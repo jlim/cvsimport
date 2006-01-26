@@ -18,7 +18,7 @@
     <tr width="100%">
       <td colspan="2">
       <center>
-      <p><b><i><span style="font-size: 20pt;">PAZAR</span></i></b><b><span style="font-size: 14pt;"> </span></b><b><span style="font-size: 20pt;"><i>-</i> advanced search</span></b></p>
+      <p><b><i><span style="font-size: 20pt;">PAZAR</span></i></b><b><span style="font-size: 14pt;"> </span></b><b><span style="font-size: 20pt;"><i>-</i> Advanced Search</span></b></p>
       </center>
       </td>
     </tr>
@@ -32,6 +32,7 @@
       <hr><b style="text-decoration: underline;">Select the Attributes to Display</b>
       </td>
     </tr>
+    <form name="attributes" METHOD="GET" ACTION="query4.htm">
     <tr>
       <td colspan="2"> <b style="font-style: italic;"> Genomic Coordinates: </b>
       </td>
@@ -184,26 +185,21 @@
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <br>
+      <td colspan="2"> <br><hr><br>
       </td>
     </tr>
     <tr>
+      <td align="right" valign="top" width="50%">
+        <input type="reset" VALUE="Reset">
+      </td>
+      <td width="50%">
+        <input type="submit" VALUE="Submit">
+      </td>
+    </tr>
+    </form>
+    <tr>
       <td colspan="2">
-      <table style="background-color: rgb(255, 255, 255); width: 357px; height: 43px; text-align: left; margin-left: auto; margin-right: auto;" border="0" cellpadding="2" cellspacing="2">
-        <tbody>
-          <tr>
-            <td style="text-align: center; width: 108px; background-color: rgb(255, 255, 255);">
-            <form><input value="download as a text file" type="button"></form>
-            </td>
-            <td style="text-align: center; width: 108px; background-color: rgb(255, 255, 255);">
-            <form><input value="download as a gff file" type="button"></form>
-            </td>
-            <td style="text-align: center; width: 108px; background-color: rgb(255, 255, 255);">
-            <form><input value="download as a xml file" type="button"></form>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+	<br>
       </td>
     </tr>
   </tbody>

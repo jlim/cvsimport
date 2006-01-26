@@ -1,0 +1,391 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>PAZAR - search by gene</title>
+
+
+  <meta content="An open-access system for the collection and dissemination of regulatory sequence annotation" name="description">
+
+  <meta content="database, regulatory sequences, annotation, pazar" name="keywords">
+
+  <meta content="text/html; charset=utf-8" http-equiv="CONTENT-TYPE">
+
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+
+<center>
+<table style="width: 600px;" border="0" cellspacing="0">
+
+  <tbody>
+
+    <tr width="100%" align="center">
+
+      <td colspan="2">
+      <p><b><i><span style="font-size: 20pt;">PAZAR</span></i></b><b><span style="font-size: 14pt;"> </span></b><b><span style="font-size: 20pt;"><i>-</i> Search by Gene
+      </span></b></p>
+
+      <hr><br>
+
+      </td>
+
+    </tr>
+
+    <tr align="left">
+
+      <td colspan="2"><b> Please enter a &nbsp;</b>
+      <select name="ID_list">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="Entrezgene"> Entrezgene ID</option>
+      </select>
+
+&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="button"><br>
+
+      <br>
+
+      </td>
+
+    </tr>
+
+    <tr align="left">
+
+      <td colspan="2"><b> Or browse the current list of annotated genes
+&nbsp;</b>
+      <input value="Browse" name="browse" type="button"><br>
+
+      <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2">
+      <hr><b style="text-decoration: underline;">Select
+the Attributes to Display</b> </td>
+
+    </tr>
+
+    <form name="attributes" method="get" action="query4.htm"></form>
+
+    <tr>
+
+      <td colspan="2"> <b style="font-style: italic;">
+Genomic Coordinates: </b> </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="chr_name" checked="checked" type="checkbox"><b> Chromosome Name </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="species" checked="checked" type="checkbox"><b> Species </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="start" checked="checked" type="checkbox"><b> Start Position (bp) </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="strand" checked="checked" type="checkbox"><b> Strand </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="end" checked="checked" type="checkbox"><b> End Position (bp) </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="band" type="checkbox"><b>
+Band </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <b style="font-style: italic;">
+Gene: </b> </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="EnsEMBL_gene" checked="checked" type="checkbox"><b> EnsEMBL Gene ID </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="EnsEMBL_transcript" type="checkbox"><b> EnsEMBL Transcript ID (if any) </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="EnsEMBL_gene" type="checkbox"><b>
+EnsEMBL Gene Description </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="EnsEMBL_transcript" type="checkbox"><b> Annotator Description </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="tss" type="checkbox"><b>
+Transcription Start Site </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <b style="font-style: italic;">
+Sequence: </b> </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="sequence" checked="checked" type="checkbox"><b> Sequence </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="seq_length" type="checkbox"><b>
+Length </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="TFBS_name" type="checkbox"><b>
+TFBS name (if any) </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <b style="font-style: italic;">Interacting Transcription Factor (if any): </b> </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="factor_gene" checked="checked" type="checkbox"><b> EnsEMBL Gene ID </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="factor_transcript" type="checkbox"><b> EnsEMBL Transcript ID </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="TF_name" checked="checked" type="checkbox"><b> Name </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="TF_class" type="checkbox"><b>
+Class </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="TF_family" type="checkbox"><b>
+Family </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="TF_modif" type="checkbox"><b>
+Modifications </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <b style="font-style: italic;">
+Experiment: </b> </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="method" checked="checked" type="checkbox"><b> Method </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="cell" type="checkbox"><b>
+Cell </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="time" type="checkbox"><b>
+Time </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="condition" type="checkbox"><b>
+Condition </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="expression" type="checkbox"><b>
+Expression Result </b></div>
+
+      </td>
+
+      <td width="50%">
+      <div><input name="interaction" type="checkbox"><b>
+Interaction Result </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td style="width: 50%; vertical-align: top; text-align: left;">
+      <div><input name="pmid" type="checkbox"><b>
+Pubmed ID </b></div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      <hr><br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td align="right" valign="top" width="50%">
+      <input value="Reset" type="reset"> </td>
+
+      <td width="50%"> <input value="Submit" type="submit"> </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"> <br>
+
+      </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+</center>
+
+</body>
+</html>
