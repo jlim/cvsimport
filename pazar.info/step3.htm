@@ -2,18 +2,25 @@
 <html>
 <head>
 
+
   
 
 
+  
+  
   
   <title>PAZAR XML writing Step 3</title>
   <meta name="description" content="An open-access system for the collection and dissemination of regulatory sequence annotation">
 
 
+
+  
   
   <meta name="keywords" content="database, regulatory sequences, annotation, pazar">
 
 
+
+  
   
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=utf-8">
 </head>
@@ -22,54 +29,73 @@
 <body style="background-color: rgb(255, 255, 255);">
 
 
+
 <center>
 <table width="600">
+
 
 
   <tbody>
 
 
+
     <tr>
+
 
 
       <td width="600">
       
+      
       <center>
       
+      
       <p><b><i><span style="font-size: 20pt;"><a style="text-decoration: none;" href="XML.html">PAZAR XML format</a></span></i></b><br>
+
 
 
       <big>Step-by-Step
 Documentation</big></p>
 
 
+
       </center>
 
 
+
+      
       
       <hr><br>
 
 
+
       <span style="font-weight: bold; text-decoration: underline;"><a name="Step3_TOP">Step3:&nbsp;Capturing the evidence
 Linking a sequence to a TF or to a specific expression<br>
+
       <br>
+
       </a></span>
 
+      
       
       <div style="text-align: justify;">This step starts inside an existing 'data'
 element. At this point, the 'reg_seq', 'funct_tf' and/or 'construct' elements
 should have been defined in this 'data' element (<a href="step2.htm">see Step 2</a>).<br>
+
       <br>
 
 
+
       </div>
+
 
 
       <span style="margin-left: 0.5in; text-decoration: underline;">3.1-
 Capturing the experiment information<br>
 
 
+
       </span>
+      
       
       <div style="text-align: justify;">The 'data' element
 stores all the annotations describing the&nbsp;evidence, cell,
@@ -77,10 +103,13 @@ time, condition,... <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
       <br>
 
 
+
       <br>
 
 
+
       </span>
+      
       
       <div style="text-align: left;"><span style="font-weight: bold;">&nbsp; &nbsp; &nbsp;
 &lt;evidence pazar_id="<span style="color: rgb(255, 0, 0);">ev_0001</span>"
@@ -88,10 +117,12 @@ status_evid="<span style="color: rgb(255, 0, 0);">provisional</span>"
 type_evid="<span style="color: rgb(255, 0, 0);">curated</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;
 &nbsp; &nbsp; &lt;cell name="<span style="color: rgb(255, 0, 0);">Y79</span>" pazar_id="<span style="color: rgb(255, 0, 0);">ce_0001</span>"
 species="<span style="color: rgb(255, 0, 0);">Homo sapiens</span>"
 status="<span style="color: rgb(255, 0, 0);">cell__line</span>"/&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
@@ -101,6 +132,7 @@ scale="<span style="color: rgb(255, 0, 0);">stages of
 embryogenesis</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;
 &nbsp; &nbsp; &lt;condition pazar_id="<span style="color: rgb(255, 0, 0);">cd_0001</span>"
 cond_type="<span style="color: rgb(255, 0, 0);">coexpression</span>"
@@ -108,10 +140,13 @@ molecule="<span style="color: rgb(255, 0, 0);">transcription
 factor</span>" concentration="<span style="color: rgb(255, 0, 0);">1:1</span>" scale="<span style="color: rgb(255, 0, 0);">ratio</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       </div>
 
 
+
       <br>
+
 
 
       <small>Replace
@@ -119,22 +154,28 @@ the red values
 with your own information.<br>
 
 
+
 The pazar IDs are internal IDs that won't be stored. They can be
 anything as long as they are unique throughout the file.</small> <br>
 
 
+
       <br>
+
 
 
       <span style="margin-left: 0.5in; text-decoration: underline;">3.2-
 Capturing the interaction/expression information<br>
 
 
+
       </span> The 'data' element&nbsp;also <span style="font-weight: bold;"></span>stores&nbsp;the
 description of the interaction and/or expression quality.<br>
 
 
+
       <br>
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
@@ -143,14 +184,17 @@ quantitative="<span style="color: rgb(255, 0, 0);">23</span>"
 scale="<span style="color: rgb(255, 0, 0);">percent</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;interaction pazar_id="<span style="color: rgb(255, 0, 0);">in_0001</span>"
 qualitative="<span style="color: rgb(255, 0, 0);">good</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;interaction pazar_id="<span style="color: rgb(255, 0, 0);">in_0002</span>"
 qualitative="<span style="color: rgb(255, 0, 0);">none</span>"/&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
@@ -159,7 +203,9 @@ quantitative="<span style="color: rgb(255, 0, 0);">14</span>"
 scale="<span style="color: rgb(255, 0, 0);">percent</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <br>
+
 
 
       <small>Replace
@@ -167,20 +213,25 @@ the red values
 with your own information.<br>
 
 
+
 The pazar IDs are internal IDs that won't be stored. They can be
 anything as long as they are unique throughout the file.</small> <br>
 
 
+
       <br>
+
 
 
       <span style="margin-left: 0.5in; text-decoration: underline;">3.3-
 Linking all together<br>
 
 
+
       </span> The 'data' element can now be closed. All the data
 stored in it will&nbsp;be linked through&nbsp; 'analysis'
 elements using the pazar_ids as IDREFS.<br>
+
 
 
 An 'analysis' element stores an experiment information, linking
@@ -189,15 +240,18 @@ sequences and factors (inputs) to an interaction or expression result
 as needed.<br>
 
 
+
 The evidence, cell and time are called as attributes of the 'analysis'
 element. The method and ref are children elements of the 'analysis'
 element.<br>
+
 
 
 The sequences and factors (always use a 'funct_tf' element) studied are
 called as attributes of the 'input' element. The interaction or
 expression descriptions are called as attributes of the 'output'
 element.<br>
+
 
 
 Thus the example below describe a SELEX experiment with a TF
@@ -209,11 +263,16 @@ with the first sequence, the other describes its interaction with the
 second sequence.<br>
 
 
+
 Please look at the 3 PAZAR XML examples available on the <a href="/XML.html">main page</a> if
 you need other examples.<br>
-
-
       <br>
+
+
+
+      <span style="font-weight: bold;">&nbsp;
+&lt;/data&gt;</span><br>
+
 
 
       <span style="font-weight: bold;">&nbsp;
@@ -221,16 +280,20 @@ you need other examples.<br>
 evidence="<span style="color: rgb(255, 0, 0);">ev_0001</span>"&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;method method="<span style="color: rgb(255, 0, 0);">SELEX</span>"/&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;ref pmid="<span style="color: rgb(255, 0, 0);">7936637</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;input_output&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -238,16 +301,20 @@ evidence="<span style="color: rgb(255, 0, 0);">ev_0001</span>"&gt;</span><br sty
 co_0001</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;output outputs="<span style="color: rgb(255, 0, 0);">in_0001</span>"/&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;/input_output&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;input_output&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -255,19 +322,24 @@ co_0001</span>"/&gt;</span><br style="font-weight: bold;">
 co_0002</span>"/&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;output outputs="<span style="color: rgb(255, 0, 0);">in_0002</span>"/&gt;</span><br style="font-weight: bold;">
+
 
 
       <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
 &lt;/input_output&gt;</span><br style="font-weight: bold;">
 
 
+
       <span style="font-weight: bold;">&nbsp;
 &lt;/analysis&gt;<br>
 
 
+
       <br>
+
 
 
       </span><small>Replace
@@ -275,15 +347,19 @@ the red values
 with your own information.<br>
 
 
+
 The pazar IDs are internal IDs that won't be stored. They can be
 anything as long as they are unique throughout the file.</small> <br>
+
 
 
       <br>
 
 
+
       <span style="margin-left: 0.5in; text-decoration: underline;">3.4-
 The end<br>
+
 
 
       </span><span>Once
@@ -291,27 +367,37 @@ all the data has been entered in the 'data' element and linked together
 through multiple 'analysis' elements, the 'pazar' element can be closed
 and the XML file is finished.<br>
 
+
       <br>
+
 
       </span><span style="font-weight: bold;">&nbsp;&lt;/pazar&gt;<br>
 
+
       <br>
 
+
       </span></div>
+
 
       <a style="text-decoration: none;" href="step2.htm"><input value="&lt;- To Step 2" type="button"></a>
       </td>
 
 
+
     </tr>
 
 
+
+  
   
   </tbody>
 </table>
 
 
+
 </center>
+
 
 
 </body>
