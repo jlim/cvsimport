@@ -1,6 +1,5 @@
 #!/usr/local/bin/perl
 
-use lib '/space/usr/local/src/regdb/API';
 use lib '/space/usr/local/src/ensembl-36/ensembl/modules/';
 
 use strict;
@@ -9,18 +8,19 @@ use regdb;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
+use CGI::Debug( report => 'everything', on => 'anything' );
 
-BEGIN {
-            use CGI::Carp qw(carpout);
-            open(LOG, ">>/usr/local/apache/pazar.info/cgi-bin/cgi-logs/mycgi-log") or
-              die("Unable to open mycgi-log: $!\n");
-            carpout(LOG);
-          }
+# BEGIN {
+#             use CGI::Carp qw(carpout);
+#             open(LOG, ">>/usr/local/apache/pazar.info/cgi-bin/cgi-logs/mycgi-log") or
+#               die("Unable to open mycgi-log: $!\n");
+#             carpout(LOG);
+#           }
 
 use constant DB_DRV  => 'mysql';
 use constant DB_NAME => 'pazar';
-use constant DB_USER => 'pazaradmin';
-use constant DB_PASS => '32paz10';
+use constant DB_USER => 'pazar_rw';
+use constant DB_PASS => 'pazar_rwpass';
 use constant DB_HOST => 'napa.cmmt.ubc.ca';
 
 my $get = new CGI;
@@ -35,7 +35,7 @@ my $dbh = regdb->new(
                    -user    =>    DB_USER,
                    -pass    =>    DB_PASS,
                    -dbname  =>    DB_NAME,
-		   -driver  =>    DB_DRV);
+		   -drv     =>    DB_DRV);
 
 #View Gene List
 if ($action eq 'View Gene List') {
@@ -44,9 +44,9 @@ if ($action eq 'View Gene List') {
     if ($projects) {
 	my $node=0;
 	while (my $project=$projects->fetchrow_hashref) {
-	    $node++;
 	    my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id='$project->{project_id}'");
 	    if ($genes) {
+	    $node++;
 		while (my $gene=$genes->fetchrow_hashref) {
 		    my $tsrs = &select($dbh, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
 		    if ($tsrs) {
@@ -74,12 +74,12 @@ function exp_coll(ind)
     if (s.style.display == 'none')
 {
     s.style.display = 'block';
-    i.src = \"images\minus.gif\";
+    i.src = \"images/minus.gif\";
 }
 else if (s.style.display == 'block')
 {
     s.style.display = 'none';
-    i.src = \"images\plus.gif\";
+    i.src = \"images/plus.gif\";
 }
 }
 function exp(ind)
@@ -88,7 +88,7 @@ function exp(ind)
     i = document.getElementById(\"im_\" + ind);
     if (!(s && i)) return false;
     s.style.display = 'block';
-    i.src = \"images\minus.gif\";
+    i.src = \"images/minus.gif\";
 }
 function coll(ind)
 {
@@ -96,7 +96,7 @@ function coll(ind)
     i = document.getElementById(\"im_\" + ind);
     if (!(s && i)) return false;
     s.style.display = 'none';
-    i.src = \"images\plus.gif\";
+    i.src = \"images/plus.gif\";
 }
 function coll_all()
 {";
@@ -138,28 +138,32 @@ print "
 
     <ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">
 
-    <a href=\"javascript:exp_all();\"><img src=\"images\plus.gif\" alt=\"toggle\" border=\"0\">Expand
+    <a href=\"javascript:exp_all();\"><img src=\"images/plus.gif\" alt=\"toggle\" border=\"0\">Expand
     all</a>
-    &nbsp; <a href=\"javascript:coll_all();\"><img src=\"images\minus.gif\" alt=\"toggle\" border=\"0\">Collapse
+    &nbsp; <a href=\"javascript:coll_all();\"><img src=\"images/minus.gif\" alt=\"toggle\" border=\"0\">Collapse
     all</a>
-    <p class=\"MsoNormal\" style=\"margin-left: 0.5in; text-indent: -0.5in;\"><b><span style=\"font-size: 14pt;\">Projects:</span></b></p>
+    <p class=\"MsoNormal\" style=\"margin-left: 0.5in; text-indent: -0.5in;\"><b><span style=\"font-size: 14pt;\">Genes available within each project:</span></b></p>
     <ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 
 my $count=0;
 foreach my $proj_name (keys %gene_project) {
 
-print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"images\minus.gif\" alt=\"toggle\" id=\"im_0\" border=\"0\" height=\"11\" width=\"11\">$proj_name</a>
-    <ul class=\"zzul\" id=\"sp_0\" style=\"padding: 0pt; margin-left: 10pt; list-style-type: none;\">
+print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"images/minus.gif\" alt=\"toggle\" id=\"im_$count\" border=\"0\" height=\"11\" width=\"11\">$proj_name</a>
+    <ul class=\"zzul\" id=\"sp_$count\" style=\"padding: 0pt; margin-left: 10pt; list-style-type: none;\">
     ";
 $count++;
 foreach my $gene_data (@{$gene_project{$proj_name}}) {
-
-print "    <li><span class=\"zzspace\">&nbsp;&nbsp;".$gene_data->{accn}."\t".$gene_data->{desc}."</span></li>";
+if ($gene_data->{desc} && $gene_data->{desc} ne '0') {
+print "    <li><span class=\"zzspace\">&nbsp;&nbsp;".$gene_data->{accn}."\t"."Description: ".$gene_data->{desc}."</span></li>";
+} else {
+print "    <li><span class=\"zzspace\">&nbsp;&nbsp;".$gene_data->{accn}."</span></li>";
+}
 }
 print "</ul></li>";
 }
 print "</ul>";
 }
+
 } elsif ($action eq 'Submit') {
 print "<head>
     <title>PAZAR - search by gene</title>
