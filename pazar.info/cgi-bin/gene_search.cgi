@@ -8,20 +8,13 @@ use regdb;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
-
-# BEGIN {
-#             use CGI::Carp qw(carpout);
-#             open(LOG, ">>/usr/local/apache/pazar.info/cgi-bin/cgi-logs/mycgi-log") or
-#               die("Unable to open mycgi-log: $!\n");
-#             carpout(LOG);
-#           }
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 use constant DB_DRV  => 'mysql';
-use constant DB_NAME => 'pazar';
-use constant DB_USER => 'pazar_rw';
-use constant DB_PASS => 'pazar_rwpass';
-use constant DB_HOST => 'napa.cmmt.ubc.ca';
+use constant DB_NAME => $ENV{REGDB_name};
+use constant DB_USER => $ENV{REGDB_pubuser};
+use constant DB_PASS => $ENV{REGDB_pubpass};
+use constant DB_HOST => $ENV{REGDB_host};
 
 my $get = new CGI;
 my $action = $get->param('submit');
@@ -64,7 +57,7 @@ if ($action eq 'View Gene List') {
 	}
 
 	print "<head>
-  <title>PAZAR - search by gene</title>
+  <title>PAZAR - Gene List</title>
   <script type=\"text/javascript\">
 <!--
 function exp_coll(ind)
@@ -74,12 +67,12 @@ function exp_coll(ind)
     if (s.style.display == 'none')
 {
     s.style.display = 'block';
-    i.src = \"images/minus.gif\";
+    i.src = \"../images/minus.gif\";
 }
 else if (s.style.display == 'block')
 {
     s.style.display = 'none';
-    i.src = \"images/plus.gif\";
+    i.src = \"../images/plus.gif\";
 }
 }
 function exp(ind)
@@ -88,7 +81,7 @@ function exp(ind)
     i = document.getElementById(\"im_\" + ind);
     if (!(s && i)) return false;
     s.style.display = 'block';
-    i.src = \"images/minus.gif\";
+    i.src = \"../images/minus.gif\";
 }
 function coll(ind)
 {
@@ -96,7 +89,7 @@ function coll(ind)
     i = document.getElementById(\"im_\" + ind);
     if (!(s && i)) return false;
     s.style.display = 'none';
-    i.src = \"images/plus.gif\";
+    i.src = \"../images/plus.gif\";
 }
 function coll_all()
 {";
@@ -116,39 +109,21 @@ print "
 -->
     </script>
     </head>
-
-
-    <body style=\"background-color: rgb(255, 255, 255);\">
-
-    <center>
-    <table width=\"600\">
-
-    <tbody>
-
-    <tr>
-
-    <td width=\"600\">
-    <center>
-    <p><b><i><span style=\"font-size: 20pt;\">PAZAR</span></i></b><b><span style=\"font-size: 14pt;\"> </span></b><b><span style=\"font-size: 20pt;\"><i>-</i> Search by Gene
-    </span></b></p>
-    </center>
-
-    <hr><br><br><br>
     <body style=\"background-color: rgb(255, 255, 255);\" onload=\"coll_all();\">
+<b><span style=\"font-size: 14pt;\">Gene List sorted by project name:</span></b>
 
     <ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">
 
-    <a href=\"javascript:exp_all();\"><img src=\"images/plus.gif\" alt=\"toggle\" border=\"0\">Expand
-    all</a>
-    &nbsp; <a href=\"javascript:coll_all();\"><img src=\"images/minus.gif\" alt=\"toggle\" border=\"0\">Collapse
-    all</a>
-    <p class=\"MsoNormal\" style=\"margin-left: 0.5in; text-indent: -0.5in;\"><b><span style=\"font-size: 14pt;\">Genes available within each project:</span></b></p>
-    <ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
+    <a href=\"javascript:exp_all();\"><img src=\"../images/plus.gif\" alt=\"toggle\" border=\"0\"><small>Expand
+    all</small></a>
+    &nbsp; <a href=\"javascript:coll_all();\"><img src=\"../images/minus.gif\" alt=\"toggle\" border=\"0\"><small>Collapse
+    all</small></a>
+<br><br><br>";
 
 my $count=0;
 foreach my $proj_name (keys %gene_project) {
 
-print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"images/minus.gif\" alt=\"toggle\" id=\"im_$count\" border=\"0\" height=\"11\" width=\"11\">$proj_name</a>
+print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"../images/minus.gif\" alt=\"toggle\" id=\"im_$count\" border=\"0\" height=\"11\" width=\"11\">$proj_name</a>
     <ul class=\"zzul\" id=\"sp_$count\" style=\"padding: 0pt; margin-left: 10pt; list-style-type: none;\">
     ";
 $count++;
@@ -159,7 +134,7 @@ print "    <li><span class=\"zzspace\">&nbsp;&nbsp;".$gene_data->{accn}."\t"."De
 print "    <li><span class=\"zzspace\">&nbsp;&nbsp;".$gene_data->{accn}."</span></li>";
 }
 }
-print "</ul></li>";
+print "</ul></li><br>";
 }
 print "</ul>";
 }
@@ -191,12 +166,21 @@ my $gene = $get->param('geneID');
 
 if (!$gene) {
     print "<big>Please provide a gene ID!</big>\n";
+} else {
 
+my $reg_seqs = $dbh->get_psms_by_accn($gene);
+
+if (!$reg_seqs) {
+    print "<big>No regulatory sequence was found for this gene!</big>\n";
+} else {
+foreach my $psm (@{$reg_seqs}) {
+		print $psm->id,"\t",$psm->start,"\t",$psm->end,"\t",$psm->seq,"\n";
 }
-my $reg_seqs = regdb->get_psms_by_accn($gene);
+}}
+print "</td></tr></tbody></table></center>";
 }
 
-print "</td></tr></tbody></table></center></body></html>";
+print "</body></html>";
 
 
 
