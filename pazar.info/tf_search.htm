@@ -10,6 +10,24 @@
 
   <meta content="text/html; charset=utf-8" http-equiv="CONTENT-TYPE">
 
+<SCRIPT LANGUAGE = "JavaScript">
+<!--
+
+function setCount(target){
+
+if(target == 0) 
+{
+document.tf_search.action="/cgi-bin/gene_list.cgi";
+window.open('about:blank','MyWindow', 'menubar=no, toolbar=no directories=no, height=600, width=300');
+}
+if(target == 1) 
+{
+document.tf_search.action="/cgi-bin/gene_search.cgi";
+window.open('about:blank','MyWindow');
+}
+}
+//-->
+</SCRIPT>
 </head>
 
 <body style="background-color: rgb(255, 255, 255);">
@@ -30,7 +48,7 @@
       </td>
 
     </tr>
-
+<form name="tf_search" method="post" action="" enctype="multipart/form-data" target="MyWindow">
     <tr align="left">
 
       <td colspan="2"><b> Please enter a &nbsp;</b>
@@ -44,7 +62,7 @@ ID</option>
       <option value="tf_name"> functional name</option>
       </select>
 
-&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="button"><br>
+&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br>
 
       <br>
 
@@ -57,7 +75,7 @@ ID</option>
       <td colspan="2"><b> Or browse the current list
 of reported TFs
 &nbsp;</b>
-      <input value="browse" name="browse" type="button"><br>
+      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)"><br>
 
       <br>
 
@@ -367,7 +385,7 @@ ID </b></div>
       <td align="right" valign="top" width="50%">
       <input value="Reset" type="reset"> </td>
 
-      <td width="50%"> <input value="Submit" type="submit"> </td>
+      <td width="50%"> <input value="Submit" type="submit"  onClick="setCount(1)"> </td>
 
     </tr>
 
