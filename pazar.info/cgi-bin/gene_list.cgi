@@ -109,7 +109,7 @@ print "
 -->
 </script>
 </head>
-<body style=\"background-color: rgb(255, 255, 255);\" onload=\"coll_all();\">
+<body style=\"background-color: rgb(255, 255, 255);\" onload=\"coll_all();\" onblur=\"self.focus();\">
 <b><span style=\"font-size: 14pt;\">Gene List sorted by project name:</span></b>
 
 <ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">

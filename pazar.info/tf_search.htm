@@ -18,12 +18,14 @@ function setCount(target){
 if(target == 0) 
 {
 document.tf_search.action="/cgi-bin/tf_list.cgi";
-window.open('about:blank','MyWindow', 'menubar=no, toolbar=no directories=no, height=600, width=300');
+document.tf_search.target="Window1";
+window.open('about:blank','Window1', 'menubar=no, toolbar=no directories=no, height=600, width=300');
 }
 if(target == 1) 
 {
 document.tf_search.action="/cgi-bin/tf_search.cgi";
-window.open('about:blank','MyWindow');
+document.tf_search.target="Window2";
+window.open('about:blank','Window2');
 }
 }
 //-->
@@ -48,7 +50,7 @@ window.open('about:blank','MyWindow');
       </td>
 
     </tr>
-<form name="tf_search" method="post" action="" enctype="multipart/form-data" target="MyWindow">
+<form name="tf_search" method="post" action="" enctype="multipart/form-data" target="">
     <tr align="left">
 
       <td colspan="2"><b> Please enter a &nbsp;</b>
