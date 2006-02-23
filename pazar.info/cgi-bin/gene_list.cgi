@@ -135,9 +135,9 @@ print "    <li>".$gene_data->{accn}."</li>";
 }
 }
 print "</ul></li><br>";
-}
-print "</ul>";
-}
+}}
+print "</ul></body></html>";
+
 
 
 

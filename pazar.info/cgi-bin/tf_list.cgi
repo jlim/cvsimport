@@ -137,8 +137,8 @@ print $tf_data->{accn}."   ".$tf_data->{class}."/".$tf_data->{family}."<br>";
 print "</li>";
 }
 print "</ul></li><br>";
-}
-print "</ul>";
+}}
+print "</ul></body></html>";
 
 
 sub select {
