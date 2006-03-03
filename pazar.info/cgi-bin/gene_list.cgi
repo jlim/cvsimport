@@ -5,17 +5,17 @@ use lib '/space/usr/local/src/bioperl-live/';
 
 use strict;
 
-use regdb;
+use pazar;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
 use constant DB_DRV  => 'mysql';
-use constant DB_NAME => $ENV{REGDB_name};
-use constant DB_USER => $ENV{REGDB_pubuser};
-use constant DB_PASS => $ENV{REGDB_pubpass};
-use constant DB_HOST => $ENV{REGDB_host};
+use constant DB_NAME => $ENV{PAZAR_name};
+use constant DB_USER => $ENV{PAZAR_pubuser};
+use constant DB_PASS => $ENV{PAZAR_pubpass};
+use constant DB_HOST => $ENV{PAZAR_host};
 
 my $get = new CGI;
 my $action = $get->param('submit');
@@ -24,7 +24,7 @@ my $action = $get->param('submit');
 print $get->header("text/html");
 
 #connect to the database
-my $dbh = regdb->new( 
+my $dbh = pazar->new( 
 	  	   -host    =>    DB_HOST,
                    -user    =>    DB_USER,
                    -pass    =>    DB_PASS,
