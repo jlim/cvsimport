@@ -16,6 +16,92 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
 
 print "Content-type: text/html\n\n";
 
+print<<template_header;
+<html>
+<head>
+<meta http-equiv="Content-Language" content="fr">
+
+<title>PAZAR Project Manager</title>
+<script language="javascript">
+<!--
+function VersionNavigateur(Netscape, Explorer)
+{
+if ((navigator.appVersion.substring(0,3) >= Netscape && navigator.appName == 'Netscape') ||
+(navigator.appVersion.substring(0,3) >= Explorer && navigator.appName.substring(0,9) == 'Microsoft'))
+return true;
+else return false;
+}
+//-->
+</script>
+<link TYPE="text/css" rel="stylesheet" HREF="pazar.css">
+</head>
+
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+
+<div align="left">
+  <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="85%" height="100%">
+    <tr>
+
+      <td valign="top">
+      <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="660">
+        <tr>
+          <td width="143">
+          <img border="0" src="../images/pazar_01.gif" width="143" height="102"></td>
+          <td width="517">
+          <img border="0" src="../images/pazar_02.gif" width="517" height="102"></td>
+        </tr>
+      </table>
+
+      <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber3">
+        <tr>
+          <td width="143" background="../images/pazar_bg.gif" valign="top" align="center">
+          <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber4">
+            <tr>
+              <td width="100%">
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img1.src='../images/up_03.gif'" OnMouseOut="img1.src='../images/pazar_03.gif'"><img name="img1" width=143 height=51 border=0 src="../images/pazar_03.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_03.gif'"></a></td>
+            </tr>
+            <tr>
+
+              <td width="100%">
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img2.src='../images/up_05.gif'" OnMouseOut="img2.src='../images/pazar_05.gif'"><img name="img2" width=143 height=51 border=0 src="../images/pazar_05.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_05.gif'"></a></td>
+            </tr>
+            <tr>
+              <td width="100%">
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img3.src='../images/up_06.gif'" OnMouseOut="img3.src='../images/pazar_06.gif'"><img name="img3" width=143 height=51 border=0 src="../images/pazar_06.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_06.gif'"></a></td>
+            </tr>
+            <tr>
+              <td width="100%">
+
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img4.src='../images/up_07.gif'" OnMouseOut="img4.src='../images/pazar_07.gif'"><img name="img4" width=143 height=51 border=0 src="../images/pazar_07.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_07.gif'"></a></td>
+            </tr>
+            <tr>
+              <td width="100%">
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img5.src='../images/up_08.gif'" OnMouseOut="img5.src='../images/pazar_08.gif'"><img name="img5" width=143 height=51 border=0 src="../images/pazar_08.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_08.gif'"></a></td>
+            </tr>
+            <tr>
+              <td width="100%">
+              <img border="0" src="../images/pazar_09.gif" width="143" height="51"></td>
+
+            </tr>
+            <tr>
+              <td width="100%">
+              <a OnMouseOver="if (VersionNavigateur(3.0,4.0)) img6.src='../images/up_10.gif'" OnMouseOut="img6.src='../images/pazar_10.gif'" href="XMLtmp.htm"><img name="img6" width=143 height=51 border=0 src="../images/pazar_10.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_10.gif'"></a></td>
+            </tr>
+            <tr>
+              <td width="100%">
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img7.src='../images/up_11.gif'" OnMouseOut="img7.src='../images/pazar_11.gif'"><img name="img7" width=143 height=51 border=0 src="../images/pazar_11.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_11.gif'"></a></td>
+            </tr>
+
+            <tr>
+              <td width="100%">
+              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img8.src='../images/up_12.gif'" OnMouseOut="img8.src='../images/pazar_12.gif'"><img name="img8" width=143 height=51 border=0 src="../images/pazar_12.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_12.gif'"></a></td>
+            </tr>
+          </table>
+          </td>
+          <td align="left" valign="top">
+          <font><br>
+template_header
+
 if ($params{mode} eq 'add') 
 {
 #insert into project
@@ -57,14 +143,6 @@ if ($params{mode} eq 'login')
     {
 
 #show projects
-print<<Header;
-	<html>
-	<head>
-	<title>PAZAR Project Management</title>
-	
-	</head>
-	<body>
-Header
 
 	print "<table border=1>\n";
 #print projects
@@ -109,13 +187,8 @@ AddFormFoot
     {
 #print error
 print<<Error_Page_1;
-	<html>
-	    <head>
-	    <title>PAZAR Project Management</title>
-	    
-	    </head>
-	    <body>
-	    <h2>PAZAR Project Management</h2>
+
+	    <h3>PAZAR Project Management</h3>
 Error_Page_1
 
 	    print "<font color='red'>Please check user name and password and try again</font>";
@@ -131,8 +204,7 @@ print<<Error_Page_2;
 
 	    </table>
 	    </FORM>
-	    </body>
-	    </html>
+
 Error_Page_2
 	}
     $dbh->disconnect;
@@ -140,13 +212,8 @@ Error_Page_2
 else {      
 
 print<<Page_Done;
-    <html>
-	<head>
-	<title>PAZAR Project Management</title>
-	
-	</head>
-	<body>
-	<h2>PAZAR User and Project creation</h2>
+
+	<h3>PAZAR User and Project creation</h3>
 
 
 	<FORM method="POST" action="editprojects.pl">
@@ -157,7 +224,22 @@ print<<Page_Done;
 	<tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
 	</table>
 	</FORM>
-	</body>
-	</html>
+
 Page_Done
     }
+
+
+print<<template_tail;
+          </font>
+          </td>
+        </tr>
+      </table>
+      </td>
+
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
+template_tail
