@@ -14,8 +14,6 @@ my $DBURL = "DBI:mysql:dbname=pazar;host=napa.cmmt.ubc.ca";
 print<<template_head;
 <html>
 <head>
-<meta http-equiv="Content-Language" content="fr">
-
 <title>PAZAR User and Project creation</title>
 <script language="javascript">
 <!--
@@ -61,70 +59,61 @@ else return false;
 	}
 //-->
 </script>
-<link TYPE="text/css" rel="stylesheet" HREF="pazar.css">
-</head>
-
-<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-
+<link type="text/css" rel="stylesheet" href="pazar.css"></head>
+<body leftmargin="0" topmargin="0" bgcolor="#ffffff" marginheight="0" marginwidth="0">
 <div align="left">
-  <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="85%" height="100%">
-    <tr>
-
+  <table border="0" cellpadding="0" cellspacing="0" height="100%" width="85%">
+    <tbody><tr>
       <td valign="top">
-      <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="660">
-        <tr>
+      <table border="0" cellpadding="0" cellspacing="0" width="660">
+        <tbody><tr>
           <td width="143">
-          <img border="0" src="../images/pazar_01.gif" width="143" height="102"></td>
+          <img src="images/pazar_01.gif" border="0" height="102" width="143"></td>
           <td width="517">
-          <img border="0" src="../images/pazar_02.gif" width="517" height="102"></td>
+          <img src="images/pazar_02.gif" border="0" height="102" width="517"></td>
         </tr>
-      </table>
-
-      <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber3">
-        <tr>
-          <td width="143" background="../images/pazar_bg.gif" valign="top" align="center">
-          <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber4">
-            <tr>
+      </tbody></table>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
+        <tbody><tr>
+          <td align="center" background="images/pazar_bg.gif" valign="top" width="143">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody><tr>
               <td width="100%">
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img1.src='../images/up_03.gif'" OnMouseOut="img1.src='../images/pazar_03.gif'"><img name="img1" width=143 height=51 border=0 src="../images/pazar_03.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_03.gif'"></a></td>
-            </tr>
-            <tr>
-
-              <td width="100%">
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img2.src='../images/up_05.gif'" OnMouseOut="img2.src='../images/pazar_05.gif'"><img name="img2" width=143 height=51 border=0 src="../images/pazar_05.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_05.gif'"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img1.src='images/up_03.gif'" onmouseout="img1.src='images/pazar_03.gif'"><img name="img1" src="images/pazar_03.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_03.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img3.src='../images/up_06.gif'" OnMouseOut="img3.src='../images/pazar_06.gif'"><img name="img3" width=143 height=51 border=0 src="../images/pazar_06.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_06.gif'"></a></td>
+              <a href="cgi-bin/register.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img2.src='images/up_05.gif'" onmouseout="img2.src='images/pazar_05.gif'"><img name="img2" src="images/pazar_05.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_05.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img4.src='../images/up_07.gif'" OnMouseOut="img4.src='../images/pazar_07.gif'"><img name="img4" width=143 height=51 border=0 src="../images/pazar_07.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_07.gif'"></a></td>
+              <a href="cgi-bin/editprojects.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img3.src='images/up_06.gif'" onmouseout="img3.src='images/pazar_06.gif'"><img name="img3" src="images/pazar_06.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_06.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img5.src='../images/up_08.gif'" OnMouseOut="img5.src='../images/pazar_08.gif'"><img name="img5" width=143 height=51 border=0 src="../images/pazar_08.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_08.gif'"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img4.src='images/up_07.gif'" onmouseout="img4.src='images/pazar_07.gif'"><img name="img4" src="images/pazar_07.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_07.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <img border="0" src="../images/pazar_09.gif" width="143" height="51"></td>
-
+              <a href="search.htm" onmouseover="if (VersionNavigateur(3.0,4.0)) img5.src='images/up_08.gif'" onmouseout="img5.src='images/pazar_08.gif'"><img name="img5" src="images/pazar_08.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_08.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a OnMouseOver="if (VersionNavigateur(3.0,4.0)) img6.src='../images/up_10.gif'" OnMouseOut="img6.src='../images/pazar_10.gif'" href="XMLtmp.htm"><img name="img6" width=143 height=51 border=0 src="../images/pazar_10.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_10.gif'"></a></td>
+              <img src="images/pazar_09.gif" border="0" height="51" width="143"></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img7.src='../images/up_11.gif'" OnMouseOut="img7.src='../images/pazar_11.gif'"><img name="img7" width=143 height=51 border=0 src="../images/pazar_11.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_11.gif'"></a></td>
+              <a href="XML.htm" onmouseover="if (VersionNavigateur(3.0,4.0)) img6.src='images/up_10.gif'" onmouseout="img6.src='images/pazar_10.gif'"><img name="img6" src="images/pazar_10.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_10.gif'" border="0" height="51" width="143"></a></td>
             </tr>
-
             <tr>
               <td width="100%">
-              <a href="" OnMouseOver="if (VersionNavigateur(3.0,4.0)) img8.src='../images/up_12.gif'" OnMouseOut="img8.src='../images/pazar_12.gif'"><img name="img8" width=143 height=51 border=0 src="../images/pazar_12.gif" OnLoad="tempImg=new Image(0,0); tempImg.src='../images/up_12.gif'"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img7.src='images/up_11.gif'" onmouseout="img7.src='images/pazar_11.gif'"><img name="img7" src="images/pazar_11.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_11.gif'" border="0" height="51" width="143"></a></td>
             </tr>
-          </table>
+            <tr>
+              <td width="100%">
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img8.src='images/up_12.gif'" onmouseout="img8.src='images/pazar_12.gif'"><img name="img8" src="images/pazar_12.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_12.gif'" border="0" height="51" width="143"></a></td>
+            </tr>
+          </tbody></table>
           </td>
           <td align="left" valign="top">
           <font><br>
@@ -245,18 +234,16 @@ Page_Done
     }
 
 print<<template_tail;
-</font>
+          <p class="marge">&nbsp;</p>
+          </font>
           </td>
         </tr>
-      </table>
+      </tbody></table>
       </td>
-
     </tr>
-  </table>
+  </tbody></table>
 </div>
-
-</body>
-</html>
+</body></html>
 template_tail
 
 $dbh->disconnect;

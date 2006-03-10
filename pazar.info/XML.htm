@@ -1,25 +1,7 @@
-#!/usr/bin/perl
-use DBI;
-use Crypt::Imail;
-use CGI qw( :all);
-
-
-my $query=new CGI;
-my %params = %{$query->Vars};
-
-my $DBUSER = "pazaradmin";
-my $DBPASS = "32paz10";
-my $DBURL = "DBI:mysql:dbname=pazar;host=napa.cmmt.ubc.ca";
-
-my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
-    or die "Can't connect to pazar database";
-
-print "Content-type: text/html\n\n";
-
-print<<template_header;
-<html>
-<head>
-<title>PAZAR Project Manager</title>
+<html><head>
+<title>PAZAR xml format</title>
+  <meta name="description" content="An open-access system for the collection and dissemination of regulatory sequence annotation">
+  <meta name="keywords" content="database, regulatory sequences, annotation, pazar">
 <script language="javascript">
 <!--
 function VersionNavigateur(Netscape, Explorer)
@@ -89,136 +71,52 @@ else return false;
           </td>
           <td align="left" valign="top">
           <font><br>
-template_header
-
-if ($params{mode} eq 'add') 
-{
-#insert into project
-    $dbh->do("insert into project values('','$params{projname}','','$params{projstatus}',null)");
-
-#insert into user_project
-    $dbh->do("insert into user_project values('',$params{uid},LAST_INSERT_ID())");
-
-#show updated list
-    $params{mode}='login';
-}
-
-if ($params{mode} eq 'delete') 
-{
-#delete from user_project
-    my $delh=$dbh->prepare("delete from user_project where project_id=$params{pid}");
-    $delh->execute();
-
-#delete from project
-    my $delh2=$dbh->prepare("delete from project where project_id=$params{pid}");
-    $delh2->execute();
-    
-#show updated list
-    $params{mode}='login';
-}
-
-
-if ($params{mode} eq 'login') 
-{
-#verify user name and password
-
-    my $im = Crypt::Imail->new();
-    my $encrypted_pass = $im->encrypt($params{username}, $params{password}); 
-    my $chkh=$dbh->prepare("select user_id,aff,first_name,last_name from users where username=? and password=?")||die;
-    $chkh->execute($params{username},$encrypted_pass)||die;
-    my ($userid,$aff,$first,$last)=$chkh->fetchrow_array;
-    
-    if($userid ne '')
-    {
-
-#show projects
-
-	print "<table border=1>\n";
-#print projects
-	my $sth=$dbh->prepare("select project_id from user_project where user_id=?");
-	$sth->execute($userid);
-	
-	print "<tr><td>name</td><td>status</td><td>Last edited</td><td>&nbsp;</td></tr>";
-	
-	while(my @results = $sth->fetchrow_array)
-	{
-	    my $proj_id = $results[0];
-	    #get project info
-	    my $sth2 = $dbh->prepare("select * from project where project_id=?");
-	    $sth2->execute($proj_id);
-	    #print project entry
-	    my @projdetails = $sth2->fetchrow_array;
-
-	    print "<tr><td>$projdetails[1]</td><td>$projdetails[3]</td><td>$projdetails[4]</td><td><form method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'><input type='submit' value='delete'></form></td></tr>";
-	}
-
-	print "</table>\n";
-print<<AddFormHead;
-	<p>
-	    <form method='post' action='editprojects.pl'>
-	    <input type='hidden' name='mode' value='add'>
-	    <input type='hidden' name='uid' value='$userid'>
-AddFormHead
-
-	    print "<input type='hidden' name='username' value='$params{username}'>";
-	print "<input type='hidden' name='password' value='$params{password}'>";
-
-print<<AddFormFoot;
-	<table border=1>
-	    <tr><td>name</td><td><input type="text" name="projname"></td></tr>
-	    <tr><td>status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published</select></td></tr>
-	    </table>
-	    <input type='submit' value='Add new project'>
-	    </form>
-AddFormFoot
-	}
-    else
-    {
-#print error
-print<<Error_Page_1;
-
-	    <h3>PAZAR Project Management</h3>
-Error_Page_1
-
-	    print "<font color='red'>Please check user name and password and try again</font>";
-	print "<FORM method=\"POST\" action=\"editprojects.pl\">";
-	print "<table>";
-	print "<tr><td>User name</td><td> <input type=\"text\" name=\"username\"></td></tr>";
-	print "<tr><td>Password</td><td><input type=\"password\" name=\"password\"></td></tr>";
-
-
-print<<Error_Page_2;
-	<tr><td colspan=2><input type="hidden" name="mode" value="login"></td></tr>
-	    <tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
-
-	    </table>
-	    </FORM>
-
-Error_Page_2
-	}
-    $dbh->disconnect;
-}
-else {      
-
-print<<Page_Done;
-
-	<h3>PAZAR User and Project creation</h3>
-
-
-	<FORM method="POST" action="editprojects.pl">
-	<table>
-	<tr><td>User name</td><td> <input type="text" name="username"></td></tr>      
-	<tr><td>Password</td><td> <input type="password" name="password"></td></tr>
-	<tr><td colspan=2><input type="hidden" name="mode" value="login"></td></tr>
-	<tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
-	</table>
-	</FORM>
-
-Page_Done
-    }
-
-
-print<<template_tail;
+          <p class="titre1">PAZAR - XML format</p>
+          <p class="titre2">Overview:</p>
+          <p class="marge">To ease the insertion of data into the database, we have designed 
+          an XML exchange format (<a href="http://www.w3schools.com/xml/default.asp" target="_blank">What's 
+          XML?</a>) that can be used to format already existing datasets. The
+          <a href="http://www.pazar.info/pazar.dtd">PAZAR Document Type 
+          Definition</a> (DTD) is now available as well as a
+          <a href="http://www.pazar.info/PAZAR_DTD_DOC.pdf">documentation</a> 
+          explaining its use.&nbsp; Some examples are also provided to help the user 
+          understand the XML format:</p>
+          <p class="marge2">- 
+            <a href="http://www.pazar.info/pazarexample.xml">example 1</a> 
+            describes an interaction between a transcription factor and a 
+            binding site located upstream a gene, and a set of mutations 
+            affecting this interaction.<br>- 
+            <a href="http://www.pazar.info/pazarexample2.xml">example 2</a> 
+            describe a SELEX experiment with an heterodimer transcription factor 
+            and the matrix built from the sequences.<br>- 
+            <a href="http://www.pazar.info/pazarexample3.xml">example 3</a> 
+            describes a gene reporter assay and the influence of co-expression 
+            with a transcription factor.
+          <br><br></p>
+          <p class="titre2">
+          <span style="color: rgb(255, 0, 0);">NEW!!!</span> Try our 
+          Step-by-step documentation:</p>
+          <p class="marge">Our step-by-step documentation is meant to help users 
+          write a backbone PAZAR XML file containing their data. It does not 
+          include all the possibilities and details available through the 
+          Document Type Definition, but is a good starting point to understand 
+          its structure.
+          </p>
+          <p class="marge2"><a href="step1.htm">1. Getting started</a><br>
+          <a href="step2.htm">2. Capturing the regulatory 
+          sequence and/or TF basic information</a><br>
+          <a href="step3.htm">3. Capturing the evidence 
+          Linking a sequence to a TF or to a specific expression</a><br>
+&nbsp;</p>
+          <p class="titre2">XML Validator:</p>
+          <p class="marge">Just upload your XML file below and Click on the "Validate" button 
+          to check its validity against PAZAR DTD.
+<form class="marge" name="validator" method="post" action="/cgi-bin/xmlvalidator.cgi" enctype="multipart/form-data">
+            <input name="xml_file" size="20" type="file"><br>
+            <br>
+            <input name="validate" value="Validate" type="submit">
+          </form>
+          </p>
           <p class="marge">&nbsp;</p>
           </font>
           </td>
@@ -229,4 +127,3 @@ print<<template_tail;
   </tbody></table>
 </div>
 </body></html>
-template_tail
