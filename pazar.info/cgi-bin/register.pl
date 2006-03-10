@@ -68,50 +68,50 @@ else return false;
       <table border="0" cellpadding="0" cellspacing="0" width="660">
         <tbody><tr>
           <td width="143">
-          <img src="images/pazar_01.gif" border="0" height="102" width="143"></td>
+          <img src="../images/pazar_01.gif" border="0" height="102" width="143"></td>
           <td width="517">
-          <img src="images/pazar_02.gif" border="0" height="102" width="517"></td>
+          <img src="../images/pazar_02.gif" border="0" height="102" width="517"></td>
         </tr>
       </tbody></table>
       <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
         <tbody><tr>
-          <td align="center" background="images/pazar_bg.gif" valign="top" width="143">
+          <td align="center" background="../images/pazar_bg.gif" valign="top" width="143">
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td width="100%">
-              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img1.src='images/up_03.gif'" onmouseout="img1.src='images/pazar_03.gif'"><img name="img1" src="images/pazar_03.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_03.gif'" border="0" height="51" width="143"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img1.src='../images/up_03.gif'" onmouseout="img1.src='../images/pazar_03.gif'"><img name="img1" src="../images/pazar_03.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_03.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="cgi-bin/register.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img2.src='images/up_05.gif'" onmouseout="img2.src='images/pazar_05.gif'"><img name="img2" src="images/pazar_05.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_05.gif'" border="0" height="51" width="143"></a></td>
+              <a href="cgi-bin/register.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img2.src='../images/up_05.gif'" onmouseout="img2.src='../images/pazar_05.gif'"><img name="img2" src="../images/pazar_05.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_05.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="cgi-bin/editprojects.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img3.src='images/up_06.gif'" onmouseout="img3.src='images/pazar_06.gif'"><img name="img3" src="images/pazar_06.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_06.gif'" border="0" height="51" width="143"></a></td>
+              <a href="cgi-bin/editprojects.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img3.src='../images/up_06.gif'" onmouseout="img3.src='../images/pazar_06.gif'"><img name="img3" src="../images/pazar_06.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_06.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img4.src='images/up_07.gif'" onmouseout="img4.src='images/pazar_07.gif'"><img name="img4" src="images/pazar_07.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_07.gif'" border="0" height="51" width="143"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img4.src='../images/up_07.gif'" onmouseout="img4.src='../images/pazar_07.gif'"><img name="img4" src="../images/pazar_07.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_07.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="search.htm" onmouseover="if (VersionNavigateur(3.0,4.0)) img5.src='images/up_08.gif'" onmouseout="img5.src='images/pazar_08.gif'"><img name="img5" src="images/pazar_08.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_08.gif'" border="0" height="51" width="143"></a></td>
+              <a href="search.htm" onmouseover="if (VersionNavigateur(3.0,4.0)) img5.src='../images/up_08.gif'" onmouseout="img5.src='../images/pazar_08.gif'"><img name="img5" src="../images/pazar_08.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_08.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <img src="images/pazar_09.gif" border="0" height="51" width="143"></td>
+              <img src="../images/pazar_09.gif" border="0" height="51" width="143"></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="XML.htm" onmouseover="if (VersionNavigateur(3.0,4.0)) img6.src='images/up_10.gif'" onmouseout="img6.src='images/pazar_10.gif'"><img name="img6" src="images/pazar_10.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_10.gif'" border="0" height="51" width="143"></a></td>
+              <a href="XML.htm" onmouseover="if (VersionNavigateur(3.0,4.0)) img6.src='../images/up_10.gif'" onmouseout="img6.src='../images/pazar_10.gif'"><img name="img6" src="../images/pazar_10.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_10.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img7.src='images/up_11.gif'" onmouseout="img7.src='images/pazar_11.gif'"><img name="img7" src="images/pazar_11.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_11.gif'" border="0" height="51" width="143"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img7.src='../images/up_11.gif'" onmouseout="img7.src='../images/pazar_11.gif'"><img name="img7" src="../images/pazar_11.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_11.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img8.src='images/up_12.gif'" onmouseout="img8.src='images/pazar_12.gif'"><img name="img8" src="images/pazar_12.gif" onload="tempImg=new Image(0,0); tempImg.src='images/up_12.gif'" border="0" height="51" width="143"></a></td>
+              <a href="" onmouseover="if (VersionNavigateur(3.0,4.0)) img8.src='../images/up_12.gif'" onmouseout="img8.src='../images/pazar_12.gif'"><img name="img8" src="../images/pazar_12.gif" onload="tempImg=new Image(0,0); tempImg.src='../images/up_12.gif'" border="0" height="51" width="143"></a></td>
             </tr>
           </tbody></table>
           </td>
