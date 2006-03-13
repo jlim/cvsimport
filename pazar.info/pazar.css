@@ -1,48 +1,70 @@
-font { font-family: Arial,Helvetica,Sans Serif; line-height: 1.7; color: #000000; }
-a { cursor: hand; color: #ba0000; text-decoration: underline}
+td {
+font-family: Arial,Helvetica,Sans Serif;
+line-height: 1.7;
+color: #000000;
+font-size: 12px;
+text-align:justify;
+}
+
+a { cursor: hand; color: #0066CC; text-decoration: underline}
 a:hover { cursor: hand; background: #333333; color: #FFFFFF}
 
+body {
+background-image: url('http://www.pazar.info/images/pazar_bg.gif');
+background-repeat: repeat-y;
 
-.titre1 {
+}
+
+.backgd {
+background-image: url('http://www.pazar.info/images/pazar_bg.gif');
+background-repeat: repeat-y;
+} 
+
+.title1 {
 font-weight: bold;
 font-size: 18px;
-padding-left:15px;
-padding-right:15px;
 }
 
-.titre2 {
+.title2 {
 font-weight: bold;
 font-size: 14px;
-padding-left:15px;
-padding-right:15px;
 }
 
-.titre3 {
+.warning {
 font-weight: bold;
 font-size: 14px;
-padding-left:15px;
-padding-right:15px;
+color: rgb(255, 0, 0);
+}
+
+.title3 {
+font-weight: bold;
+font-size: 14px;
 text-decoration: underline;
 }
 
-.titre4 {
+.title4 {
 font-weight: bold;
 font-size: 14px;
-padding-left:15px;
-padding-right:15px;
 font-style: italic;
 }
 
-.marge {
-font-size: 12px;
+.margin {
 padding-left:15px;
 padding-right:15px;
-text-align:justify;
 }
 
-.marge2 {
-font-size: 12px;
-padding-left:40px;
-padding-right:15px;
-text-align:justify;
+.small {
+font-size: 10px;
+}
+
+.bold {
+font-weight: bold;
+}
+
+.red {
+color: rgb(255, 0, 0);
+}
+
+.margin2 {
+padding-left:25px;
 }

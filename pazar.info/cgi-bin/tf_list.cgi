@@ -30,7 +30,7 @@ my $dbh = pazar->new(
                    -dbname  =>    DB_NAME,
 		   -drv     =>    DB_DRV);
 
-my $projects=&select($dbh, "SELECT * FROM project");
+my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
 my %tf_project;
 my %tf_subunit;
 if ($projects) {

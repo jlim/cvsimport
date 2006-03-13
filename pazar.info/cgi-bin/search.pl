@@ -12,21 +12,17 @@ $template->param(TITLE => 'PAZAR Search');
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
-          <p class="titre1">PAZAR - Search</p>
-<p class="marge2"><a href="http://www.pazar.info/cgi-bin/gsearch.pl"><b> Search by Gene </b></a><br>
+          <p class="title1">PAZAR - Search</p>
+<p class="margin2"><a href="http://www.pazar.info/cgi-bin/gsearch.pl"><b> Search by Gene </b></a><br>
       <br>
 <a href="http://www.pazar.info/cgi-bin/tfsearch.pl"><b> Search by Transcription Factor </b></a><br>
       <br>
 <a href=""><b> Advanced Search </b></a><br>
       <br>
 </p>
-          <p class="marge">&nbsp;</p>
-          </font>
-          </td>
-        </tr>
-      </tbody></table>
-      </td>
-    </tr>
-  </tbody></table>
-</div>
-</body></html>
+
+page
+
+# print out the html tail template
+my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+print $template_tail->output;

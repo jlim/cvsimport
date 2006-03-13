@@ -33,7 +33,7 @@ my $dbh = pazar->new(
 
 
 my %gene_project;
-my $projects=&select($dbh, "SELECT * FROM project");
+my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
 if ($projects) {
 my $node=0;
 while (my $project=$projects->fetchrow_hashref) {
