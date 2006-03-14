@@ -12,15 +12,13 @@ function setCount(target){
 
 if(target == 0) 
 {
-document.gene_search.action="/cgi-bin/gene_list.cgi";
+document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
 document.gene_search.target="Window1";
-window.open('about:blank','Window1', 'menubar=no, toolbar=no directories=no, height=600, width=300');
+window.open('about:blank','Window1', 'menubar=no, toolbar=no directories=no, height=600, width=400');
 }
 if(target == 1) 
 {
-document.gene_search.action="/cgi-bin/gene_search.cgi";
-document.gene_search.target="Window2";
-window.open('about:blank','Window2');
+document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
 }
 }});
 

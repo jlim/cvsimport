@@ -37,11 +37,11 @@ if ($projects) {
     my $node=0;
     while (my $project=$projects->fetchrow_hashref) {
 	$node++;
-	my @funct_tfs = $dbh->get_all_tfs($project->{project_id});
+	my @funct_tfs = $dbh->get_all_complex_ids($project->{project_id});
 	foreach my $funct_tf (@funct_tfs) {
 	    my $funct_name = $dbh->get_complex_name_by_id($funct_tf);
 	    push (@{$tf_project{$project->{project_name}}}, $funct_name);
-	    my @tf_subunits = $dbh->get_subunit_by_complex($funct_tf);
+	    my @tf_subunits = $dbh->get_subunit_by_complex_id($funct_tf);
 	    foreach my $subunit (@tf_subunits) {
 		push (@{$tf_subunit{$funct_name}}, {
 		    accn => $subunit->{transcript},
