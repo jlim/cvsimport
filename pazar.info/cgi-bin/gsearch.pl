@@ -14,10 +14,11 @@ if(target == 0)
 {
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
 document.gene_search.target="Window1";
-window.open('about:blank','Window1', 'menubar=no, toolbar=no directories=no, height=600, width=400');
+window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=400');
 }
 if(target == 1) 
 {
+document.gene_search.target="_self";
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
 }
 }});
@@ -66,10 +67,10 @@ Genomic Coordinates: </p></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="chr_name" checked="checked" type="checkbox"> Chromosome Name </p>
+      <p ><br><input name="chromosome" checked="checked" type="checkbox"> Chromosome Name </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="species" checked="checked" type="checkbox"> Species </p>
+      <p ><br><input name="binomial_species" checked="checked" type="checkbox"> Species </p>
       </td>
     </tr>
     <tr>
@@ -99,19 +100,19 @@ Gene: </p> </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="EnsEMBL_gene" checked="checked" type="checkbox"> EnsEMBL Gene ID </p>
+      <p ><br><input name="gene_accession" checked="checked" type="checkbox"> EnsEMBL Gene ID </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="EnsEMBL_transcript" type="checkbox"> EnsEMBL Transcript ID (if any) </p>
+      <p ><br><input name="transcript_accession" type="checkbox"> EnsEMBL Transcript ID (if any) </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="EnsEMBL_gene" type="checkbox">
+      <p ><input name="EnsEMBL_description" type="checkbox">
 EnsEMBL Gene Description </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="EnsEMBL_transcript" type="checkbox"> Annotator Description </p>
+      <p ><input name="gene_description" type="checkbox"> Annotator Description </p>
       </td>
     </tr>
     <tr>
@@ -130,15 +131,15 @@ Sequence: </p> </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="sequence" checked="checked" type="checkbox"> Sequence </p>
+      <p ><br><input name="seq" checked="checked" type="checkbox"> Sequence </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="seq_length" type="checkbox"> Length </p>
+      <p ><br><input name="length" type="checkbox"> Length </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="TFBS_name" type="checkbox"> TFBS name (if any) </p>
+      <p ><input name="id" type="checkbox"> TFBS name (if any) </p>
       </td>
     </tr>
     <tr>

@@ -54,31 +54,38 @@ if (!$gene) {
 	print "<p class=\"warning\">No regulatory sequence was found for this gene!</p>\n";
     } else {
 	foreach my $reg_seq (@regseqs) {
-	    print $reg_seq->seq."\n";
-	    print $reg_seq->start."\n";
-	    print $reg_seq->end."\n";
-	    print $reg_seq->strand."\n";
-	    print $reg_seq->id."\n";
-	    print $reg_seq->accession_number."\n";
-	    print $reg_seq->chromosome."\n";
-	    print $reg_seq->band."\n";
-	    print $reg_seq->quality."\n";
-	    print $reg_seq->binomial_species."\n";
-	    print $reg_seq->gene_dbname."\n";
-	    print $reg_seq->gene_dbsubset."\n";
-	    print $reg_seq->gene_accession."\n";
-	    print $reg_seq->gene_description."\n";
-	    print $reg_seq->transcript_dbname."\n";
-	    print $reg_seq->transcript_dbsubset."\n";
-	    print $reg_seq->transcript_accession."\n";
-	    print $reg_seq->isoform."\n";
-	    print $reg_seq->transcript_comment."\n";
-	    print $reg_seq->seq_dbname."\n";
-	    print $reg_seq->seq_dbsubset."\n";
-	    print $reg_seq->seq_dbassembly."\n";
-	    print $reg_seq->transcript_fuzzy_start."\n";
-	    print $reg_seq->transcript_fuzzy_end."\n";
-	    print $reg_seq->transcript_predominant_start."\n";
+	    undef my %attr;
+	    foreach my $item (keys %params) {
+		if ($params{$item} eq 'on') {
+		    eval {$reg_seq->$item };
+		    if ($@) { next;}
+		    else {
+			if ($item eq "binomial_species") {
+			    $attr{'species'}=$reg_seq->$item;
+			} else {
+			    $attr{$item}=$reg_seq->$item;
+			}
+		    }
+		    if ($item eq 'length') {
+			$attr{$item}=($reg_seq->end)-($reg_seq->start)+1;
+		    }
+		    if ($item eq 'tss') {
+			if ($reg_seq->transcript_fuzzy_start == $reg_seq->transcript_fuzzy_end) { 
+			    $attr{$item}=$reg_seq->transcript_fuzzy_start;
+			} else {
+			    $attr{$item}=$reg_seq->transcript_fuzzy_start."-".$reg_seq->transcript_fuzzy_end; 
+			}
+		    }
+
+		}
+	    }
+	    my @attr=qw(gene_accession gene_description transcript_accession isoform tss id seq chromosome band start end length strand quality species);
+	    for (my $i=0;$i<@attr;$i++) {
+		if ($attr{$attr[$i]}) {
+		    print "<span class=\"bold\">".$attr[$i].": </span>".$attr{$attr[$i]}."<br>";
+		}
+	    }
+            print "<br><br>";
 	}
     }
 }

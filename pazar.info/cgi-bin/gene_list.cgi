@@ -133,7 +133,7 @@ print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"../images/minus.
 $count++;
 foreach my $gene_data (@{$gene_project{$proj_name}}) {
 if ($gene_data->{desc} && $gene_data->{desc} ne '0') {
-print "    <li><b>EnsEMBL stable ID: </b>".$gene_data->{accn}."<br>"."<b>PAZAR Description: </b>".$gene_data->{desc}."<br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
+print "    <li><b>EnsEMBL stable ID: </b>".$gene_data->{accn}."<br>"."<b>Annotator Description: </b>".$gene_data->{desc}."<br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
 } else {
 print "    <li><b>EnsEMBL stable ID: </b>".$gene_data->{accn}."<br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
 }
