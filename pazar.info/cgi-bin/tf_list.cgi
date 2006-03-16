@@ -2,13 +2,15 @@
 
 use lib '/space/usr/local/src/ensembl-36/ensembl/modules/';
 use lib '/space/usr/local/src/bioperl-1.5.0/';
+
 use strict;
 
 use pazar;
+use pazar::talk;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-#use CGI::Debug( report => 'everything', on => 'anything' );
+use CGI::Debug( report => 'everything', on => 'anything' );
 
 use constant DB_DRV  => 'mysql';
 use constant DB_NAME => $ENV{PAZAR_name};
@@ -17,7 +19,6 @@ use constant DB_PASS => $ENV{PAZAR_pubpass};
 use constant DB_HOST => $ENV{PAZAR_host};
 
 my $get = new CGI;
-my $action = $get->param('submit');
 
 #initialize the html page
 print $get->header("text/html");

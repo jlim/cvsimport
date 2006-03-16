@@ -96,7 +96,7 @@ if (!$accn) {
 			$attr{$item}=$desc[0];
 		    }
 		    if ($item =~ /TF/ || $item =~ /interaction/ || $item =~ /other/) {
-			my $aid = $pazar->get_analysis_IO_by_regseq_id($reg_seq->accession_number);
+			my $aid = $dbh->get_analysis_IO_by_regseq_id($reg_seq->accession_number);
 
 			if ($item =~ /other/) {
 			}
@@ -132,15 +132,22 @@ sub select {
 
 sub convert_id {
     my ($auxdb,$genedb,$geneid,$ens)=@_;
-    undef my $id;
+    undef my @id;
     my $add=$genedb . "_to_llid";
- print "Working on $geneid in $genedb; $add";
-    $id=$auxdb->$add($geneid);
-    my $ll=$id->[0]->[0];
-    print "llid ".$ll."\n";
-    my $ensembl;
-    if ($ll) { 
-	$ensembl=$ens?$ens:$auxdb->getensembl($ll) ;
+# print "Working on $geneid in $genedb; $add";
+    @id=$auxdb->$add($geneid);
+    my $ll;
+    eval { $ll=$id[0]->[0]->[0]; };
+    if ($@) { 
+	$ll=$id[0]->[0];
+    } else { 
+	$ll=$id[0]->[0]->[0];
     }
-    return $ensembl;
+
+#    print "llid ".$ll."\n";
+    my @ensembl;
+    if ($ll) { 
+	@ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
+    }
+    return $ensembl[0]->[0]->[0];
 }
