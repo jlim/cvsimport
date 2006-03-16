@@ -43,7 +43,9 @@ gene ID</option>
       <option value="EnsEMBL_transcript"> EnsEMBL
 transcript
 ID</option>
-      <option value="Entrezgene"> Entrezgene ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+      <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
       </select>
 &nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
       <br>
@@ -151,67 +153,89 @@ Sequence: </p> </td>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <p class="title4">Interacting Transcription Factor (if any): </p> </td>
+      <td colspan="2"> <p class="title4">Interacting Evidence (if any): </p> </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="factor_gene" checked="checked" type="checkbox"> EnsEMBL Gene ID </p>
+      <p ><br><input name="TF_gene" checked="checked" type="checkbox"> TF EnsEMBL Gene ID </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="factor_transcript" type="checkbox"> EnsEMBL Transcript ID </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="TF_name" checked="checked" type="checkbox"> Name </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="TF_class" type="checkbox"> Class </p>
+      <p ><br><input name="TF_transcript" type="checkbox"> TF EnsEMBL Transcript ID </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="TF_family" type="checkbox"> Family </p>
+      <p ><input name="TF_name" checked="checked" type="checkbox"> TF Name </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="TF_modif" type="checkbox"> Modifications </p>
-      </td>
-    </tr>
-    <tr>
-     <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <p class="title4">
-Experiment: </p> </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><br><input name="method" checked="checked" type="checkbox"> Method </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><br><input name="cell" type="checkbox"> Cell </p>
+      <p ><input name="TF_class" type="checkbox"> TF Class </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="time" type="checkbox"> Time </p>
+      <p ><input name="TF_family" type="checkbox"> TF Family </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="condition" type="checkbox"> Condition </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="expression" type="checkbox"> Expression Result </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction" type="checkbox"> Interaction Result </p>
+      <p ><input name="TF_modifications" type="checkbox"> TF Modifications </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="pmid" type="checkbox"> Pubmed ID </p>
+      <p ><input name="interaction_method" checked="checked" type="checkbox"> Method </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="interaction_cell" type="checkbox"> Cell </p>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="interaction_time" type="checkbox"> Time </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="interaction_condition" type="checkbox"> Condition </p>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="interaction_pmid" type="checkbox"> Pubmed ID </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="interaction_description" type="checkbox"> Interaction Description </p>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <p class="title4">Other Evidence (if any): </p> </td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="other_method" checked="checked" type="checkbox"> Method </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="other_cell" type="checkbox"> Cell </p>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="other_time" type="checkbox"> Time </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="other_condition" type="checkbox"> Condition </p>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="other_pmid" type="checkbox"> Pubmed ID </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="other_effect_description" type="checkbox"> Effect Description </p>
       </td>
     </tr>
     <tr>
