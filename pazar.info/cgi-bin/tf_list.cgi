@@ -10,7 +10,7 @@ use pazar::talk;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 use constant DB_DRV  => 'mysql';
 use constant DB_NAME => $ENV{PAZAR_name};

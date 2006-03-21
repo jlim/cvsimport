@@ -43,8 +43,10 @@ gene ID</option>
       <option value="EnsEMBL_transcript"> EnsEMBL
 transcript
 ID</option>
-      <option value="Entrezgene"> Entrezgene ID</option>
-            <option value="tf_name"> functional name</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+       <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+           <option value="tf_name"> functional name</option>
 </select>
 &nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
       <br>

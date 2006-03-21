@@ -56,8 +56,8 @@ if (!$accn) {
 	$gene=$gene[0]->[0];
         unless ($gene=~/\w{2,}/) {die "Conversion failed for $accn";}
     } elsif ($dbaccn eq 'EntrezGene') {
-	my $all=$gkdb->llid_to_ens($accn);
-	$gene=$all->[0]->[0];
+	my @gene=$gkdb->llid_to_ens($accn);
+	$gene=$gene[0];
 	unless ($gene=~/\w{2,}/) {die "Conversion failed for $accn";}
     } else {
 	my ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
@@ -136,18 +136,10 @@ sub convert_id {
     my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
     @id=$auxdb->$add($geneid);
-    my $ll;
-    eval { $ll=$id[0]->[0]->[0]; };
-    if ($@) { 
-	$ll=$id[0]->[0];
-    } else { 
-	$ll=$id[0]->[0]->[0];
-    }
-
-#    print "llid ".$ll."\n";
+     my $ll = $id[0];
     my @ensembl;
     if ($ll) { 
 	@ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
     }
-    return $ensembl[0]->[0]->[0];
+    return $ensembl[0];
 }
