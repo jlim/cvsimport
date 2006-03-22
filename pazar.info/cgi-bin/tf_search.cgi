@@ -67,11 +67,11 @@ if (!$accn) {
 	my $species=$sp->fetchrow_array();
 	$ensdb->change_mart_organism($species);
 	my @trans =$ensdb->swissprot_to_enst($accn);
-	unless ($gene=~/\w{2,}/) {die "Conversion failed for $accn";}
+	unless ($trans[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
     } elsif ($dbaccn eq 'tf_name') {
     }
     foreach my $trans (@trans) {
-	print "you're looking fo transcipt: ".$trans."\n";
+	print "you're looking fo transcript: ".$trans."\n";
     }
 #     my @tfcomplexes = $dbh->get_complex_by_name($tf_name); 
 #     if (!$regseqs[0]) {

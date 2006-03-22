@@ -53,7 +53,7 @@ if (!$accn) {
 	$gene=$accn;
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
-	$gene=$gene[0]->[0];
+	$gene=$gene[0];
         unless ($gene=~/\w{2,}/) {die "Conversion failed for $accn";}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
