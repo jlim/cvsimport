@@ -85,11 +85,5 @@ foreach (@tables) {
     }
 }
 
-# #delete from user_project
-my $delh2=$dbh->prepare("delete from user_project where project_id=?");
-$delh2->execute($project_id)||die;
 
-# #delete from project
-my $delh3=$dbh->prepare("delete from project where project_id=?");
-$delh3->execute($project_id)||die;
     
