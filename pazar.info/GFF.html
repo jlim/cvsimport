@@ -35,7 +35,7 @@ GFF format</span></i></b><br>
 <p>The PAZAR GFF format (<a href="http://www.sanger.ac.uk/Software/formats/GFF/" target="_blank">What's GFF?</a>) is intended to capture simple annotations. It is not meant to record a detailed annotation. Please use the XML format if you want more options.
 One record is on a unique line and holds one annotation for one sequence, this annotation coming either from an interaction OR an expression experiment (NOT BOTH IN THE SAME RECORD). An interaction will be stored as 'good' and an expression as 'induced'. If a mutant sequence is reported it is assumed that this mutant has an impaired activity compared to the annotation of the original sequence(interaction = 'none' or expression = 'no change').</p>
 <p style="font-weight: bold; font-size: 14px;">PAZAR GFF format (uppercase are mandatory fields):</p>
-<p>SEQNAME	SOURCE	FEATURE	START	END	SCORE	STRAND	FRAME	SEQUENCE=""; DB_SEQINFO="DATABASE:ASSEMBLY"; SPECIES="BINOMIAL FORMAT"; DB_GENEINFO="DATABASE:ASSEMBLY:ACCESSION:name"; band=""; db_transcriptinfo="DATABASE:ASSEMBLY:ACCESSION:name"; transcript_start=""; analysis_name=""; db_tfinfo="DATABASE:ASSEMBLY:ACCESSION:NAME"; method=""; evidence=""; pmid=""; expression="CELL:SPECIES:time:time_scale"; impaired_mutant="";</p>
+<p>SEQNAME	SOURCE	FEATURE	START	END	SCORE	STRAND	FRAME	SEQUENCE=""; DB_SEQINFO="DATABASE:ASSEMBLY"; SPECIES="BINOMIAL FORMAT"; DB_GENEINFO="DATABASE:ACCESSION:name"; band=""; db_transcriptinfo="DATABASE:ACCESSION:name"; transcript_start=""; analysis_name=""; db_tfinfo="DATABASE:ACCESSION:NAME"; method=""; evidence=""; pmid=""; expression="CELL:SPECIES:time:time_scale"; impaired_mutant="";</p>
 <p style="font-weight: bold; font-size: 14px;">Description:</p>
 <p><span style="font-weight: bold; font-size: 14px; font-style: italic;">Mandatory Fields</span><br>
 <b>seqname</b> - The name of the sequence. Must be a chromosome.<br>
@@ -50,14 +50,14 @@ One record is on a unique line and holds one annotation for one sequence, this a
 <b>sequence=</b>"";<br>
 <b>db_seqinfo=</b>"database:assembly";<br>
 <b>species=</b>""; #binomial format (Homo sapiens, Mus musculus,Danio rerio,...)<br>
-<b>db_geneinfo=</b>"database:assembly:accession:name"; #the database can be either of the following:EnsEMBL, Entrez Gene, RefSeq, SwissProt, Genbank. Last part (gene name) optional.<br>
+<b>db_geneinfo=</b>"database:accession:name"; #the database can be either of the following:EnsEMBL Gene, Entrez Gene, RefSeq, SwissProt. Last part (gene name) optional.<br>
 </p>
 <p><span style="font-weight: bold; font-size: 14px; font-style: italic;">Optional Attributes</span><br>
 <b>band=</b>"";<br>
-<b>db_transcriptinfo=</b>"database:assembly:accession:name"; #the database can be either of the following:EnsEMBL, RefSeq, SwissProt, Genbank. Last part (isoform name) optional.<br>
+<b>db_transcriptinfo=</b>"database:accession:name"; #the database can be either of the following:EnsEMBL Transcript, RefSeq, SwissProt. Last part (isoform name) optional.<br>
 <b>transcript_start=</b>"";<br>
 <b>analysis_name=</b>"";<br>
-<b>db_tfinfo=</b>"database:assembly:accession:name";<br>
+<b>db_tfinfo=</b>"database:accession:name"; #the database can be either of the following:EnsEMBL Transcript, RefSeq, SwissProt.<br>
 <b>method=</b>"";<br>
 <b>evidence=</b>""; #should be either curated or prediction<br>
 <b>pmid=</b>"";<br>
@@ -65,7 +65,7 @@ One record is on a unique line and holds one annotation for one sequence, this a
 <b>impaired_mutant=</b>"sequence"; #the format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use 'N' where the original nucleotides were.<br></p>
 <p style="font-weight: bold; font-size: 14px;">Examples:</p>
 <p><span style="font-weight: bold; font-size: 14px; font-style: italic;">Interaction example</span><br>
-chr7	oreganno_example	OREG0000056	99037559	99037584	.	-	.	sequence="gcatcaagaacatgtggttctaatgg"; db_seqinfo="EnsEMBL:NCBI 35"; species="Homo sapiens"; db_geneinfo="EntrezGene:1576:CYP3A4"; band="q22.1"; analysis_name="gff_example1"; db_tfinfo="EnsEMBL:ENST00000289790:USF1"; method="EMSA_analysis"; evidence="curated"; pmid="14742674"; impaired_mutant="gcatcaagaacatTAggttctaatgg"
+chr7	oreganno_example	OREG0000056	99037559	99037584	.	-	.	sequence="gcatcaagaacatgtggttctaatgg"; db_seqinfo="EnsEMBL:NCBI 35"; species="Homo sapiens"; db_geneinfo="EntrezGene:1576:CYP3A4"; band="q22.1"; analysis_name="gff_example1"; db_tfinfo="EnsEMBL Transcript:ENST00000289790:USF1"; method="EMSA_analysis"; evidence="curated"; pmid="14742674"; impaired_mutant="gcatcaagaacatTAggttctaatgg"
 <br></p>
 <p><span style="font-weight: bold; font-size: 14px; font-style: italic;">Expression example</span><br>
 chr7	oreganno_example	OREG0000056	99037559	99037584	.	-	.	sequence="gcatcaagaacatgtggttctaatgg"; db_seqinfo="EnsEMBL:NCBI 35"; species="Homo sapiens"; db_geneinfo="EntrezGene:1576:CYP3A4"; band="q22.1"; analysis_name="gff_example2"; expression="HepG2:Homo sapiens"; method="gene reporter assay"; evidence="curated"; pmid="14742674"; impaired_mutant="gcatcaagaacatTAggttctaatgg"
