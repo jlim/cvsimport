@@ -7,9 +7,12 @@ use HTML::Template;
 my $query=new CGI;
 my %params = %{$query->Vars};
 
-my $DBUSER = "pazaradmin";
-my $DBPASS = "32paz10";
-my $DBURL = "DBI:mysql:dbname=pazar;host=napa.cmmt.ubc.ca";
+my $dbname = $ENV{PAZAR_name};
+my $dbhost = $ENV{PAZAR_host};
+
+my $DBUSER = $ENV{PAZAR_adminuser};
+my $DBPASS = $ENV{PAZAR_adminpass};
+my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
 
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
