@@ -7,12 +7,18 @@ use HTML::Template;
 my $query=new CGI;
 my %params = %{$query->Vars};
 
-my $DBUSER = "pazaradmin";
-my $DBPASS = "32paz10";
-my $DBURL = "DBI:mysql:dbname=pazar;host=napa.cmmt.ubc.ca";
+my $dbname = $ENV{PAZAR_name};
+my $dbhost = $ENV{PAZAR_host};
+
+my $DBUSER = $ENV{PAZAR_adminuser};
+my $DBPASS = $ENV{PAZAR_adminpass};
+my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
 
 my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
     or die "Can't connect to pazar database";
+
+
+my $statusmsg = "";
 
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
@@ -22,6 +28,30 @@ $template->param(TITLE => 'PAZAR Project Manager');
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
+
+print<<javascript;
+<script language="JavaScript">
+function doDelete(pid)
+{
+    var decision = confirm("Do you really want to delete this project? Doing so will remove all public and private stored data for this project as well.");
+   
+    if (decision == true)
+    {
+	eval("document.deleteform"+pid+".submit();");       
+    }
+}
+
+function doUserAdd(pid)
+{
+    var decision = confirm("Full management privileges for this project will be made available to this user when added. Do you wish to continue?");
+    if (decision == true)
+    {	
+	eval("document.useraddform"+pid+".submit();");
+    }
+
+}
+</script>
+javascript
 
 if ($params{mode} eq 'add') 
 {
@@ -35,15 +65,136 @@ if ($params{mode} eq 'add')
     $params{mode}='login';
 }
 
+if($params{mode} eq 'adduser') 
+{
+#first check if user exists
+    my $sth = $dbh->prepare("select user_id from users where username='$params{usertoadd}'");
+    $sth->execute();
+    if (my @userinfo = $sth->fetchrow_array)
+    {
+	my $uid = $userinfo[0];
+	$dbh->do("insert into user_project values('',$uid,$params{pid})");
+    }
+    else
+    {
+	$statusmsg = "Invalid username entered. User not added to project.";
+    }
+#show updated list
+    $params{mode}='login';
+}
+
+
+if ($params{mode} eq 'updatestatus') 
+{
+    $dbh->do("update project set status='$params{projstatus}' where project_id=$params{pid}");
+#show updated list
+    $params{mode}='login';
+}
+
+if ($params{mode} eq 'useremove') 
+{
+#check number of users in project
+    my $sth = $dbh->prepare("select count(*) from user_project where project_id=$params{pid}");
+    $sth->execute();
+    my @usercount = $sth->fetchrow_array;
+    my $numusers = $usercount[0];
+
+    if($numusers > 1)
+    {
+	my $rh = $dbh->prepare("delete from user_project where user_id=$params{uid} and project_id=$params{pid}");
+	$rh->execute();
+    }
+    else
+    {
+	$statusmsg = "No other users in this project. There must be 2 or more users in a project before you can remove yourself";
+    }
+#show updated list
+    $params{mode}='login';
+}
+
 if ($params{mode} eq 'delete') 
 {
 #delete from user_project
-    my $delh=$dbh->prepare("delete from user_project where project_id=$params{pid}");
-    $delh->execute();
+    my $dh=$dbh->prepare("delete from user_project where project_id=$params{pid}");
+    $dh->execute();
 
 #delete from project
-    my $delh2=$dbh->prepare("delete from project where project_id=$params{pid}");
-    $delh2->execute();
+    my $dh2=$dbh->prepare("delete from project where project_id=$params{pid}");
+    $dh2->execute();
+
+    my $project=$params{pid};
+
+#select project_id
+    my $sth=$dbh->prepare("select project_id from project where project_name=?")||die;
+    $sth->execute($project);
+    my $project_id = $sth->fetchrow_array;
+
+#select all ids from project specific records
+    $sth=$dbh->prepare("show tables");
+    $sth->execute()||die;
+    my %table_ids;
+    my @tables;
+    while (my $table  = $sth->fetchrow_array) {
+	my $table_id = $table."_id";
+	my $clh=$dbh->prepare("desc $table");
+	$clh->execute()||die;
+	my $i=0;
+	while (my $col  = $clh->fetchrow_hashref) {
+	    if ($col->{Field} eq 'project_id') {
+		$i=1;
+	    }
+	}
+	if ($i == 1) {
+	    my $prh=$dbh->prepare("select $table_id from $table where project_id=?")||die;
+	    $prh->execute($project_id)||die;
+	    while (my ($id)  = $prh->fetchrow_array) {
+		push (@{$table_ids{$table}},$id);
+	    }
+	    my $delh=$dbh->prepare("delete from $table where project_id=?");
+	    $delh->execute($project_id)||die;
+	} else {
+	    push (@tables, $table);
+	}
+    }
+
+    foreach (@tables) {
+	if ($_ eq 'analysis_i_link') {
+	    foreach my $tbl_id (@{$table_ids{'analysis_input'}}) {
+		my $delh=$dbh->prepare("delete from analysis_i_link where analysis_input_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	} elsif ($_ eq 'analysis_o_link') {
+	    foreach my $tbl_id (@{$table_ids{'analysis_output'}}) {
+		my $delh=$dbh->prepare("delete from analysis_o_link where analysis_output_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	} elsif ($_ eq 'anchor_reg_seq') {
+	    foreach my $tbl_id (@{$table_ids{'reg_seq'}}) {
+		my $delh=$dbh->prepare("delete from anchor_reg_seq where reg_seq_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	} elsif ($_ eq 'matrix_info') {
+	    foreach my $tbl_id (@{$table_ids{'matrix'}}) {
+		my $delh=$dbh->prepare("delete from matrix_info where matrix_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	} elsif ($_ eq 'mutation') {
+	    foreach my $tbl_id (@{$table_ids{'mutation_set'}}) {
+		my $delh=$dbh->prepare("delete from mutation where mutation_set_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	} elsif ($_ eq 'reg_seq_set') {
+	    foreach my $tbl_id (@{$table_ids{'matrix'}}) {
+		my $delh=$dbh->prepare("delete from reg_seq_set where matrix_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	} elsif ($_ eq 'tf_complex') {
+	    foreach my $tbl_id (@{$table_ids{'funct_tf'}}) {
+		my $delh=$dbh->prepare("delete from tf_complex where funct_tf_id=?");
+		$delh->execute($tbl_id)||die;
+	    }
+	}
+    }
     
 #show updated list
     $params{mode}='login';
@@ -63,14 +214,17 @@ if ($params{mode} eq 'login')
     if($userid ne '')
     {
 
+#show any status messages
+	print "<center><font color='red'>$statusmsg</font></center>";
+
 #show projects
 
-	print "<table border=1>\n";
+	print "<table border=1 cellspacing=0 cellpadding=2>\n";
 #print projects
 	my $sth=$dbh->prepare("select project_id from user_project where user_id=?");
 	$sth->execute($userid);
 	
-	print "<tr><td>name</td><td>status</td><td>Last edited</td><td>&nbsp;</td></tr>";
+	print "<tr><td>Project ID</td><td>Project Name</td><td>Project Status</td><td>Last Edited</td><td>Project Users</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 	
 	while(my @results = $sth->fetchrow_array)
 	{
@@ -81,10 +235,54 @@ if ($params{mode} eq 'login')
 	    #print project entry
 	    my @projdetails = $sth2->fetchrow_array;
 
-	    print "<tr><td>$projdetails[1]</td><td>$projdetails[3]</td><td>$projdetails[4]</td><td><form method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'><input type='submit' value='delete'></form></td></tr>";
+	    print "<tr><td>$proj_id</td><td>$projdetails[1]</td><td>";
+#project status update form
+
+	    print "<form method='post' action='editprojects.pl'>";
+
+	    print "<select name='projstatus'>";
+	    print "<option ";
+	    if($projdetails[3] eq "restricted")
+	    {
+		print "selected ";
+	    }
+	    print "name='restricted' value='restricted'>restricted";
+	    
+	    print "<option ";
+	    
+	    if($projdetails[3] eq "published")
+	    {
+		print "selected ";
+	    }
+	    print "name='published' value='published'>published</select>";
+	    
+	    print "<input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='updatestatus'><input type='hidden' name='pid' value='$proj_id'><input type='submit' value='Update Project Status'></form>";
+	    
+	    print "</td><td>$projdetails[4]</td><td>";
+
+#retrieve users
+	    my $userlisthandle = $dbh->prepare("select username from users,user_project where users.user_id=user_project.user_id and user_project.project_id=?");
+	    $userlisthandle->execute($proj_id);
+	    my $userstring = "";
+	    while(my @users = $userlisthandle->fetchrow_array)
+	    {
+		my $user = $users[0];
+		$userstring = $userstring . ", ". $user;
+	    }
+	    $userstring = substr($userstring,2);
+	    print $userstring;
+#form: add user to this project
+	    print "<form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'><input type='text' name='usertoadd' size=30 value='enter a registered username'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
+
+
+#delete project form
+	    print "<td><form name=\"deleteform$proj_id\" id=\"deleteform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'><input type='button' onClick='doDelete($proj_id);' value='Delete This Project' ></form></td>";
+
+#remove myself from this project
+print "<td><form method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='useremove'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='uid' value='$userid'><input type='submit' value='Remove Myself From This Project'></form></td>";
 	}
 
-	print "</table>\n";
+	print "</tr></table>\n";
 print<<AddFormHead;
 	<p>
 	    <form method='post' action='editprojects.pl'>
@@ -96,11 +294,14 @@ AddFormHead
 	print "<input type='hidden' name='password' value='$params{password}'>";
 
 print<<AddFormFoot;
-	<table border=1>
-	    <tr><td >name</td><td><input type="text" name="projname"></td></tr>
-	    <tr><td >status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published</select></td></tr>
-	    </table>
-	    <input type='submit' value='Add new project'>
+\
+
+<!-- Form to add a new project -->
+	<table border=1 cellspacing=0 cellpadding=2>
+	    <tr><td >Name</td><td><input type="text" name="projname"></td></tr>
+	    <tr><td >Status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published</select></td></tr>
+<tr><td colspan=2><input type='submit' value='Add New Project'></td></tr>
+	    </table>	    
 	    </form>
 AddFormFoot
 	}
