@@ -114,20 +114,7 @@ if ($params{mode} eq 'useremove')
 
 if ($params{mode} eq 'delete') 
 {
-#delete from user_project
-    my $dh=$dbh->prepare("delete from user_project where project_id=$params{pid}");
-    $dh->execute();
-
-#delete from project
-    my $dh2=$dbh->prepare("delete from project where project_id=$params{pid}");
-    $dh2->execute();
-
-    my $project=$params{pid};
-
-#select project_id
-    my $sth=$dbh->prepare("select project_id from project where project_name=?")||die;
-    $sth->execute($project);
-    my $project_id = $sth->fetchrow_array;
+    my $project_id = $params{pid};
 
 #select all ids from project specific records
     $sth=$dbh->prepare("show tables");
