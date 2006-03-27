@@ -26,6 +26,40 @@ my $template = HTML::Template->new(filename => 'header.tmpl');
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Project Manager');
 
+$template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
+	    var themessage = "You are required to complete the following fields: ";
+	    
+	    if (document.createprojectform.projname.value=="") {
+		themessage = themessage + "\\n - User Name";
+	    }
+	    if (document.createprojectform.projpass.value=="") {
+		themessage = themessage + "\\n -  Project password";
+	    }
+	    if (document.createprojectform.projpasscheck.value=="") {
+		themessage = themessage + "\\n -  Project password re-entry";
+	    }	    
+	    if (document.createprojectform.projpasscheck.value != document.createprojectform.projpass.value)
+	    {
+		if (themessage == "You are required to complete the following fields: ") {
+		    themessage = "Passwords do not match. Please check them";
+		}
+		else
+		{
+		    themessage = themessage + "\\n Passwords do not match, please check them";
+		}
+	    }
+
+	    //alert if fields are empty and cancel form submit
+		if (themessage == "You are required to complete the following fields: ") {
+		    document.createprojectform.submit();
+		}
+	    else
+	    {
+		alert(themessage);
+		return false;
+	    }
+	}});
+
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
@@ -43,7 +77,7 @@ function doDelete(pid)
 
 function doUserAdd(pid)
 {
-    var decision = confirm("Full management privileges for this project will be made available to this user when added. Do you wish to continue?");
+    var decision = confirm("This will permanently add this user to the project. Do you wish to continue?");
     if (decision == true)
     {	
 	eval("document.useraddform"+pid+".submit();");
@@ -53,13 +87,30 @@ function doUserAdd(pid)
 </script>
 javascript
 
+
+
 if ($params{mode} eq 'add') 
 {
+
+#make sure passwords match before creating project
+    if ($params{projpass} eq $params{projpasscheck})
+    {
+       
+#encrypt password and insert
+	my $im = Crypt::Imail->new();
+        my $encrypted_pass = $im->encrypt($params{username}, $params{projpass});	
+
 #insert into project
-    $dbh->do("insert into project values('','$params{projname}','','$params{projstatus}',null)");
+    $dbh->do("insert into project(project_id,project_name,password,status,edit_date) values('','$params{projname}','$encrypted_pass','$params{projstatus}',null)");
 
 #insert into user_project
-    $dbh->do("insert into user_project values('',$params{uid},LAST_INSERT_ID())");
+    $dbh->do("insert into user_project(user_project_id,user_id,project_id) values('',$params{uid},LAST_INSERT_ID())");
+    }
+    else
+    {
+	$statusmsg = "Paswords do not match. Please re-enter them.";
+    }
+
 
 #show updated list
     $params{mode}='login';
@@ -67,17 +118,32 @@ if ($params{mode} eq 'add')
 
 if($params{mode} eq 'adduser') 
 {
-#first check if user exists
-    my $sth = $dbh->prepare("select user_id from users where username='$params{usertoadd}'");
-    $sth->execute();
-    if (my @userinfo = $sth->fetchrow_array)
+#check project password
+    my $im = Crypt::Imail->new();
+    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass}); 
+    my $chkh=$dbh->prepare("select password from project where project_id=?")||die;
+    $chkh->execute($params{pid})||die;
+    my ($dbpass) = $chkh->fetchrow_array;
+    
+    if($dbpass eq $encrypted_pass)
     {
-	my $uid = $userinfo[0];
-	$dbh->do("insert into user_project values('',$uid,$params{pid})");
+
+# check if user exists
+	my $sth = $dbh->prepare("select user_id from users where username='$params{usertoadd}'");
+	$sth->execute();
+	if (my @userinfo = $sth->fetchrow_array)
+	{
+	    my $uid = $userinfo[0];
+	    $dbh->do("insert into user_project(user_project_id,user_id,project_id) values('',$uid,$params{pid})");
+	}
+	else
+	{
+	    $statusmsg = "Invalid username entered. User not added to project.";
+	}
     }
     else
     {
-	$statusmsg = "Invalid username entered. User not added to project.";
+	$statusmsg = "Incorrect project administrator password entered. Please check password and try again";
     }
 #show updated list
     $params{mode}='login';
@@ -115,6 +181,16 @@ if ($params{mode} eq 'useremove')
 if ($params{mode} eq 'delete') 
 {
     my $project_id = $params{pid};
+
+#check project password
+    my $im = Crypt::Imail->new();
+    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass}); 
+    my $chkh=$dbh->prepare("select password from project where project_id=?")||die;
+    $chkh->execute($params{pid})||die;
+    my ($dbpass) = $chkh->fetchrow_array;
+    
+    if($dbpass eq $encrypted_pass)
+    {
 
 #select all ids from project specific records
     $sth=$dbh->prepare("show tables");
@@ -182,7 +258,11 @@ if ($params{mode} eq 'delete')
 	    }
 	}
     }
-    
+}
+else
+{
+    $statusmsg = "Incorrect project administrator password entered. Please check password and try again";
+}
 #show updated list
     $params{mode}='login';
 }
@@ -211,7 +291,7 @@ if ($params{mode} eq 'login')
 	my $sth=$dbh->prepare("select project_id from user_project where user_id=?");
 	$sth->execute($userid);
 	
-	print "<tr><td>Project ID</td><td>Project Name</td><td>Project Status</td><td>Last Edited</td><td>Project Users</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+	print "<tr><td><b>Project ID</b></td><td><b>Project Name</b></td><td><b>Project Status</b></td><td><b>Last Edited</b></td><td><b>Project Users</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 	
 	while(my @results = $sth->fetchrow_array)
 	{
@@ -234,6 +314,13 @@ if ($params{mode} eq 'login')
 		print "selected ";
 	    }
 	    print "name='restricted' value='restricted'>restricted";
+
+	    print "<option ";
+	    if($projdetails[3] eq "open")
+	    {
+		print "selected ";
+	    }
+	    print "name='open' value='open'>open";
 	    
 	    print "<option ";
 	    
@@ -243,7 +330,7 @@ if ($params{mode} eq 'login')
 	    }
 	    print "name='published' value='published'>published</select>";
 	    
-	    print "<input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='updatestatus'><input type='hidden' name='pid' value='$proj_id'><input type='submit' value='Update Project Status'></form>";
+	    print "<input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='updatestatus'><input type='hidden' name='pid' value='$proj_id'><input type='submit' value='Update Project \nStatus'></form>";
 	    
 	    print "</td><td>$projdetails[4]</td><td>";
 
@@ -259,35 +346,37 @@ if ($params{mode} eq 'login')
 	    $userstring = substr($userstring,2);
 	    print $userstring;
 #form: add user to this project
-	    print "<form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'><input type='text' name='usertoadd' size=30 value='enter a registered username'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
+	    print "</td><td><form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'>Username: <br><input type='text' name='usertoadd' size=25 value='enter a registered username'><br>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
 
 
 #delete project form
-	    print "<td><form name=\"deleteform$proj_id\" id=\"deleteform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'><input type='button' onClick='doDelete($proj_id);' value='Delete This Project' ></form></td>";
+	    print "<td><form name=\"deleteform$proj_id\" id=\"deleteform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'>Project Password: <br><input type='password' name='projpass'><br><input type='button' onClick='doDelete($proj_id);' value='Delete This Project' ></form><hr>";
 
 #remove myself from this project
-print "<td><form method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='useremove'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='uid' value='$userid'><input type='submit' value='Remove Myself From This Project'></form></td>";
+print "<form method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='useremove'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='uid' value='$userid'><input type='submit' value='Remove Myself \nFrom This Project'></form></td>";
 	}
 
 	print "</tr></table>\n";
 print<<AddFormHead;
 	<p>
-	    <form method='post' action='editprojects.pl'>
+	    <form name='createprojectform' method='post' action='editprojects.pl'>
 	    <input type='hidden' name='mode' value='add'>
 	    <input type='hidden' name='uid' value='$userid'>
 AddFormHead
 
-	    print "<input type='hidden' name='username' value='$params{username}'>";
-	print "<input type='hidden' name='password' value='$params{password}'>";
+print "<input type='hidden' name='username' value='$params{username}'>";
+print "<input type='hidden' name='password' value='$params{password}'>";
 
 print<<AddFormFoot;
-\
 
 <!-- Form to add a new project -->
 	<table border=1 cellspacing=0 cellpadding=2>
+	    <tr><td colspan=2 align='center'><b>Create A New Project</b></td></tr>
 	    <tr><td >Name</td><td><input type="text" name="projname"></td></tr>
-	    <tr><td >Status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published</select></td></tr>
-<tr><td colspan=2><input type='submit' value='Add New Project'></td></tr>
+	    <tr><td >Status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published<option name="open" value="open">open</select></td></tr>
+<tr><td >Administrator Password</td><td><input type="password" name="projpass"></td></tr>
+<tr><td >Re-enter Admin Password</td><td><input type="password" name="projpasscheck"></td></tr>
+<tr><td colspan=2><input type="button" onClick="verifyProjectCreate();" value='Create New Project'></td></tr>
 	    </table>	    
 	    </form>
 AddFormFoot
@@ -300,7 +389,7 @@ print<<Error_Page_1;
 	    <p class="title1">PAZAR Project Management</p>
 Error_Page_1
 
-	    print "<p class=\"warning\">Please check user name and password and try again</p>";
+	    print "<p class=\"warning\">Could not log you in. Please check user name and password and try again</p>";
 	print "<FORM method=\"POST\" action=\"editprojects.pl\">";
 	print "<table>";
 	print "<tr><td>User name</td><td> <input type=\"text\" name=\"username\"></td></tr>";
