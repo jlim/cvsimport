@@ -6,20 +6,13 @@ use HTML::Template;
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR Search');
+$template->param(TITLE => 'PAZAR Project Outline');
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
-          <p class="title1">PAZAR - Search</p>
-<p class="margin2"><a href="http://www.pazar.info/cgi-bin/gsearch.pl"><b> Search by Gene </b></a><br>
-      <br>
-<a href="http://www.pazar.info/cgi-bin/tfsearch.pl"><b> Search by Transcription Factor </b></a><br>
-      <br>
-<a href=""><b> Advanced Search </b></a><br>
-      <br>
-</p>
+          <p class="title2">Not implemented yet</p>
 
 page
 
