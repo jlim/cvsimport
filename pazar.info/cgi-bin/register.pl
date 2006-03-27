@@ -40,6 +40,36 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verify() {
 	    if (document.regform.last.value=="") {
 		themessage = themessage + "\\n -  Last Name";
 	    }
+	    if (document.regform.passwordcheck.value != document.regform.password.value)
+	    {
+		if (themessage == "You are required to complete the following fields: ") {
+		    themessage = "Passwords do not match. Please check them";
+		}
+		else
+		{
+		    themessage = themessage + "\\n Passwords do not match, please check them";
+		}
+	    }
+
+	var x = document.regform.username.value;
+	var filter  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+	if (filter.test(x))
+	{
+	    //username is a valid email address
+	}
+	else 
+	{
+	    if (themessage == "You are required to complete the following fields: ") {
+		themessage = "Username is not a valid email address. Please re-enter it.";
+	    }
+	    else
+	    {
+		if (document.regform.username.value!="")
+		{
+		    themessage = themessage + "\\n Username is not a valid email address. Please re-enter it.";
+		}
+	    }
+	}
 
 	    //alert if fields are empty and cancel form submit
 		if (themessage == "You are required to complete the following fields: ") {
@@ -111,7 +141,7 @@ if ($params{mode} eq 'register') {
 
 	print "<FORM  name=\"regform\" method=\"POST\" action=\"register.pl\">";
 	print "<table>";
-	print "<tr><td >User name</td><td> <input type=\"text\" name=\"username\"";
+	print "<tr><td valign='top'>User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type=\"text\" name=\"username\"";
 
 	if($duplicates == 0)
 	{
@@ -124,7 +154,7 @@ if ($params{mode} eq 'register') {
 	    print " value=\"$params{password}\"";
 	}
 	print "></td></tr>";
-	print "<tr><td >Re-enter password</td><td> <input type=\"password\" name=\"passwordcheck\"";
+	print "<tr><td >Re-enter password</td><td><input type=\"password\" name=\"passwordcheck\"";
 	if($pwmatch eq "true")
 	{
 	    print " value=\"$params{passwordcheck}\"";
@@ -151,7 +181,7 @@ print<<Page_Done;
 
 	<FORM  name="regform" method="POST" action="register.pl">
 	<table>
-	<tr><td >User name</td><td> <input type="text" name="username"></td></tr>      
+	<tr><td valign="top">User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type="text" name="username"></td></tr>      
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
 	<tr><td >Re-enter password</td><td> <input type="password" name="passwordcheck"></td></tr>
 	<tr><td >Affiliation</td><td><input type="text" name="affiliation"></td></tr>
