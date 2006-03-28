@@ -18,7 +18,7 @@ my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR User and Project creation');
+$template->param(TITLE => 'PAZAR User Registration');
 $template->param(JAVASCRIPT_FUNCTION => q{function verify() {
 	    var themessage = "You are required to complete the following fields: ";
 	    
@@ -177,7 +177,7 @@ Error_Page_2
 else {      
 print<<Page_Done;
 
-	<p class="title1">PAZAR User and Project creation</p>
+	<p class="title1">PAZAR User Registration</p>
 
 	<FORM  name="regform" method="POST" action="register.pl">
 	<table>
