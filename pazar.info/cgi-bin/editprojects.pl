@@ -77,7 +77,7 @@ function doDelete(pid)
 
 function doUserAdd(pid)
 {
-    var decision = confirm("This will permanently add this user to the project. Do you wish to continue?");
+    var decision = confirm("This will permanently add this user to the project. He/she will be able to change the project status. Do you wish to continue?");
     if (decision == true)
     {	
 	eval("document.useraddform"+pid+".submit();");
@@ -411,7 +411,7 @@ else {
 
 print<<Page_Done;
 
-	<p class="title1">PAZAR User and Project creation</p>
+	<p class="title1">PAZAR Project Manager</p>
 
 
 	<FORM  method="POST" action="editprojects.pl">
