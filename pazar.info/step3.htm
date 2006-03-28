@@ -98,7 +98,7 @@ Capturing the experiment information<br>
       
       
       <div style="text-align: justify;">The 'data' element
-stores all the annotations describing the&nbsp;evidence, cell,
+stores all the annotations describing the cell,
 time, condition,... <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
       <br>
 
@@ -111,14 +111,7 @@ time, condition,... <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
       </span>
       
       
-      <div style="text-align: left;"><span style="font-weight: bold;">&nbsp; &nbsp; &nbsp;
-&lt;evidence pazar_id="<span style="color: rgb(255, 0, 0);">ev_0001</span>"
-status_evid="<span style="color: rgb(255, 0, 0);">provisional</span>"
-type_evid="<span style="color: rgb(255, 0, 0);">curated</span>"/&gt;</span><br style="font-weight: bold;">
-
-
-
-      <span style="font-weight: bold;">&nbsp;
+      <div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
 &nbsp; &nbsp; &lt;cell name="<span style="color: rgb(255, 0, 0);">Y79</span>" pazar_id="<span style="color: rgb(255, 0, 0);">ce_0001</span>"
 species="<span style="color: rgb(255, 0, 0);">Homo sapiens</span>"
 status="<span style="color: rgb(255, 0, 0);">cell__line</span>"/&gt;</span><br style="font-weight: bold;">
@@ -241,8 +234,8 @@ as needed.<br>
 
 
 
-The evidence, cell and time are called as attributes of the 'analysis'
-element. The method and ref are children elements of the 'analysis'
+The cell and time are called as attributes of the 'analysis'
+element. The evidence, method and ref are children elements of the 'analysis'
 element.<br>
 
 
@@ -276,8 +269,12 @@ you need other examples.<br>
 
 
       <span style="font-weight: bold;">&nbsp;
-&lt;analysis name="<span style="color: rgb(255, 0, 0);">analysis_example1</span>"
-evidence="<span style="color: rgb(255, 0, 0);">ev_0001</span>"&gt;</span><br style="font-weight: bold;">
+&lt;analysis name="<span style="color: rgb(255, 0, 0);">analysis_example1</span>"</span><br style="font-weight: bold;">
+
+
+
+      <span style="font-weight: bold;">&nbsp; &nbsp; &nbsp;
+&lt;evidence type_evid="<span style="color: rgb(255, 0, 0);">curated</span>" status_evid="<span style="color: rgb(255, 0, 0);">provisional</span>"/&gt;</span><br style="font-weight: bold;">
 
 
 
