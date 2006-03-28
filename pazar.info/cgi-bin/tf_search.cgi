@@ -31,8 +31,6 @@ my $dbh = pazar->new(
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -pazar_user    =>    '',
-		      -pazar_pass    =>    '',
 		      -dbname        =>    $ENV{PAZAR_name},
 		      -drv           =>    'mysql');
 
@@ -71,7 +69,7 @@ if (!$accn) {
     } elsif ($dbaccn eq 'tf_name') {
     }
     foreach my $trans (@trans) {
-	print "you're looking fo transcript: ".$trans."\n";
+	print "you're looking for transcript: ".$trans."\n";
     }
 #     my @tfcomplexes = $dbh->get_complex_by_name($tf_name); 
 #     if (!$regseqs[0]) {
