@@ -91,26 +91,38 @@ javascript
 
 if ($params{mode} eq 'add') 
 {
+#make sure that project name is not in use by another project already
 
-#make sure passwords match before creating project
-    if ($params{projpass} eq $params{projpasscheck})
+    my $sth = $dbh->prepare("select count(*) from project where project_name='$params{projname}'");
+    $sth->execute();
+    my @res = $sth->fetchrow_array;
+
+
+    if($res[0] == 0)
     {
-       
+#make sure passwords match before creating project
+	if ($params{projpass} eq $params{projpasscheck})
+	{
+	    
 #encrypt password and insert
-	my $im = Crypt::Imail->new();
-        my $encrypted_pass = $im->encrypt($params{username}, $params{projpass});	
-
+	    my $im = Crypt::Imail->new();
+	    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass});	
+	    
 #insert into project
-    $dbh->do("insert into project(project_id,project_name,password,status,edit_date) values('','$params{projname}','$encrypted_pass','$params{projstatus}',null)");
+	    $dbh->do("insert into project(project_id,project_name,password,status,edit_date) values('','$params{projname}','$encrypted_pass','$params{projstatus}',null)");
 
 #insert into user_project
-    $dbh->do("insert into user_project(user_project_id,user_id,project_id) values('',$params{uid},LAST_INSERT_ID())");
+	    $dbh->do("insert into user_project(user_project_id,user_id,project_id) values('',$params{uid},LAST_INSERT_ID())");
+	}
+	else
+	{
+	    $statusmsg = "Paswords do not match. Please re-enter them.";
+	}
     }
     else
     {
-	$statusmsg = "Paswords do not match. Please re-enter them.";
+	$statusmsg = "Project name is already in use. Please choose a different project name.";
     }
-
 
 #show updated list
     $params{mode}='login';
