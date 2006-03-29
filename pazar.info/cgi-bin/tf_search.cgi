@@ -28,6 +28,7 @@ print "Content-Type: text/html\n\n", $template->output;
 
 #connect to the database
 my $dbh = pazar->new( 
+                      -globalsearch  =>    'yes',
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
@@ -60,67 +61,23 @@ if (!$accn) {
 	@trans=$gkdb->nm_to_enst($accn);
 	unless ($trans[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
     } elsif ($dbaccn eq 'swissprot') {
-	my $sp=$gkdb->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
+	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
 	$sp->execute($accn)||die;
 	my $species=$sp->fetchrow_array();
 	$ensdb->change_mart_organism($species);
-	my @trans =$ensdb->swissprot_to_enst($accn);
+	@trans =$ensdb->swissprot_to_enst($accn);
 	unless ($trans[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
     } elsif ($dbaccn eq 'tf_name') {
     }
     foreach my $trans (@trans) {
-	print "you're looking for transcript: ".$trans."\n";
+#	print "you're looking for transcript: ".$trans."\n";
+	my $tf = $dbh->create_tf;
+	my @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
+	foreach my $complex (@tfcomplexes) {
+	    print $trans." is included in TF ".$complex->name."\n";
+	}
     }
-#     my @tfcomplexes = $dbh->get_complex_by_name($tf_name); 
-#     if (!$regseqs[0]) {
-# 	print "<p class=\"warning\">No information was found for gene $gene!</p>\n";
-#     } else {
-# 	my @ens_coords = $ensdb->get_ens_chr($gene);
-# 	foreach my $reg_seq (@regseqs) {
-# 	    undef my %attr;
-# 	    foreach my $item (keys %params) {
-# 		if ($params{$item} eq 'on') {
-# 		    eval {$reg_seq->$item };
-# 		    unless ($@) {
-# 			if ($item eq "binomial_species") {
-# 			    $attr{'species'}=$reg_seq->$item;
-# 			} else {
-# 			    $attr{$item}=$reg_seq->$item;
-# 			}
-# 		    }
-# 		    if ($item eq 'length') {
-# 			$attr{$item}=($reg_seq->end)-($reg_seq->start)+1;
-# 		    }
-# 		    if ($item eq 'tss') {
-# 			if ($reg_seq->transcript_fuzzy_start == $reg_seq->transcript_fuzzy_end) { 
-# 			    $attr{$item}=$reg_seq->transcript_fuzzy_start;
-# 			} else {
-# 			    $attr{$item}=$reg_seq->transcript_fuzzy_start."-".$reg_seq->transcript_fuzzy_end; 
-# 			}
-# 		    }
-# 		    if ($item eq 'EnsEMBL_description') {
-# 			my @desc = split('\[',$ens_coords[5]);
-# 			$attr{$item}=$desc[0];
-# 		    }
-# 		    if ($item =~ /TF/ || $item =~ /interaction/ || $item =~ /other/) {
-# 			my $aid = $dbh->get_analysis_IO_by_regseq_id($reg_seq->accession_number);
 
-# 			if ($item =~ /other/) {
-# 			}
-
-# 		    }
-
-# 		}
-# 	    }
-# 	    my @attr=qw(gene_accession gene_description EnsEMBL_description transcript_accession isoform tss id seq chromosome band start end length strand quality species);
-# 	    for (my $i=0;$i<@attr;$i++) {
-# 		if ($attr{$attr[$i]}) {
-# 		    print "<span class=\"bold\">".$attr[$i].": </span>".$attr{$attr[$i]}."<br>";
-# 		}
-# 	    }
-#             print "<br><br>";
-# 	}
-#     }
 }
 
 # print out the html tail template
