@@ -15,13 +15,16 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Debug( report => 'everything', on => 'anything' );
 
+use TFBS::PatternGen::MEME;
+use TFBS::Matrix::PFM;
+
 use Data::Dumper;
 
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR Gene Search');
+$template->param(TITLE => 'PAZAR TF Results');
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -32,6 +35,8 @@ my $dbh = pazar->new(
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
+		      -pazar_user    =>    'elodie@cmmt.ubc.ca',
+		      -pazar_pass    =>    'pazarpw',
 		      -dbname        =>    $ENV{PAZAR_name},
 		      -drv           =>    'mysql');
 
@@ -40,46 +45,182 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
 my $get = new CGI;
-my %params = %{$get->Vars};
-my $accn = $params{geneID};
-my $dbaccn = $params{ID_list};
+my %param = %{$get->Vars};
+my $accn = $param{geneID};
+my $dbaccn = $param{ID_list};
 my @trans;
-
+my $tfname;
 if (!$accn) {
     print "<p class=\"warning\">Please provide a TF ID!</p>\n";
+    exit;
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
 	@trans = $gkdb->ens_transcripts_by_gene($accn);
+        unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	push @trans,$accn;
-        unless ($trans[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
+        unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
-	unless ($gene[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
+	unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
 	@trans = $gkdb->ens_transcripts_by_gene($gene[0]);
     } elsif ($dbaccn eq 'nm') {
 	@trans=$gkdb->nm_to_enst($accn);
-	unless ($trans[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
+	unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     } elsif ($dbaccn eq 'swissprot') {
 	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
 	$sp->execute($accn)||die;
 	my $species=$sp->fetchrow_array();
+	if (!$species) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
 	$ensdb->change_mart_organism($species);
 	@trans =$ensdb->swissprot_to_enst($accn);
-	unless ($trans[0]=~/\w{2,}/) {die "Conversion failed for $accn";}
+	unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     } elsif ($dbaccn eq 'tf_name') {
+	@trans = ('none');
+	$tfname = $accn;
     }
+    my $count=0;
+    my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
+    open (TMP, ">$file");
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
-	my $tf = $dbh->create_tf;
-	my @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
+	my $tf;
+	my @tfcomplexes;
+	if ($trans eq 'none') {
+	    $tf = $dbh->create_tf;
+	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
+	    if (!$tfcomplexes[0]){
+		print "<p class=\"warning\">No $tfname TF could be found in the database!</p>\n";
+		exit;
+	    }
+	} else {
+	    $tf = $dbh->create_tf;
+	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
+	    if (!$tfcomplexes[0]){
+		print "<p class=\"warning\">No $trans transcript could be found in the database!</p>\n";
+		exit;
+	    }
+	}
 	foreach my $complex (@tfcomplexes) {
-	    print $trans." is included in TF ".$complex->name."\n";
+	    print "<span class=\"title3\">Functional Transcription Factor: ".$complex->name."</span><br>";
+	    print "<span class=\"title4\">Project: </span>".$dbh->get_project_name('funct_tf',$complex->dbid)."<br>";
+
+	    while (my $subunit=$complex->next_subunit) {
+		my $tid = $subunit->get_transcript_accession($dbh);
+		my $cl = $subunit->get_class ||'unknown'; 
+		my $fam = $subunit->get_fam ||'unknown';
+		print "<span class=\"title4\">Subunit: </span>".$tid." - Class: ".$cl." - Family: ".$fam."<br>";
+	    }
+	    if (!$complex->{targets}) {
+		print "<p class=\"warning\">No target could be found for this TF!</p>\n";
+		next;
+	    }
+	    while (my $site=$complex->next_target) {
+		my $type=$site->get_type;
+		if ($type eq 'matrix') {next;}
+		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
+		    print "<span class=\"title4\">Genomic Target (reg_seq): </span>".$site->get_seq."<br>";
+                    my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+#		    print Dumper(@regseq);
+		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
+		    if ($param{reg_seq_name} eq 'on' && $site->get_name) {
+			print "<li>Name: ".$site->get_name."</li>";
+		    }
+		    if ($param{gene} eq 'on') {
+			my $transcript=$regseq[0]->transcript_accession || 'Transcript Not Specified';
+			print "<li>Gene/Transcript Regulated: ".$regseq[0]->gene_accession."/".$transcript."</li>";
+			my @ens_coords = $ensdb->get_ens_chr($regseq[0]->gene_accession);
+			my @desc = split('\[',$ens_coords[5]);
+			print "<li>".$desc[0]."</li>";
+		    }
+		    if ($param{species} eq 'on') {
+			print "<li>Species: ".$regseq[0]->binomial_species."</li>";
+		    }
+		    if ($param{coordinates} eq 'on') {
+			print "<li>Coordinates: ".$regseq[0]->chromosome." (".$regseq[0]->strand.") ".$regseq[0]->start."-".$regseq[0]->end."</li>";
+		    }
+		    if ($param{quality} eq 'on') {
+			print "<li>Quality: ".$regseq[0]->quality."</li>";
+		    }
+		}
+		if ($type eq 'construct' && $param{construct} eq 'on') {
+		    print "<span class=\"title4\">Artificial Target (construct): </span>".$site->get_seq."<br>";
+		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
+		    if ($param{construct_name} eq 'on') {
+			print "<li>Name: ".$site->get_name."</li>";
+		    }
+		    if ($param{description} eq 'on' && $site->get_desc) {
+			print "<li>Description: ".$site->get_desc."</li>";
+		    }
+		}
+		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
+		if ($param{analysis} eq 'on') {
+		    my $aname=$an[2];
+		    my @anal;
+		    push @anal,$aname;
+		    if ($an[3]) {
+			my @met=$dbh->get_data_by_primary_key('method',$an[3]);
+			push @anal,$met[0];
+		    }
+		    if ($an[4]) {
+			my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
+			push @anal,$cell[0];
+		    }
+		    if ($an[5]) {
+			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
+			push @anal,$time[0];
+		    }
+		    print "<li>Analysis: ";
+		    print join(':',@anal)."</li>";
+		}
+		if ($param{reference} eq 'on' && $an[6]) {
+		    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+		    print "<li>Reference: ".$ref[0]."</li>";
+		}
+		if ($param{interaction} eq 'on') {
+		    my ($table,$pazarid,@dat)=$dbh->links_to_data($site->get_olink,'output');
+		    if ($table eq 'interaction') {
+			print "<li>Interaction: ";
+			if ($dat[1]) {
+			    print $dat[1]." ".$dat[2].":comments:".$dat[3]."</li>";
+			} else {
+			    print $dat[0].":comments:".$dat[3]."</li>";
+			}
+		    }
+		}
+		if ($param{evidence} eq 'on' && $an[1]) {
+		    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+		    print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
+		}
+                print "</ul>";
+		$count++;
+		my $construct_name=$accn."_site".$count;
+		print TMP ">".$construct_name."\n";
+		print TMP $site->get_seq."\n";
+	    }
+	    print "<br>";
 	}
     }
-
+    close (TMP);
+    unless ($count==0) {
+	my $patterngen =
+	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
+					-binary => 'meme',
+					-additional_params => '-mod oops');
+	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
+#print a human readable format of the matrix
+	my $prettystring = $pfm->prettyprint();
+	my @matrixlines = split /\n/, $prettystring;
+	$prettystring = join "<BR>\n", @matrixlines;
+	$prettystring =~ s/ /\&nbsp\;/g;
+	print "<span class=\"title4\">Position Frequency Matrix</span><br><SPAN class=\"monospace\">$prettystring</SPAN><br>";
+#draw the logo
+	my $logo = $accn.".png";
+	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
+	print "<br><p class=\"title4\">Logo: <br><img src=\"http://www.pazar.info/tmp/$logo\"></p>";
+	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";
+    }
 }
-
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
 print $template_tail->output;

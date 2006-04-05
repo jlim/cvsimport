@@ -21,6 +21,47 @@ if(target == 1)
 document.gene_search.target="_self";
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
 }
+}
+var state=0;
+function CheckBox(cat){
+if (cat == 1)
+{
+if (state == 1)
+{
+    document.gene_search.tf.checked=false;
+    document.gene_search.tf_analysis.checked=false;
+    document.gene_search.tf_reference.checked=false;
+    document.gene_search.tf_interaction.checked=false;
+    document.gene_search.tf_evidence.checked=false;
+    state=0;
+}
+if (state == 0)
+{
+    document.gene_search.tf.checked=true;
+    document.gene_search.tf_analysis.checked=true;
+    document.gene_search.tf_reference.checked=true;
+    document.gene_search.tf_interaction.checked=true;
+    document.gene_search.tf_evidence.checked=true;
+    state=1;
+}}
+if (cat == 0)
+{
+if (state == 1)
+{
+    document.gene_search.other_analysis.checked=false;
+    document.gene_search.other_reference.checked=false;
+    document.gene_search.other_effect.checked=false;
+    document.gene_search.other_evidence.checked=false;
+    state=0;
+}
+if (state == 0)
+{
+    document.gene_search.other_analysis.checked=true;
+    document.gene_search.other_reference.checked=true;
+    document.gene_search.other_effect.checked=true;
+    document.gene_search.other_evidence.checked=true;
+    state=1;
+}}
 }});
 
 # send the obligatory Content-Type and print the template output
@@ -63,33 +104,44 @@ ID</option>
       <hr><p class="title3">Select
 the Attributes to Display</p><br></td>
     </tr>
-    <tr>
-      <td colspan="2"><p class="title4">
-Genomic Coordinates: </p></td>
+<tr>
+      <td colspan="2"><span class="title4"><input name="reg_seq" checked="checked" type="checkbox"> Regulatory Sequence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="chromosome" checked="checked" type="checkbox"> Chromosome Name </p>
+      <p ><input name="gene" checked="checked" type="checkbox"> Gene/Transcript ID </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="binomial_species" checked="checked" type="checkbox"> Species </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="start" checked="checked" type="checkbox"> Start Position (bp) </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="strand" checked="checked" type="checkbox"> Strand </p>
+      <p ><input name="tss" type="checkbox"> Transcription Start Site </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="end" checked="checked" type="checkbox"> End Position (bp) </p>
+      <p ><input name="reg_seq_name" checked="checked" type="checkbox"> Name (if any) </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="band" type="checkbox">
-Band </p>
+      <p ><input name="sequence" checked="checked" type="checkbox"> Sequence </p>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="coordinates" checked="checked" type="checkbox"> Coordinates </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="species" checked="checked" type="checkbox"> Species </p>
+      </td>
+    </tr>
+    <tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="quality" type="checkbox"> Quality </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      </td>
+    </tr>
+    <tr>
+    <tr>
+      <td colspan="2"> <br>
       </td>
     </tr>
     <tr>
@@ -97,51 +149,26 @@ Band </p>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <p class="title4">
-Gene: </p> </td>
+      <td colspan="2"> <span class="title4"><input name="ev" type="checkbox" onclick="javascript:CheckBox(1)"> Interacting Evidence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="gene_accession" checked="checked" type="checkbox"> EnsEMBL Gene ID </p>
+      <p ><input name="tf" type="checkbox"> Transcription Factor </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="transcript_accession" type="checkbox"> EnsEMBL Transcript ID (if any) </p>
-      </td>
+      <p ><input name="tf_interaction" type="checkbox"> Interaction Description </p>     </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="EnsEMBL_description" type="checkbox">
-EnsEMBL Gene Description </p>
+      <p ><input name="tf_analysis" type="checkbox"> Analysis Details </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="gene_description" type="checkbox"> Annotator Description </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="tss" type="checkbox">
-Transcription Start Site </p>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <p class="title4">
-Sequence: </p> </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><br><input name="seq" checked="checked" type="checkbox"> Sequence </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><br><input name="length" type="checkbox"> Length </p>
+      <p ><input name="tf_reference" type="checkbox"> Reference (PMID) </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="id" type="checkbox"> TFBS name (if any) </p>
+      <p ><input name="tf_evidence" type="checkbox"> Evidence </p>
       </td>
     </tr>
     <tr>
@@ -153,89 +180,22 @@ Sequence: </p> </td>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <p class="title4">Interacting Evidence (if any): </p> </td>
+      <td colspan="2"> <span class="title4"><input name="other" type="checkbox" onclick="javascript:CheckBox(0)"> Other Evidence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="TF_gene" checked="checked" type="checkbox"> TF EnsEMBL Gene ID </p>
+      <p ><input name="other_analysis" type="checkbox"> Analysis Details </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><br><input name="TF_transcript" type="checkbox"> TF EnsEMBL Transcript ID </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="TF_name" checked="checked" type="checkbox"> TF Name </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="TF_class" type="checkbox"> TF Class </p>
+      <p ><input name="other_reference" type="checkbox"> Reference (PMID) </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="TF_family" type="checkbox"> TF Family </p>
+      <p ><input name="other_effect" type="checkbox"> Effect Description </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="TF_modifications" type="checkbox"> TF Modifications </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction_method" checked="checked" type="checkbox"> Method </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction_cell" type="checkbox"> Cell </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction_time" type="checkbox"> Time </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction_condition" type="checkbox"> Condition </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction_pmid" type="checkbox"> Pubmed ID </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="interaction_description" type="checkbox"> Interaction Description </p>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <p class="title4">Other Evidence (if any): </p> </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="other_method" checked="checked" type="checkbox"> Method </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="other_cell" type="checkbox"> Cell </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="other_time" type="checkbox"> Time </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="other_condition" type="checkbox"> Condition </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="other_pmid" type="checkbox"> Pubmed ID </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="other_effect_description" type="checkbox"> Effect Description </p>
+      <p ><input name="other_evidence" type="checkbox"> Evidence </p>
       </td>
     </tr>
     <tr>

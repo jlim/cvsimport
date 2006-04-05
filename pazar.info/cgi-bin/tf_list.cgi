@@ -16,6 +16,8 @@ use constant DB_DRV  => 'mysql';
 use constant DB_NAME => $ENV{PAZAR_name};
 use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
+use constant PAZAR_USER => 'elodie@cmmt.ubc.ca';
+use constant PAZAR_PASS => 'pazarpw';
 use constant DB_HOST => $ENV{PAZAR_host};
 
 my $get = new CGI;
@@ -25,11 +27,14 @@ print $get->header("text/html");
 
 #connect to the database
 my $dbh = pazar->new( 
-	  	   -host    =>    DB_HOST,
-                   -user    =>    DB_USER,
-                   -pass    =>    DB_PASS,
-                   -dbname  =>    DB_NAME,
-		   -drv     =>    DB_DRV);
+	  	   -host          =>    DB_HOST,
+                   -user          =>    DB_USER,
+                   -pass          =>    DB_PASS,
+		   -pazar_user    =>    PAZAR_USER,
+		   -pazar_pass    =>    PAZAR_PASS,
+                   -dbname        =>    DB_NAME,
+		   -drv           =>    DB_DRV,
+                   -globalsearch  =>    'yes');
 
 my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
 my %tf_project;
@@ -42,12 +47,13 @@ if ($projects) {
 	foreach my $funct_tf (@funct_tfs) {
 	    my $funct_name = $dbh->get_complex_name_by_id($funct_tf);
 	    push (@{$tf_project{$project->{project_name}}}, $funct_name);
-	    my @tf_subunits = $dbh->get_subunit_by_complex_id($funct_tf);
-	    foreach my $subunit (@tf_subunits) {
-		push (@{$tf_subunit{$funct_name}}, {
-		    accn => $subunit->{transcript},
-		    class => $subunit->{class},
-		    family => $subunit->{family}});
+	    my $tf = $dbh->create_tf;
+	    my $tfcomplex = $tf->get_tfcomplex_by_id($funct_tf,'notargets');
+	    while (my $subunit=$tfcomplex->next_subunit) {
+		push (@{$tf_subunit{$project->{project_name}}{$funct_name}}, {
+		    accn => $subunit->get_transcript_accession($dbh),
+		    class => $subunit->get_class,
+		    family => $subunit->get_fam});
 	    }
 	}
     }
@@ -126,13 +132,13 @@ foreach my $tf_name (@{$tf_project{$proj_name}}) {
 
 print "<li><b>".$tf_name."</b><br>";
 
-foreach my $tf_data (@{$tf_subunit{$tf_name}}) {
+foreach my $tf_data (@{$tf_subunit{$proj_name}{$tf_name}}) {
 if (!$tf_data->{class} || $tf_data->{class} eq '0') {
 print $tf_data->{accn}."<br>";
 } elsif (!$tf_data->{family} || $tf_data->{family} eq '0') {
-print $tf_data->{accn}."   ".$tf_data->{class}."<br>";
+print $tf_data->{accn}."   (".$tf_data->{class}.")<br>";
 } else {
-print $tf_data->{accn}."   ".$tf_data->{class}."/".$tf_data->{family}."<br>";
+print $tf_data->{accn}."   (".$tf_data->{class}."/".$tf_data->{family}.")<br>";
 }
 }
 print "</li>";

@@ -1,5 +1,5 @@
 td {
-font-family: Arial,Helvetica,Sans Serif;
+font-family: Arial,Helvetica,Sans-Serif;
 line-height: 1.7;
 color: #000000;
 font-size: 12px;
@@ -67,4 +67,8 @@ color: rgb(255, 0, 0);
 
 .margin2 {
 padding-left:25px;
+}
+
+.monospace {
+font-family: monospace;
 }

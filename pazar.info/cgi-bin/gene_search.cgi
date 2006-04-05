@@ -31,10 +31,11 @@ my $dbh = pazar->new(
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -pazar_user    =>    '',
-		      -pazar_pass    =>    '',
+		      -pazar_user    =>    'elodie@cmmt.ubc.ca',
+		      -pazar_pass    =>    'pazarpw',
 		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    'mysql');
+		      -drv           =>    'mysql',
+                      -globalsearch  =>    'yes');
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
@@ -50,18 +51,18 @@ if (!$accn) {
     print "<p class=\"warning\">Please provide a gene ID!</p>\n";
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
-	$gene=$accn;
+	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {$gene=$accn;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$gene=$gene[0];
-        unless ($gene=~/\w{2,}/) {die "Conversion failed for $accn";}
+        unless ($gene=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
 	$gene=$gene[0];
-	unless ($gene=~/\w{2,}/) {die "Conversion failed for $accn";}
+	unless ($gene=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     } else {
 	my ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
-	if (!$ens) {die "Gene $accn not found $err";} else {$gene=$ens;}
+	if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {$gene=$ens;}
     }
 
     my @regseqs = $dbh->get_reg_seqs_by_accn($gene); 
@@ -69,49 +70,126 @@ if (!$accn) {
 	print "<p class=\"warning\">No regulatory sequence was found for gene $gene!</p>\n";
     } else {
 	my @ens_coords = $ensdb->get_ens_chr($gene);
-	foreach my $reg_seq (@regseqs) {
-	    undef my %attr;
-	    foreach my $item (keys %params) {
-		if ($params{$item} eq 'on') {
-		    eval {$reg_seq->$item };
-		    unless ($@) {
-			if ($item eq "binomial_species") {
-			    $attr{'species'}=$reg_seq->$item;
-			} else {
-			    $attr{$item}=$reg_seq->$item;
-			}
-		    }
-		    if ($item eq 'length') {
-			$attr{$item}=($reg_seq->end)-($reg_seq->start)+1;
-		    }
-		    if ($item eq 'tss') {
-			if ($reg_seq->transcript_fuzzy_start == $reg_seq->transcript_fuzzy_end) { 
-			    $attr{$item}=$reg_seq->transcript_fuzzy_start;
-			} else {
-			    $attr{$item}=$reg_seq->transcript_fuzzy_start."-".$reg_seq->transcript_fuzzy_end; 
-			}
-		    }
-		    if ($item eq 'EnsEMBL_description') {
-			my @desc = split('\[',$ens_coords[5]);
-			$attr{$item}=$desc[0];
-		    }
-		    if ($item =~ /TF/ || $item =~ /interaction/ || $item =~ /other/) {
-			my $aid = $dbh->get_analysis_IO_by_regseq_id($reg_seq->accession_number);
-
-			if ($item =~ /other/) {
-			}
-
-		    }
-
+	foreach my $regseq (@regseqs) {
+	    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
+	    if ($params{gene} eq 'on') {
+		my $transcript=$regseq->transcript_accession || 'Transcript Not Specified';
+		print "<li><b>Gene/Transcript: </b>".$regseq->gene_accession."/".$transcript."</li>";
+		my @ens_coords = $ensdb->get_ens_chr($regseq->gene_accession);
+		my @desc = split('\[',$ens_coords[5]);
+		print "<li>".$desc[0]."</li>";
+	    }
+	    if ($params{tss} eq 'on') {
+		if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<li><b>Transcription Start Site: </b>".$regseq->transcript_fuzzy_start."</li>";} else {
+		    print "<li>Transcription Start Site: </b>".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</li>";
 		}
 	    }
-	    my @attr=qw(gene_accession gene_description EnsEMBL_description transcript_accession isoform tss id seq chromosome band start end length strand quality species);
-	    for (my $i=0;$i<@attr;$i++) {
-		if ($attr{$attr[$i]}) {
-		    print "<span class=\"bold\">".$attr[$i].": </span>".$attr{$attr[$i]}."<br>";
+	    if ($params{species} eq 'on') {
+		print "<li><b>Species: </b>".$regseq->binomial_species."</li>";
+	    }
+	    if ($params{reg_seq_name} eq 'on' && $regseq->id) {
+		print "<li><b>Name: </b>".$regseq->id."</li>";
+	    }
+	    if ($params{sequence} eq 'on') {
+		print "<li><b>Sequence: </b>".$regseq->seq."</li>";
+	    }
+	    if ($params{coordinates} eq 'on') {
+		print "<li><b>Coordinates: </b>".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</li>";
+	    }
+	    if ($params{quality} eq 'on') {
+		print "<li><b>Quality: </b>".$regseq->quality."</li>";
+	    }
+	    my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
+	    foreach my $inter (@interactors) {
+		if ($params{tf} eq 'on') {
+		    my $tf = $dbh->create_tf;
+		    my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
+		    print "<li><b>Transcription Factor: </b>".$complex->name."</li>";
+		    while (my $subunit=$complex->next_subunit) {
+			my $db = $subunit->get_tdb;
+			my $tid = $subunit->get_transcript_accession($dbh);
+			my $cl = $subunit->get_class ||'unknown'; 
+			my $fam = $subunit->get_fam ||'unknown';
+			print "<li>Subunit: ".$tid." - Class: ".$cl." - Family: ".$fam."</li>";
+		    }
+		}
+	    	my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
+		if ($params{tf_analysis} eq 'on') {
+		    my $aname=$an[2];
+		    my @anal;
+		    push @anal,$aname;
+		    if ($an[3]) {
+			my @met=$dbh->get_data_by_primary_key('method',$an[3]);
+			push @anal,$met[0];
+		    }
+		    if ($an[4]) {
+			my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
+			push @anal,$cell[0];
+		    }
+		    if ($an[5]) {
+			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
+			push @anal,$time[0];
+		    }
+		    print "<li><b>Analysis: </b>";
+		    print join(':',@anal)."</li>";
+		}
+		if ($params{tf_reference} eq 'on' && $an[6]) {
+		    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+		    print "<li><b>Reference: </b>".$ref[0]."</li>";
+		}
+		if ($params{tf_interaction} eq 'on') {
+		    my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
+		    if ($table eq 'interaction') {
+			print "<li><b>Interaction: </b>";
+			if ($dat[1]) {
+			    print $dat[1]." ".$dat[2].":comments:".$dat[3]."</li>";
+			} else {
+			    print $dat[0].":comments:".$dat[3]."</li>";
+			}
+		    }
+		}
+		if ($params{tf_evidence} eq 'on' && $an[1]) {
+		    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+		    print "<li><b>Evidence: </b>".$ev[0]."_".$ev[1]."</li>";
 		}
 	    }
-            print "<br><br>";
+	    my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
+	    foreach my $exp (@expressors) {
+	    	my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
+		if ($params{other_analysis} eq 'on') {
+		    my $aname=$an[2];
+		    my @anal;
+		    push @anal,$aname;
+		    if ($an[3]) {
+			my @met=$dbh->get_data_by_primary_key('method',$an[3]);
+			push @anal,$met[0];
+		    }
+		    if ($an[4]) {
+			my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
+			push @anal,$cell[0];
+		    }
+		    if ($an[5]) {
+			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
+			push @anal,$time[0];
+		    }
+		    print "<li><b>Analysis: </b>";
+		    print join(':',@anal)."</li>";
+		}
+		if ($params{other_reference} eq 'on' && $an[6]) {
+		    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+		    print "<li><b>Reference: </b>".$ref[0]."</li>";
+		}
+		if ($params{other_effect} eq 'on') {
+		    my ($table,$pazarid,@dat)=$dbh->links_to_data($exp->{olink},'output');
+		    print "<li><b>$table: </b>";
+		    print join(":",@dat)."</li>";
+		}
+		if ($params{other_evidence} eq 'on' && $an[1]) {
+		    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+		    print "<li><b>Evidence: </b>".$ev[0]."_".$ev[1]."</li>";
+		}
+	    }
+	    print "</ul>";
 	}
     }
 }
