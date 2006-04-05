@@ -107,6 +107,11 @@ print "exp($i);";
 }
 print "
 }
+
+function autoPopulate(val)
+{
+    window.opener.document.tf_search.geneID.value=val;   ;
+}
 -->
 </script>
 </head>
@@ -130,15 +135,15 @@ print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"../images/minus.
 $count++;
 foreach my $tf_name (@{$tf_project{$proj_name}}) {
 
-print "<li><b>".$tf_name."</b><br>";
+print "<li><a name='#$tf_name'><b>".$tf_name."</b><br>";
 
 foreach my $tf_data (@{$tf_subunit{$proj_name}{$tf_name}}) {
 if (!$tf_data->{class} || $tf_data->{class} eq '0') {
-print $tf_data->{accn}."<br>";
+print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}'\">".$tf_data->{accn}."</a><br>";
 } elsif (!$tf_data->{family} || $tf_data->{family} eq '0') {
-print $tf_data->{accn}."   (".$tf_data->{class}.")<br>";
+print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}'\">".$tf_data->{accn}."</a>   ("."<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{class}'\">".$tf_data->{class}."</a>)<br>";
 } else {
-print $tf_data->{accn}."   (".$tf_data->{class}."/".$tf_data->{family}.")<br>";
+print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}'\">".$tf_data->{accn}."</a>   (<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{class}'\">".$tf_data->{class}."</a>/"."<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{family}'\">".$tf_data->{family}."</a>)<br>";
 }
 }
 print "</li>";
