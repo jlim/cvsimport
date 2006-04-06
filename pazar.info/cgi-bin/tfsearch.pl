@@ -21,6 +21,12 @@ if(target == 1)
 document.tf_search.action="http://www.pazar.info/cgi-bin/tf_search.cgi";
 document.tf_search.target="_self";
 }
+if(target == 2) 
+{
+document.tf_search.action="http://www.pazar.info/cgi-bin/tfbrowse_alpha.pl";
+document.tf_search.target="Window1";
+window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
+}
 }
 var state='false';
 function CheckBox(){
@@ -74,7 +80,7 @@ ID</option>
     <tr align="left">
       <td colspan="2"><p > Or browse the current list of reported TFs
 &nbsp;
-      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)">     <input value="View Alphabetical TF List" name="submit" type="submit"  onClick="setCount(2)"><br></p>
       <br>
       </td>
     </tr>
