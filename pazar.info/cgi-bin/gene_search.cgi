@@ -67,7 +67,7 @@ if (!$accn) {
 
     my @regseqs = $dbh->get_reg_seqs_by_accn($gene); 
     if (!$regseqs[0]) {
-	print "<p class=\"warning\">No regulatory sequence was found for gene $gene!</p>\n";
+	print "<p class=\"warning\">No regulatory sequence was found for gene $gene! Is it really an Ensembl Gene ID?</p>\n";
     } else {
 	my @ens_coords = $ensdb->get_ens_chr($gene);
 	foreach my $regseq (@regseqs) {
@@ -100,17 +100,19 @@ if (!$accn) {
 		print "<li><b>Quality: </b>".$regseq->quality."</li>";
 	    }
 	    my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
+	    my $count=1;
 	    foreach my $inter (@interactors) {
+		print "<li><b>Line of evidence $count: </b></li>";
 		if ($params{tf} eq 'on') {
 		    my $tf = $dbh->create_tf;
 		    my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
-		    print "<li><b>Transcription Factor: </b>".$complex->name."</li>";
+		    print "<li>Transcription Factor Complex Name: ".$complex->name."</li>";
 		    while (my $subunit=$complex->next_subunit) {
 			my $db = $subunit->get_tdb;
 			my $tid = $subunit->get_transcript_accession($dbh);
 			my $cl = $subunit->get_class ||'unknown'; 
 			my $fam = $subunit->get_fam ||'unknown';
-			print "<li>Subunit: ".$tid." - Class: ".$cl." - Family: ".$fam."</li>";
+			print "<li>Transcription Factor Complex Subunit: ".$tid." - Class: ".$cl." - Family: ".$fam."</li>";
 		    }
 		}
 	    	my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
@@ -130,31 +132,35 @@ if (!$accn) {
 			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
 			push @anal,$time[0];
 		    }
-		    print "<li><b>Analysis: </b>";
+		    print "<li>Analysis: ";
 		    print join(':',@anal)."</li>";
 		}
 		if ($params{tf_reference} eq 'on' && $an[6]) {
 		    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-		    print "<li><b>Reference: </b>".$ref[0]."</li>";
+		    print "<li>Reference: ".$ref[0]."</li>";
 		}
 		if ($params{tf_interaction} eq 'on') {
 		    my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
 		    if ($table eq 'interaction') {
-			print "<li><b>Interaction: </b>";
-			if ($dat[1]) {
-			    print $dat[1]." ".$dat[2].":comments:".$dat[3]."</li>";
-			} else {
-			    print $dat[0].":comments:".$dat[3]."</li>";
+			print "<li>Interaction: ";
+   		        my @data;
+			for (my $i=0;$i<(@dat-3);$i++) {
+			    if ($dat[$i] && $dat[$i] ne '0') {
+				push @data,$dat[$i];
+			    }
 			}
+			print join(":",@data)."</li>";
 		    }
 		}
 		if ($params{tf_evidence} eq 'on' && $an[1]) {
 		    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-		    print "<li><b>Evidence: </b>".$ev[0]."_".$ev[1]."</li>";
+		    print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
 		}
+		$count++;
 	    }
 	    my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
 	    foreach my $exp (@expressors) {
+		print "<li><b>Line of evidence $count: </b></li>";
 	    	my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 		if ($params{other_analysis} eq 'on') {
 		    my $aname=$an[2];
@@ -172,22 +178,29 @@ if (!$accn) {
 			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
 			push @anal,$time[0];
 		    }
-		    print "<li><b>Analysis: </b>";
+		    print "<li>Analysis: ";
 		    print join(':',@anal)."</li>";
 		}
 		if ($params{other_reference} eq 'on' && $an[6]) {
 		    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-		    print "<li><b>Reference: </b>".$ref[0]."</li>";
+		    print "<li>Reference: ".$ref[0]."</li>";
 		}
 		if ($params{other_effect} eq 'on') {
-		    my ($table,$pazarid,@dat)=$dbh->links_to_data($exp->{olink},'output');
-		    print "<li><b>$table: </b>";
-		    print join(":",@dat)."</li>";
+		    my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
+		    print "<li>Expression: ";
+		    my @data;
+		    for (my $i=0;$i<(@dat-3);$i++) {
+			if ($dat[$i] && $dat[$i] ne '0') {
+			    push @data,$dat[$i];
+			}
+		    }
+		    print join(":",@data)."</li>";
 		}
 		if ($params{other_evidence} eq 'on' && $an[1]) {
 		    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-		    print "<li><b>Evidence: </b>".$ev[0]."_".$ev[1]."</li>";
+		    print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
 		}
+		$count++;
 	    }
 	    print "</ul>";
 	}
@@ -214,7 +227,7 @@ sub convert_id {
     my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
     @id=$auxdb->$add($geneid);
-     my $ll = $id[0];
+    my $ll = $id[0];
     my @ensembl;
     if ($ll) { 
 	@ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
