@@ -26,6 +26,32 @@ my $template = HTML::Template->new(filename => 'header.tmpl');
 # fill in template parameters
 $template->param(TITLE => 'PAZAR TF Results');
 
+$template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {            
+    var numChecked = 0;
+    var counter;
+    
+    // iterate through sequenceform elements
+
+
+    for(counter=0;counter<document.sequenceform.length;counter++)
+    {
+	if (document.sequenceform.elements[counter].checked)
+	{
+	    numChecked++;
+	}
+    }
+    if (numChecked < 2)
+    {
+	alert('You must select at least 2 sequences\nNumber of sequences selected: ' + numChecked);
+    }
+    else
+    {
+	document.sequenceform.submit();
+    }
+
+        }});
+
+
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
@@ -82,6 +108,9 @@ if (!$accn) {
     my $count=0;
     my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
     open (TMP, ">$file");
+####start of form
+    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>";
+    print "<input type='hidden' name='accn' value='$accn'";
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
 	my $tf;
@@ -115,11 +144,13 @@ if (!$accn) {
 		print "<p class=\"warning\">No target could be found for this TF!</p>\n";
 		next;
 	    }
+	    my $seqcounter = 0;
 	    while (my $site=$complex->next_target) {
+		$seqcounter++;
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
 		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
-		    print "<span class=\"title4\">Genomic Target (reg_seq): </span>".$site->get_seq."<br>";
+		    print "<input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><span class=\"title4\">Genomic Target (reg_seq): </span>".$site->get_seq."<br>";
                     my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
 		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
@@ -144,7 +175,7 @@ if (!$accn) {
 		    }
 		}
 		if ($type eq 'construct' && $param{construct} eq 'on') {
-		    print "<span class=\"title4\">Artificial Target (construct): </span>".$site->get_seq."<br>";
+		    print "<input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><span class=\"title4\">Artificial Target (construct): </span>".$site->get_seq."<br>";
 		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{construct_name} eq 'on') {
 			print "<li>Name: ".$site->get_name."</li>";
@@ -202,6 +233,13 @@ if (!$accn) {
 	}
     }
     close (TMP);
+####hidden form inputs
+
+
+    print "Click Go to recalculate matrix and logo based on selected sequences<br>";
+    print "<input type='button' value='Go' onClick=\"verifyCheckedBoxes();\">";
+    print "</form>";
+####end of form
     unless ($count==0) {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
