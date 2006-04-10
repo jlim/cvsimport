@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use HTML::Template;
 use strict;
@@ -42,23 +42,26 @@ print "<p class=\"title1\">PAZAR - Project $proj Search Engine</p>";
 print<<page1;
 <table>
 <tbody>
-<form name="filters" METHOD="post" ACTION="http://www.pazar.info/cgi-bin/project.cgi" enctype="multipart/form-data" target="_self">
+<form name="filters" METHOD="post" ACTION="http://www.pazar.info/cgi-bin/proj_gene_att.cgi" enctype="multipart/form-data" target="_self">
     <tr>
       <td colspan="2">
-<span class="title2">FILTERS: </span><br>
+<span class="title3">Filters: </span><br>
       </td>
     </tr>
+page1
+
+my $species = &select($dbh, "SELECT species FROM location WHERE project_id=$projid");
+if ($species) {
+
+print<<page1b;
     <tr>
       <td align="left" valign="top" width="50%">
         <input type="checkbox" name="species_filter"><b> Restrict to one or more species: </b>
       </td>
       <td align="left" valign="top" width="50%">
         <select name="species" size="3" multiple="multiple">
-page1
+page1b
 
-my $species = &select($dbh, "SELECT species FROM location WHERE project_id=$projid");
-if ($species) {
-    print "<option value=\"all\" selected> All </option>";
     my @species;
     while (my $sp=$species->fetchrow_array) {
 	if (!grep(/$sp/i,@species)) {
@@ -69,16 +72,13 @@ if ($species) {
     foreach (@sortedsp) {
 	print "<option value=\"$_\"> $_ </option>";
     }
+print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
 }
 
+my $chr = &select($dbh, "SELECT chr FROM location WHERE project_id=$projid");
+if ($chr) {
+
 print<<page2;
-        </select>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
     <tr>
       <td align="left" valign="top" width="50%">
       <input type="checkbox" name="region_filter"><b> Restrict to a specific region: </b>
@@ -88,9 +88,6 @@ print<<page2;
         <select name="chromosome">
 page2
 
-my $chr = &select($dbh, "SELECT chr FROM location WHERE project_id=$projid");
-if ($chr) {
-    print "<option value=\"all\" selected> All </option>";
     my @chr;
     while (my $ch=$chr->fetchrow_array) {
 	if (!grep(/$ch/i,@chr)) {
@@ -99,11 +96,10 @@ if ($chr) {
     }
     my @sortedch=sort(@chr);
     foreach (@sortedch) {
-	print "<option value=\"chr$_\"> $_ </option>";
+	print "<option value=\"$_\"> $_ </option>";
     }
-}
 
-print<<page3;
+print<<page2b;
         </select><br>
 	<input type="checkbox" name="bp_filter">base pair: start 
 	<input name="bp_start" value="" type="text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end
@@ -114,15 +110,10 @@ print<<page3;
       <td colspan="2"> <br>
       </td>
     </tr>
-    <tr>
-      <td align="left" valign="top" width="50%">
-      <input type="checkbox" name="gene_filter"><b> Restrict to one or more Regulated Gene: </b>
-      </td>
-      <td align="left" valign="top" width="50%">
-        <select name="gene" size="3" multiple="multiple">
-page3
+page2b
+}
 
-    my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id=$projid");
+my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id=$projid");
 my %gene;
 if ($genes) {
     while (my $gene=$genes->fetchrow_hashref) {
@@ -144,26 +135,38 @@ if ($genes) {
     }
 }
 if (%gene) {
-    print "<option value=\"all\" selected> All </option>";
+
+print<<page3;
+    <tr>
+      <td align="left" valign="top" width="50%">
+      <input type="checkbox" name="gene_filter"><b> Restrict to one or more Regulated Gene: </b>
+      </td>
+      <td align="left" valign="top" width="50%">
+        <select name="gene" size="3" multiple="multiple">
+page3
+
     foreach my $accn (keys %gene) {
 	print "<option value=\"$accn\"> $gene{$accn} ($accn) </option>";
     }
+print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
 }
 
 print<<page4;
+    <tr>
+      <td colspan="2">
+      <input type="checkbox" name="length_filter"><b> Restrict to sequences </b>
+        <select name="shorter_larger">
+        <option value="greater_than" selected> Greater than </option>
+        <option value="less_than" > Less than </option>
+        <option value="equal_to" > Equal to </option>
         </select>
+	<input type="text" name="length"><b> bases </b>
       </td>
-   </tr>
+    </tr>
     <tr>
       <td colspan="2"> <br>
       </td>
     </tr>
-    <tr>
-      <td align="left" valign="top" width="50%">
-      <input type="checkbox" name="gene_filter"><b> Restrict to one or more Regulating Factor: </b>
-      </td>
-      <td align="left" valign="top" width="50%">
-        <select name="tf" size="3" multiple="multiple">
 page4
 
 my @funct_tfs = $dbh->get_all_complex_ids($projid);
@@ -179,7 +182,16 @@ foreach my $funct_tf (@funct_tfs) {
     }
 }
 if ($ftf==1) {
-    print "<option value=\"all\" selected> All </option>";
+
+print<<page4b;
+    <tr>
+      <td align="left" valign="top" width="50%">
+      <input type="checkbox" name="tf_filter"><b> Restrict to one or more Regulating Factor: </b>
+      </td>
+      <td align="left" valign="top" width="50%">
+        <select name="tf" size="3" multiple="multiple">
+page4b
+
     foreach my $name (keys %tf_subunit) {
 	print "<option value=\"$name\"> $name (";
 	foreach my $su (@{$tf_subunit{$name}}) {
@@ -187,32 +199,41 @@ if ($ftf==1) {
 	}
 	print ")</option>";
     }
+print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
 }
 
+my $classes = &select($dbh, "SELECT class, family FROM tf WHERE project_id=$projid");
+my @classes;
+if ($classes) {
+
 print<<page5;
-        </select>
-      </td>
-   </tr>
-   <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
     <tr>
       <td align="left" valign="top" width="50%">
       <div><input type="checkbox" name="class_filter"><b> Restrict to a specific class/family: </b></div>
       </td>
       <td align="left" valign="top" width="50%">
         <select name="class">
-        <option value="bZIP" selected> bZIP </option>
-        <option value="bZIP/Maf"> bZIP/Maf </option>
-        <option value="homeobox"> Homeobox </option>
-        </select>
-      </td>
-    </tr>
-   <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
+page5
+
+    my $cf;
+    while (my ($class,$fam)=$chr->fetchrow_array) {
+	if ($class && $fam) {
+	    $cf=$class."/".$fam;
+	} elsif ($class && !$fam) {
+	    $cf=$class;
+	}
+	if (!grep(/$cf/i,@classes)) {
+	    push @classes,$cf;
+	}
+    }
+    my @sortedcf=sort(@classes);
+    foreach (@sortedcf) {
+	print "<option value=\"$_\"> $_ </option>";
+    }
+print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
+}
+
+print<<page6;
     <tr>
       <td colspan="2">
       <input type="checkbox" name="interaction_filter"><b> Restrict to sequences when interaction is </b>
@@ -248,39 +269,6 @@ print<<page5;
       </td>
     </tr>
     <tr>
-      <td colspan="2">
-      <input type="checkbox" name="length_filter"><b> Restrict to sequences </b>
-        <select name="shorter_larger">
-        <option value="larger_than" selected> larger than </option>
-        <option value="shorter_than" > shorter than </option>
-        <option value="equal_to" > equal to </option>
-        </select>
-	<input type="text" name="length"><b> bases </b>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2">
-      <input type="checkbox" name="mutation_filter"><b> Restrict to sequences with mutation information </b>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2">
-      <input type="checkbox" name="construct_filter"><b> Do not include artificial sequences </b>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
       <td align="left" valign="top" width="50%">
       <div><input type="checkbox" name="evidence_filter"><b> Restrict to
 one or more evidence type(s): </b></div>
@@ -304,9 +292,20 @@ one or more method(s): </b></div>
       </td>
       <td width="50%">
         <select name="method" size="3" multiple="multiple">
-        <option value="EMSA" selected> EMSA </option>
-        <option value="gene_reporter"> gene reporter </option>
-        <option value="footprinting"> footprinting </option>
+page6
+
+my $mets = &select($dbh, "SELECT method FROM method");
+my @methods;
+while (my $met=$mets->fetchrow_array) {
+    push @methods,$met;
+}
+my @sortedmet=sort(@methods);
+foreach (@sortedmet) {
+    print "<option value=\"$_\"> $_ </option>";
+}
+
+
+print<<page7;
         </select>
       </td>
     </tr>
@@ -325,7 +324,7 @@ one or more method(s): </b></div>
     </form>
 </tbody>
 </table>
-page5
+page7
 
 ###  print out the html tail template
   my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
