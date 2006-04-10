@@ -97,7 +97,7 @@ Page_Done
     print<<Page_Done;
     <tr>
       <td width="100" valign="top" bgcolor="$colors{$bg_color}">$projname</td>
- <td width="187" valign="top" bgcolor="$colors{$bg_color}"><a name="#$arrayref->[1]"><a href="#$arrayref->[1]" onClick="javascript:window.opener.document.tf_search.geneID.value='$arrayref->[1]'">$arrayref->[1]</a></td>
+ <td width="187" valign="top" bgcolor="$colors{$bg_color}"><a name="#$arrayref->[1]"><a href="#$arrayref->[1]" onClick="javascript:window.opener.document.tf_search.geneID.value='$arrayref->[1]';window.opener.document.tf_search.ID_list.options[5].selected=true;window.opener.focus();">$arrayref->[1]</a></td>
 Page_Done
 
     #get classes,families, transcript accessions
@@ -120,21 +120,21 @@ Page_Done
     #class
     foreach my $c (@classes)
     {
-	print "<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$c'\">".$c."</a><br>";
+	print $c."<br>";
     }
     print "&nbsp;</td>";
     print "<td bgcolor=\"$colors{$bg_color}\">";
     #transcript accession
     foreach my $ta (@transcript_accessions)
     {
-	print "<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$ta'\">".$ta."</a><br>";
+	print "<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$ta';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$ta."</a><br>";
     }
     print  "&nbsp;</td>";
     print "<td bgcolor=\"$colors{$bg_color}\">";
     #family
     foreach my $f (@families)
     {
-	print "<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$f'\">".$f."</a><br>";
+	print $f."<br>";
     }
     print "&nbsp;</td>";
     print  "</tr>";
