@@ -239,7 +239,7 @@ print<<page6;
       <input type="checkbox" name="interaction_filter"><b> Restrict to sequences when interaction is </b>
         <select name="interaction">
         <option value="not_null" selected> Not NULL </option>
-        <option value="null" > NULL </option>
+        <option value="none" > NULL </option>
         <option value="poor" > poor </option>
         <option value="marginal" > marginal </option>
         <option value="good" > good </option>
@@ -255,12 +255,12 @@ print<<page6;
       <td colspan="2">
       <input type="checkbox" name="expression_filter"><b> Restrict to sequences when expression is </b>
         <select name="expression">
-        <option value="changed" selected> changed </option>
-        <option value="not_changed" > not changed </option>
-        <option value="highly_induced" > highly induced </option>
+        <option value="change" selected> changed </option>
+        <option value="no change" > not changed </option>
+        <option value="highly induced" > highly induced </option>
         <option value=" induced" > induced </option>
-        <option value="strongly_repressed" > strongly repressed </option>
         <option value="repressed" > repressed </option>
+        <option value="strongly repressed" > strongly repressed </option>
         </select>
       </td>
     </tr>
@@ -275,8 +275,8 @@ one or more evidence type(s): </b></div>
       </td>
       <td width="50%">
         <select name="evidence" size="3" multiple="multiple">
-        <option value="curated" selected> curated </option>
         <option value="ADMC"> ADMC </option>
+        <option value="curated"> curated </option>
         <option value="predicted"> predicted </option>
         </select>
       </td>
@@ -294,11 +294,7 @@ one or more method(s): </b></div>
         <select name="method" size="3" multiple="multiple">
 page6
 
-my $mets = &select($dbh, "SELECT method FROM method");
-my @methods;
-while (my $met=$mets->fetchrow_array) {
-    push @methods,$met;
-}
+my @methods = $dbh->get_method_names();
 my @sortedmet=sort(@methods);
 foreach (@sortedmet) {
     print "<option value=\"$_\"> $_ </option>";
