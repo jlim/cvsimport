@@ -56,18 +56,18 @@ if ($param{view} eq 'gene-centric') {
 	if (!$param{species}) {print "<p class=\"warning\">You need to select one or more species when using the species filter!</p>\n"; exit;}
 	unless ($param{region_filter} eq 'on') {
 	    @reg_seqs=$dbh->get_reg_seq_by_species($param{species});
-            if (!$regseqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for species $param{species}</p>\n"; exit;}
+            if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for species $param{species}</p>\n"; exit;}
 	} else {
 
 ### region filter
 	    if ($param{chr_filter} eq 'on') {
 		unless ($param{bp_filter} eq 'on') {
 		    @reg_seqs=$dbh->get_reg_seq_by_chromosome($param{chromosome},$param{species});
-                    if (!$regseqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}</p>\n"; exit;}
+                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}</p>\n"; exit;}
 		} else {
 if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need to specify the start and end of the region you're interested in when using the base pair filter!</p>\n"; exit;}
 		    @reg_seqs=$dbh->get_reg_seq_by_region($param{bp_start},$param{bp_end},$param{chromosome},$param{species});
-                    if (!$regseqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}</p>\n"; exit;}
+                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}</p>\n"; exit;}
 		}
 	    }
 	}
@@ -77,7 +77,7 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 
 ### gene filter
     if ($param{gene_filter} eq 'on') {
-	if ($regseqs[0]) {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!</p>\n"; exit;}
+	if ($reg_seqs[0]) {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!</p>\n"; exit;}
 	if (!$param{gene}) {print "<p class=\"warning\">You need to select one or more gene when using the gene filter!</p>\n"; exit;}
 	my @genes;
 	while (@{$param{gene}}) {
@@ -89,10 +89,10 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 		push @reg_seqs, $regseq;
 	    }
 	}
-	if (!$regseqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for the genes ".join(',',@genes)."!</p>\n"; exit;}
+	if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for the genes ".join(',',@genes)."!</p>\n"; exit;}
 
     }
-    if (!$regseqs[0]) {
+    if (!$reg_seqs[0]) {
 	my @rsid = $dbh->get_all_regseq_ids();
 	foreach my $id (@rsid) {
 	    my @seqs=$dbh->get_reg_seq_by_regseq_id($id);
@@ -101,9 +101,9 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 	    }
 	}
     }
-    if (!$regseqs[0]) {print "<p class=\"warning\">No regulatory sequence was found in this project!</p>\n"; exit;}
+    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found in this project!</p>\n"; exit;}
 
-    foreach my $regseq (@regseqs) {
+    foreach my $regseq (@reg_seqs) {
 
 ### length filter
 	if ($param{length_filter} eq 'on' && $param{length} ne '0') {
@@ -128,14 +128,13 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 	}
 	my @inters;
 	my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
-	$count=0;
        	foreach my $inter (@interactors) {
-	    $count++;
+
 ### TF filter
 	    if ($param{tf_filter} eq 'on') {
 	        if (!$param{tf}) {print "<p class=\"warning\">You need to select one or more TF when using the TF filter!</p>\n"; exit;}
 		my @tfs;
-		while (@$param{tf}) {
+		while (@{$param{tf}}) {
 		    push @tfs, $_;
 		}
 		my $tf_name = $dbh->get_complex_name_by_id($inter->{tfcomplex});
@@ -150,13 +149,13 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 		my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex},'notargets');
 		my $found = 0;
 		my $cf;
-		while (my $subunit=$tfcomplex->next_subunit) {
+		while (my $subunit=$complex->next_subunit) {
 		    if ($subunit->get_class && $subunit->get_fam) {
 			$cf = $subunit->get_class."/".$subunit->get_fam;
 		    } elsif ($subunit->get_class && !$subunit->get_fam) {
 			$cf = $subunit->get_class;
 		    }
-		    if ($param{class} == $cf)) {
+		    if ($param{class} == $cf) {
 			$found = 1;
 		    }
 		}
@@ -188,7 +187,7 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 	    if ($param{evidence_filter} eq 'on') {
 	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!</p>\n"; exit;}
 		my @evids;
-		while (@$param{evidence}) {
+		while (@{$param{evidence}}) {
 		    push @evids, $_;
 		}
 		my ($evid,@res)=$dbh->get_evidence_by_analysis_id($inter->{aid});
@@ -201,7 +200,7 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 	    if ($param{method_filter} eq 'on') {
 	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!</p>\n"; exit;}
 		my @mets;
-		while (@$param{method}) {
+		while (@{$param{method}}) {
 		    push @mets, $_;
 		}
 		my ($met,@res)=$dbh->get_method_by_analysis_id($inter->{aid});
@@ -237,7 +236,7 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 	    if ($param{evidence_filter} eq 'on') {
 	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!</p>\n"; exit;}
 		my @evids;
-		while (@$param{evidence}) {
+		while (@{$param{evidence}}) {
 		    push @evids, $_;
 		}
 		my ($evid,@res)=$dbh->get_evidence_by_analysis_id($expr->{aid});
@@ -250,7 +249,7 @@ if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need 
 	    if ($param{method_filter} eq 'on') {
 	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!</p>\n"; exit;}
 		my @mets;
-		while (@$param{method}) {
+		while (@{$param{method}}) {
 		    push @mets, $_;
 		}
 		my ($met,@res)=$dbh->get_method_by_analysis_id($expr->{aid});
