@@ -70,6 +70,11 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
+my $bg_color = 0;
+my %colors = (0 => "#fffff0",
+	      1 => "#9ad3e2"
+	      );
+
 my $get = new CGI;
 my %param = %{$get->Vars};
 my $accn = $param{geneID};
@@ -130,16 +135,122 @@ if (!$accn) {
 		exit;
 	    }
 	}
+
+
 	foreach my $complex (@tfcomplexes) {
-	    print "<span class=\"title3\">Functional Transcription Factor: ".$complex->name."</span><br>";
-	    print "<span class=\"title4\">Project: </span>".$dbh->get_project_name('funct_tf',$complex->dbid)."<br>";
+
+	    
+########### start of HTML table
+
+	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
+	print<<COLNAMES;
+<tr>
+      <td width="100" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
+ <td align="center" width="187" valign="top" bgcolor="#61b9cf"><span class="title4">Name</span></td>
+      <td align="center" bgcolor="#61b9cf"><span class="title4">Classes</span>
+      </td> 
+
+<td align="center" bgcolor="#61b9cf"><span class="title4">Transcript Accessions</span>
+      </td> 
+
+<td align="center" bgcolor="#61b9cf"><span class="title4">Families</span>
+      </td> 
+  </tr>
+COLNAMES
+
+	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$dbh->get_project_name('funct_tf',$complex->dbid)."</td><td bgcolor=\"$colors{$bg_color}\">".$complex->name."</td>";
+
+    my @classes = ();
+    my @families = ();
+    my @transcript_accessions = ();
 
 	    while (my $subunit=$complex->next_subunit) {
 		my $tid = $subunit->get_transcript_accession($dbh);
 		my $cl = $subunit->get_class ||'unknown'; 
 		my $fam = $subunit->get_fam ||'unknown';
-		print "<span class=\"title4\">Subunit: </span>".$tid." - Class: ".$cl." - Family: ".$fam."<br>";
+
+		push(@classes,$subunit->get_class);
+		push(@families,$subunit->get_fam);
+		push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
 	    }
+    #print subunit information
+    print "<td bgcolor=\"$colors{$bg_color}\">";
+    #class
+    foreach my $c (@classes)
+    {
+	print $c."<br>";
+    }
+    print "&nbsp;</td>";
+    print "<td bgcolor=\"$colors{$bg_color}\">";
+    #transcript accession
+    foreach my $ta (@transcript_accessions)
+    {
+	print $ta."<br>";
+    }
+    print  "&nbsp;</td>";
+    print "<td bgcolor=\"$colors{$bg_color}\">";
+    #family
+    foreach my $f (@families)
+    {
+	print $f."<br>";
+    }
+    print "&nbsp;</td>";
+    print  "</tr></table>";
+
+#separate tables for artificial and genomic targets
+	    print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+
+if ($param{reg_seq_name} eq 'on' || $param{construct_name} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Name</span></td>"
+}
+
+ if ($param{gene} eq 'on') 
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Gene</span></td>";
+}
+ if ($param{species} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Species</span></td>";
+}
+
+if ($param{coordinates} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
+}
+
+if ($param{quality} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
+}
+
+if ($param{description} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Description</span></td>";
+}
+
+if ($param{analysis} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Analysis</span></td>";
+}
+
+if ($param{reference} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Reference</span></td>";
+}
+
+if ($param{interaction} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Interaction</span></td>";
+}
+if ($param{evidence} eq 'on') 
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Evidence</span></td>";
+}
+
+    print "</tr>\n";
+
+
 	    if (!$complex->{targets}) {
 		print "<p class=\"warning\">No target could be found for this TF!</p>\n";
 		next;
@@ -150,38 +261,101 @@ if (!$accn) {
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
 		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
-		    print "<input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><span class=\"title4\">Genomic Target (reg_seq): </span>".$site->get_seq."<br>";
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
                     my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
 		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
-		    if ($param{reg_seq_name} eq 'on' && $site->get_name) {
-			print "<li>Name: ".$site->get_name."</li>";
+		    if ($param{reg_seq_name} eq 'on') {
+			if($site->get_name)
+			{
+			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
+			}
+			else
+			{
+			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+			}
 		    }
 		    if ($param{gene} eq 'on') {
 			my $transcript=$regseq[0]->transcript_accession || 'Transcript Not Specified';
-			print "<li>Gene/Transcript Regulated: ".$regseq[0]->gene_accession."/".$transcript."</li>";
+			print "<td>".$regseq[0]->gene_accession."</td><td>".$transcript."</td>";
 			my @ens_coords = $ensdb->get_ens_chr($regseq[0]->gene_accession);
 			my @desc = split('\[',$ens_coords[5]);
-			print "<li>".$desc[0]."</li>";
+			print "<td bgcolor=\"$colors{$bg_color}\">".$desc[0]."</td>";
 		    }
 		    if ($param{species} eq 'on') {
-			print "<li>Species: ".$regseq[0]->binomial_species."</li>";
+			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->binomial_species."</td>";
 		    }
 		    if ($param{coordinates} eq 'on') {
-			print "<li>Coordinates: ".$regseq[0]->chromosome." (".$regseq[0]->strand.") ".$regseq[0]->start."-".$regseq[0]->end."</li>";
+			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->chromosome." (".$regseq[0]->strand.") ".$regseq[0]->start."-".$regseq[0]->end."</td>";
 		    }
 		    if ($param{quality} eq 'on') {
-			print "<li>Quality: ".$regseq[0]->quality."</li>";
+			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->quality."</td>";
 		    }
+
+#fill in blank cells in table
+if ($param{description} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+
+if ($param{analysis} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+
+if ($param{reference} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+
+if ($param{interaction} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+if ($param{evidence} eq 'on') 
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+		    print"</tr>";
 		}
 		if ($type eq 'construct' && $param{construct} eq 'on') {
-		    print "<input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><span class=\"title4\">Artificial Target (construct): </span>".$site->get_seq."<br>";
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
 		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{construct_name} eq 'on') {
-			print "<li>Name: ".$site->get_name."</li>";
+			print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
 		    }
-		    if ($param{description} eq 'on' && $site->get_desc) {
-			print "<li>Description: ".$site->get_desc."</li>";
+
+#fill in blank cells
+ if ($param{gene} eq 'on') 
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+ if ($param{species} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+
+if ($param{coordinates} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+
+if ($param{quality} eq 'on')
+{
+    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+}
+
+
+###
+		    if ($param{description} eq 'on') {
+			if($site->get_desc)
+			{
+			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_desc."</td>";			   
+		        }
+			else
+			{
+			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+			}
 		    }
 		}
 		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
@@ -201,43 +375,60 @@ if (!$accn) {
 			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
 			push @anal,$time[0];
 		    }
-		    print "<li>Analysis: ";
-		    print join(':',@anal)."</li>";
+		    print "<td bgcolor=\"$colors{$bg_color}\">";
+		    print join(':',@anal)."&nbsp;</td>";
 		}
-		if ($param{reference} eq 'on' && $an[6]) {
-		    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-		    print "<li>Reference: ".$ref[0]."</li>";
+		if ($param{reference} eq 'on') {
+                   if ($an[6])
+                   {
+		       my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+		       print "<td bgcolor=\"$colors{$bg_color}\">".$ref[0]."&nbsp;</td>";
+                   }
+                   else
+                   {
+		       print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>"
+                   }
 		}
 		if ($param{interaction} eq 'on') {
+                    print "<td bgcolor=\"$colors{$bg_color}\">";
 		    my ($table,$pazarid,@dat)=$dbh->links_to_data($site->get_olink,'output');
 		    if ($table eq 'interaction') {
-			print "<li>Interaction: ";
+			
 			if ($dat[1]) {
 			    print $dat[1]." ".$dat[2].":comments:".$dat[3]."</li>";
 			} else {
-			    print $dat[0].":comments:".$dat[3]."</li>";
+			    print $dat[0].":comments:".$dat[3];
 			}
 		    }
+                    print "&nbsp;</td>";
 		}
-		if ($param{evidence} eq 'on' && $an[1]) {
-		    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-		    print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
+		if ($param{evidence} eq 'on') {
+                    if ($an[1])
+                    {
+			my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+			print "<td bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
+                    }
+                    else
+                    {
+			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+                    }
 		}
-                print "</ul>";
+                print "</tr>";
 		$count++;
 		my $construct_name=$accn."_site".$count;
 		print TMP ">".$construct_name."\n";
 		print TMP $site->get_seq."\n";
-	    }
-	    print "<br>";
-	}
-    }
+                $bg_color = 1 - $bg_color;
+            }
+	    print "</table>";
+         }
+     }
     close (TMP);
 ####hidden form inputs
 
 
-    print "Click Go to recalculate matrix and logo based on selected sequences<br>";
-    print "<input type='button' value='Go' onClick=\"verifyCheckedBoxes();\">";
+    print "<table bordercolor='white' bgcolor='white'><tr><td>Click Go to recalculate matrix and logo based on selected sequences</td>";
+    print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr></table>";
     print "</form>";
 ####end of form
     unless ($count==0) {
@@ -251,12 +442,15 @@ if (!$accn) {
 	my @matrixlines = split /\n/, $prettystring;
 	$prettystring = join "<BR>\n", @matrixlines;
 	$prettystring =~ s/ /\&nbsp\;/g;
-	print "<span class=\"title4\">Position Frequency Matrix</span><br><SPAN class=\"monospace\">$prettystring</SPAN><br>";
+	print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
 	my $logo = $accn.".png";
 	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
-	print "<br><p class=\"title4\">Logo: <br><img src=\"http://www.pazar.info/tmp/$logo\"></p>";
-	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";
+	print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
+	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
+	print "</table>\n";
+########### end of HTML table
+
     }
 }
 # print out the html tail template
