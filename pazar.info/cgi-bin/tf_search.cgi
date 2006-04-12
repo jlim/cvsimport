@@ -145,15 +145,15 @@ if (!$accn) {
 	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
 	print<<COLNAMES;
 <tr>
-      <td width="100" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
- <td align="center" width="187" valign="top" bgcolor="#61b9cf"><span class="title4">Name</span></td>
-      <td align="center" bgcolor="#61b9cf"><span class="title4">Classes</span>
+      <td width="100" align="center" valign="top" bgcolor="#e65656"><span class="title4">Project</span></td>
+ <td align="center" width="187" valign="top" bgcolor="#e65656"><span class="title4">Name</span></td>
+      <td align="center" bgcolor="#e65656"><span class="title4">Classes</span>
       </td> 
 
-<td align="center" bgcolor="#61b9cf"><span class="title4">Transcript Accessions</span>
+<td align="center" bgcolor="#e65656"><span class="title4">Transcript Accessions</span>
       </td> 
 
-<td align="center" bgcolor="#61b9cf"><span class="title4">Families</span>
+<td align="center" bgcolor="#e65656"><span class="title4">Families</span>
       </td> 
   </tr>
 COLNAMES
@@ -393,12 +393,17 @@ if ($param{quality} eq 'on')
                     print "<td bgcolor=\"$colors{$bg_color}\">";
 		    my ($table,$pazarid,@dat)=$dbh->links_to_data($site->get_olink,'output');
 		    if ($table eq 'interaction') {
-			
-			if ($dat[1]) {
-			    print $dat[1]." ".$dat[2].":comments:".$dat[3]."</li>";
-			} else {
-			    print $dat[0].":comments:".$dat[3];
+
+			my @data;
+			for (my $i=0;$i<(@dat-3);$i++) {
+			    if ($dat[$i] && $dat[$i] ne '0') {
+				push @data,$dat[$i];
+			    }
 			}
+			print join(":",@data);
+
+
+
 		    }
                     print "&nbsp;</td>";
 		}
