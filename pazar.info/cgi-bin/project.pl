@@ -15,6 +15,20 @@ my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
 $template->param(TITLE => "PAZAR - Project Search Engine");
+$template->param(JAVASCRIPT_FUNCTION => q{
+var state=0;
+function CheckBox(){
+if (state == 1)
+{
+    document.filters.chr_filter.checked=false;
+    state=0;
+}
+if (state == 0)
+{
+    document.filters.chr_filter.checked=true;
+    state=1;
+}
+}});
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -81,7 +95,7 @@ if ($chr) {
 print<<page2;
     <tr>
       <td align="left" valign="top" width="50%">
-      <input type="checkbox" name="region_filter"><b> Restrict to a specific region: </b>
+      <input type="checkbox" name="region_filter" onclick="javascript:CheckBox()"><b> Restrict to a specific region: </b>
       </td>
       <td style="text-align:left;" width="50%">
 	<input type="checkbox" name="chr_filter">chromosome:&nbsp;

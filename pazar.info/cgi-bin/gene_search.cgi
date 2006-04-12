@@ -102,6 +102,7 @@ if (!$accn) {
 	    my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
 	    my $count=1;
 	    foreach my $inter (@interactors) {
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
 		print "<li><b>Line of evidence $count: </b></li>";
 		if ($params{tf} eq 'on') {
 		    my $tf = $dbh->create_tf;
@@ -157,9 +158,10 @@ if (!$accn) {
 		    print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
 		}
 		$count++;
-	    }
+	    }}
 	    my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
 	    foreach my $exp (@expressors) {
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
 		print "<li><b>Line of evidence $count: </b></li>";
 	    	my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 		if ($params{other_analysis} eq 'on') {
@@ -201,7 +203,7 @@ if (!$accn) {
 		    print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
 		}
 		$count++;
-	    }
+	    }}
 	    print "</ul>";
 	}
     }
