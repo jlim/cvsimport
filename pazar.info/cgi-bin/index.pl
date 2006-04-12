@@ -36,15 +36,16 @@ while (my $project=$projects->fetchrow_hashref) {
 #       description => $project->{description}}
 ###Add description when the schema is changed
 }
-my $flashvars;
+undef(my $flashvars);
 for (my $i=0;$i<10;$i++) {
-    my $num=sprintf("%02d",$i);
+    my $num=sprintf("%02d",($i+1));
     if ($desc[$i]) {
-	my $PTtag='PTM'.$num;
-	my $PTval=$desc[i]->{name};
-	my $PDtag='PDM'.$num;
-	my $PDval=$desc[i]->{description};
-	my $PUtag='PUM'.$num;
+	my $PTtag='PT1'.$num;
+	my $PTval=$desc[$i]->{name};
+	my $PDtag='PD1'.$num;
+	my $PDval='some description';
+#	my $PDval=$desc[$i]->{description};
+	my $PUtag='PU1'.$num;
 	my $PUval='project.pl&name='.$PTval;
 	if (!$flashvars) {
 	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
@@ -52,11 +53,11 @@ for (my $i=0;$i<10;$i++) {
 	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	}
     } else {
-	my $PTtag='PTM'.$num;
+	my $PTtag='PT1'.$num;
 	my $PTval='For Lease';
-	my $PDtag='PDM'.$num;
+	my $PDtag='PD1'.$num;
 	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
-	my $PUtag='PUM'.$num;
+	my $PUtag='PU1'.$num;
 	my $PUval='register.pl';
 	if (!$flashvars) {
 	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
@@ -85,3 +86,11 @@ page2
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
 print $template_tail->output;
+
+sub select {
+
+    my ($dbh, $sql) = @_;
+    my $sth=$dbh->prepare($sql);
+    $sth->execute or die "$dbh->errstr\n";
+    return $sth;
+}
