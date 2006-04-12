@@ -185,7 +185,11 @@ print<<page;
 page
 
 foreach my $item (keys %param) {
-    print "<input type=\"hidden\" name=\"$item\" value=\"$param{$item}\">";
+    my @vals;
+    foreach my $val ($get->param($item)) {
+	push @vals, $val;
+    }
+    print "<input type=\"hidden\" name=\"$item\" value=\"".join(';',@vals)."\">";
 }
 print "</form></td></tr></tbody></table>";
 

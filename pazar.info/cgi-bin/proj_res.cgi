@@ -52,8 +52,10 @@ if ($param{view} eq 'gene-centric') {
 ### species filter
     if ($param{species_filter} eq 'on') {
 	if (!$param{species}) {print "<p class=\"warning\">You need to select one or more species when using the species filter!</p>\n"; exit;}
+	if (!grep(/species filter/, @filters)) {
 	my $filter='species filter: '.$param{species};
 	push @filters, $filter;
+    }
 	unless ($param{region_filter} eq 'on') {
 	    @reg_seqs=$dbh->get_reg_seq_by_species($param{species});
             if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for species $param{species}</p>\n"; exit;}
@@ -63,14 +65,18 @@ if ($param{view} eq 'gene-centric') {
 	    if ($param{chr_filter} eq 'on') {
 		unless ($param{bp_filter} eq 'on') {
 		    @reg_seqs=$dbh->get_reg_seq_by_chromosome($param{chromosome},$param{species});
+	if (!grep(/chromosome filter/, @filters)) {
 		    my $filter='chromosome filter: '.$param{chromosome};
 		    push @filters, $filter;
+		}
                     if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}</p>\n"; exit;}
 		} else {
                     if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need to specify the start and end of the region you're interested in when using the base pair filter!</p>\n"; exit;}
 		    if ($param{bp_start}>=$param{bp_end}) {print "<p class=\"warning\">The start coordinate needs to be lower that the end!</p>\n"; exit;}
+	if (!grep(/region filter/, @filters)) {
 		    my $filter='region filter: '.$param{chromosome}.':'.$param{bp_start}.'-'.$param{bp_end};
 		    push @filters, $filter;
+		}
 		    @reg_seqs=$dbh->get_reg_seq_by_region($param{bp_start},$param{bp_end},$param{chromosome},$param{species});
                     if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}</p>\n"; exit;}
 		}
@@ -84,12 +90,11 @@ if ($param{view} eq 'gene-centric') {
     if ($param{gene_filter} eq 'on') {
 	if ($reg_seqs[0]) {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!</p>\n"; exit;}
 	if (!$param{gene}) {print "<p class=\"warning\">You need to select one or more gene when using the gene filter!</p>\n"; exit;}
-	my @genes;
-	foreach my $gene ($get->param('gene')) {
-	    push @genes, $gene;
-	}
+	my @genes=split(/;/,$param{gene});
+	if (!grep(/gene filter/, @filters)) {
 	my $filter='gene filter: '.join(',',@genes);
 	push @filters, $filter;
+    }
         foreach my $accn (@genes) {
 	    my @seqs=$dbh->get_reg_seqs_by_accn($accn);
 	    foreach my $regseq (@seqs) {
@@ -117,7 +122,7 @@ if ($param{view} eq 'gene-centric') {
 ### length filter
 	if ($param{length_filter} eq 'on' && $param{length} ne '0') {
 	    if (!$param{length} || $param{length}<=0) {print "<p class=\"warning\">You need to specify a length greater than 0 when using the length filter!</p>\n"; exit;}
-	    if ($first==0) {
+	if (!grep(/length filter/, @filters)) {
 		my $filter='length filter: '.$param{shorter_larger}.' '.$param{length}.' bases';
 		push @filters, $filter;
 	    }
@@ -147,11 +152,8 @@ my $filter =
 ### TF filter
 	    if ($param{tf_filter} eq 'on') {
 	        if (!$param{tf}) {print "<p class=\"warning\">You need to select one or more TF when using the TF filter!</p>\n"; exit;}
-		my @tfs;
-		foreach my $tf ($get->param('tf')) {
-		    push @tfs, $tf;
-		}
-		if ($sec==0) {
+		my @tfs=split(/;/,$param{tf});
+	if (!grep(/TF filter/, @filters)) {
 		    my $filter='TF filter: '.join(',',@tfs);
 		    push @filters, $filter;
 		}
@@ -167,7 +169,7 @@ my $filter =
 		my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex},'notargets');
 		my $found = 0;
 		my $cf;
-		if ($sec==0) {
+		if (!grep(/TF class filter/, @filters)) {
 		    my $filter='TF class filter: '.$param{class};
 		    push @filters, $filter;
 		}
@@ -191,19 +193,26 @@ my $filter =
 		my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
 		my $qual=lc($dat[0]);
 		my $match=0;
-		if ($sec==0) {
-		    my $filter='interaction filter: '.$param{interaction};
+		if (!grep(/interaction filter/, @filters)) {
+		    my $filter;
+		    if ($param{interaction}=='none') {
+			$filter='interaction filter: null';
+		    } else {
+			$filter='interaction filter: '.$param{interaction};
+		    }
 		    push @filters, $filter;
 		}
+		my @notnull=('good','poor','marginal','saturation');
 		if ($qual eq $param{interaction}) {
 		    $match = 1;
-		} elsif ($param{interaction} eq 'not_null' && $qual && $qual ne 'none' && $qual ne 'na') {
+		} elsif ($param{interaction} eq 'not_null' && grep(/$qual/,@notnull)) {
 		    $match = 1;
 		} elsif ($param{interaction} ne 'none' && $dat[1]>0) {
 		    $match = 1;
-		} elsif ($param{interaction} eq 'none' && (!$qual || $qual eq 'na') && $dat[1]==0) {
+		} elsif ($param{interaction} eq 'none' && !grep(/$qual/,@notnull) && $dat[1]==0) {
 		    $match = 1;
 		}
+#		print $match.$param{interaction}.$qual.$dat[1].'<br>';
 		if ($match == 0) {
 		    next;
 		}
@@ -212,11 +221,8 @@ my $filter =
 ### evidence filter
 	    if ($param{evidence_filter} eq 'on') {
 	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!</p>\n"; exit;}
-		my @evids;
-		foreach my $ev ($get->param('evidence')) {
-		    push @evids, $ev;
-		}
-		if ($sec==0) {
+		my @evids=split(/;/,$param{evidence});
+		if (!grep(/evidence filter/, @filters)) {
 		    my $filter='evidence filter: '.join(',',@evids);
 		    push @filters, $filter;
 		}
@@ -229,11 +235,8 @@ my $filter =
 ### method filter
 	    if ($param{method_filter} eq 'on') {
 	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!</p>\n"; exit;}
-		my @mets;
-		foreach my $met ($get->param('method')) {
-		    push @mets, $met;
-		}
-		if ($sec==0) {
+		my @mets=split(/;/,$param{method});
+		if (!grep(/method filter/, @filters)) {
 		    my $filter='method filter: '.join(',',@mets);
 		    push @filters, $filter;
 		}
@@ -255,20 +258,23 @@ my $filter =
 		my ($table,$pazarid,@dat)=$dbh->links_to_data($expr->{olink},'output');
 		my $qual=lc($dat[0]);
 		my $match=0;
-		if ($third==0) {
+		if (!grep(/expression filter/, @filters)) {
 		    my $filter='expression filter: '.$param{expression};
 		    push @filters, $filter;
 		}
-
+		my @change=('highly induced','induced','repressed','strongly repressed');
+		my @induce=('highly induced','induced','change');
+		my @repress=('repressed','strongly repressed','change');
 		if ($qual eq $param{expression}) {
 		    $match = 1;
-		} elsif ($param{expression} eq 'change' && $qual && $qual ne ('no change'|| 'na')) {
+		} elsif ($param{expression} eq 'change' && grep(/$qual/,@change)) {
 		    $match = 1;
-		} elsif ($param{expression} eq ('change' || 'highly induced' || 'induced') && $dat[1]>0) {
+		} elsif (grep(/^$param{expression}$/,@induce) && $dat[1]>0) {
 		    $match = 1;
-		} elsif ($param{expression} eq ('change' || 'highly repressed' || 'repressed') && $dat[1]<0) {
+		} elsif (grep(/^$param{expression}$/,@repress) && $dat[1]<0) {
 		    $match = 1;
 		}
+#		print $match.$param{expression}.$qual.$dat[1].'<br>';
 		if ($match == 0) {
 		    next;
 		}
@@ -277,11 +283,8 @@ my $filter =
 ### evidence filter
 	    if ($param{evidence_filter} eq 'on') {
 	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!</p>\n"; exit;}
-		my @evids;
-		foreach my $ev ($get->param('evidence')) {
-		    push @evids, $ev;
-		}
-		if ($sec==0 && $third==0) {
+		my @evids=split(/;/,$param{evidence});
+		if (!grep(/evidence filter/, @filters)) {
 		    my $filter='evidence filter: '.join(',',@evids);
 		    push @filters, $filter;
 		}
@@ -294,11 +297,8 @@ my $filter =
 ### method filter
 	    if ($param{method_filter} eq 'on') {
 	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!</p>\n"; exit;}
-		my @mets;
-		foreach my $met ($get->param('method')) {
-		    push @mets, $met;
-		}
-		if ($sec==0 && $third==0) {
+		my @mets=split(/;/,$param{method});
+		if (!grep(/method filter/, @filters)) {
 		    my $filter='method filter: '.join(',',@mets);
 		    push @filters, $filter;
 		}

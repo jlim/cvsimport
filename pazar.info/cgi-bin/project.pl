@@ -272,7 +272,7 @@ print<<page6;
         <option value="change" selected> changed </option>
         <option value="no change" > not changed </option>
         <option value="highly induced" > highly induced </option>
-        <option value=" induced" > induced </option>
+        <option value="induced" > induced </option>
         <option value="repressed" > repressed </option>
         <option value="strongly repressed" > strongly repressed </option>
         </select>
