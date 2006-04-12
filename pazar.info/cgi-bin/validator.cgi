@@ -40,7 +40,7 @@ if (!$xml_file) {
 
 } elsif (-e $xml_file) {
 
-    open(OUTFILE,">tmp/$xml_file");
+    open(OUTFILE,">/usr/local/apache/pazar.info/tmp/$xml_file");
     my($bytesread,$buffer);
     binmode(OUTFILE);
     while ($bytesread = read($xml_file, $buffer, 4096)) { 
@@ -58,14 +58,14 @@ if (!$xml_file) {
     if ($overflow eq "true") {
 	print "<p class=\"title2\">Sorry!<br>";
 	print "Your file $xml_file is to big for this tool!<br><br></p>\n";
-	unlink("tmp/$xml_file");  
+	unlink("/usr/local/apache/pazar.info/tmp/$xml_file");  
     }
 
     my $xp = new XML::Checker::Parser ( Handlers => { } );
 
     eval {
      local $XML::Checker::FAIL = \&my_fail;
-     $xp->parsefile("tmp/$xml_file");
+     $xp->parsefile("/usr/local/apache/pazar.info/tmp/$xml_file");
     };
     close (LOG);
 
@@ -86,7 +86,7 @@ if (!$xml_file) {
 	print "Your file $xml_file passed validation!<br><br></p>\n";
     }
 
-    unlink("tmp/$xml_file");
+    unlink("/usr/local/apache/pazar.info/tmp/$xml_file");
 
 } else {
     print "<p class=\"warning\">Unable to open the file $xml_file</p>\n";
