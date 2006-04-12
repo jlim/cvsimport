@@ -49,7 +49,7 @@ for (my $i=0;$i<10;$i++) {
 	if (!$flashvars) {
 	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	} else {
-	    $flashvars.=."&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	}
     } else {
 	my $PTtag='PTM'.$num;
@@ -61,7 +61,7 @@ for (my $i=0;$i<10;$i++) {
 	if (!$flashvars) {
 	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	} else {
-	    $flashvars.=."&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	}
     }
 }
