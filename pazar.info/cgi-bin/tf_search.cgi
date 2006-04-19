@@ -56,7 +56,8 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {
 print "Content-Type: text/html\n\n", $template->output;
 
 #connect to the database
-my $dbh = pazar->new( 
+=pod
+my $pazar = pazar->new( 
                       -globalsearch  =>    'yes',
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
@@ -65,6 +66,16 @@ my $dbh = pazar->new(
 		      -pazar_pass    =>    'pazarpw',
 		      -dbname        =>    $ENV{PAZAR_name},
 		      -drv           =>    'mysql');
+=cut
+
+my $dbh = pazar->new( 
+		      -host          =>    $ENV{PAZAR_host},
+		      -user          =>    $ENV{PAZAR_pubuser},
+		      -pass          =>    $ENV{PAZAR_pubpass},
+		      -dbname        =>    $ENV{PAZAR_name},
+		      -drv           =>    'mysql',
+                      -globalsearch  =>    'yes');
+
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
@@ -115,6 +126,28 @@ if (!$accn) {
     open (TMP, ">$file");
 ####start of form
     print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>";
+
+##########project loop
+
+    my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
+    my @projects;
+    while (my $project=$projects->fetchrow_hashref) {
+	push @projects, $project->{project_name};
+    }
+    my $empty=0;
+    foreach my $projname (@projects) {
+#connect to the database
+	my $dbh = pazar->new( 
+                              -globalsearch  =>    'no',		      
+                              -host          =>    $ENV{PAZAR_host},
+			      -user          =>    $ENV{PAZAR_pubuser},
+			      -pass          =>    $ENV{PAZAR_pubpass},
+			      -dbname        =>    $ENV{PAZAR_name},
+			      -drv           =>    'mysql',
+			      -project       =>    $projname);
+
+#######project loop
+
     print "<input type='hidden' name='accn' value='$accn'";
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
@@ -122,6 +155,7 @@ if (!$accn) {
 	my @tfcomplexes;
 	if ($trans eq 'none') {
 	    $tf = $dbh->create_tf;
+#	    print "<span class='title4'>1".$dbh->{globalsearch}."</span>";
 	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
 	    if (!$tfcomplexes[0]){
 		print "<p class=\"warning\">No $tfname TF could be found in the database!</p>\n";
@@ -129,6 +163,7 @@ if (!$accn) {
 	    }
 	} else {
 	    $tf = $dbh->create_tf;
+            print "<span class='title4'>2".$dbh->{projectid}."</span>";
 	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
 	    if (!$tfcomplexes[0]){
 		print "<p class=\"warning\">No $trans transcript could be found in the database!</p>\n";
@@ -136,10 +171,7 @@ if (!$accn) {
 	    }
 	}
 
-
-	foreach my $complex (@tfcomplexes) {
-
-	    
+	foreach my $complex (@tfcomplexes) {	    
 ########### start of HTML table
 
 	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
@@ -158,7 +190,7 @@ if (!$accn) {
   </tr>
 COLNAMES
 
-	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$dbh->get_project_name('funct_tf',$complex->dbid)."</td><td bgcolor=\"$colors{$bg_color}\">".$complex->name."</td>";
+	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$projname."</td><td bgcolor=\"$colors{$bg_color}\">".$complex->name."</td>";
 
     my @classes = ();
     my @families = ();
@@ -264,7 +296,7 @@ if ($param{evidence} eq 'on')
 		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
                     my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
-		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
+#		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{reg_seq_name} eq 'on') {
 			if($site->get_name)
 			{
@@ -277,10 +309,10 @@ if ($param{evidence} eq 'on')
 		    }
 		    if ($param{gene} eq 'on') {
 			my $transcript=$regseq[0]->transcript_accession || 'Transcript Not Specified';
-			print "<td>".$regseq[0]->gene_accession."</td><td>".$transcript."</td>";
+			#print "<td>".$regseq[0]->gene_accession."</td><td>".$transcript."</td>";
 			my @ens_coords = $ensdb->get_ens_chr($regseq[0]->gene_accession);
 			my @desc = split('\[',$ens_coords[5]);
-			print "<td bgcolor=\"$colors{$bg_color}\">".$desc[0]."</td>";
+			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->gene_accession."<br>".$transcript."<br>".$desc[0]."</td>";
 		    }
 		    if ($param{species} eq 'on') {
 			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->binomial_species."</td>";
@@ -292,60 +324,44 @@ if ($param{evidence} eq 'on')
 			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->quality."</td>";
 		    }
 
-#fill in blank cells in table
-if ($param{description} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
+		    if ($param{description} eq 'on') {
+			if($site->get_desc)
+			{
+			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_desc."</td>";			   
+		        }
+			else
+			{
+			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+			}
+		    }
 
-if ($param{analysis} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-
-if ($param{reference} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-
-if ($param{interaction} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-if ($param{evidence} eq 'on') 
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-		    print"</tr>";
-		}
+		}	    
 		if ($type eq 'construct' && $param{construct} eq 'on') {
 		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
-		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
+#		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{construct_name} eq 'on') {
 			print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
 		    }
 
 #fill in blank cells
- if ($param{gene} eq 'on') 
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
- if ($param{species} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-
-if ($param{coordinates} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-
-if ($param{quality} eq 'on')
-{
-    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-}
-
-
+		    if ($param{gene} eq 'on') 
+		    {
+			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+		    }
+		    if ($param{species} eq 'on')
+		    {
+			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+		    }
+		    
+		    if ($param{coordinates} eq 'on')
+		    {
+			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+		    }
+		    
+		    if ($param{quality} eq 'on')
+		    {
+			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+		    }
 ###
 		    if ($param{description} eq 'on') {
 			if($site->get_desc)
@@ -357,7 +373,9 @@ if ($param{quality} eq 'on')
 			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
 			}
 		    }
-		}
+                }
+
+## do the following regardless of target type
 		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
 		if ($param{analysis} eq 'on') {
 		    my $aname=$an[2];
@@ -401,9 +419,6 @@ if ($param{quality} eq 'on')
 			    }
 			}
 			print join(":",@data);
-
-
-
 		    }
                     print "&nbsp;</td>";
 		}
@@ -426,8 +441,9 @@ if ($param{quality} eq 'on')
                 $bg_color = 1 - $bg_color;
             }
 	    print "</table>";
-         }
-     }
+          }
+        }
+}
     close (TMP);
 ####hidden form inputs
 
