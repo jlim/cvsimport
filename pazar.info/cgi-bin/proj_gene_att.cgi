@@ -1,13 +1,7 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 use HTML::Template;
 use strict;
-use Data::Dumper;
-use pazar;
-use pazar::reg_seq;
-use pazar::talk;
-use pazar::tf::tfcomplex;
-use pazar::tf::subunit;
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Debug( report => 'everything', on => 'anything' );
@@ -85,26 +79,9 @@ if (state == 0)
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
-###getting the project_name
-my $proj='gffparsertest';
-
-###database connection
-my $dbh= pazar->new( 
-		       -host          =>    $ENV{PAZAR_host},
-		       -user          =>    $ENV{PAZAR_pubuser},
-		       -pass          =>    $ENV{PAZAR_pubpass},
-		       -pazar_user    =>    'elodie@cmmt.ubc.ca',
-		       -pazar_pass    =>    'pazarpw',
-		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
-		       -project       =>    $proj);
-
-my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-my $projid = $dbh->get_projectid();
-
 my $get = new CGI;
 my %param = %{$get->Vars};
+my $proj = $param{project_name};
 
 print "<p class=\"title1\">PAZAR - Project $proj Search Engine</p>";
 
@@ -222,7 +199,7 @@ print<<page;
     </tr>
     <tr>
       <td colspan="2"> <br>
-<input type="hidden" name="bp_filter" value=""><input type="hidden" name="chr_filter" value=""><input type="hidden" name="expression_filter" value=""><input type="hidden" name="interaction" value=""><input type="hidden" name="gene" value=""><input type="hidden" name="species_filter" value=""><input type="hidden" name="mutation_filter" value=""><input type="hidden" name="length_filter" value=""><input type="hidden" name="tf" value=""><input type="hidden" name="expression" value=""><input type="hidden" name="chromosome" value=""><input type="hidden" name="evidence" value=""><input type="hidden" name="interaction_filter" value=""><input type="hidden" name="method" value=""><input type="hidden" name="shorter_larger" value=""><input type="hidden" name="bp_end" value=""><input type="hidden" name="class_filter" value=""><input type="hidden" name="method_filter" value=""><input type="hidden" name="region_filter" value=""><input type="hidden" name="construct_filter" value=""><input type="hidden" name="species" value=""><input type="hidden" name="gene_filter" value=""><input type="hidden" name="length" value=""><input type="hidden" name="bp_start" value=""><input type="hidden" name="evidence_filter" value=""><input type="hidden" name="class" value=""><input type="hidden" name="tf_filter" value="">
+<input type="hidden" name="bp_filter" value=""><input type="hidden" name="chr_filter" value=""><input type="hidden" name="expression_filter" value=""><input type="hidden" name="interaction" value=""><input type="hidden" name="gene" value=""><input type="hidden" name="species_filter" value=""><input type="hidden" name="mutation_filter" value=""><input type="hidden" name="length_filter" value=""><input type="hidden" name="tf" value=""><input type="hidden" name="expression" value=""><input type="hidden" name="chromosome" value=""><input type="hidden" name="evidence" value=""><input type="hidden" name="interaction_filter" value=""><input type="hidden" name="method" value=""><input type="hidden" name="shorter_larger" value=""><input type="hidden" name="bp_end" value=""><input type="hidden" name="class_filter" value=""><input type="hidden" name="method_filter" value=""><input type="hidden" name="region_filter" value=""><input type="hidden" name="construct_filter" value=""><input type="hidden" name="species" value=""><input type="hidden" name="gene_filter" value=""><input type="hidden" name="length" value=""><input type="hidden" name="bp_start" value=""><input type="hidden" name="evidence_filter" value=""><input type="hidden" name="classes" value=""><input type="hidden" name="tf_filter" value=""><input type="hidden" name="project_name" value="">
       <hr><br>
       </td>
     </tr>
@@ -250,11 +227,3 @@ print "</form></td></tr></tbody></table>";
 ###  print out the html tail template
   my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
   print $template_tail->output;
-
-sub select {
-
-    my ($dbh, $sql) = @_;
-    my $sth=$dbh->prepare($sql);
-    $sth->execute or die "$dbh->errstr\n";
-    return $sth;
-}

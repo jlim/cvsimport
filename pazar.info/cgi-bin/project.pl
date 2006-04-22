@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 use HTML::Template;
 use strict;
@@ -8,6 +8,9 @@ use pazar::reg_seq;
 use pazar::talk;
 use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
+use CGI qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+use CGI::Debug( report => 'everything', on => 'anything' );
 
  
 # open the html header template
@@ -33,16 +36,17 @@ if (state == 0)
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
+my $get = new CGI;
+my %param = %{$get->Vars};
+
 ###getting the project_name
-my $proj='gffparsertest';
+my $proj=$param{project_name}||'jaspar_core';
 
 ###database connection
 my $dbh= pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
-		       -pazar_user    =>    'elodie@cmmt.ubc.ca',
-		       -pazar_pass    =>    'pazarpw',
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -drv           =>    'mysql',
 		       -project       =>    $proj);
@@ -64,8 +68,33 @@ print<<page1;
     </tr>
 page1
 
+print "<tr><td><input type=\"hidden\" name=\"project_name\" value=\"$proj\"</td></tr>";
+
+my @species;
 my $species = &select($dbh, "SELECT species FROM location WHERE project_id=$projid");
 if ($species) {
+    while (my $sp=$species->fetchrow_array) {
+	if (!grep(/$sp/i,@species)) {
+	    push (@species,$sp);
+	}
+    }
+}
+my @functs = $dbh->get_all_complex_ids($projid);
+foreach my $funct_tf (@functs) {
+    my $tf = $dbh->create_tf;
+    my $tfcomplex = $tf->get_tfcomplex_by_id($funct_tf,'notargets');
+    while (my $subunit=$tfcomplex->next_subunit) {
+	my $trans=$subunit->get_transcript_accession($dbh);
+        my $gene=$talkdb->ens_transcr_to_gene($trans);
+        my $sp=$talkdb->current_org();
+	if (!grep(/$sp/i,@species)) {
+	    push (@species,$sp);
+	}
+    }
+}
+
+if (@species) {
+    my @sortedsp=sort(@species);
 
 print<<page1b;
     <tr>
@@ -76,13 +105,6 @@ print<<page1b;
         <select name="species" size="3" multiple="multiple">
 page1b
 
-    my @species;
-    while (my $sp=$species->fetchrow_array) {
-	if (!grep(/$sp/i,@species)) {
-	    push (@species,$sp);
-	}
-    }
-    my @sortedsp=sort(@species);
     foreach (@sortedsp) {
 	print "<option value=\"$_\"> $_ </option>";
     }
@@ -159,7 +181,9 @@ print<<page3;
         <select name="gene" size="3" multiple="multiple">
 page3
 
-    foreach my $accn (keys %gene) {
+my @accns = keys %gene;
+my @sortedaccn=sort(@accns);
+foreach my $accn (@sortedaccn) {
 	print "<option value=\"$accn\"> $gene{$accn} ($accn) </option>";
     }
 print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
@@ -206,7 +230,9 @@ print<<page4b;
         <select name="tf" size="3" multiple="multiple">
 page4b
 
-    foreach my $name (keys %tf_subunit) {
+my @tfnames = keys %tf_subunit;
+my @sortedtfname=sort(@tfnames);
+    foreach my $name (@sortedtfname) {
 	print "<option value=\"$name\"> $name (";
 	foreach my $su (@{$tf_subunit{$name}}) {
 	    print "$su ";
@@ -217,7 +243,6 @@ print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
 }
 
 my $classes = &select($dbh, "SELECT class, family FROM tf WHERE project_id=$projid");
-my @classes;
 if ($classes) {
 
 print<<page5;
@@ -226,11 +251,12 @@ print<<page5;
       <div><input type="checkbox" name="class_filter"><b> Restrict to a specific class/family: </b></div>
       </td>
       <td align="left" valign="top" width="50%">
-        <select name="class">
+        <select name="classes">
 page5
 
     my $cf;
-    while (my ($class,$fam)=$chr->fetchrow_array) {
+    my @classes;
+    while (my ($class,$fam)=$classes->fetchrow_array) {
 	if ($class && $fam) {
 	    $cf=$class."/".$fam;
 	} elsif ($class && !$fam) {

@@ -13,7 +13,7 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
@@ -56,18 +56,6 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {
 print "Content-Type: text/html\n\n", $template->output;
 
 #connect to the database
-=pod
-my $pazar = pazar->new( 
-                      -globalsearch  =>    'yes',
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -pazar_user    =>    'elodie@cmmt.ubc.ca',
-		      -pazar_pass    =>    'pazarpw',
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    'mysql');
-=cut
-
 my $dbh = pazar->new( 
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
@@ -122,11 +110,12 @@ if (!$accn) {
 	$tfname = $accn;
     }
     my $count=0;
+    my $tfcount=0;
     my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
     open (TMP, ">$file");
 ####start of form
     print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>";
-
+    print "<input type='hidden' name='accn' value='$accn'";
 ##########project loop
 
     my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
@@ -134,7 +123,7 @@ if (!$accn) {
     while (my $project=$projects->fetchrow_hashref) {
 	push @projects, $project->{project_name};
     }
-    my $empty=0;
+
     foreach my $projname (@projects) {
 #connect to the database
 	my $dbh = pazar->new( 
@@ -148,7 +137,6 @@ if (!$accn) {
 
 #######project loop
 
-    print "<input type='hidden' name='accn' value='$accn'";
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
 	my $tf;
@@ -158,34 +146,30 @@ if (!$accn) {
 #	    print "<span class='title4'>1".$dbh->{globalsearch}."</span>";
 	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
 	    if (!$tfcomplexes[0]){
-		print "<p class=\"warning\">No $tfname TF could be found in the database!</p>\n";
-		exit;
+		next;
 	    }
 	} else {
 	    $tf = $dbh->create_tf;
             print "<span class='title4'>2".$dbh->{projectid}."</span>";
 	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
 	    if (!$tfcomplexes[0]){
-		print "<p class=\"warning\">No $trans transcript could be found in the database!</p>\n";
-		exit;
+		next;
 	    }
 	}
 
 	foreach my $complex (@tfcomplexes) {	    
 ########### start of HTML table
-
+	    $tfcount++;
 	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
 	print<<COLNAMES;
 <tr>
       <td width="100" align="center" valign="top" bgcolor="#e65656"><span class="title4">Project</span></td>
  <td align="center" width="187" valign="top" bgcolor="#e65656"><span class="title4">Name</span></td>
-      <td align="center" bgcolor="#e65656"><span class="title4">Classes</span>
+<td align="center" bgcolor="#e65656"><span class="title4">Transcript Accession</span>
       </td> 
-
-<td align="center" bgcolor="#e65656"><span class="title4">Transcript Accessions</span>
+      <td align="center" bgcolor="#e65656"><span class="title4">Class</span>
       </td> 
-
-<td align="center" bgcolor="#e65656"><span class="title4">Families</span>
+<td align="center" bgcolor="#e65656"><span class="title4">Family</span>
       </td> 
   </tr>
 COLNAMES
@@ -207,19 +191,19 @@ COLNAMES
 	    }
     #print subunit information
     print "<td bgcolor=\"$colors{$bg_color}\">";
-    #class
-    foreach my $c (@classes)
-    {
-	print $c."<br>";
-    }
-    print "&nbsp;</td>";
-    print "<td bgcolor=\"$colors{$bg_color}\">";
     #transcript accession
     foreach my $ta (@transcript_accessions)
     {
 	print $ta."<br>";
     }
     print  "&nbsp;</td>";
+    print "<td bgcolor=\"$colors{$bg_color}\">";
+    #class
+    foreach my $c (@classes)
+    {
+	print $c."<br>";
+    }
+    print "&nbsp;</td>";
     print "<td bgcolor=\"$colors{$bg_color}\">";
     #family
     foreach my $f (@families)
@@ -293,7 +277,7 @@ if ($param{evidence} eq 'on')
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
 		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."' checked>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
                     my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
@@ -337,7 +321,7 @@ if ($param{evidence} eq 'on')
 
 		}	    
 		if ($type eq 'construct' && $param{construct} eq 'on') {
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."' checked>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{construct_name} eq 'on') {
 			print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
@@ -441,18 +425,26 @@ if ($param{evidence} eq 'on')
                 $bg_color = 1 - $bg_color;
             }
 	    print "</table>";
-          }
-        }
+}
+}
 }
     close (TMP);
-####hidden form inputs
 
+if ($tfcount==0) {
+		print "<p class=\"warning\">No TF with the ID $accn could be found in the database!</p>\n";
+		exit;
+	    }
+if ($count<2) {
+    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
+    exit;
+} else {
+
+####hidden form inputs
 
     print "<table bordercolor='white' bgcolor='white'><tr><td>Click Go to recalculate matrix and logo based on selected sequences</td>";
     print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr></table>";
     print "</form>";
 ####end of form
-    unless ($count==0) {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',

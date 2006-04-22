@@ -12,7 +12,7 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
@@ -34,8 +34,6 @@ my $dbh = pazar->new(
 		      -host          =>    $ENV{PAZAR_host},
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -pazar_user    =>    'elodie@cmmt.ubc.ca',
-		      -pazar_pass    =>    'pazarpw',
 		      -dbname        =>    $ENV{PAZAR_name},
 		      -drv           =>    'mysql');
 
