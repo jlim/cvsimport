@@ -21,6 +21,12 @@ if(target == 1)
 document.gene_search.target="_self";
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
 }
+if(target == 2) 
+{
+document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
+document.gene_search.target="Window1";
+window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
+}
 }
 var state=0;
 function CheckBox(cat){
@@ -95,7 +101,7 @@ ID</option>
     <tr align="left">
       <td colspan="2"><p > Or browse the current list of annotated genes
 &nbsp;
-      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><input value="View Alphabetical Gene List" name="submit" type="submit"  onClick="setCount(2)"><br></p>
       <br>
       </td>
     </tr>
