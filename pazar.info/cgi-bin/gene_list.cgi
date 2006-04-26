@@ -136,9 +136,9 @@ print " <li><a href=\"javascript:exp_coll($count);\"><img src=\"../images/minus.
 $count++;
 foreach my $gene_data (@{$gene_project{$proj_name}}) {
 if ($gene_data->{desc} && $gene_data->{desc} ne '0') {
-print "    <li><b>EnsEMBL stable ID: </b>".$gene_data->{accn}."<br>"."<b>Annotator Description: </b>".$gene_data->{desc}."<br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
+print "    <li><a name='#$gene_data->{accn}'><b>EnsEMBL stable ID: </b>"."<a href=\"#$gene_data->{accn}\" onClick=\"javascript:window.opener.document.gene_search.geneID.value='$gene_data->{accn}';window.opener.document.gene_search.ID_list.options[0].selected=true;window.opener.focus();\">".$gene_data->{accn}."</a><br>"."<b>Annotator Description: </b>".$gene_data->{desc}."<br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
 } else {
-print "    <li><b>EnsEMBL stable ID: </b>".$gene_data->{accn}."<br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
+print "    <li><a name='#$gene_data->{accn}'><b>EnsEMBL stable ID: </b>"."<a href=\"#$gene_data->{accn}\" onClick=\"javascript:window.opener.document.gene_search.geneID.value='$gene_data->{accn}';window.opener.document.gene_search.ID_list.options[0].selected=true;window.opener.focus();\">".$gene_data->{accn}."</a><br>"."<b>EnsEMBL Description: </b>".$gene_data->{ens_desc}."</li>";
 }
 }
 print "</ul></li><br>";
