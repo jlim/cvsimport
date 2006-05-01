@@ -40,24 +40,24 @@ undef(my $flashvars);
 for (my $i=0;$i<10;$i++) {
     my $num=sprintf("%02d",($i+1));
     if ($desc[$i]) {
-	my $PTtag='PT1'.$num;
+	my $PTtag='PTM'.$num;
 	my $PTval=$desc[$i]->{name};
-	my $PDtag='PD1'.$num;
+	my $PDtag='PDM'.$num;
 	my $PDval='some description';
 #	my $PDval=$desc[$i]->{description};
-	my $PUtag='PU1'.$num;
-	my $PUval='project.pl&name='.$PTval;
+	my $PUtag='PUM'.$num;
+	my $PUval='project.pl';
 	if (!$flashvars) {
 	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	} else {
 	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	}
     } else {
-	my $PTtag='PT1'.$num;
+	my $PTtag='PTM'.$num;
 	my $PTval='For Lease';
-	my $PDtag='PD1'.$num;
+	my $PDtag='PDM'.$num;
 	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
-	my $PUtag='PU1'.$num;
+	my $PUtag='PUM'.$num;
 	my $PUval='register.pl';
 	if (!$flashvars) {
 	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
