@@ -165,7 +165,8 @@ if ($genes) {
 	}
 	if ($seq==1) {
 	    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-	    my @desc = split('\(',$coords[5]);
+	    my @des = split('\(',$coords[5]);
+	    my @desc = split('\[',$des[0]);
 	    $gene{$gene->{db_accn}}=$desc[0];
 	}
     }
