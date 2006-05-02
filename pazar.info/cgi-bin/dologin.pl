@@ -4,6 +4,7 @@ use DBI;
 use Crypt::Imail;
 use CGI qw( :all);
 use HTML::Template;
+use CGI::Session;
 
 my $query=new CGI;
 my %params = %{$query->Vars};
@@ -14,6 +15,9 @@ my $dbhost = $ENV{PAZAR_host};
 my $DBUSER = $ENV{PAZAR_adminuser};
 my $DBPASS = $ENV{PAZAR_adminpass};
 my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
+
+my $session = new CGI::Session("driver:File", undef, {Directory=>"/tmp"});
+$session->expire('+4h');
 
 
 my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
@@ -41,21 +45,26 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
 	    #get project info
 	}
 
+
+#store values in session
+
+    $session->param('info', \%info);
+    $session->param('projects', \@projids);
+ 
 #create cookie
 # values can be arrayref, hashref or scalar
 #\@arrayref, \%hashref, [@array]
 # NOTE: complex data structures eg. hash of arrays, hash of hashes will not work properly with cookies
-$cookie = $query->cookie(-name=>'PAZAR_COOKIE',
-			 -value=>\%info,
-			 -expires=>'+4h',
-			 -path=>'/');
 
-$project_cookie = $query->cookie(-name=>'PAZAR_PROJECT_COOKIE',
-			 -value=>\@projids,
-			 -expires=>'+4h',
-			 -path=>'/');
+    $cookie = $query->cookie(-name=>'PAZAR_COOKIE',
+			     -value=>$session->id,
+			     -expires=>'+4h',
+			     -path=>'/');
 
-print $query->header(-cookie=>[$cookie,$project_cookie]);
+#example: storing multiple cookies
+#print $query->header(-cookie=>[$cookie,$project_cookie]);
+
+print $query->header(-cookie=>$cookie);
 #store other attributes
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
