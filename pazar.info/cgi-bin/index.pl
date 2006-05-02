@@ -10,11 +10,24 @@ use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
 use constant DB_HOST => $ENV{PAZAR_host};
 
+require 'getsession.pl';
+
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Mall');
+
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => '<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
