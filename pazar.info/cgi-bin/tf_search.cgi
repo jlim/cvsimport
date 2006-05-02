@@ -300,7 +300,7 @@ if ($param{evidence} eq 'on')
 
 		}	    
 		if ($type eq 'construct' && $param{construct} eq 'on') {
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."' checked>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{construct_name} eq 'on') {
 			print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
@@ -403,7 +403,7 @@ if ($param{evidence} eq 'on')
 		print TMP $site->get_seq."\n";
                 $bg_color = 1 - $bg_color;
             }
-	    print "</table>";
+	    print "</table><br>";
 }
 }
     close (TMP);
@@ -412,6 +412,7 @@ if ($tfcount==0) {
 		print "<p class=\"warning\">No TF with the ID $accn could be found in the database!</p>\n";
 		exit;
 	    }
+if ($param{profile} eq 'on') {
 if ($count<2) {
     print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
     exit;
@@ -444,6 +445,8 @@ if ($count<2) {
 
     }
 }
+}
+
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
 print $template_tail->output;

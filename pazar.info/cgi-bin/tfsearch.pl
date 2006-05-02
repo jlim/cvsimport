@@ -155,6 +155,13 @@ the Attributes to Display</p><br></td>
     </tr>
     <tr>
       <td colspan="2"> <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <span class="title4"><input name="profile" type="checkbox" checked> Dynamically computed profile </span></td>
+    </tr>
+    <tr>
+      <td colspan="2"> <br>
       <hr><br>
       </td>
     </tr>
