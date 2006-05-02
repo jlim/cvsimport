@@ -116,26 +116,6 @@ if (!$accn) {
 ####start of form
     print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>";
     print "<input type='hidden' name='accn' value='$accn'";
-##########project loop
-
-    my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
-    my @projects;
-    while (my $project=$projects->fetchrow_hashref) {
-	push @projects, $project->{project_name};
-    }
-
-    foreach my $projname (@projects) {
-#connect to the database
-	my $dbh = pazar->new( 
-                              -globalsearch  =>    'no',		      
-                              -host          =>    $ENV{PAZAR_host},
-			      -user          =>    $ENV{PAZAR_pubuser},
-			      -pass          =>    $ENV{PAZAR_pubpass},
-			      -dbname        =>    $ENV{PAZAR_name},
-			      -drv           =>    'mysql',
-			      -project       =>    $projname);
-
-#######project loop
 
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
@@ -174,7 +154,7 @@ if (!$accn) {
   </tr>
 COLNAMES
 
-	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$projname."</td><td bgcolor=\"$colors{$bg_color}\">".$complex->name."</td>";
+	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$dbh->get_project_name('funct_tf',$complex->dbid)."</td><td bgcolor=\"$colors{$bg_color}\">".$complex->name."</td>";
 
     my @classes = ();
     my @families = ();
@@ -277,7 +257,7 @@ if ($param{evidence} eq 'on')
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
 		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."' checked>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
                     my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";

@@ -16,8 +16,6 @@ use constant DB_DRV  => 'mysql';
 use constant DB_NAME => $ENV{PAZAR_name};
 use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
-use constant PAZAR_USER => 'elodie@cmmt.ubc.ca';
-use constant PAZAR_PASS => 'pazarpw';
 use constant DB_HOST => $ENV{PAZAR_host};
 
 my $get = new CGI;
@@ -30,8 +28,6 @@ my $dbh = pazar->new(
 	  	   -host          =>    DB_HOST,
                    -user          =>    DB_USER,
                    -pass          =>    DB_PASS,
-		   -pazar_user    =>    PAZAR_USER,
-		   -pazar_pass    =>    PAZAR_PASS,
                    -dbname        =>    DB_NAME,
 		   -drv           =>    DB_DRV,
                    -globalsearch  =>    'yes');
