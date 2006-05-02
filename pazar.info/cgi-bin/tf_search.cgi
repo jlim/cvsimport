@@ -13,7 +13,7 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-#use CGI::Debug( report => 'everything', on => 'anything' );
+use CGI::Debug( report => 'everything', on => 'anything' );
 
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
@@ -69,10 +69,6 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
-my $bg_color = 0;
-my %colors = (0 => "#fffff0",
-	      1 => "#9ad3e2"
-	      );
 
 my $get = new CGI;
 my %param = %{$get->Vars};
@@ -135,7 +131,12 @@ if (!$accn) {
 	    }
 	}
 
-	foreach my $complex (@tfcomplexes) {	    
+	foreach my $complex (@tfcomplexes) {
+my $bg_color = 0;
+my %colors = (0 => "#fffff0",
+	      1 => "#9ad3e2"
+	      );
+	    
 ########### start of HTML table
 	    $tfcount++;
 	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
@@ -152,7 +153,7 @@ if (!$accn) {
   </tr>
 COLNAMES
 
-	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$dbh->get_project_name('funct_tf',$complex->dbid)."</td><td bgcolor=\"$colors{$bg_color}\">".$complex->name."</td>";
+	    print "<tr><td bgcolor=\"#fffff0\">".$dbh->get_project_name('funct_tf',$complex->dbid)."</td><td bgcolor=\"#fffff0\">".$complex->name."</td>";
 
     my @classes = ();
     my @families = ();
@@ -168,31 +169,26 @@ COLNAMES
 		push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
 	    }
     #print subunit information
-    print "<td bgcolor=\"$colors{$bg_color}\">";
+    print "<td bgcolor=\"#fffff0\">";
     #transcript accession
-    foreach my $ta (@transcript_accessions)
-    {
-	print $ta."<br>";
-    }
+    print join('<br>',@transcript_accessions);
     print  "&nbsp;</td>";
-    print "<td bgcolor=\"$colors{$bg_color}\">";
+    print "<td bgcolor=\"#fffff0\">";
     #class
-    foreach my $c (@classes)
-    {
-	print $c."<br>";
-    }
+    print join('<br>',@classes);
     print "&nbsp;</td>";
-    print "<td bgcolor=\"$colors{$bg_color}\">";
+    print "<td bgcolor=\"#fffff0\">";
     #family
-    foreach my $f (@families)
-    {
-	print $f."<br>";
-    }
+    print join('<br>',@families);
     print "&nbsp;</td>";
     print  "</tr></table>";
 
 #separate tables for artificial and genomic targets
-	    print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+    print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr>";
+if ($param{reg_seq} eq 'on' || $param{construct} eq 'on')
+{
+	    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+}
 
 if ($param{reg_seq_name} eq 'on' || $param{construct_name} eq 'on')
 {

@@ -817,14 +817,14 @@ sub print_gene_attr {
 
 sub print_tf_attr {
     my ($dbh,$tfname,$projid,$target,%params) = @_;
-    my $bg_color = 0;
-    my %colors = (0 => "#fffff0",
-		  1 => "#9ad3e2"
-		  );
 
     my $tf = $dbh->create_tf;
     my @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
     foreach my $complex (@tfcomplexes) {
+    my $bg_color = 0;
+    my %colors = (0 => "#fffff0",
+		  1 => "#9ad3e2"
+		  );
 	my $count=0;
 	my $file="/space/usr/local/apache/pazar.info/tmp/".$tfname.".fa";
 	open (TMP, ">$file");
@@ -847,7 +847,7 @@ sub print_tf_attr {
 	    </tr>
 COLNAMES
 
-	    print "<tr><td bgcolor=\"$colors{$bg_color}\">".$proj."</td><td bgcolor=\"$colors{$bg_color}\">".$tfname."</td>";
+	    print "<tr><td bgcolor=\"#fffff0\">".$proj."</td><td bgcolor=\"#fffff0\">".$tfname."</td>";
 
 	my @classes = ();
 	my @families = ();
@@ -862,29 +862,20 @@ COLNAMES
 	    push(@families,$subunit->get_fam);
 	    push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
 	}
-	#print subunit information
-	print "<td bgcolor=\"$colors{$bg_color}\">";
-	#transcript accession
-	foreach my $ta (@transcript_accessions)
-	{
-	    print $ta."<br>";
-	}
-	print  "&nbsp;</td>";
-	print "<td bgcolor=\"$colors{$bg_color}\">";
-	#class
-	foreach my $c (@classes)
-	{
-	    print $c."<br>";
-	}
-	print "&nbsp;</td>";
-	print "<td bgcolor=\"$colors{$bg_color}\">";
-	#family
-	foreach my $f (@families)
-	{
-	    print $f."<br>";
-	}
-	print "&nbsp;</td>";
-	print  "</tr></table>";
+    #print subunit information
+    print "<td bgcolor=\"#fffff0\">";
+    #transcript accession
+    print join('<br>',@transcript_accessions);
+    print  "&nbsp;</td>";
+    print "<td bgcolor=\"#fffff0\">";
+    #class
+    print join('<br>',@classes);
+    print "&nbsp;</td>";
+    print "<td bgcolor=\"#fffff0\">";
+    #family
+    print join('<br>',@families);
+    print "&nbsp;</td>";
+    print  "</tr></table>";
 
 #separate tables for artificial and genomic targets
 	print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr>";
