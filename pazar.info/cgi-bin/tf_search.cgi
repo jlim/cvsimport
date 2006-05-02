@@ -123,14 +123,12 @@ if (!$accn) {
 	my @tfcomplexes;
 	if ($trans eq 'none') {
 	    $tf = $dbh->create_tf;
-#	    print "<span class='title4'>1".$dbh->{globalsearch}."</span>";
 	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
 	    if (!$tfcomplexes[0]){
 		next;
 	    }
 	} else {
 	    $tf = $dbh->create_tf;
-            print "<span class='title4'>2".$dbh->{projectid}."</span>";
 	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
 	    if (!$tfcomplexes[0]){
 		next;
@@ -275,7 +273,8 @@ if ($param{evidence} eq 'on')
 			my $transcript=$regseq[0]->transcript_accession || 'Transcript Not Specified';
 			#print "<td>".$regseq[0]->gene_accession."</td><td>".$transcript."</td>";
 			my @ens_coords = $ensdb->get_ens_chr($regseq[0]->gene_accession);
-			my @desc = split('\[',$ens_coords[5]);
+			my @des = split('\(',$ens_coords[5]);
+			my @desc = split('\[',$des[0]);
 			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->gene_accession."<br>".$transcript."<br>".$desc[0]."</td>";
 		    }
 		    if ($param{species} eq 'on') {
