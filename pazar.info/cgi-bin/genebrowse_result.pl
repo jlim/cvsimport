@@ -17,8 +17,7 @@ $PAZARDBPASS = $ENV{PAZAR_pubpass};
 $PAZARDBURL = "DBI:mysql:dbname=$ENV{PAZAR_name};host=$ENV{PAZAR_host}";
 
 
-#my $search_alpha = param("search_alpha");
-my $search_alpha = "n";
+my $search_alpha = param("search_alpha");
 local @results = ();
 my @complexes = ();
 
