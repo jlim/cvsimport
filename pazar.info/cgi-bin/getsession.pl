@@ -1,44 +1,34 @@
-#!/usr/bin/perl
-#
-#  PROGRAM:	cookie-get.cgi
-#
-#  PURPOSE:	session information retrieval, to be included in all web pages
-#		
-#
-#  Copyright DevDaily Interactive, Inc., 1998. All Rights Reserved.
-#
-
-#------------------------------#
-#  1. Create a new CGI object  #
-#------------------------------#
+#!/usr/local/bin/perl
 
 use CGI;
 use CGI::Cookie;
+use CGI::Session;
 $query = new CGI;
 
-$cookieExists = false;
+$loggedin = false;
 %info = ();
 @projids = ();
-
+$sessionid = undef;
+$session = undef;
 
 %cookies = fetch CGI::Cookie;
 $pazarCookie = $cookies{'PAZAR_COOKIE'};
-$pazarProjectCookie = $cookies{'PAZAR_PROJECT_COOKIE'};
 
 
-if($pazarCookie && $pazarProjectCookie)
+if($pazarCookie)
 {
-    $cookieExists = true;
+#get the session
+    $sessionid = $pazarCookie->value;
+    $session = new CGI::Session("driver:File",$sessionid,{Directory=>"/tmp"});
 
-    #retrieve cook information into variables
-    %info = $pazarCookie->value;
-    @projids = $query->cookie('PAZAR_PROJECT_COOKIE');
+#if session exists, populate %info and @projids
+    if($session)
+    {
+	%info = %{ $session->param('info') };
+	@projids = @{ $session->param('projects') };
+	$loggedin = true;
+    }
 }
-else
-{
-    $cookieExists=false;
-}
-
 
 
 1;
