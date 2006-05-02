@@ -43,7 +43,10 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 
 my $get = new CGI;
 my %param = %{$get->Vars};
-my $accn = $param{accn};
+foreach my $ac ($get->param('accn')) {
+	push @accns, $ac;
+    }
+my $accn = join('_',@accns);
 
 
 my $count=0;

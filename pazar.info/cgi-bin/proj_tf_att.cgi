@@ -4,7 +4,7 @@ use HTML::Template;
 use strict;
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
  
 # open the html header template
@@ -144,6 +144,13 @@ print<<page;
       <td width="50%" valign="top" align="left">
       <p ><input name="at_evidence" type="checkbox"> Evidence </p>
       </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <span class="title4"><input name="at_profile" type="checkbox" checked> Dynamically computed profile </span></td>
     </tr>
     <tr>
       <td colspan="2"> <br>

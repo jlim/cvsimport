@@ -10,7 +10,7 @@ use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
 
@@ -653,10 +653,18 @@ my $filter =
 	print "<p class=\"warning\">No regulatory sequence and/or TF was found using this set of filters!<br></p>";
     } else{
 	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
-	print "<p class=\"title3\">Results: </p>";
+	print "<p class=\"title3\">Results: </p>\n";
+####start of form
+	print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>\n";
 	foreach my $tf (keys %inters) {
 	    &print_tf_attr($dbh,$tf,$projid,\@{$inters{$tf}},%param);
 	}
+####hidden form inputs
+print "<br><table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
+print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
+<tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
+print "</form>";
+####end of form
     }
 }
 
@@ -814,9 +822,6 @@ sub print_tf_attr {
 		  1 => "#9ad3e2"
 		  );
 
-####start of form
-	print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>";
-
     my $tf = $dbh->create_tf;
     my @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
     foreach my $complex (@tfcomplexes) {
@@ -824,7 +829,7 @@ sub print_tf_attr {
 	my $file="/space/usr/local/apache/pazar.info/tmp/".$tfname.".fa";
 	open (TMP, ">$file");
 
-	print "<input type='hidden' name='accn' value='$tfname'";
+	print "<input type='hidden' name='accn' value='$tfname'>\n";
 	
 ########### start of HTML table
 
@@ -956,7 +961,7 @@ while (my $site=$complex->next_target) {
 	    }
 	}
 	unless ($found==1) {next;}
-	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."' checked>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>\n";
 	my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
@@ -1005,7 +1010,7 @@ while (my $site=$complex->next_target) {
 	    }
 	}
 	unless ($found==1) {next;}
-	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."' checked>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>\n";
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 	if ($params{at_construct_name} eq 'on') {
 	    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
@@ -1110,20 +1115,16 @@ print TMP ">".$construct_name."\n";
 print TMP $site->get_seq."\n";
 $bg_color = 1 - $bg_color;
 }
-print "</table>";
+print "</table><br>\n";
 
 close (TMP);
 
+if ($params{at_profile} eq 'on') {
 if ($count<2) {
     print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
     exit;
 } else {
 
-####hidden form inputs
-print "<table bordercolor='white' bgcolor='white'><tr><td>Click Go to recalculate matrix and logo based on selected sequences</td>";
-print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr></table>";
-print "</form>";
-####end of form
     my $patterngen =
 	TFBS::PatternGen::MEME->new(-seq_file=> "$file",
     -binary => 'meme',
@@ -1134,14 +1135,15 @@ my $prettystring = $pfm->prettyprint();
 my @matrixlines = split /\n/, $prettystring;
 $prettystring = join "<BR>\n", @matrixlines;
 $prettystring =~ s/ /\&nbsp\;/g;
-print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
+print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td ><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
 my $logo = $tfname.".png";
 my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
 print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
 print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
-print "</table>\n";
+print "</table><br>\n";
 ########### end of HTML table
+}
 }
 }
 }

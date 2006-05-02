@@ -417,13 +417,6 @@ if ($count<2) {
     print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
     exit;
 } else {
-
-####hidden form inputs
-
-    print "<table bordercolor='white' bgcolor='white'><tr><td>Click Go to recalculate matrix and logo based on selected sequences</td>";
-    print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr></table>";
-    print "</form>";
-####end of form
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
@@ -434,18 +427,23 @@ if ($count<2) {
 	my @matrixlines = split /\n/, $prettystring;
 	$prettystring = join "<BR>\n", @matrixlines;
 	$prettystring =~ s/ /\&nbsp\;/g;
-	print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
+	print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
 	my $logo = $accn.".png";
 	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
 	print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
 	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
-	print "</table>\n";
+	print "</table><br>\n";
 ########### end of HTML table
-
+}
+}
+####hidden form inputs
+print "<br><table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
+print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
+<tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
+print "</form>";
+####end of form
     }
-}
-}
 
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
