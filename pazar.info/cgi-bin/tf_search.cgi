@@ -407,7 +407,6 @@ if ($param{evidence} eq 'on')
 	    print "</table>";
 }
 }
-}
     close (TMP);
 
 if ($tfcount==0) {
