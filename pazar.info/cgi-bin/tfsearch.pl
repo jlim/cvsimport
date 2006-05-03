@@ -2,6 +2,8 @@
 
 use HTML::Template;
 
+require 'getsession.pl';
+
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
@@ -47,6 +49,17 @@ if (state=='false')
     state='true';
 }
 }});
+
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;

@@ -3,8 +3,6 @@
 use lib '/space/usr/local/src/ensembl-36/ensembl/modules/';
 use lib '/space/usr/local/src/bioperl-live/';
 
-use strict;
-
 use pazar;
 use pazar::gene;
 use pazar::talk;
@@ -13,12 +11,14 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
 
 use Data::Dumper;
+
+require 'getsession.pl';
 
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
@@ -51,6 +51,16 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {
 
         }});
 
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -120,17 +130,39 @@ if (!$accn) {
 	if ($trans eq 'none') {
 	    $tf = $dbh->create_tf;
 	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
-	    if (!$tfcomplexes[0]){
-		next;
-	    }
 	} else {
 	    $tf = $dbh->create_tf;
 	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
-	    if (!$tfcomplexes[0]){
-		next;
+	}
+	if ($loggedin eq 'true') {
+	    foreach my $proj (@projids) {
+		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and status='restricted'");
+		my $restr_proj=$restricted->fetchrow_array();
+		if ($restr_proj) {
+		    my $dbhandle = pazar->new( 
+		      -host          =>    $ENV{PAZAR_host},
+		      -user          =>    $ENV{PAZAR_pubuser},
+		      -pass          =>    $ENV{PAZAR_pubpass},
+		      -dbname        =>    $ENV{PAZAR_name},
+  	              -pazar_user    =>    $info{user},
+		      -pazar_pass    =>    $info{pass},
+                      -drv           =>    'mysql',
+		      -project       =>    $restr_proj);
+
+		    my @complexes;
+		    if ($trans eq 'none') {
+			$tf = $dbhandle->create_tf;
+			@complexes = $tf->get_tfcomplex_by_name($tfname);
+		    } else {
+			$tf = $dbhandle->create_tf;
+			@complexes = $tf->get_tfcomplex_by_transcript($trans);
+		    }
+		    foreach my $comp (@complexes) {
+			push @tfcomplexes, $comp;
+		    }
+		}
 	    }
 	}
-
 	foreach my $complex (@tfcomplexes) {
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
