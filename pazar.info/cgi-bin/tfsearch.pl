@@ -16,7 +16,7 @@ if(target == 0)
 {
 document.tf_search.action="http://www.pazar.info/cgi-bin/tf_list.cgi";
 document.tf_search.target="Window1";
-window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=400');
+window.open('about:blank','Window1', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=400');
 }
 if(target == 1) 
 {
@@ -26,8 +26,8 @@ document.tf_search.target="_self";
 if(target == 2) 
 {
 document.tf_search.action="http://www.pazar.info/cgi-bin/tfbrowse_alpha.pl";
-document.tf_search.target="Window1";
-window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
+document.tf_search.target="Window2";
+window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
 var state='false';

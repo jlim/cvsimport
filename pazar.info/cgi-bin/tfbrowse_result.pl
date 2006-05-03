@@ -9,6 +9,8 @@ use pazar;
 use pazar::talk;
 use pazar::tf;
 
+require 'getsession.pl';
+
 print "content-type:text/html\n\n";
 
 
@@ -26,12 +28,9 @@ my @alpharesults = ();
 
 
 my $pazar = pazar->new(
-                      -globalsearch  =>    'yes',
                       -host          =>    $ENV{PAZAR_host},
                       -user          =>    $ENV{PAZAR_pubuser},
                       -pass          =>    $ENV{PAZAR_pubpass},
-                      -pazar_user    =>    'elodie@cmmt.ubc.ca',
-                      -pazar_pass    =>    'pazarpw',
                       -dbname        =>    $ENV{PAZAR_name},
                       -drv           =>    'mysql');
 
@@ -48,16 +47,22 @@ my %colors = (0 => "#fffff0",
 #manual DBI query for letter
 my $pazardbh = DBI->connect($PAZARDBURL,$PAZARDBUSER,$PAZARDBPASS)
     or die "Can't connect to pazar database";
-my $pazarsth = $pazardbh->prepare("select * from funct_tf where funct_tf_name like '$search_alpha%'");
-    $pazarsth->execute();
+my $pazarsth = $pazardbh->prepare("select * from funct_tf a, project b where funct_tf_name like '$search_alpha%' and a.project_id=b.project_id and upper(status)<>'RESTRICTED'");
+$pazarsth->execute();
 #pazar load tfs from results for each result
-while(@res = $pazarsth->fetchrow_array)
-{
+while(my @res = $pazarsth->fetchrow_array) {
     push(@alpharesults,[@res]);
 }
-
-
-
+if ($loggedin eq 'true') {
+    foreach my $proj (@projids) {
+	my $pazarsth2 = $pazardbh->prepare("select * from funct_tf a, project b where funct_tf_name like '$search_alpha%' and a.project_id='$proj' and a.project_id=b.project_id and upper(status)='RESTRICTED'");
+        $pazarsth2->execute();
+#pazar load tfs from results for each result
+	while(my @res2 = $pazarsth2->fetchrow_array) {
+	    push(@alpharesults,[@res2]);
+	}
+    }
+}
 
 print<<Page_Done;
 <html>
@@ -67,24 +72,20 @@ print<<Page_Done;
  <body bgcolor="#ffffff">
 <p> <b><a href="tfbrowse_alpha.pl">Back</a></b> 
 <table width="100%" border="0" cellspacing="1" cellpadding="3">
-  <tbody>
-    <tr>
-      <td width="100" align="center" valign="top" bgcolor="#00007f"><b><font
+ <tbody>
+ <tr>
+ <td width="100" align="center" valign="top" bgcolor="#00007f"><b><font
  color="#ffffff">Project</font></b></td>
  <td align="center" width="187" valign="top" bgcolor="#00007f"><b><font
  color="#ffffff">Name</font></b></td>
-      <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Classes</font></b><br>
-      </td> 
-
-<td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Transcript Accessions</font></b><br>
-      </td> 
-
-<td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Families</font></b><br>
-      </td> 
-  </tr>
+ <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Transcript Accession</font></b><br></td> 
+ <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Class</font></b><br></td> 
+ <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Family</font></b><br></td> 
+ </tr>
 Page_Done
 
-
+#set globalsearch to no
+    $pazar->{globalsearch}='no';
 
 #go through alphabetical results for pazar
 
@@ -92,7 +93,7 @@ Page_Done
     {
     #get other info
     #retrieve for all public projects
-    my @complex_ids = $pazar->get_complex_id_by_name($arrayref->[1]);
+    my @complex_ids = $pazar->get_complex_id_by_name($arrayref->[1],$arrayref->[4]);
     my $projname = $pazar->get_project_name('funct_tf',$complex_ids[0]);
     print<<Page_Done;
     <tr>
@@ -117,25 +118,22 @@ Page_Done
 
     #print subunit information
     print "<td bgcolor=\"$colors{$bg_color}\">";
-    #class
-    foreach my $c (@classes)
-    {
-	print $c."<br>";
-    }
-    print "&nbsp;</td>";
-    print "<td bgcolor=\"$colors{$bg_color}\">";
     #transcript accession
+    my @accns;
     foreach my $ta (@transcript_accessions)
     {
-	print "<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$ta';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$ta."</a><br>";
+	my $ta_link="<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$ta';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$ta."</a>";
+	push @accns, $ta_link;
     }
+    print join('<br>',@accns);
     print  "&nbsp;</td>";
     print "<td bgcolor=\"$colors{$bg_color}\">";
+    #class
+    print join('<br>',@classes);
+    print "&nbsp;</td>";
+    print "<td bgcolor=\"$colors{$bg_color}\">";
     #family
-    foreach my $f (@families)
-    {
-	print $f."<br>";
-    }
+    print join('<br>',@families);
     print "&nbsp;</td>";
     print  "</tr>";
     $bg_color = 1 - $bg_color;

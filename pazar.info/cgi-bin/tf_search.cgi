@@ -46,6 +46,7 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {
     }
     else
     {
+	window.open('about:blank','logowin', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
 	document.sequenceform.submit();
     }
 
@@ -120,7 +121,7 @@ if (!$accn) {
     my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
     open (TMP, ">$file");
 ####start of form
-    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>";
+    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl')'>";
     print "<input type='hidden' name='accn' value='$accn'";
 
     foreach my $trans (@trans) {
@@ -448,7 +449,7 @@ if ($count<2) {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
-					-additional_params => '-mod oops');
+					-additional_params => '-revcomp -mod oops');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
 #print a human readable format of the matrix
 	my $prettystring = $pfm->prettyprint();

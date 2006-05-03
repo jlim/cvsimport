@@ -19,15 +19,6 @@ use TFBS::Matrix::PFM;
 
 use Data::Dumper;
 
-# open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
-
-# fill in template parameters
-$template->param(TITLE => 'PAZAR TF Results');
-
-# send the obligatory Content-Type and print the template output
-print "Content-Type: text/html\n\n", $template->output;
-
 #connect to the database
 my $dbh = pazar->new( 
                       -globalsearch  =>    'yes',
@@ -48,6 +39,12 @@ foreach my $ac ($get->param('accn')) {
     }
 my $accn = join('_',@accns);
 
+#initialize the html page
+print $get->header("text/html");
+print "<head>
+       <title>PAZAR - TF Profile</title>
+       </head>
+       <body style=\"background-color: rgb(255, 255, 255);\" onload=\"coll_all();\" onblur=\"self.focus();\">";
 
 my $count=0;
 #alter file name by adding random number with current time as seed
@@ -82,23 +79,21 @@ while (@keys)
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
-					-additional_params => '-mod oops');
+					-additional_params => '-revcomp -mod oops');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
 #print a human readable format of the matrix
 	my $prettystring = $pfm->prettyprint();
 	my @matrixlines = split /\n/, $prettystring;
 	$prettystring = join "<BR>\n", @matrixlines;
 	$prettystring =~ s/ /\&nbsp\;/g;
-	print "<span class=\"title4\">Position Frequency Matrix</span><br><SPAN class=\"monospace\">$prettystring</SPAN><br>";
+	print "<span style=\"font-size: 14pt;\"><b>Position Frequency Matrix:</b></span><br><br><SPAN style=\"font-size: 11pt;font-family: monospace;\">$prettystring</SPAN><br>";
 #draw the logo
 	my $logo = $newaccn.".png";
 	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
-	print "<br><p class=\"title4\">Logo: <br><img src=\"http://www.pazar.info/tmp/$logo\"></p>";
-	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";
+	print "<br><p style=\"font-size: 14pt;\"><b>Logo:</b><br><img src=\"http://www.pazar.info/tmp/$logo\"></p>";
+	print "<p style=\"font-size: 10pt;\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";
     }
 
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
-print $template_tail->output;
-
+# print out the html end
+print "</body></html>";
 
