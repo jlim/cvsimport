@@ -21,7 +21,7 @@ $template->param(TITLE => 'PAZAR Mall');
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => '<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
 }
 else
 {
@@ -49,6 +49,19 @@ while (my $project=$projects->fetchrow_hashref) {
 #       description => $project->{description}}
 ###Add description when the schema is changed
 }
+
+if ($loggedin eq 'true') {
+    foreach my $proj (@projids) {
+	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and status='restricted'");
+	while (my $restr=$restricted->fetchrow_hashref) {
+	    push @desc, {
+		name => $restr->{project_name}};
+#       description => $project->{description}}
+###Add description when the schema is changed
+	}
+    }
+}
+
 undef(my $flashvars);
 for (my $i=0;$i<10;$i++) {
     my $num=sprintf("%02d",($i+1));

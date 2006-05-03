@@ -4,6 +4,8 @@ use Crypt::Imail;
 use CGI qw( :all);
 use HTML::Template;
 
+require 'getsession.pl';
+
 my $query=new CGI;
 my %params = %{$query->Vars};
 
@@ -82,13 +84,23 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verify() {
 	    }
 	}});
 
-# send the obligatory Content-Type and print the template output
-print "Content-Type: text/html\n\n", $template->output;
+if($loggedin eq 'true') {
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    # send the obligatory Content-Type and print the template output
+    print "Content-Type: text/html\n\n", $template->output;
+    #print logout message if user already logged in
+    print "<p class=\"warning\">You are already logged in.<br>Please logout before registering a new user!</p>";
+} else {
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    # send the obligatory Content-Type and print the template output
+    print "Content-Type: text/html\n\n", $template->output;
 
 if ($params{mode} eq 'register') {
 
     my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
-    or die "Can't connect to pfam database";
+    or die "Can't connect to the database";
 
 #make sure passwords match
     my $pwmatch = "false";
@@ -121,7 +133,7 @@ if ($params{mode} eq 'register') {
 
 #print confirmation
 	print "<p >User account successfully created";
-	print "<br>To begin creating projects for this user, click the button below<br><form   method='post' action='editprojects.pl'><input type='hidden' name='mode' value='login'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='submit' name='submit' value='Add Projects'></form></p></body></html>";
+	print "<br>To begin creating projects for this user, click the button below<br><form   method='post' action='dologin.pl'><input type='hidden' name='project' value='true'><input type='hidden' name='mode' value='login'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='submit' name='submit' value='Add Projects'></form></p></body></html>";
 
     }
     else
@@ -198,6 +210,7 @@ Page_Done
     }
 
 $dbh->disconnect;
+}
 
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');

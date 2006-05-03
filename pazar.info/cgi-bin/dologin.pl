@@ -31,7 +31,7 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
     
     if($userid ne '')
 {
-    my %info = (userid=>$userid,aff=>$aff,first=>$first,last=>$last);
+    my %info = (user=>$params{username},pass=>$params{password},userid=>$userid,aff=>$aff,first=>$first,last=>$last);
 
 
 #store project ids
@@ -78,6 +78,20 @@ $template->param(TITLE => 'PAZAR Login');
 
 print $template->output;
 
+    if ($params{project} eq 'true') {
+#go to editprojects.pl script
+print<<Page;
+	<FORM  name="editprojects" method="POST" action="editprojects.pl">
+	<input type="hidden" name="username">      
+	<input type="hidden" name="password">
+	<input type="hidden" name="mode" value="login">
+	</FORM>
+        <script language='JavaScript'>
+        document.editprojects.submit();
+        </script>
+Page
+
+    } else {
 #return to main page 
     print<<refresh;
 <script language='JavaScript'>
@@ -85,7 +99,7 @@ print $template->output;
 </script>
 
 refresh
-
+}
 }
 else
 {

@@ -2,7 +2,10 @@
 use DBI;
 use Crypt::Imail;
 use CGI qw( :all);
+use CGI::Session;
 use HTML::Template;
+
+require 'getsession.pl';
 
 my $query=new CGI;
 my %params = %{$query->Vars};
@@ -59,6 +62,20 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 		return false;
 	    }
 	}});
+
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+
+    $params{username}=$info{user};
+    $params{password}=$info{pass};
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -280,19 +297,17 @@ else
 }
 
 
-if ($params{mode} eq 'login') 
+if ($params{mode} eq 'login' || $loggedin eq 'true') 
 {
 #verify user name and password
-
     my $im = Crypt::Imail->new();
     my $encrypted_pass = $im->encrypt($params{username}, $params{password}); 
     my $chkh=$dbh->prepare("select user_id,aff,first_name,last_name from users where username=? and password=?")||die;
     $chkh->execute($params{username},$encrypted_pass)||die;
     my ($userid,$aff,$first,$last)=$chkh->fetchrow_array;
-    
+
     if($userid ne '')
     {
-
 #show any status messages
 	print "<center><font color='red'>$statusmsg</font></center>";
 
@@ -392,7 +407,7 @@ print<<AddFormFoot;
 	    </table>	    
 	    </form>
 AddFormFoot
-	}
+}
     else
     {
 #print error
@@ -426,11 +441,12 @@ print<<Page_Done;
 	<p class="title1">PAZAR Project Manager</p>
 
 
-	<FORM  method="POST" action="editprojects.pl">
+	<FORM  method="POST" action="dologin.pl">
 	<table>
 	<tr><td >User name</td><td> <input type="text" name="username"></td></tr>      
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
 	<tr><td colspan=2><input type="hidden" name="mode" value="login"></td></tr>
+        <tr><td colspan=2><input type="hidden" name="project" value="true"></td></tr>
 	<tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
 	</table>
 	</FORM>
