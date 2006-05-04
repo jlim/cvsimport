@@ -58,7 +58,7 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
 
     $cookie = $query->cookie(-name=>'PAZAR_COOKIE',
 			     -value=>$session->id,
-			     -expires=>'+4h',
+			     -expires=>'',
 			     -path=>'/');
 
 #example: storing multiple cookies
