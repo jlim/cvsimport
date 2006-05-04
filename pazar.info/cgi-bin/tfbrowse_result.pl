@@ -74,13 +74,13 @@ print<<Page_Done;
 <table width="100%" border="0" cellspacing="1" cellpadding="3">
  <tbody>
  <tr>
- <td width="100" align="center" valign="top" bgcolor="#00007f"><b><font
+ <td width="100" align="center" valign="top" bgcolor="#61b9cf"><b><font
  color="#ffffff">Project</font></b></td>
- <td align="center" width="187" valign="top" bgcolor="#00007f"><b><font
+ <td align="center" width="187" valign="top" bgcolor="#61b9cf"><b><font
  color="#ffffff">Name</font></b></td>
- <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Transcript Accession</font></b><br></td> 
- <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Class</font></b><br></td> 
- <td valign="top" bgcolor="#00007f"><b><font color="#ffffff">Family</font></b><br></td> 
+ <td valign="top" bgcolor="#61b9cf"><b><font color="#ffffff">Transcript Accession</font></b><br></td> 
+ <td valign="top" bgcolor="#61b9cf"><b><font color="#ffffff">Class</font></b><br></td> 
+ <td valign="top" bgcolor="#61b9cf"><b><font color="#ffffff">Family</font></b><br></td> 
  </tr>
 Page_Done
 
