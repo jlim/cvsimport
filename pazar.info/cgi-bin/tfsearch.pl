@@ -30,25 +30,67 @@ document.tf_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
-var state='false';
-function CheckBox(){
-if (state=='true')
-{
-    document.tf_search.analysis.checked=false;
-    document.tf_search.reference.checked=false;
-    document.tf_search.interaction.checked=false;
-    document.tf_search.evidence.checked=false;
-    state='false';
+var evstate=0; // Lines of evidence initially off
+var gtstate=1; // genomic target checkboxes
+var atstate=1; // artificial target checkboxes
+
+function evCheckBox(){
+    if (evstate==1)
+    {
+	document.tf_search.analysis.checked=false;
+	document.tf_search.reference.checked=false;
+	document.tf_search.interaction.checked=false;
+	document.tf_search.evidence.checked=false;
+	evstate=0;
+    }
+    else
+    { 
+	document.tf_search.analysis.checked=true;
+	document.tf_search.reference.checked=true;
+	document.tf_search.interaction.checked=true;
+	document.tf_search.evidence.checked=true;
+	evstate=1;
+    }
 }
-if (state=='false')
-{
-    document.tf_search.analysis.checked=true;
-    document.tf_search.reference.checked=true;
-    document.tf_search.interaction.checked=true;
-    document.tf_search.evidence.checked=true;
-    state='true';
+
+function atCheckBox(){
+    if (atstate==1)
+    {
+	document.tf_search.construct_name.checked=false;
+	document.tf_search.description.checked=false;
+	atstate=0;
+    }
+    else
+    { 
+	document.tf_search.construct_name.checked=true;
+	document.tf_search.description.checked=true;
+	atstate=1;
+    }
 }
-}});
+
+
+function gtCheckBox(){
+    if (gtstate==1)
+    {
+	document.tf_search.reg_seq_name.checked=false;
+	document.tf_search.gene.checked=false;
+	document.tf_search.species.checked=false;
+	document.tf_search.coordinates.checked=false;
+	document.tf_search.quality.checked=false;
+	gtstate=0;
+    }
+    else
+    { 
+	document.tf_search.reg_seq_name.checked=true;
+	document.tf_search.gene.checked=true;
+	document.tf_search.species.checked=true;
+	document.tf_search.coordinates.checked=true;
+	document.tf_search.quality.checked=true;
+	gtstate=1;
+    }
+}
+
+});
 
 if($loggedin eq 'true')
 {
@@ -103,44 +145,29 @@ ID</option>
 the Attributes to Display</p><br></td>
     </tr>
     <tr>
-      <td colspan="2"><span class="title4"><input name="reg_seq" checked="checked" type="checkbox"> Genomic Target (reg_seq): </span></td>
+      <td colspan="2"><span class="title4"><input name="reg_seq" checked type="checkbox" onclick="gtCheckBox();"> Genomic Target (reg_seq): </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="reg_seq_name" type="checkbox"> Name (if any) </p>
+      <p ><input name="reg_seq_name" type="checkbox" checked> Name (if any) </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="gene" type="checkbox"> Gene </p>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="coordinates" type="checkbox"> Coordinates </p>
-      </td>
-      <td width="50%" valign="top" align="left">
-      <p ><input name="species" type="checkbox"> Species </p>
+      <p ><input name="gene" type="checkbox" checked> Gene </p>
       </td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="quality" type="checkbox"> Quality </p>
+      <p ><input name="coordinates" type="checkbox" checked> Coordinates </p>
       </td>
       <td width="50%" valign="top" align="left">
+      <p ><input name="species" type="checkbox" checked> Species </p>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <span class="title4"><input name="construct" checked="checked" type="checkbox"> Artificial Target (construct): </span></td>
-    </tr>
-    <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="construct_name" type="checkbox"> Name </p>
+      <p ><input name="quality" type="checkbox" checked> Quality </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="description" type="checkbox"> Description (if any) </p>
       </td>
     </tr>
     <tr>
@@ -148,7 +175,22 @@ the Attributes to Display</p><br></td>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <span class="title4"><input name="ev" type="checkbox" onclick="javascript:CheckBox()"> Lines of evidence: </span></td>
+      <td colspan="2"> <span class="title4"><input name="construct" checked type="checkbox" onclick="atCheckBox();"> Artificial Target (construct): </span></td>
+    </tr>
+    <tr>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="construct_name" type="checkbox" checked> Name </p>
+      </td>
+      <td width="50%" valign="top" align="left">
+      <p ><input name="description" type="checkbox" checked> Description (if any) </p>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"> <span class="title4"><input name="ev" type="checkbox" onclick="evCheckBox();"> Lines of evidence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">

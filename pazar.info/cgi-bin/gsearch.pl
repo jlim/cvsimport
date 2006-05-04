@@ -28,47 +28,79 @@ document.gene_search.target="Window1";
 window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
 }
 }
-var state=0;
-function CheckBox(cat){
-if (cat == 1)
+var regState=1;//regulatory sequence checkbox on by default
+var intState=0; // interacting evidence checkbox state
+var othState=0; // other evidence checkbox state
+
+function regCheckBox()
 {
-if (state == 1)
-{
-    document.gene_search.tf.checked=false;
-    document.gene_search.tf_analysis.checked=false;
-    document.gene_search.tf_reference.checked=false;
-    document.gene_search.tf_interaction.checked=false;
-    document.gene_search.tf_evidence.checked=false;
-    state=0;
+    if(regState==1)
+    {
+	document.gene_search.gene.checked=false;
+	document.gene_search.tss.checked=false;
+	document.gene_search.reg_seq_name.checked=false;
+	document.gene_search.sequence.checked=false;
+	document.gene_search.coordinates.checked=false;
+	document.gene_search.species.checked=false;
+	document.gene_search.quality.checked=false;
+	regState=0;
+    }
+    else
+    {
+	document.gene_search.gene.checked=true;
+	document.gene_search.tss.checked=true;
+	document.gene_search.reg_seq_name.checked=true;
+	document.gene_search.sequence.checked=true;
+	document.gene_search.coordinates.checked=true;
+	document.gene_search.species.checked=true;
+	document.gene_search.quality.checked=true;
+	regState=1;
+    }
 }
-if (state == 0)
+
+function intCheckBox()
 {
-    document.gene_search.tf.checked=true;
-    document.gene_search.tf_analysis.checked=true;
-    document.gene_search.tf_reference.checked=true;
-    document.gene_search.tf_interaction.checked=true;
-    document.gene_search.tf_evidence.checked=true;
-    state=1;
-}}
-if (cat == 0)
-{
-if (state == 1)
-{
-    document.gene_search.other_analysis.checked=false;
-    document.gene_search.other_reference.checked=false;
-    document.gene_search.other_effect.checked=false;
-    document.gene_search.other_evidence.checked=false;
-    state=0;
+    if(intState==1)
+    {
+	document.gene_search.tf.checked=false;
+	document.gene_search.tf_analysis.checked=false;
+	document.gene_search.tf_reference.checked=false;
+	document.gene_search.tf_interaction.checked=false;
+	document.gene_search.tf_evidence.checked=false;
+	intState=0;
+    }
+    else
+    {
+	document.gene_search.tf.checked=true;
+	document.gene_search.tf_analysis.checked=true;
+	document.gene_search.tf_reference.checked=true;
+	document.gene_search.tf_interaction.checked=true;
+	document.gene_search.tf_evidence.checked=true;
+	intState=1;
+    }
 }
-if (state == 0)
+
+function othCheckBox()
 {
-    document.gene_search.other_analysis.checked=true;
-    document.gene_search.other_reference.checked=true;
-    document.gene_search.other_effect.checked=true;
-    document.gene_search.other_evidence.checked=true;
-    state=1;
-}}
-}});
+    if(othState==1)
+    {
+	document.gene_search.other_analysis.checked=false;
+	document.gene_search.other_reference.checked=false;
+	document.gene_search.other_effect.checked=false;
+	document.gene_search.other_evidence.checked=false;
+	othState=0;
+    }
+    else
+    {
+	document.gene_search.other_analysis.checked=true;
+	document.gene_search.other_reference.checked=true;
+	document.gene_search.other_effect.checked=true;
+	document.gene_search.other_evidence.checked=true;
+	othState=1;
+    }
+}
+
+});
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -111,7 +143,7 @@ ID</option>
 the Attributes to Display</p><br></td>
     </tr>
 <tr>
-      <td colspan="2"><span class="title4"><input name="reg_seq" checked="checked" type="checkbox"> Regulatory Sequence: </span></td>
+      <td colspan="2"><span class="title4"><input name="reg_seq" checked type="checkbox" onClick="regCheckBox();"> Regulatory Sequence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
@@ -155,7 +187,7 @@ the Attributes to Display</p><br></td>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <span class="title4"><input name="ev" type="checkbox" onclick="javascript:CheckBox(1)"> Interacting Evidence: </span></td>
+      <td colspan="2"> <span class="title4"><input name="ev" type="checkbox" onclick="intCheckBox();"> Interacting Evidence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
@@ -186,7 +218,7 @@ the Attributes to Display</p><br></td>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <span class="title4"><input name="other" type="checkbox" onclick="javascript:CheckBox(0)"> Other Evidence: </span></td>
+      <td colspan="2"> <span class="title4"><input name="other" type="checkbox" onclick="othCheckBox();"> Other Evidence: </span></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
