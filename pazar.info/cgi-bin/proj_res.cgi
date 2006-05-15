@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 
 use HTML::Template;
-use strict;
 use Data::Dumper;
 use pazar;
 use pazar::reg_seq;
@@ -14,12 +13,14 @@ use CGI::Carp qw(fatalsToBrowser);
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
 
+require 'getsession.pl';
+
  
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => "PAZAR - Project Search Engine");
+$template->param(TITLE => "PAZAR - Project Search Results");
 $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {            
     var numChecked = 0;
     var counter;
@@ -45,6 +46,17 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {
 
         }});
 
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
+
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
@@ -55,19 +67,45 @@ my %param = %{$get->Vars};
 my $proj=$param{project_name};
 
 ###database connection
-my $dbh= pazar->new( 
+my $dbh0= pazar->new( 
+		       -host          =>    $ENV{PAZAR_host},
+		       -user          =>    $ENV{PAZAR_pubuser},
+		       -pass          =>    $ENV{PAZAR_pubpass},
+		       -dbname        =>    $ENV{PAZAR_name},
+		       -drv           =>    'mysql',
+		       -globalsearch  =>    'yes');
+
+my $stat = &select($dbh0, "SELECT status FROM project WHERE project_name='$proj'");
+my $status=$stat->fetchrow_array;
+
+my $dbh;
+if ($status eq 'open' || $status eq 'published') {
+### global database connection
+$dbh= pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -drv           =>    'mysql',
 		       -project       =>    $proj);
+} elsif ($status eq 'restricted') {
+### user specific database connection
+$dbh= pazar->new( 
+		       -host          =>    $ENV{PAZAR_host},
+		       -user          =>    $ENV{PAZAR_pubuser},
+		       -pass          =>    $ENV{PAZAR_pubpass},
+		       -pazar_user    =>    $info{user},
+		       -pazar_pass    =>    $info{pass},
+		       -dbname        =>    $ENV{PAZAR_name},
+		       -drv           =>    'mysql',
+		       -project       =>    $proj);
+}
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 my $projid = $dbh->get_projectid();
 
-print "<p class=\"title1\">PAZAR - Project $proj Results</p>";
+print "<p class=\"title1\">PAZAR - $proj Search Results</p>";
 
 ###
 ### gene-centric view

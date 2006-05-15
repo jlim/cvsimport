@@ -1,10 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use HTML::Template;
-use strict;
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
+
+require 'getsession.pl';
 
  
 # open the html header template
@@ -53,6 +54,17 @@ if (state == 0)
 }
 }});
 
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
+
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
@@ -61,7 +73,7 @@ my $get = new CGI;
 my %param = %{$get->Vars};
 my $proj = $param{project_name};
 
-print "<p class=\"title1\">PAZAR - Project $proj Search Engine</p>";
+print "<p class=\"title1\">PAZAR - $proj Search Engine</p>";
 
 print<<page;
 <table border="0" cellpadding="0" cellspacing="0" width="100%">

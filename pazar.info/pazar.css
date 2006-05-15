@@ -3,7 +3,6 @@ font-family: Arial,Helvetica,Sans-Serif;
 line-height: 1.7;
 color: #000000;
 font-size: 12px;
-text-align:justify;
 }
 
 a { cursor: hand; color: #0066CC; text-decoration: underline}
@@ -71,4 +70,8 @@ padding-left:25px;
 
 .monospace {
 font-family: monospace;
+}
+
+.justify {
+text-align:justify;
 }

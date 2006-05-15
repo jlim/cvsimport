@@ -1,7 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use HTML::Template;
-use strict;
 use Data::Dumper;
 use pazar;
 use pazar::reg_seq;
@@ -10,8 +9,9 @@ use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
+require 'getsession.pl';
  
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
@@ -33,6 +33,17 @@ if (state == 0)
 }
 }});
 
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
+
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
@@ -40,22 +51,79 @@ my $get = new CGI;
 my %param = %{$get->Vars};
 
 ###getting the project_name
-my $proj=$param{project_name}||'jaspar_core';
+my $proj=$param{project_name};
 
 ###database connection
-my $dbh= pazar->new( 
+my $dbh0= pazar->new( 
+		       -host          =>    $ENV{PAZAR_host},
+		       -user          =>    $ENV{PAZAR_pubuser},
+		       -pass          =>    $ENV{PAZAR_pubpass},
+		       -dbname        =>    $ENV{PAZAR_name},
+		       -drv           =>    'mysql',
+		       -globalsearch  =>    'yes');
+
+my $stat = &select($dbh0, "SELECT status FROM project WHERE project_name='$proj'");
+my $status=$stat->fetchrow_array;
+
+### add description when the schema is changed
+#my $stat = &select($dbh, "SELECT status, description FROM project WHERE project_name='$proj'");
+#my ($status, $descrip) = $stat->fetchrow_array;
+
+my $dbh;
+if ($status eq 'open' || $status eq 'published') {
+### global database connection
+$dbh= pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -drv           =>    'mysql',
 		       -project       =>    $proj);
+} elsif ($status eq 'restricted') {
+### user specific database connection
+$dbh= pazar->new( 
+		       -host          =>    $ENV{PAZAR_host},
+		       -user          =>    $ENV{PAZAR_pubuser},
+		       -pass          =>    $ENV{PAZAR_pubpass},
+		       -pazar_user    =>    $info{user},
+		       -pazar_pass    =>    $info{pass},
+		       -dbname        =>    $ENV{PAZAR_name},
+		       -drv           =>    'mysql',
+		       -project       =>    $proj);
+}
 
 my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 my $projid = $dbh->get_projectid();
 
-print "<p class=\"title1\">PAZAR - Project $proj Search Engine</p>";
+print "<p class=\"title1\">PAZAR - $proj</p>";
+print "<p><span class=\"title4\">Description</span><br>";
+### add description when the schema is changed
+#print $descrip."<br>";
+print "</p>";
+
+print "<p><span class=\"title4\">Statistics</span><br>";
+my $gnb=&select($dbh, "SELECT count(distinct db_accn) FROM gene_source a, tsr b WHERE a.project_id='$projid' and a.gene_source_id=b.gene_source_id");
+my $genenb=$gnb->fetchrow_array||'0';
+my $rnb=&select($dbh, "SELECT count(reg_seq_id) FROM reg_seq WHERE project_id='$projid'");
+my $regseqnb=$rnb->fetchrow_array||'0';
+my $cnb=&select($dbh, "SELECT count(construct_id) FROM construct WHERE project_id='$projid'");
+my $constrnb=$cnb->fetchrow_array||'0';
+my $tnb=&select($dbh, "SELECT count(funct_tf_id) FROM funct_tf WHERE project_id='$projid'");
+my $tfnb=$tnb->fetchrow_array||'0';
+my $mnb=&select($dbh, "SELECT count(matrix_id) FROM matrix WHERE project_id='$projid'");
+my $matrixnb=$mnb->fetchrow_array||'0';
+
+print "Regulated Genes: ".$genenb."<br>";
+print "Regulatory sequence (genomic): ".$regseqnb."<br>";
+print "Regulatory sequence (artificial): ".$constrnb."<br>";
+print "Transcription Factors: ".$tfnb."<br>";
+print "Transcription Factor Profiles: ".$matrixnb."<br></p>";
+
+if ($genenb==0&&$regseqnb==0&&$constrnb==0&&$tfnb==0&&$matrixnb!=0) {
+    print "<p class=\"warning\"> This project only holds pre-computed profiles.<br>Please use the TF PROFILES search engine to look at those profiles.</p>";
+} else {
+print "<span class=\"title4\">Search Engine</span><br>";
 
 print<<page1;
 <table>
@@ -362,6 +430,7 @@ print<<page7;
 </tbody>
 </table>
 page7
+}
 
 ###  print out the html tail template
   my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
