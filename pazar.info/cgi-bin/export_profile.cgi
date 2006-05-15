@@ -12,7 +12,7 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 require 'getsession.pl';
 
@@ -136,6 +136,7 @@ COLNAMES
 				if ($subnb==0) {
 				    $classes=$cl;
 				    $tfs=$tid;
+				    $subnb++;
 				} else {
 				    $classes.='<br>'.$cl;
 				    $tfs.='<br>'.$tid;
@@ -155,7 +156,7 @@ COLNAMES
 					  class => $classes,
 					  pmid => $pmid,
 					  method => $exptype,
-					  transcript => $tid,
+					  transcript => $tfs,
 					  pfm => $matrixref,
 					  pazar_id => $mid,
                                           logo => $logo};
@@ -193,7 +194,7 @@ print<<ROWS;
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{species}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{class}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><img src="http://www.pazar.info/tmp/precomputed/$logo"></td>
-    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><form name='$sorted[$i]->{logo}' method='post' action ='http://www.pazar.info/cgi-bin/export_profile.cgi' enctype="multipart/form-data" target='Detail_win'><input type="hidden" name="mode" value="details"><input type="hidden" name="project" value="$sorted[$i]->{project}"><input type="hidden" name="dbid" value="$sorted[$i]->{dbid}"><input type="hidden" name="name" value="$sorted[$i]->{name}"><input type="hidden" name="class" value="$sorted[$i]->{class}"><input type="hidden" name="species" value="$sorted[$i]->{species}"><input type="hidden" name="pmid" value="$sorted[$i]->{pmid}"><input type="hidden" name="method" value="$sorted[$i]->{method}"><input type="hidden" name="transcript" value="$sorted[$i]->{transcript}"><input type="hidden" name="pazar_id" value="$sorted[$i]->{pazar_id}"><input type="hidden" name="pfm" value="$sorted[$i]->{pfm}"><input type="hidden" name="logo" value="$sorted[$i]->{logo}"><input value="More" name="submit" type="submit" onClick="window.open('about:blank','Detail_win', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=500')"></form></td>
+    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><form name='$sorted[$i]->{logo}' method='post' action ='http://www.pazar.info/cgi-bin/export_profile.cgi' enctype="multipart/form-data" target='Detail_win'><input type="hidden" name="mode" value="details"><input type="hidden" name="project" value="$sorted[$i]->{project}"><input type="hidden" name="dbid" value="$sorted[$i]->{dbid}"><input type="hidden" name="name" value="$sorted[$i]->{name}"><input type="hidden" name="class" value="$sorted[$i]->{class}"><input type="hidden" name="species" value="$sorted[$i]->{species}"><input type="hidden" name="pmid" value="$sorted[$i]->{pmid}"><input type="hidden" name="method" value="$sorted[$i]->{method}"><input type="hidden" name="transcript" value="$sorted[$i]->{transcript}"><input type="hidden" name="pazar_id" value="$sorted[$i]->{pazar_id}"><input type="hidden" name="pfm" value="$sorted[$i]->{pfm}"><input type="hidden" name="logo" value="$sorted[$i]->{logo}"><input value="More" name="submit" type="submit" onClick="window.open('about:blank','Detail_win', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=450')"></form></td>
     </tr>
 ROWS
 
@@ -214,7 +215,7 @@ $bg_color=1-$bg_color;
                       ."T [ ".$matrix[3]." ]<br>";
 
 ########### start of HTML table
-print $get->header("text/html");
+    print $get->header("text/html");
 
 print<<DETAILS;
 <head><title>PAZAR - TF Profiles</title></head>
@@ -222,21 +223,90 @@ print<<DETAILS;
 <tr><td width="400" align="center" valign="center"><img src="http://www.pazar.info/tmp/precomputed/$logo"></td></tr>
 <tr><td width="400" align="center" valign="center">$prettystring<br></td></tr>
 <tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Matrix Info</span></td></tr>
-<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0>
+<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
         <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Project</b></td>
             <td bgcolor="#fffff0" align="left" valign="center">$param{project}</td>
             <td bgcolor="#9ad3e2" align="left" valign="center"><b>Database::ID</b></td>
             <td bgcolor="#fffff0" align="left" valign="center">$param{dbid}</td>
         </tr>
-        </table>
-</td></tr>
-</table></body></html>
+        <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Name</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$param{name}</td>
+            <td bgcolor="#9ad3e2" align="left" valign="center"><b>Species</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$param{species}</td>
+        </tr>
+    <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>PubmedID</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$param{pmid}</td>
+            <td bgcolor="#9ad3e2" align="left" valign="center"><b>Experiment</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$param{method}</td>
+        </tr>
 DETAILS
+
+    if ($param{desc} && $param{desc} ne '') {
+	
+print<<DESC;
+    <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Description</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center" colspan=3>$param{desc}</td>
+        </tr>
+DESC
+    }
+
+print<<TF; 
+</table><br></td></tr>
+<tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Transcription Factor Info</span></td></tr>
+<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
+        <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Accession Number</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$param{transcript}</td>
+            <td bgcolor="#9ad3e2" align="left" valign="center"><b>Class,Family</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$param{class}</td>
+        </tr>
+</table><br></td></tr>
+TF
+    my $dbh= pazar->new( 
+		     -host          =>    $ENV{PAZAR_host},
+		     -user          =>    $ENV{PAZAR_pubuser},
+		     -pass          =>    $ENV{PAZAR_pubpass},
+		     -dbname        =>    $ENV{PAZAR_name},
+		     -drv           =>    'mysql',
+		     -globalsearch  =>    'yes'); #To
+
+    my $seq_ids= &select($dbh, "SELECT * FROM reg_seq_set WHERE matrix_id='$param{pazar_id}'");
+    if ($seq_ids) {
+
+print<<SITES1; 
+<tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Individual Binding Sites</span></td></tr>
+<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
+SITES1
+
+        while (my $seq_id=$seq_ids->fetchrow_hashref) {
+	    my $construct_id = $seq_id->{construct_id};
+	    my $reg_seq_id = $seq_id->{reg_seq_id};
+	    if ($construct_id && $construct_id ne '0' && $construct_id ne 'NULL') {
+		my @dat=$dbh->get_data_by_primary_key('construct',$construct_id);
+print<<SITES2;
+        <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Artificial Sequence</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$dat[2]</td>
+        </tr>
+SITES2
+	    }
+	    if ($reg_seq_id && $reg_seq_id ne '0' && $reg_seq_id ne 'NULL') {
+		my @dat=$dbh->get_data_by_primary_key('reg_seq',$reg_seq_id);
+print<<SITES3;
+        <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Genomic Sequence</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$dat[2]</td>
+        </tr>
+SITES3
+	    }
+        }
+    print "</table><br></td></tr>";
+    }
+
+print "</table></body></html>";
+
 }
 
 ###  print out the html tail template
-  my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
-  print $template_tail->output;
+my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+print $template_tail->output;
 
 
 sub select {
@@ -260,19 +330,3 @@ sub uncompress {
 }
 
 
-# 	undef (my $sequences);
-# 	my $seq_ids= &select($dbh, "SELECT * FROM reg_seq_set WHERE matrix_id='$mid'");
-# 	if ($seq_ids) {
-# 	    while (my $seq_id=$seq_ids->fetchrow_hashref) {
-# 		my $construct_id = $seq_id->{construct_id};
-# 		my $reg_seq_id = $seq_id->{reg_seq_id};
-# 		if ($construct_id && $construct_id ne '0' && $construct_id ne 'NULL') {
-# 		    $sequence_ids .= "construct".$construct_id." ";
-# 		}
-# 		if ($reg_seq_id && $reg_seq_id ne '0' && $reg_seq_id ne 'NULL') {
-# 		    $sequence_ids .= "reg_seq".$reg_seq_id." ";
-# 		}
-
-# 	    }
-
-# 	}
