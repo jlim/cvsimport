@@ -2,6 +2,8 @@
 
 use HTML::Template;
 
+require 'getsession.pl';
+
 # open the html header template
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
@@ -24,8 +26,8 @@ document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
 if(target == 2) 
 {
 document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
-document.gene_search.target="Window1";
-window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
+document.gene_search.target="Window2";
+window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
 var regState=1;//regulatory sequence checkbox on by default
@@ -101,6 +103,17 @@ function othCheckBox()
 }
 
 });
+
+if($loggedin eq 'true')
+{
+    #log out link
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+}
+else
+{
+    #log in link
+    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+}
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;

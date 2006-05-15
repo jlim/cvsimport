@@ -3,8 +3,6 @@
 use lib '/space/usr/local/src/ensembl-36/ensembl/modules/';
 use lib '/space/usr/local/src/bioperl-live/';
 
-use strict;
-
 use pazar;
 use pazar::talk;
 
@@ -16,9 +14,9 @@ use constant DB_DRV  => 'mysql';
 use constant DB_NAME => $ENV{PAZAR_name};
 use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
-use constant PAZAR_USER => 'elodie@cmmt.ubc.ca';
-use constant PAZAR_PASS => 'pazarpw';
 use constant DB_HOST => $ENV{PAZAR_host};
+
+require 'getsession.pl';
 
 my $get = new CGI;
 
@@ -36,32 +34,47 @@ my $dbh = pazar->new(
 
 my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
-my %gene_project;
+
 my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
-if ($projects) {
-    my $node=0;
-    while (my $project=$projects->fetchrow_hashref) {
-	my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id='$project->{project_id}'");
-	if ($genes) {
-	    $node++;
-	    while (my $gene=$genes->fetchrow_hashref) {
-		my $tsrs = &select($dbh, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
-		if ($tsrs) {
-		    while (my $tsr=$tsrs->fetchrow_hashref) {
-			my $reg_seqs = &select($dbh, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
-			if ($reg_seqs) {
-			    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-			    my @desc = split('\[',$coords[5]);
-			    push (@{$gene_project{$project->{project_name}}}, {
-				accn => $gene->{db_accn},
-				desc => $gene->{description},
-				ens_desc => $desc[0]});
-			}
+
+my @desc;
+while (my $project=$projects->fetchrow_hashref) {
+    push @desc, $project;
+}
+if ($loggedin eq 'true') {
+    foreach my $proj (@projids) {
+	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and status='restricted'");
+	while (my $restr=$restricted->fetchrow_hashref) {
+	    push @desc, $restr;
+	}
+    }
+}
+
+my %gene_project;
+my $node=0;
+foreach my $project (@desc) {
+    my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id='$project->{project_id}'");
+    if ($genes) {
+	$node++;
+	while (my $gene=$genes->fetchrow_hashref) {
+	    my $tsrs = &select($dbh, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
+	    if ($tsrs) {
+		while (my $tsr=$tsrs->fetchrow_hashref) {
+		    my $reg_seqs = &select($dbh, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
+		    if ($reg_seqs) {
+			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
+			my @des = split('\(',$coords[5]);
+			my @desc = split('\[',$des[0]);
+			push (@{$gene_project{$project->{project_name}}}, {
+			    accn => $gene->{db_accn},
+			    desc => $gene->{description},
+			    ens_desc => $desc[0]});
 		    }
 		}
 	    }
 	}
     }
+}
 
     print "<head>
 <title>PAZAR - Gene List</title>
@@ -142,7 +155,7 @@ print "    <li><a name='#$gene_data->{accn}'><b>EnsEMBL stable ID: </b>"."<a hre
 }
 }
 print "</ul></li><br>";
-}}
+}
 print "</ul></body></html>";
 
 

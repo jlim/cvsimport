@@ -9,6 +9,8 @@ use pazar;
 use pazar::talk;
 use pazar::tf;
 
+require 'getsession.pl';
+
 print "content-type:text/html\n\n";
 
 
@@ -30,13 +32,8 @@ my $pazar = pazar->new(
                       -host          =>    $ENV{PAZAR_host},
                       -user          =>    $ENV{PAZAR_pubuser},
                       -pass          =>    $ENV{PAZAR_pubpass},
-                      -pazar_user    =>    'elodie@cmmt.ubc.ca',
-                      -pazar_pass    =>    'pazarpw',
                       -dbname        =>    $ENV{PAZAR_name},
                       -drv           =>    'mysql');
-
-#load tf from pazar
-my $tf = $pazar->create_tf;
 
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
@@ -57,14 +54,23 @@ my $projects=&select($pazardbh, "SELECT * FROM project WHERE status='open' OR st
 if ($projects) {
     my $node=0;
     while (my $project=$projects->fetchrow_hashref) {
-
-
 	my $pazarsth = $pazardbh->prepare("select * from gene_source where description like '$search_alpha%' and project_id=$project->{project_id}");
 	$pazarsth->execute();
 #pazar load tfs from results for each result
 	while(@res = $pazarsth->fetchrow_array)
 	{
 	    push(@alpharesults,[@res]);
+	}
+    }
+}
+
+if ($loggedin eq 'true') {
+    foreach my $proj (@projids) {
+	my $pazarsth2 = $pazardbh->prepare("select * from gene_source where description like '$search_alpha%' and a.project_id='$proj' and a.project_id=b.project_id and upper(status)='RESTRICTED'");
+        $pazarsth2->execute();
+#pazar load tfs from results for each result
+	while(my @res2 = $pazarsth2->fetchrow_array) {
+	    push(@alpharesults,[@res2]);
 	}
     }
 }
@@ -110,7 +116,8 @@ foreach my $arrayref (@alpharesults)
 			my $reg_seqs = &select($pazardbh, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
 			if ($reg_seqs) {
 			    my @coords = $talkdb->get_ens_chr($arrayref->[2]);
-			    my @desc = split('\[',$coords[5]);
+			    my @des = split('\(',$coords[5]);
+			    my @desc = split('\[',$des[0]);
 			    $description = $desc[0];
 			}
 		    }

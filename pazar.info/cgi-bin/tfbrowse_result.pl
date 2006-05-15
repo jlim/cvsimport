@@ -34,9 +34,6 @@ my $pazar = pazar->new(
                       -dbname        =>    $ENV{PAZAR_name},
                       -drv           =>    'mysql');
 
-#load tf from pazar
-my $tf = $pazar->create_tf;
-
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
 	      1 => "#dadce0"
