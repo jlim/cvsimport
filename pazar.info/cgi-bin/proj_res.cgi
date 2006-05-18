@@ -794,7 +794,7 @@ print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class
     print "<p></td></tr>";
 
 #make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
-    if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) {
+    if((scalar(@interactors)>0 && ($params{at_tf} eq 'on' || $params{at_tf_analysis} eq 'on' || $params{at_tf_reference} eq 'on' || $params{at_tf_interaction} eq 'on' || $params{at_tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{at_other_analysis} eq 'on' || $params{at_other_reference} eq 'on' || $params{at_other_effect} eq 'on' || $params{at_other_evidence} eq 'on'))) {
         print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
     }
 ################### BEGIN INTERACTING EVIDENCE SECTION #####################
