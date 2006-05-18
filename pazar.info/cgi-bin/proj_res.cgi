@@ -188,7 +188,9 @@ if ($param{view} eq 'gene-centric') {
     if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found in this project!<br></p>\n"; exit;}
     my $res=0;
     my $filt=0;
-    foreach my $regseq (@reg_seqs) {
+    my @sorted_regseqs = sort {$a->gene_accession cmp $b->gene_accession} @reg_seqs;
+    my $prev_gene_accn;
+    foreach my $regseq (@sorted_regseqs) {
 
 ### length filter
 	if ($param{length_filter} eq 'on' && $param{length} ne '0') {
@@ -385,6 +387,27 @@ my $filter =
 	}
 	if ($exprs[0] || $inters[0]) {
 	    $filt=1;
+	    my $gene_accn = $regseq->gene_accession;
+	    my $gene_desc = $regseq->gene_description || '';
+	    my $gene_sp = $regseq->binomial_species;
+	    if ($gene_accn ne $prev_gene_accn) {
+		my @ens_coords = $ensdb->get_ens_chr($gene_accn);
+		my @des = split('\(',$ens_coords[5]);
+		my @desc = split('\[',$des[0]);    
+		my $geneDescription = $desc[0];
+#print header
+
+print<<HEADER_TABLE;
+
+<table width='1200' border=1 cellspacing=0>
+<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_desc</td></tr>
+<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_accn</td></tr>
+<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
+<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_sp</td></tr>
+</table>
+HEADER_TABLE
+                $prev_gene_accn = $gene_accn;
+	    }
 	    &print_gene_attr($dbh, $ensdb, $regseq, \@inters, \@exprs, %param);
 	}
     }
@@ -719,49 +742,117 @@ sub select {
 
 sub print_gene_attr {
     my ($dbh, $ensdb, $regseq, $inters, $exprs, %params) = @_;
-    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
-    if ($params{at_gene} eq 'on') {
-	my $transcript=$regseq->transcript_accession || 'Transcript Not Specified';
-	print "<li><b>Gene/Transcript: </b>".$regseq->gene_accession."/".$transcript."</li>";
-	my @ens_coords = $ensdb->get_ens_chr($regseq->gene_accession);
-	my @desc = split('\[',$ens_coords[5]);
-	print "<li>".$desc[0]."</li>";
+    my @interactors = @$inters;
+    my @expressors = @$exprs;
+
+#start table
+print<<COLNAMES;	    
+		<table width='1200' border=1 cellspacing=0><tr><td>
+		    <table width='100%' border="1" cellspacing="0" cellpadding="3">
+		    <tr>
+		    <td width="150" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
+		    
+COLNAMES
+
+print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Gene/Transcript ID</span></td>";
+
+    if ($params{at_tss} eq 'on')
+    {
+	print "<td width='180' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
     }
+    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
+    print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
+
+    if ($params{at_quality} eq 'on') {
+	print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
+    }
+    print "</tr>";
+    
+#print out default information
+    print "<tr>";
+    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$proj</td>";
+    
+    my $transcript=$regseq->transcript_accession || 'Transcript Not Specified';
+    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$transcript."</td>";
+
     if ($params{at_tss} eq 'on') {
-	if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<li><b>Transcription Start Site: </b>".$regseq->transcript_fuzzy_start."</li>";} else {
-	    print "<li>Transcription Start Site: </b>".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</li>";
+	if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
+	    print "<td width='180' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
 	}
     }
-    if ($params{at_species} eq 'on') {
-	print "<li><b>Species: </b>".$regseq->binomial_species."</li>";
-    }
-    if ($params{at_reg_seq_name} eq 'on' && $regseq->id) {
-	print "<li><b>Name: </b>".$regseq->id."</li>";
-    }
-    if ($params{at_sequence} eq 'on') {
-	print "<li><b>Sequence: </b>".$regseq->seq."</li>";
-    }
-    if ($params{at_coordinates} eq 'on') {
-	print "<li><b>Coordinates: </b>".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</li>";
-    }
+
+    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
+    print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
+    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
+
     if ($params{at_quality} eq 'on') {
-	print "<li><b>Quality: </b>".$regseq->quality."</li>";
+	print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
     }
+
+    print "</tr></table>";
+    print "<p></td></tr>";
+
+#make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
+    if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) {
+        print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
+    }
+################### BEGIN INTERACTING EVIDENCE SECTION #####################
+#reset row color
+    $bg_color = 0;
     my $count=1;
-    foreach my $inter (@$inters) {
+
+    if ($params{at_tf} eq 'on' || $params{at_tf_analysis} eq 'on' || $params{at_tf_reference} eq 'on' || $params{at_tf_interaction} eq 'on' || $params{at_tf_evidence} eq 'on') {
+	
+#    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+
+#only print table if there is at least one result
+
+	if(scalar(@interactors)>0)
+	{
+	    print "<table width='100%' cellspacing=0 border=1><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
+	    
+	    if ($params{at_tf} eq 'on') {
+		print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
+	    }
+	    if ($params{at_tf_analysis} eq 'on' || $params{at_other_analysis} eq 'on')
+	    {
+		print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+	    }
+	    if ($params{at_tf_reference} eq 'on' || $params{at_other_reference} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
+	    }
+	    if ($params{at_tf_interaction} eq 'on')
+	    {
+		print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
+	    }
+	    if ($params{at_other_effect} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
+	    }
+	    if ($params{at_tf_evidence} eq 'on' || $params{at_other_evidence} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
+	    }
+	    print "</tr>";
+	}
+    }
+    foreach my $inter (@interactors) {
 	if ($params{at_tf} eq 'on' || $params{at_tf_analysis} eq 'on' || $params{at_tf_reference} eq 'on' || $params{at_tf_interaction} eq 'on' || $params{at_tf_evidence} eq 'on') {
-	    print "<li><b>Line of evidence $count: </b></li>";
+	    print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 	    if ($params{at_tf} eq 'on') {
 		my $tf = $dbh->create_tf;
 		my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
-		print "<li>Transcription Factor Complex Name: ".$complex->name."</li>";
+		print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\">".$complex->name;
 		while (my $subunit=$complex->next_subunit) {
 		    my $db = $subunit->get_tdb;
 		    my $tid = $subunit->get_transcript_accession($dbh);
 		    my $cl = $subunit->get_class ||'unknown'; 
 		    my $fam = $subunit->get_fam ||'unknown';
-		    print "<li>Transcription Factor Complex Subunit: ".$tid." - Class: ".$cl." - Family: ".$fam."</li>";
+		    print $tid."&nbsp;(".$cl.")&nbsp; - Family: ".$fam."<br>";
 		}
+		print "</td>";
 	    }
 	    my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
 	    if ($params{at_tf_analysis} eq 'on') {
@@ -780,35 +871,98 @@ sub print_gene_attr {
 		    my @time=$dbh->get_data_by_primary_key('time',$an[5]);
 		    push @anal,$time[0];
 		}
-		print "<li>Analysis: ";
-		print join(':',@anal)."</li>";
+		print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+		print join(':',@anal)."</td>";
 	    }
 	    if ($params{at_tf_reference} eq 'on' && $an[6]) {
 		my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-		print "<li>Reference: ".$ref[0]."</li>";
+		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
 	    }
 	    if ($params{at_tf_interaction} eq 'on') {
 		my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
 		if ($table eq 'interaction') {
-		    print "<li>Interaction: ";
+		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">";
 		    my @data;
 		    for (my $i=0;$i<(@dat-3);$i++) {
 			if ($dat[$i] && $dat[$i] ne '0') {
 			    push @data,$dat[$i];
 			}
 		    }
-		    print join(":",@data)."</li>";
+		    print join(":",@data)."</td>";
 		}
 	    }
+	    if ($params{at_other_effect} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+	    }
+
 	    if ($params{at_tf_evidence} eq 'on' && $an[1]) {
 		my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-		print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
+		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
 	    }
 	    $count++;
+	    print "</tr>";
+	    $bg_color = 1 - $bg_color;
 	}}
-    foreach my $exp (@$exprs) {
+
+    if ($params{at_tf} eq 'on' || $params{at_tf_analysis} eq 'on' || $params{at_tf_reference} eq 'on' || $params{at_tf_interaction} eq 'on' || $params{at_tf_evidence} eq 'on') {
+	
+#end table that was created if there were results
+	if(scalar(@interactors)>0)
+	{
+	    print "</table>";
+	}		    
+    }
+
+################### BEGIN OTHER EVIDENCE SECTION #####################
+#reset row color
+    $bg_color = 0;
+
+
+
+    if ($params{at_other_analysis} eq 'on' || $params{at_other_reference} eq 'on' || $params{at_other_effect} eq 'on' || $params{at_other_evidence} eq 'on') {
+	
+	
+#print table only if results exist
+	if (scalar(@expressors) > 0)
+	{
+	    print "<table width='100%' border=1 cellspacing=0><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
+
+# 			if ($params{at_tf} eq 'on') {
+# 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
+# 			}
+	    if ($params{at_other_analysis} eq 'on' || $params{at_tf_analysis} eq 'on')
+	    {
+		print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+	    }
+	    if ($params{at_other_reference} eq 'on' || $params{at_tf_reference} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
+	    }
+# 			if ($params{at_tf_interaction} eq 'on')
+# 			{
+# 			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
+# 			}
+	    if ($params{at_other_effect} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
+	    }
+	    if ($params{at_other_evidence} eq 'on' || $params{at_tf_evidence} eq 'on')
+	    {
+		print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
+	    }
+	    
+	    print "</tr>";
+	}
+    }
+    foreach my $exp (@expressors) {
 	if ($params{at_other_analysis} eq 'on' || $params{at_other_reference} eq 'on' || $params{at_other_effect} eq 'on' || $params{at_other_evidence} eq 'on') {
-	    print "<li><b>Line of evidence $count: </b></li>";
+	    print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
+
+# 			if ($params{at_tf} eq 'on') {
+# 			    print "<td width='200' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+# 			}
+
 	    my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 	    if ($params{at_other_analysis} eq 'on') {
 		my $aname=$an[2];
@@ -826,31 +980,49 @@ sub print_gene_attr {
 		    my @time=$dbh->get_data_by_primary_key('time',$an[5]);
 		    push @anal,$time[0];
 		}
-		print "<li>Analysis: ";
-		print join(':',@anal)."</li>";
+		print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+		print join(':',@anal)."</td>";
 	    }
 	    if ($params{at_other_reference} eq 'on' && $an[6]) {
 		my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-		print "<li>Reference: ".$ref[0]."</li>";
+		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
 	    }
+# 			if ($params{at_tf_interaction} eq 'on')
+# 			{
+# 			    print "<td width='100' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+# 			}
 	    if ($params{at_other_effect} eq 'on') {
 		my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
-		print "<li>Expression: ";
+		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
 		my @data;
 		for (my $i=0;$i<(@dat-3);$i++) {
 		    if ($dat[$i] && $dat[$i] ne '0') {
 			push @data,$dat[$i];
 		    }
 		}
-		print join(":",@data)."</li>";
+		print join(":",@data)."</td>";
 	    }
 	    if ($params{at_other_evidence} eq 'on' && $an[1]) {
 		my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-		print "<li>Evidence: ".$ev[0]."_".$ev[1]."</li>";
+		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
 	    }
 	    $count++;
+	    print "</tr>";
+	    $bg_color = 1 - $bg_color;
 	}}
-    print "</ul><br>";
+
+    if ($params{at_other_analysis} eq 'on' || $params{at_other_reference} eq 'on' || $params{at_other_effect} eq 'on' || $params{at_other_evidence} eq 'on') {
+
+#end table only if results exist
+	if(scalar(@expressors)>0)
+	{
+	    print "</table>";
+	}
+    }
+
+#end table around evidence
+print "</td></tr></table><br>";
+
 }
 
 sub print_tf_attr {
@@ -1175,4 +1347,23 @@ print "</table><br>\n";
 }
 }
 }
+}
+
+#split long lines into several smaller ones by inserting a line break at a specified character interval
+#parameters: string to break up, interval
+sub chopstr {
+
+    my $longstr = $_[0];
+    my $interval = $_[1];
+    my $newstr = "";
+
+    while(length($longstr) > $interval)
+    {
+#put line break at character+1 position
+	$newstr = $newstr.substr($longstr,0,$interval)."<br>";
+	$longstr = substr($longstr,$interval); #return everything starting at interval'th character	
+    }
+    $newstr = $newstr . $longstr;
+
+    return $newstr;
 }
