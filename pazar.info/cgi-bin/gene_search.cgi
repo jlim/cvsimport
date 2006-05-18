@@ -13,7 +13,7 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Debug( report => 'everything', on => 'anything' );
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 use Data::Dumper;
 
@@ -264,11 +264,10 @@ COLNAMES
 		my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
 		my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
 ########################
-#make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed
-		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on')))
-		{
-			print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";	    
-		}
+if(scalar(@interactors)>0 || scalar(@expressors)>0)
+{
+		print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
+}
 ################### BEGIN INTERACTING EVIDENCE SECTION #####################
 #reset row color
 		$bg_color = 0;
@@ -402,9 +401,9 @@ COLNAMES
 		    {
 			print "<table width='100%' border=1 cellspacing=0><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
 
-			if ($params{tf} eq 'on') {
-			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
-			}
+# 			if ($params{tf} eq 'on') {
+# 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
+# 			}
 			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
 			{
 			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
@@ -413,10 +412,10 @@ COLNAMES
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
 			}
-			if ($params{tf_interaction} eq 'on')
-			{
-			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
-			}
+# 			if ($params{tf_interaction} eq 'on')
+# 			{
+# 			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
+# 			}
 			if ($params{other_effect} eq 'on')
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
@@ -435,9 +434,9 @@ COLNAMES
 		    if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
 			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 
-			if ($params{tf} eq 'on') {
-			    print "<td width='200' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-			}
+# 			if ($params{tf} eq 'on') {
+# 			    print "<td width='200' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+# 			}
 
 			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 			if ($params{other_analysis} eq 'on') {
@@ -463,10 +462,10 @@ COLNAMES
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
 			}
-			if ($params{tf_interaction} eq 'on')
-			{
-			    print "<td width='100' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-			}
+# 			if ($params{tf_interaction} eq 'on')
+# 			{
+# 			    print "<td width='100' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+# 			}
 			if ($params{other_effect} eq 'on') {
 			    my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
