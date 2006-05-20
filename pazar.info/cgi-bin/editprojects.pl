@@ -101,6 +101,16 @@ function doUserAdd(pid)
     }
 
 }
+
+function doUpdateDesc(pid)
+{
+    var decision = confirm("This will permanently change the project description. Do you wish to continue?");
+    if (decision == true)
+    {	
+	eval("document.updatedescform"+pid+".submit();");
+    }
+
+}
 </script>
 javascript
 
@@ -126,10 +136,20 @@ if ($params{mode} eq 'add')
 	    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass});	
 	    
 #insert into project
-	    $dbh->do("insert into project(project_id,project_name,password,status,edit_date) values('','$params{projname}','$encrypted_pass','$params{projstatus}',null)");
+	    $dbh->do("insert into project(project_id,project_name,password,status,description,edit_date) values('','$params{projname}','$encrypted_pass','$params{projstatus}','$params{projdesc}',null)");
+
+#get id of newly created project
+    $sth = $dbh->prepare("select LAST_INSERT_ID()");
+    $sth->execute();
+    my @rs = $sth->fetchrow_array;
 
 #insert into user_project
 	    $dbh->do("insert into user_project(user_project_id,user_id,project_id) values('',$params{uid},LAST_INSERT_ID())");
+
+#update session to include newly created project id
+
+	    push(@projids,$rs[0]);
+	    $session->param('projects', \@projids);
 	}
 	else
 	{
@@ -178,6 +198,28 @@ if($params{mode} eq 'adduser')
     $params{mode}='login';
 }
 
+if($params{mode} eq 'updatedesc') 
+{
+#check project password
+    my $im = Crypt::Imail->new();
+    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass}); 
+    my $chkh=$dbh->prepare("select password from project where project_id=?")||die;
+    $chkh->execute($params{pid})||die;
+    my ($dbpass) = $chkh->fetchrow_array;
+    
+    if($dbpass eq $encrypted_pass)
+    {
+
+# perform update
+	$dbh->do("update project set description='$params{projdesc}' where project_id=$params{pid}");
+    }
+    else
+    {
+	$statusmsg = "Incorrect project administrator password entered. Please check password and try again";
+    }
+#show updated list
+    $params{mode}='login';
+}
 
 if ($params{mode} eq 'updatestatus') 
 {
@@ -318,7 +360,7 @@ if ($params{mode} eq 'login' || $loggedin eq 'true')
 	my $sth=$dbh->prepare("select project_id from user_project where user_id=?");
 	$sth->execute($userid);
 	
-	print "<tr><td><b>Project ID</b></td><td><b>Project Name</b></td><td><b>Project Status</b></td><td><b>Last Edited</b></td><td><b>Project Users</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+	print "<tr><td><b>Project ID</b></td><td><b>Project Name</b></td><td><b>Project Description</b></td><td><b>Project Status</b></td><td><b>Last Edited</b></td><td><b>Project Users</b></td><td>&nbsp;</td><td>&nbsp;</td></tr>";
 	
 	while(my @results = $sth->fetchrow_array)
 	{
@@ -329,10 +371,16 @@ if ($params{mode} eq 'login' || $loggedin eq 'true')
 	    #print project entry
 	    my @projdetails = $sth2->fetchrow_array;
 
-	    print "<tr><td>$proj_id</td><td>$projdetails[1]</td><td>";
+	    print "<tr><td>$proj_id</td><td>$projdetails[1]</td>";
+
+#project description
+	    print "<form name=\"updatedescform$proj_id\" id=\"updatedescform$proj_id\" method='post' action='editprojects.pl'><td><textarea name='projdesc' cols=40 rows=6>$projdetails[4]</textarea>";
+print "<input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='updatedesc'>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUpdateDesc($proj_id);' value='Update Project Description'></form>";
+print "</td>";
+
 #project status update form
 
-	    print "<form method='post' action='editprojects.pl'>";
+	    print "<td><form method='post' action='editprojects.pl'>";
 
 	    print "<select name='projstatus'>";
 	    print "<option ";
@@ -359,7 +407,7 @@ if ($params{mode} eq 'login' || $loggedin eq 'true')
 	    
 	    print "<input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='updatestatus'><input type='hidden' name='pid' value='$proj_id'><input type='submit' value='Update Project \nStatus'></form>";
 	    
-	    print "</td><td>$projdetails[4]</td><td>";
+	    print "</td><td>$projdetails[5]</td><td>";
 
 #retrieve users
 	    my $userlisthandle = $dbh->prepare("select username from users,user_project where users.user_id=user_project.user_id and user_project.project_id=?");
@@ -401,6 +449,7 @@ print<<AddFormFoot;
 	    <tr><td colspan=2 align='center'><b>Create A New Project</b></td></tr>
 	    <tr><td >Name</td><td><input type="text" name="projname"></td></tr>
 	    <tr><td >Status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published<option name="open" value="open">open</select></td></tr>
+<tr><td>Description</td><td><textarea name="projdesc" cols=40 rows=6></textarea></td></tr>
 <tr><td >Administrator Password</td><td><input type="password" name="projpass"></td></tr>
 <tr><td >Re-enter Admin Password</td><td><input type="password" name="projpasscheck"></td></tr>
 <tr><td colspan=2><input type="button" onClick="verifyProjectCreate();" value='Create New Project'></td></tr>
