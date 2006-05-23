@@ -32,7 +32,7 @@ my $dbh = pazar->new(
 		   -drv           =>    DB_DRV,
                    -globalsearch  =>    'yes');
 
-my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
+my $projects=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
 
 my @desc;
 while (my $project=$projects->fetchrow_hashref) {
@@ -40,7 +40,7 @@ while (my $project=$projects->fetchrow_hashref) {
 }
 if ($loggedin eq 'true') {
     foreach my $proj (@projids) {
-	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and status='restricted'");
+	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
 	while (my $restr=$restricted->fetchrow_hashref) {
 	    push @desc, $restr;
 	}
@@ -155,7 +155,7 @@ print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_sear
 } elsif (!$tf_data->{family} || $tf_data->{family} eq '0') {
     print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}.")<br>";
 } else {
-    print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}."/".$tf_data->{family}.")<br>";
+    print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}.", ".$tf_data->{family}.")<br>";
 }
 }
 print "</li>";

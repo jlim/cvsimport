@@ -137,7 +137,7 @@ if (!$accn) {
 	}
 	if ($loggedin eq 'true') {
 	    foreach my $proj (@projids) {
-		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and status='restricted'");
+		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
 		my $restr_proj=$restricted->fetchrow_array();
 		if ($restr_proj) {
 		    my $dbhandle = pazar->new( 

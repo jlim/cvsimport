@@ -79,7 +79,7 @@ my $stat = &select($dbh0, "SELECT status FROM project WHERE project_name='$proj'
 my $status=$stat->fetchrow_array;
 
 my $dbh;
-if ($status eq 'open' || $status eq 'published') {
+if ($status=~/open/i || $status=~/published/i) {
 ### global database connection
 $dbh= pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
@@ -88,7 +88,7 @@ $dbh= pazar->new(
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -drv           =>    'mysql',
 		       -project       =>    $proj);
-} elsif ($status eq 'restricted') {
+} elsif ($status=~/restricted/i) {
 ### user specific database connection
 $dbh= pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},

@@ -84,7 +84,7 @@ if (!$accn) {
 
 #get open or published projects
 
-    my $projectsth=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
+    my $projectsth=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
     my @projects;
     while (my $project=$projectsth->fetchrow_hashref) {
 	push @projects, [$project->{project_name},$project->{project_id}];
@@ -110,25 +110,17 @@ if (!$accn) {
 
 #get species
 
-    my $sources_projects_handle = &select($dbh,"select db_source_id,project_id from gene_source where db_accn='$gene'");
-#just get the first one
-    my $href = $sources_projects_handle->fetchrow_hashref;
- 
-    my $tmp_src = $href->{db_source_id};
-    my $tmp_proj =  $href->{project_id};
-    my $specieshandle = &select($dbh,"select species from location where db_source_id='$tmp_src' and project_id='$tmp_proj'");
-#just get the first one
-    my $specieshref = $specieshandle->fetchrow_hashref;
-    my $tempspecies = $specieshref->{species};
+    my $species = $ensdb->current_org();
+
 #print header
 
 print<<HEADER_TABLE;
 
-<table width='1200' border=1 cellspacing=0>
+<table width='1150' border=1 cellspacing=0>
 <tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneName</td></tr>
 <tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene</td></tr>
 <tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
-<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$tempspecies</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$species</td></tr>
 </table>
 HEADER_TABLE
 
@@ -140,7 +132,7 @@ HEADER_TABLE
 
 	if ($loggedin eq 'true') {
 	    foreach my $proj (@projids) {
-		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and status='restricted'");
+		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
 		my @restr_proj=$restricted->fetchrow_array();
 		if (@restr_proj) {
 		    push @projects, [$restr_proj[0],$proj];
@@ -214,18 +206,18 @@ HEADER_TABLE
 
 #start table
 print<<COLNAMES;	    
-		<table width='1200' border=1 cellspacing=0><tr><td>
+		<table width='1150' border=1 cellspacing=0><tr><td>
 		    <table width='100%' border="1" cellspacing="0" cellpadding="3">
 		    <tr>
-		    <td width="150" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
+		    <td width="100" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
 		    
 COLNAMES
 
-		print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Gene/Transcript ID</span></td>";
+		print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcript ID</span></td>";
 
 		if ($params{tss} eq 'on')
 		{
-		    print "<td width='180' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
+		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
 		}
 		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
 		    print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
@@ -234,18 +226,21 @@ COLNAMES
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
 		}
+		    print "<td width='80' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Display</span></td>";
+
 		print "</tr>";
 		
 #print out default information
+		print "<form name='display' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 		print "<tr>";
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$projname</td>";
 		
-		my $transcript=$regseq->transcript_accession || 'Transcript Not Specified';
+		my $transcript=$regseq->transcript_accession || 'Not Specified';
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$transcript."</td>";
 
 		if ($params{tss} eq 'on') {
-		    if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
-			print "<td width='180' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
+		    if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
+			print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
 		    }
 		}
 
@@ -256,8 +251,8 @@ COLNAMES
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
 		}
-
-		print "</tr></table>";
+		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='submit' name='ucsc' value='ucsc'><br><input type='submit' name='ensembl' value='ensembl'></td>";	       
+		print "</tr></form></table>";
 		print "<p></td></tr>";
 
 ####################### get data objects for retrieving lines of evidence
@@ -318,13 +313,19 @@ COLNAMES
 			if ($params{tf} eq 'on') {
 			    my $tf = $dbh->create_tf;
 			    my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
-			    print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\">".$complex->name;
+			    print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\"><b>".$complex->name."</b><br>";
 			    while (my $subunit=$complex->next_subunit) {
 				my $db = $subunit->get_tdb;
 				my $tid = $subunit->get_transcript_accession($dbh);
-				my $cl = $subunit->get_class ||'unknown'; 
-				my $fam = $subunit->get_fam ||'unknown';
-				print $tid."&nbsp;(".$cl.")&nbsp; - Family: ".$fam."<br>";
+				my $cl = $subunit->get_class; 
+				my $fam = $subunit->get_fam;
+				if (!$cl || $cl eq '0' || $cl eq 'unknown') {
+				print $tid."<br>";
+				} elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
+				    print $tid."&nbsp;(".$cl.")<br>";
+				} else {
+				print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
+			    }
 			    }
 			    print "</td>";
 			}

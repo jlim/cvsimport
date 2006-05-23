@@ -50,7 +50,7 @@ my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_
 
 #use open and published projects for searching
 my %gene_project;
-my $projects=&select($pazardbh, "SELECT * FROM project WHERE status='open' OR status='published'");
+my $projects=&select($pazardbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
 if ($projects) {
     my $node=0;
     while (my $project=$projects->fetchrow_hashref) {

@@ -41,7 +41,7 @@ my $dbh = pazar->new(
 		      -drv           =>    DB_DRV,
                       -globalsearch  =>    'yes');
 
-my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
+my $projects=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
 my @desc;
 while (my $project=$projects->fetchrow_hashref) {
     push @desc, {
@@ -52,7 +52,7 @@ while (my $project=$projects->fetchrow_hashref) {
 
 if ($loggedin eq 'true') {
     foreach my $proj (@projids) {
-	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and status='restricted'");
+	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
 	while (my $restr=$restricted->fetchrow_hashref) {
 	    push @desc, {
 		name => $restr->{project_name}};
