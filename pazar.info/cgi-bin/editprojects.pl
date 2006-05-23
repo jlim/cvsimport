@@ -164,9 +164,18 @@ if ($params{mode} eq 'add')
 #encrypt password and insert
 	    my $im = Crypt::Imail->new();
 	    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass});	
+
+#delimit quotes in project name and description
+	    my $pname = $params{projname};
+	    $pname =~ s/'/\\'/g;
+	    $pname =~ s/"/\\"/g;
+	    
+	    my $pdesc = $params{projdesc};
+	    $pdesc =~ s/'/\\'/g;
+	    $pdesc =~ s/"/\\"/g;
 	    
 #insert into project
-	    $dbh->do("insert into project(project_id,project_name,password,status,description,edit_date) values('','$params{projname}','$encrypted_pass','$params{projstatus}','$params{projdesc}',null)");
+	    $dbh->do("insert into project(project_id,project_name,password,status,description,edit_date) values('','$pname','$encrypted_pass','$params{projstatus}','$pdesc',null)");
 
 #get id of newly created project
     $sth = $dbh->prepare("select LAST_INSERT_ID()");
@@ -241,7 +250,10 @@ if($params{mode} eq 'updatedesc')
     {
 
 # perform update
-	$dbh->do("update project set description='$params{projdesc}' where project_id=$params{pid}");
+	my $pdesc = $params{projdesc};
+	$pdesc =~ s/'/\\'/g;
+	$pdesc =~ s/"/\\"/g;
+	$dbh->do("update project set description='$pdesc' where project_id=$params{pid}");
     }
     else
     {
