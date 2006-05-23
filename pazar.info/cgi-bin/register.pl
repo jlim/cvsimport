@@ -126,7 +126,26 @@ if ($params{mode} eq 'register') {
 #encrypt password
 	my $im = Crypt::Imail->new();
         my $encrypted_pass = $im->encrypt($params{username}, $params{password});
-	my $userinsert = "insert into users(user_id,first_name,last_name,edit_date,password,username,aff) values('','$params{first}','$params{last}',null,'$encrypted_pass','$params{username}','$params{affiliation}')";
+
+#delimit single quotes and double quotes for first name, last name, username and affiliation
+
+	my $fn = $params{first};
+	$fn =~ s/'/\\'/g;
+	$fn =~ s/"/\\"/g;
+
+	my $ln = $params{last};
+	$ln =~ s/'/\\'/g;
+	$ln =~ s/"/\\"/g;
+
+	my $un = $params{username};
+	$un =~ s/'/\\'/g;
+	$un =~ s/"/\\"/g;
+
+	my $af = $params{affiliation};
+	$af =~ s/'/\\'/g;
+	$af =~ s/"/\\"/g;
+
+	my $userinsert = "insert into users(user_id,first_name,last_name,edit_date,password,username,aff) values('','$fn','$ln',null,'$encrypted_pass','$un','$af')";
 
 	my $sth = $dbh->prepare($userinsert);
 	$sth->execute();
