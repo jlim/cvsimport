@@ -153,7 +153,7 @@ if ($params{mode} eq 'register') {
 
 	print "<FORM  name=\"regform\" method=\"POST\" action=\"register.pl\">";
 	print "<table>";
-	print "<tr><td valign='top'>User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type=\"text\" name=\"username\"";
+	print "<tr><td valign='top'>User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type=\"text\" name=\"username\" maxlength=64";
 
 	if($duplicates == 0)
 	{
@@ -174,9 +174,9 @@ if ($params{mode} eq 'register') {
 print<<Error_Page_2;
 	></td></tr>
 	    
-	    <tr><td >Affiliation</td><td><input type="text" name="affiliation" value=$params{affiliation}></td></tr>
-	    <tr><td >First name</td><td><input type="text" name="first" value=$params{first}></td></tr>
-	    <tr><td >Last name</td><td><input type="text" name="last" value=$params{last}></td></tr>
+	    <tr><td >Affiliation</td><td><input type="text" name="affiliation" maxlength=64 value=$params{affiliation}></td></tr>
+	    <tr><td >First name</td><td><input type="text" name="first" maxlength=32 value=$params{first}></td></tr>
+	    <tr><td >Last name</td><td><input type="text" name="last" maxlength=32 value=$params{last}></td></tr>
 	    <tr><td colspan=2><input type="hidden" name="mode" value="register"></td></tr>
 	    <tr><td></td><td><INPUT type="button" onClick="verify();" name="Register" value="Register">
 	    <INPUT type="reset" name="Reset" value="Reset"></td></tr>
@@ -193,12 +193,12 @@ print<<Page_Done;
 
 	<FORM  name="regform" method="POST" action="register.pl">
 	<table>
-	<tr><td valign="top">User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type="text" name="username"></td></tr>      
+	<tr><td valign="top">User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type="text" name="username" maxlength=64></td></tr>
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
 	<tr><td >Re-enter password</td><td> <input type="password" name="passwordcheck"></td></tr>
-	<tr><td >Affiliation</td><td><input type="text" name="affiliation"></td></tr>
-	<tr><td >First name</td><td><input type="text" name="first"></td></tr>
-	<tr><td >Last name</td><td><input type="text" name="last"></td></tr>
+	<tr><td >Affiliation</td><td><input type="text" name="affiliation" maxlength=64></td></tr>
+	<tr><td >First name</td><td><input type="text" name="first" maxlength=32></td></tr>
+	<tr><td >Last name</td><td><input type="text" name="last" maxlength=32></td></tr>
 	<tr><td colspan=2><input type="hidden" name="mode" value="register"></td></tr>
 	<tr><td></td><td><INPUT type="button" onClick="verify();" name="Register" value="Register">
 	<INPUT type="reset" name="Reset" value="Reset"></td></tr>
