@@ -54,7 +54,15 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 
 	    //alert if fields are empty and cancel form submit
 		if (themessage == "You are required to complete the following fields: ") {
-		    document.createprojectform.submit();
+		    var descLength = document.createprojectform.projdesc.value.length;
+		    if(descLength < 301)
+		    {
+			document.createprojectform.submit();
+		    }
+		    else
+		    {
+			alert("Please ensure that description is no more than 300 characters (Currently "+descLength+" characters)");
+		    }
 		}
 	    else
 	    {
@@ -105,12 +113,34 @@ function doUserAdd(pid)
 function doUpdateDesc(pid)
 {
     var decision = confirm("This will permanently change the project description. Do you wish to continue?");
+    var descLength = eval("document.updatedescform"+pid+".projdesc.value.length");
     if (decision == true)
     {	
-	eval("document.updatedescform"+pid+".submit();");
+	if(descLength <301)
+	{
+	    eval("document.updatedescform"+pid+".submit();");
+	}
+	else
+	{
+	    alert("Please ensure that description is no more than 300 characters (Currently "+descLength+" characters)");
+	}
     }
-
 }
+
+/*
+function CheckMaxLength(Object, MaxLen)
+{
+  if(Object.value.length > MaxLen)
+  {     
+    alert
+  }
+  else
+  {
+      form.submit();
+  }
+}
+*/
+
 </script>
 javascript
 
@@ -447,7 +477,7 @@ print<<AddFormFoot;
 <!-- Form to add a new project -->
 	<table border=1 cellspacing=0 cellpadding=2>
 	    <tr><td colspan=2 align='center'><b>Create A New Project</b></td></tr>
-	    <tr><td >Name</td><td><input type="text" name="projname"></td></tr>
+	    <tr><td >Name</td><td><input type="text" name="projname" maxlength=20></td></tr>
 	    <tr><td >Status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published<option name="open" value="open">open</select></td></tr>
 <tr><td>Description</td><td><textarea name="projdesc" cols=40 rows=6></textarea></td></tr>
 <tr><td >Administrator Password</td><td><input type="password" name="projpass"></td></tr>
