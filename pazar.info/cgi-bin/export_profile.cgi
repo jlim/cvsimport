@@ -91,12 +91,14 @@ COLNAMES
 	if ($matrixs) {
 	    while (my ($mid,$name,$db,$acc,$a,$c,$g,$t,$desc)=$matrixs->fetchrow_array) {
 
-		my @a=&uncompress($a);
-		my @c=&uncompress($c);
-		my @g=&uncompress($g);
-		my @t=&uncompress($t);
+# 		my @a=&uncompress($a);
+# 		my @c=&uncompress($c);
+# 		my @g=&uncompress($g);
+# 		my @t=&uncompress($t);
 
-		my $matrixref = join (' ',@a)."\n".join (' ',@c)."\n".join (' ',@g)."\n".join (' ',@t);
+# 		my $matrixref = join (' ',@a)."\n".join (' ',@c)."\n".join (' ',@g)."\n".join (' ',@t);
+
+		my $matrixref = $a."\n".$c."\n".$g."\n".$t;
 		my $pfm = TFBS::Matrix::PFM->new(-matrix => $matrixref);
 
 #alter file name by adding random number with current time as seed

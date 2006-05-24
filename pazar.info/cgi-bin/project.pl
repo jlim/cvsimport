@@ -206,7 +206,7 @@ page2
 print<<page2b;
         </select><br>
 	<input type="checkbox" name="bp_filter">base pair: start 
-	<input name="bp_start" value="" type="text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end
+	<input name="bp_start" value="" type="text"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end
 	<input name="bp_end" value="" type="text">
       </td>
     </tr>
