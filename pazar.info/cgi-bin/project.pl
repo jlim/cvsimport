@@ -63,7 +63,7 @@ my $dbh0= pazar->new(
 		       -globalsearch  =>    'yes');
 
 
-my $stat = &select($dbh, "SELECT status, description FROM project WHERE project_name='$proj'");
+my $stat = &select($dbh0, "SELECT status, description FROM project WHERE project_name='$proj'");
 my ($status, $descrip) = $stat->fetchrow_array;
 
 my $dbh;
