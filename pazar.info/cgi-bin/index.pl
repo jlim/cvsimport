@@ -46,8 +46,7 @@ my @desc;
 while (my $project=$projects->fetchrow_hashref) {
     push @desc, {
 	name => $project->{project_name}};
-#       description => $project->{description}}
-###Add description when the schema is changed
+        description => $project->{description}}
 }
 
 if ($loggedin eq 'true') {
@@ -56,8 +55,7 @@ if ($loggedin eq 'true') {
 	while (my $restr=$restricted->fetchrow_hashref) {
 	    push @desc, {
 		name => $restr->{project_name}};
-#       description => $project->{description}}
-###Add description when the schema is changed
+                description => $project->{description}}
 	}
     }
 }
@@ -69,8 +67,7 @@ for (my $i=0;$i<10;$i++) {
 	my $PTtag='PTM'.$num;
 	my $PTval=$desc[$i]->{name};
 	my $PDtag='PDM'.$num;
-	my $PDval='some description';
-#	my $PDval=$desc[$i]->{description};
+	my $PDval=$desc[$i]->{description}||'No description available';
 	my $PUtag='PUM'.$num;
 	my $PUval='project.pl';
 	if (!$flashvars) {
