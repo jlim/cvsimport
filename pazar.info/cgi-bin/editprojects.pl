@@ -426,14 +426,14 @@ print "</td>";
 
 	    print "<select name='projstatus'>";
 	    print "<option ";
-	    if($projdetails[3] eq "restricted")
+	    if(lc($projdetails[3]) eq "restricted")
 	    {
 		print "selected ";
 	    }
 	    print "name='restricted' value='restricted'>restricted";
 
 	    print "<option ";
-	    if($projdetails[3] eq "open")
+	    if(lc($projdetails[3]) eq "open")
 	    {
 		print "selected ";
 	    }
@@ -441,7 +441,7 @@ print "</td>";
 	    
 	    print "<option ";
 	    
-	    if($projdetails[3] eq "published")
+	    if(lc($projdetails[3]) eq "published")
 	    {
 		print "selected ";
 	    }
