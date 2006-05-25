@@ -3,17 +3,16 @@
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 use HTML::Template;
-
-BEGIN {
-            use CGI::Carp qw(carpout);
-            open(LOG, ">>/usr/local/apache/pazar.info/cgi-bin/cgi-logs/mycgi-log") or
-              die("Unable to open mycgi-log: $!\n");
-            carpout(LOG);
-          }
-
-
+use CGI::Carp qw(carpout);
 use XML::Checker::Parser;
 
+srand(time() ^ ($$ + ($$ << 15) ) );
+my $randnum = substr(rand() * 100,3);
+my $file = "mycgi-log".$randnum;
+
+open(LOG, ">>/usr/local/apache/pazar.info/cgi-bin/cgi-logs/$file") or
+    die("Unable to open mycgi-log: $!\n");
+carpout(LOG);
 
 my $max_allowed = 50000000;
 my $total = 0;
@@ -73,13 +72,13 @@ if (!$xml_file) {
     print "<p class=\"title2\">Sorry!<br>";
     print "Your file $xml_file failed validation!<br><br></p>\n";
 
-    open(ERRLOG, "/usr/local/apache/pazar.info/cgi-bin/cgi-logs/mycgi-log") or
+    open(ERRLOG, "/usr/local/apache/pazar.info/cgi-bin/cgi-logs/$file") or
      die("Unable to open mycgi-log: $!\n");
     while (<ERRLOG>) {
 	print "$_ <br>";
     }
     close (ERRLOG);
-    unlink("/usr/local/apache/pazar.info/cgi-bin/cgi-logs/mycgi-log");
+    unlink("/usr/local/apache/pazar.info/cgi-bin/cgi-logs/$file");
 
     } else {
 	print "<p class=\"title2\">Congratulations!<br>";
