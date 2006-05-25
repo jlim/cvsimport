@@ -62,12 +62,9 @@ my $dbh0= pazar->new(
 		       -drv           =>    'mysql',
 		       -globalsearch  =>    'yes');
 
-my $stat = &select($dbh0, "SELECT status FROM project WHERE project_name='$proj'");
-my $status=$stat->fetchrow_array;
 
-### add description when the schema is changed
-#my $stat = &select($dbh, "SELECT status, description FROM project WHERE project_name='$proj'");
-#my ($status, $descrip) = $stat->fetchrow_array;
+my $stat = &select($dbh, "SELECT status, description FROM project WHERE project_name='$proj'");
+my ($status, $descrip) = $stat->fetchrow_array;
 
 my $dbh;
 if ($status=~/open/i || $status=~/published/i) {
@@ -98,8 +95,7 @@ my $projid = $dbh->get_projectid();
 
 print "<p class=\"title1\">PAZAR - $proj</p>";
 print "<p><span class=\"title4\">Description</span><br>";
-### add description when the schema is changed
-#print $descrip."<br>";
+print $descrip."<br>";
 print "</p>";
 
 print "<p><span class=\"title4\">Statistics</span><br>";
