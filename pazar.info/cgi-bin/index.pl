@@ -45,8 +45,8 @@ my $projects=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR 
 my @desc;
 while (my $project=$projects->fetchrow_hashref) {
     push @desc, {
-	name => $project->{project_name}};
-        description => $project->{description}}
+	name => $project->{project_name},
+        description => $project->{description}};
 }
 
 if ($loggedin eq 'true') {
@@ -54,8 +54,8 @@ if ($loggedin eq 'true') {
 	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
 	while (my $restr=$restricted->fetchrow_hashref) {
 	    push @desc, {
-		name => $restr->{project_name}};
-                description => $project->{description}}
+		name => $restr->{project_name},
+                description => $project->{description}};
 	}
     }
 }
