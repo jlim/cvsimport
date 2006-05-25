@@ -463,7 +463,7 @@ print "</td>";
 	    $userstring = substr($userstring,2);
 	    print $userstring;
 #form: add user to this project
-	    print "</td><td><form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'>Username: <br><input type='text' name='usertoadd' size=25 value='enter a registered username'><br>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
+	    print "</td><td><form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'>Registered Username: <br><input type='text' name='usertoadd' size=25><br>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
 
 
 #delete project form
