@@ -1,0 +1,48 @@
+<form style="height: 546px;"
+ action="http://serverpath/psite_get.cgi"
+ method="post" name="F1">
+  <p>Analysis name</p>
+  <p> 
+    <input name="aname" size="32" maxlength="64" type="text">
+    select auxiliary database 
+    <select name="auxDB" id="auxDB">
+      <option value="EnsEMBL" selected>EnsEMBL</option>
+      <option value="GeneKeyDB">GeneKeyDB</option>
+    </select>
+  </p>
+  <p>Project</p>
+  <p>
+    <input name="project" type="text" id="project">
+  </p>
+  <p>Published? <label> <input name="published"
+ onclick="bVal=!this.checked;
+pubmedid.disabled=bVal;pubmedid.disabled=bVal;if(!bVal)pubmedid.focus()"
+ type="checkbox"> </label></p>
+  <p> PubMedID <input name="pubmedid" disabled="disabled" type="text">
+  <br>
+  </p>
+  <br>
+  <p>May be released to the public</p>
+  <p> <input name="release" value="yes"
+ onclick="F1.reldate.disabled = true;" type="radio"> yes <input
+ name="release" value="no" onclick="F1.reldate.disabled = true;"
+ type="radio"> no <input name="release" value="after"
+ onclick="F1.reldate.disabled = false;" type="radio"> after a
+certain date </p>
+  <p>Release date <input name="reldate" disabled="disabled" type="text">
+  </p>
+  <p>Authors (one per line, no
+commas)</p>
+  <p> <textarea name="authors"></textarea> </p>
+  <p>&nbsp;</p>
+  <p>Description and comments</p>
+  <p> 
+    <textarea name="analysis_desc" cols="80"></textarea>
+  </p>
+  <p> 
+    <input name="TFcentric" type="submit" id="TFcentric" onClick="MM_validateForm('aname','','R');return document.MM_returnValue" value="TF centric submissions">
+    <input name="CREcentric" type="submit" id="CREcentric" value="CRE centric submisssions" onClick="MM_validateForm('aname','','R');return document.MM_returnValue">
+    <input
+ name="cancel" value="cancel" type="reset">
+  </p>
+  </form>
