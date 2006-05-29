@@ -1,10 +1,9 @@
 #!/usr/bin/perl
-use  lib $ENV{BPLIVE};
 
 use HTML::Template;
 use CGI qw( :all);
 use CGI::Debug;#(report => everything, on => anything);
-use strict;
+
 use pazar;
 use pazar::talk;
 use pazar::tf;

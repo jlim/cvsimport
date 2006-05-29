@@ -1,12 +1,10 @@
 #!/usr/bin/perl
 
-use  lib $ENV{BPLIVE};
-
 use HTML::Template;
 use Exporter;
 use CGI qw(  :all);
 use pazar;
-use CGI::Debug;
+#use CGI::Debug;
 
 require '../getsession.pl';
 
@@ -63,6 +61,16 @@ function onoff(objref) {
 		else {
 		objref.disabled=true;}
 	return;
+}
+
+function open_cgi(user,aname,type,con) {
+params="user="+user+";"+"aname="+aname+";"+"file="+con+";"+"type="+type+";";
+if (type=='mutation') {
+window.open('http://watson.lsd.ornl.gov/cgi-bin/genekeydb/psite/add_to_mut_set.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
+}
+else {
+window.open('http://watson.lsd.ornl.gov/cgi-bin/genekeydb/psite/add_to_TF_complex.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
+}
 }
 
 function NewOption(arg){
@@ -122,6 +130,7 @@ print "Content-Type: text/html\n\n", $template->output;
 
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
 my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
+my $docpath=$ENV{SERVER_NAME}.'/sWI';
 
 our $query=new CGI;
 
@@ -135,6 +144,15 @@ my $pubmedid = $params{'pubmedid'};
 my $desc1 = $params{'textarea2'};
 my $proj = $params{'project'};
 
+my $nextpage="$docroot/creanalysis.htm";
+my $alterpage="$docroot/TFcentric.htm";
+my $tmpdir="$cgiroot/tmp";
+chdir($tmpdir);
+mkdir($userid) unless (-e $userid);
+chdir $userid;
+system ("rm -fr *");
+my $file=filename(length(10));
+
 my $pazar = pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
 		       -user          =>    $ENV{PAZAR_pubuser},
@@ -147,25 +165,32 @@ my $pazar = pazar->new(
 
 die "You cannot submit to this project" unless ($pazar->{projectid});
 my $err=check_input_and_write($pazar,$aid,$proj);
+
 if ($params{TFcentric}) {
-&tfcentric;
+
+open (TFC,$alterpage)||die;
+while (my $buf=<TFC>) {
+	if ($buf=~/action/i) {
+		$buf=~s/serverpath/$cgiroot/i;
+	}
+    print $buf;
+    if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
+        &forward_args;
+      print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>";
+      print "\<input name=\"filebase\" type=\"hidden\" value=\"$file\"\>";
+#      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
+    }
+}
+close TFC;
+# print out the html tail template
+my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+print $template_tail->output;
 exit();
 }
-my $nextpage="$docroot/creanalysis.htm";
-my $selfpage="$docroot/entryform1.htm";
-my $tmpdir="$cgiroot/tmp";
-chdir($tmpdir);
 
 open (NEXT, $nextpage) ||die;
-
-#print $query->h3("Analysis $aid");
-#print $query->h3("Submission authorized");
-mkdir($userid) unless (-e $userid);
-chdir $userid;
-system ("rm -fr *");
-$file=filename(length(10));
-
 while (my $buf=<NEXT>) {
+    $buf=~s/htpath/$docpath/;
   if (($buf=~/TFcomplexadd/)||($buf=~/Add to set of mutations/)) {
     $buf=~s/file/'$file'/;
      print $buf;
@@ -182,7 +207,7 @@ while (my $buf=<NEXT>) {
       }
       print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>";
       print "\<input name=\"filebase\" type=\"hidden\" value=\"$file\"\>";
-      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
+#      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
       next;
   }
   print $buf;
@@ -249,25 +274,6 @@ print $query->h2($message);
 my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
 print $template_tail->output;
 exit(0);
-}
-
-
-sub tfcentric {
-my $alterpage="$docroot/TFcentric.htm";
-open (TFC,$alterpage)||die;
-while (my $buf=<TFC>) {
-	if ($buf=~/action/i) {
-		$buf=~s/serverpath/$cgiroot/i;
-	}
-    print $buf;
-    if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
-        &forward_args;
-    }
-}
-close TFC;
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
-print $template_tail->output;
 }
 
 sub forward_args {

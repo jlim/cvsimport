@@ -1,9 +1,6 @@
 #!/usr/bin/perl
 
 
-use lib '/space/usr/local/src/ensembl-36/ensembl/modules/';
-use lib '/space/usr/local/src/bioperl-live/';
-
 use pazar;
 #use Bio::Matrix::PSM::SiteMatrix;
 use TFBS::Matrix::PFM;

@@ -1,9 +1,17 @@
-<FORM NAME="usersform" action="http://serverpath/get_coordinates.cgi">
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+<body>
+<FORM NAME="usersform" action="http://www.pazar.info/cgi-bin/sWI/get_coordinates.cgi">
  <p>
  Auxilliary database
  <select name="auxDB">
       <option value="GeneKeyDB">GeneKeyDB</option>
-      <option value="EnsEMBL">EnsEMBL</option>
+      <option value="EnsEMBL" selected>EnsEMBL</option>
     </select>
   <p> Gene ID 
     <input name="geneid" maxlength="25" type="text" />
@@ -43,3 +51,5 @@ Optional organism chooser<select name="org" size="true">
    <INPUT TYPE=submit VALUE="Submit">
   <input type="reset" name="Reset" value="Reset" />
 </form>
+</body>
+</html>

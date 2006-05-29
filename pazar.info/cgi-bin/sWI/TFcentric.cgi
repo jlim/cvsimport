@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-use  lib $ENV{BPLIVE};
-
 use HTML::Template;
 use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
@@ -195,7 +193,7 @@ exit();
 
 sub next_page {
 unless ($params{userid}) {
-    print $query->h3("An error occurred- not a valid user? If you believe this is an error e-mail us and describe the problem");
+    print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
 print $template_tail->output;
