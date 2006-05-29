@@ -1,0 +1,65 @@
+<h1>Describe your Cis Regulatory Element<br>
+</h1>
+
+<form style="height: 546px;" action="http://serverpath/psite_get_cre.cgi" method="post" name="CRE">
+  <h4>Interaction type between the TF complex (factor) and this CRE </h4>
+  <table width="200">
+    <tr>
+      <td><label>
+        <input name="inttype" type="radio" value="qual" onClick="CRE.interact0.disabled=true;CRE.interactscale.disabled=true;CRE.qualitative.disabled=false;
+		CRE.qualitative.focus();">
+        qualitative</label></td>
+    </tr>
+    <tr>
+      <td><label>
+        <input name="inttype" type="radio" onClick="CRE.interact0.disabled=false;
+		CRE.qualitative.disabled=true;CRE.interactscale.disabled=false; CRE.interact0.focus();" value="quan" checked>
+        quantitative</label></td>
+    </tr>
+  </table>
+  <p>quantitative 
+    <input name="interact0" type="text" id="interact0">
+  </p>
+  <p>scale
+    <select name="interactscale" id="interactscale">
+      <option value="percent" selected>percent</option>
+      <option value="absolute">absolute</option>
+      <option value="relative">relative</option>
+      <option value="saturation">saturation</option>
+    </select>
+  </p>
+  <p>qualitative 
+    <select name="qualitative" id="qualitative" disabled="true">
+      <option value="saturation">saturation</option>
+      <option value="good">good</option>
+      <option value="marginal" selected>marginal</option>
+      <option value="poor">poor</option>
+      <option value="ND">ND</option>
+    </select>
+  </p>
+  <p>Method (select from list or add the name and the description in the box if 
+    not available): </p>
+  <p> 
+    <input name="newmethod" type="text" id="newmethod">
+    description </p>
+  <p> 
+    <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
+  </p>
+  <p>reference 
+    <input name="reference" type="text" id="reference">
+  </p>
+  <hr>
+  <p>sequence 
+    <input name="sequence" type="text" id="sequence">
+    construct name 
+    <input name="constructname" type="text" id="constructname">
+  </p>
+  <p>comment 
+    <textarea name="artificialcomment" cols="120" rows="2" id="artificialcomment"></textarea>
+  </p>
+  <p> 
+    <input name="submit2" type="submit" id="submit2" onClick="MM_validateForm('interact0','','NisNum','sequence','','R','constructname','','R');return document.MM_returnValue" value="Submit">
+    <input name="cancel" id="cancel" value="Cancel" type="reset">
+  </p>
+  <hr>
+</form>

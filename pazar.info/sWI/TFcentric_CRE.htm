@@ -1,0 +1,97 @@
+<h1>Describe your Cis Regulatory Element</h1>
+
+<form style="height: 546px;" action="http://serverpath/psite_get_cre.cgi" method="post" name="CRE">
+  <h4>General description</h4>
+  <h4>Interaction type between the TF complex (factor) and this CRE </h4>
+  <table width="200">
+    <tr> 
+      <td><label> 
+        <input name="inttype" type="radio" value="qual" onClick="CRE.interact0.disabled=true;CRE.interactscale.disabled=true;CRE.qual.disabled=false;
+		CRE.qual.focus();">
+        qualitative</label></td>
+    </tr>
+    <tr> 
+      <td><label> 
+        <input name="inttype" type="radio" onClick="CRE.interact0.disabled=false;
+		CRE.qual.disabled=true;CRE.interactscale.disabled=false; CRE.interact0.focus();" value="quan" checked>
+        quantitative</label></td>
+    </tr>
+  </table>
+  <p>quantitative 
+    <input name="interact0" type="text" id="interact0">
+  </p>
+  <p>scale 
+    <select name="interactscale" id="interactscale">
+      <option value="percent" selected>percent</option>
+      <option value="absolute">absolute</option>
+      <option value="relative">relative</option>
+      <option value="saturation">saturation</option>
+    </select>
+  </p>
+  <p>qualitative 
+    <select name="qual" id="qual" disabled="true">
+      <option value="saturation">saturation</option>
+      <option value="good">good</option>
+      <option value="marginal" selected>marginal</option>
+      <option value="poor">poor</option>
+      <option value="ND">ND</option>
+    </select>
+  </p>
+  <p>Method (select from list or add the name and the description in the box if 
+    not available): </p>
+  <p> 
+    <input name="newmethod" type="text" id="newmethod">
+    description </p>
+  <p>
+    <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
+  </p>
+  <p>cell type 
+    <input name="cell" type="text" id="cell">
+    cell status 
+    <select name="select">
+      <option value="primary">primary</option>
+      <option value="cell line">cell line</option>
+    </select>
+    tissue 
+    <input name="tissue" type="text" id="tissue">
+    reference (PubMed ID) 
+    <input name="reference" type="text" id="reference">
+  </p>
+  <hr>
+  <h3>CRE genome location data</h3>
+  <h4>Enter here unique genome identification parameters in chromosome coordinates.</h4>
+  <p>The chromosome coordinates should be correct for the current Ensembl release 
+    and the respective genome build. The best way to set those is through the 
+    'Get chromosome coordinates' button.</p>
+  <p> start 
+    <input name="start" type="text" id="start">
+    end 
+    <input name="end" type="text" id="end">
+  </p>
+  <p>chromosome 
+    <input type="text" name="chromosome" id="chromosome">
+  </p>
+  <p>oranism 
+    <input name="organism" type="text" id="organism">
+    Genome Build 
+    <input name="build" type="text" id="build">
+  </p>
+  <p>sequence (optional) 
+    <input name="sequence" type="text" id="sequence">
+  </p>
+  <p>Ensembl representative transcript stable id (optional) 
+    <input name="tid" type="text" id="tid">
+  </p>
+  <p>TSR definition start (optional) 
+    <input name="fstart" type="text" id="fstart">
+    TSR definition end (optional) 
+    <input name="fend" type="text" id="fend">
+  </p>
+  <p>
+    <input name="chrcoord" type="button" id="chrcoord" onclick="PopUp('http://serverpath/chrcoordinates.htm')" value="Get chromosome coordinates">
+  </p>
+  <p> 
+    <input name="submit" type="submit" id="submit" onClick="MM_validateForm('interact0','','NisNum','start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','build','','R','tid','','R');return document.MM_returnValue" value="Next">
+    <input name="cancel" id="cancel" value="Cancel" type="reset">
+  </p>
+  </form>

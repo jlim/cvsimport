@@ -1,0 +1,101 @@
+<form style="height: 546px;" action="http://serverpath/accept_entry.cgi" method="post" name="COND">
+  <h1>Method description</h1>
+  <h2>Explain what method was
+applied to this particular element/subelement</h2>
+  <p>&nbsp;</p>
+  <p>Method name </p>
+  <p>Either Type in the method
+name or select it from the pull-down menu </p>
+  <input name="Method" type="text">
+  <p>Organism <input name="Host" type="text"> </p>
+  <p>Cell type/tissue <input name="Cell" type="text"> </p>
+  <p> Published elsewhere? <input name="checkbox" value="checkbox"
+ onclick="bVal=!this.checked;
+thispubmed.disabled=bVal;thispubmed.disabled=bVal;if(!bVal)thispubmed.focus()"
+ type="checkbox"> </p>
+  <p>if yes Pubmed ID <input name="thispubmed" disabled="true"
+ type="text"> </p>
+  <hr>
+  <h1>Explain specific conditions
+(if any). Please do not fill anything if not applicable.</h1>
+  <hr>
+  <h2>Development data</h2>
+  <p>Development/cell
+stage/Differentiation agent <input name="dev_condition" maxlength="25"
+ type="text">
+Differentiation agent concentration/Quantity <input name="dev_quant"
+ size="5" type="text"> </p>
+  <p>Timepoint <input name="time_dev" value="0" size="5" maxlength="5"
+ type="text">
+  <select name="dev_tscale" size="1" id="select">
+  <option value="min">minutes</option>
+  <option value="hr" selected="selected">hours</option>
+  <option value="days">days</option>
+  <option value="years">years</option>
+  </select>
+  </p>
+  <hr>
+  <h2>Physiological conditions</h2>
+  <p>Condition <input name="phys_cond" maxlength="25" type="text">
+Concentration/Quantity/Stage <input name="phys_quant" size="5"
+ type="text"> (if
+applicable)</p>
+  <p>Timepoint <input name="time_phys" value="0" size="5" maxlength="5"
+ type="text">
+  <select name="phys_tscale" size="1" id="phys_tscale">
+  <option value="min">minutes</option>
+  <option value="hr" selected="selected">hours</option>
+  <option value="days">days</option>
+  <option value="years">years</option>
+  </select>
+  </p>
+
+  <hr>
+  <h2>Environmental Conditions</h2>
+  <p>Temperature <input name="env_temp" value="37" size="5"
+ maxlength="5" type="text"> C </p>
+  <p>Timepoint <input name="time_env" id="time_env" value="0" size="5"
+ maxlength="5" type="text">
+  <select name="env_tscale" size="1" id="select2">
+  <option value="min">minutes</option>
+  <option value="hr" selected="selected">hours</option>
+  <option value="days">days</option>
+  <option value="years">years</option>
+  </select>
+  </p>
+  <p>Chemical compound <input name="env_comp" maxlength="25"
+ type="text">
+Concentration/Quantity <input name="env_conc" size="5" type="text"> </p>
+  <hr>
+  <br>
+  <p>Description and comments</p>
+  <p> <textarea name="desc_instance" cols="80"></textarea> </p>
+  Effect description <input name="effect_grp"
+ onclick="foldchange.disabled = false; foldchange.focus()  
+		change.disabled = true; "
+ value="quantitave" type="radio">
+fold change <input name="effect_grp"
+ onclick="change.disabled = false; 
+		foldchange.disabled = true; "
+ value="qualitative" type="radio">
+induction/repression/no change <input name="effect_grp"
+ onclick="change.disabled = true; 
+		foldchange.disabled = true; "
+ value="qualitative" checked="checked" type="radio">
+not known
+  <p> Fold change <input name="foldchange" disabled="true"
+ size="5" type="text"> </p>
+  <p>Qualitative effect
+  <select name="change" disabled="disabled">
+  <option value="induction">induction</option>
+  <option value="neutral" selected="selected">no
+change</option>
+  <option value="repression">repression</option>
+  </select>
+  </p>
+  <p>&nbsp;</p>
+  <p> <input name="submit" value="Add more sites" type="submit"> <input
+ name="submit" value="Add more pertubations" type="submit"> <input
+ name="submit" value="Submit analysis set" type="submit"> <input
+ name="cancel" value="cancel" type="reset"> </p>
+</form>

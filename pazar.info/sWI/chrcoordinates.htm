@@ -1,0 +1,45 @@
+<FORM NAME="usersform" action="http://serverpath/get_coordinates.cgi">
+ <p>
+ Auxilliary database
+ <select name="auxDB">
+      <option value="GeneKeyDB">GeneKeyDB</option>
+      <option value="EnsEMBL">EnsEMBL</option>
+    </select>
+  <p> Gene ID 
+    <input name="geneid" maxlength="25" type="text" />
+    Gene DB 
+    <select name="genedb">
+      <option value="nm">Refseq</option>
+      <option value="enst">Ensembl transcript</option>
+      <option value="ens">Ensembl gene</option>
+      <option value="locuslink">Locus link</option>
+      <option value="swissprot">Swiss prot</option>
+      <option value="accn">Genbank</option>
+    </select>
+  </p>
+  <p>approximate position of the element relative to the most common transcription 
+    start site 
+    <input name="start" type="text" id="start" />
+  </p>
+Optional organism chooser<select name="org" size="true">
+<option value="Unknown">Unknown</option>
+<option value="fugu rubripes">fugu rubripes</option>
+<option value="anopheles gambiae">anopheles gambiae</option>
+<option value="xenopus tropicalis">xenopus tropicalis</option>
+<option value="homo sapiens">homo sapiens</option>
+<option value="drosophila melanogaster">drosophila melanogaster</option>
+<option value="pan troglodytes">pan troglodytes</option>
+<option value="danio rerio">danio rerio</option>
+<option value="bos taurus">bos taurus</option>
+<option value="mus musculus">mus musculus</option>
+<option value="caenorhabditis elegans">caenorhabditis elegans</option>
+<option value="gallus gallus">gallus gallus</option>
+<option value="rattus norvegicus">rattus norvegicus</option>
+<option value="apis mellifera">apis mellifera</option>
+<option value="tetraodon nigroviridis">tetraodon nigroviridis</option>
+</select>  <p>sequence 
+    <input name="sequence" type="text" id="sequence" />
+  </p>
+   <INPUT TYPE=submit VALUE="Submit">
+  <input type="reset" name="Reset" value="Reset" />
+</form>

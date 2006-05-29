@@ -40,16 +40,6 @@ function MM_validateForm() { //v4.0
   document.MM_returnValue = (errors == '');
 }
 
-function open_cgi(user,aname,type,con) {
-params="user="+user+";"+"aname="+aname+";"+"file="+con+";"+"type="+type+";";
-if (type=='mutation') {
-window.open('http://watson.lsd.ornl.gov/cgi-bin/genekeydb/psite/add_to_mut_set.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
-}
-else {
-window.open('http://watson.lsd.ornl.gov/cgi-bin/genekeydb/psite/add_to_TF_complex.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
-}
-}
-
 function ActivateCheckBox ()
 {
 document.form.pubmedid.disabled = false;
@@ -130,10 +120,8 @@ else
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
-my $htroot=$ENV{PAZARHTDOCS};
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $server=$ENV{SERVER_NAME};
-my $cgiroot=$server . $ENV{PAZARCGI}.'/sWI';
+my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
 
 our $query=new CGI;
 
@@ -159,7 +147,6 @@ my $pazar = pazar->new(
 
 die "You cannot submit to this project" unless ($pazar->{projectid});
 my $err=check_input_and_write($pazar,$aid,$proj);
-
 if ($params{TFcentric}) {
 &tfcentric;
 exit();
@@ -171,8 +158,8 @@ chdir($tmpdir);
 
 open (NEXT, $nextpage) ||die;
 
-print $query->h3("Analysis $aid");
-print $query->h3("Submission authorized");
+#print $query->h3("Analysis $aid");
+#print $query->h3("Submission authorized");
 mkdir($userid) unless (-e $userid);
 chdir $userid;
 system ("rm -fr *");
@@ -185,6 +172,7 @@ while (my $buf=<NEXT>) {
      next;
   }
   if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
+	    $buf=~s/serverpath/$cgiroot/i;
       print $buf;
 #  unless ($buf=~/method/&&/name/&&/action/) {my $buf=<NEXT>; print $buf;}
       foreach my $key (keys %params) {
@@ -215,11 +203,12 @@ my $projid=$pazar->get_projectid;
 my $dh=$pazar->prepare("select count(*) from analysis where project_id='$projid' and name='$aid'")||die;
 $dh->execute||die;
 my $exist=$dh->fetchrow_array;
-if ($exist) { print "<p class=\"warning\">Analysis $aid for project $proj already exists. Modifying analysis is disabled at the moment.</p>";}
+if ($exist) { print "<p class=\"warning\">Analysis $aid for project $proj already exists. Modifying analysis is disabled at the moment.</p>";
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
 print $template_tail->output;
-exit(0);
+exit();
+	  }
 }
 
 sub filename {
@@ -268,7 +257,7 @@ my $alterpage="$docroot/TFcentric.htm";
 open (TFC,$alterpage)||die;
 while (my $buf=<TFC>) {
 	if ($buf=~/action/i) {
-		$buf=~s/server/$cgiroot/i;
+		$buf=~s/serverpath/$cgiroot/i;
 	}
     print $buf;
     if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
