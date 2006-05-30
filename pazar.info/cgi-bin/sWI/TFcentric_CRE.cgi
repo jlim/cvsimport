@@ -61,16 +61,6 @@ function onoff(objref) {
 	return;
 }
 
-function open_cgi(user,aname,type,con) {
-params="user="+user+";"+"aname="+aname+";"+"file="+con+";"+"type="+type+";";
-if (type=='mutation') {
-window.open('http://watson.lsd.ornl.gov/cgi-bin/genekeydb/psite/add_to_mut_set.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
-}
-else {
-window.open('http://watson.lsd.ornl.gov/cgi-bin/genekeydb/psite/add_to_TF_complex.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
-}
-}
-
 function NewOption(arg){
 //alert('The pager number & (val)')
 var args=arg.split(":");

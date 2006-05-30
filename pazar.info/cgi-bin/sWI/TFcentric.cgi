@@ -88,7 +88,7 @@ print "Content-Type: text/html\n\n", $template->output;
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME}.$cgiroot.'/sWI';
+my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
 
 my $selfpage="$docroot/TFcentric.htm";
 my $nextpage="$docroot/TFcentric_CRE.htm";
@@ -103,6 +103,7 @@ my $user=$info{user};
 my $pass=$info{pass};
 my $analysis=$params{'aname'};
 my $auxDB=$params{'auxDB'};
+my $userid=$params{'userid'};
 
 SUBMIT: {
 if ($input eq 'cancel') {  exit();}
@@ -159,6 +160,7 @@ while (my $buf=<SELF>) {
         $started=0;
 		print "\<input name=\"aname\" type=\"hidden\" value=\"$analysis\"\>";
 		print "\<input name=\"auxDB\" type=\"hidden\" value=\"$auxDB\"\>";
+		print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>";
 #        for my $j (1..$i) {
 #            my $k1='TF' . $j;
 #	        my $k2='TFDB' . $j;

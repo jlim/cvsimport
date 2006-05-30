@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-use  lib $ENV{BPLIVE};
-
 use HTML::Template;
 #use CGI::Debug (report=>'everything', on=>'anything');
 use CGI::Debug;
@@ -71,6 +69,29 @@ function MM_validateForm() { //v4.0
     } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
+}
+
+function NewOption(arg){
+//alert('The pager number & (val)')
+var args=arg.split(":");
+st=document.getElementById('start');
+st.value=args[1];
+endel=document.getElementById('end');
+endel.value=args[2];
+chrel=document.getElementById('chromosome');
+chrel.value=args[0];
+orgrel=document.getElementById('organism');
+orgrel.value=args[3];
+buildrel=document.getElementById('build');
+buildrel.value=args[4];
+seqrel=document.getElementById('sequence');
+seqrel.value=args[5];
+trel=document.getElementById('tid');
+trel.value=args[6];
+fstrel=document.getElementById('fstart');
+fstrel.value=args[7];
+fendrel=document.getElementById('fend');
+fendrel.value=args[8];
 }
 
 function PopUp(PopUpUrl){

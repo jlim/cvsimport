@@ -1,8 +1,10 @@
 #!/usr/bin/perl
 
+use lib $ENV{ENS_API};
+
 use Exporter;
 use CGI qw( :all);
-use CGI::Debug (report=>'everything', on=>'anything');
+#use CGI::Debug (report=>'everything', on=>'anything');
 #use GKDB;
 use DBI;
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
@@ -32,44 +34,59 @@ print $query->header;
 
 open (SELF, $selfpage) ||die;
 
-my $auxdb=$params{auxDB};
-if ($auxdb) {
-my ($auxh,$auxname,$auxpass,$auxuser,$auxdrv);
-if ($params{auxDB} =~/ensembl/i) {
-    $auxh=$ENV{ENS_HOST};
-    $auxuser=$ENV{ENS_USER};
-    $auxpass=$ENV{ENS_PASS};
-    $auxdrv=$ENV{ENS_DRV}||'mysql';
-}
-if ($params{auxDB} =~/genekeydb/i) {
-    $auxh=$ENV{GKDB_HOST};
-    $auxuser=$ENV{GKDB_USER};
-    $auxpass=$ENV{GKDB_PASS};
-      $auxdrv=$ENV{GKDB_DRV}||'mysql';
-}
+# my $auxdb=$params{auxDB};
+# if ($auxdb) {
+# my ($auxh,$auxname,$auxpass,$auxuser,$auxdrv);
+# if ($params{auxDB} =~/ensembl/i) {
+#     $auxh=$ENV{ENS_HOST};
+#     $auxuser=$ENV{ENS_USER};
+#     $auxpass=$ENV{ENS_PASS};
+#     $auxdrv=$ENV{ENS_DRV}||'mysql';
+# }
+# if ($params{auxDB} =~/genekeydb/i) {
+#     $auxh=$ENV{GKDB_HOST};
+#     $auxuser=$ENV{GKDB_USER};
+#     $auxpass=$ENV{GKDB_PASS};
+#       $auxdrv=$ENV{GKDB_DRV}||'mysql';
+# }
 
-our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
-		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{org});
+# our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
+# 		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{org});
+my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
-my $geneid = $params{'geneid'};
-my $genedb = $params{'genedb'};
-my ($gene,$err,$ens);
+my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
-if ($genedb eq 'locuslink') {
-  $gene=$geneid;
- my @all=$talkdb->llid_to_ens($gene);
- $ens=$all[0];
- unless ($ens=~/\w{2,}/) { print "Conversion failed for $gene"; exit();}
- }
- elsif  ($genedb eq 'ens') {
-  $ens=$geneid;
-  $gene=$geneid;
-}
-else {
-  ($gene,$ens,$err) =convert_id($talkdb,$genedb,$geneid);
- }
-unless (($gene)&&($ens)) {print_self($query,"Gene $geneid not found $err",1); exit(0); } #Error message her - gene not in DB
-#else {print "Gene symbol: ". $pazar->ll_to_sym($gene),$query->br;}
+my $accn = $params{'geneid'};
+my $dbaccn = $params{'genedb'};
+my ($gene,$ens,$err);
+
+if (!$accn) {
+    print "<p class=\"warning\">Please provide a gene ID!</p>\n";
+} else {
+    if ($dbaccn eq 'EnsEMBL_gene') {
+	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {
+	    $ens=$accn;
+	    my @ll=$gkdb->ens_to_llid($ens);
+	    $gene=$ll[0];
+	}
+    } elsif ($dbaccn eq 'EnsEMBL_transcript') {
+	my @gene = $ensdb->ens_transcr_to_gene($accn);
+	$ens=$gene[0];
+        unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	my @ll=$gkdb->ens_to_llid($ens);
+	$gene=$ll[0];
+    } elsif ($dbaccn eq 'EntrezGene') {
+	my @gene=$gkdb->llid_to_ens($accn);
+	$ens=$gene[0];
+	unless ($gene=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	$gene=$accn;
+    } else {
+	($gene,$ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+	if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    }
+print "<span>$accn $ens $gene</span><br>";
+unless (($gene)&&($ens)) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+else {print "Gene symbol: ". $gkdb->llid_to_sym($gene),$query->br;}
 my $type = $params{'radiobutton'};
 
  next_page(\%params,$gene,$ens,$query,$pazar); 
@@ -131,18 +148,19 @@ my $element=$params{sequence};
 my ($enstr,$sadapt,$proceed,%tr,%sites,%tss);
 	my $precisetr;
    
-     print ("Gene $gene (NCBI); $ens (Ensembl)" . $html->br);
+     print ("Gene $ens (Ensembl)" . $html->br);
+     print ("Gene $gene (EntrezGene)" . $html->br);
       #Get the transcript ids and organism so we can look fot alt TSSs and upstream se
      
      #$org=$pazar->getorg($gene);
-    my ($chr,$build,$begin,$end,$orient)=$talkdb->get_ens_chr($ens);
-    $org=$talkdb->current_org($gene);
+    my ($chr,$build,$begin,$end,$orient)=$ensdb->get_ens_chr($ens);
+    $org=$ensdb->current_org();
     unless ($chr) {print $query->h1("This gene is not mapped in the genome or was not found in the current ensembl release"); exit();}
     #We need now an ensembl adaptor to get the sequence
-    my $sadapt=$talkdb->get_ens_adaptor;
+    my $sadapt=$ensdb->get_ens_adaptor;
     my $adapt=$sadapt->get_SliceAdaptor();
 my $slice = $adapt->fetch_by_region('chromosome',$chr,$begin,$end,$orient); 
-     print ("Specie: $org" . $html->br);
+     print ("Species: $org" . $html->br);
      #print ("Gene chromosome location: chrosomosome $chr, build $build, on $orient strand, begin $begin" . $html->br);
 	$params{build}=$build;
 	$params{strand}=$orient;
@@ -200,6 +218,10 @@ my $enstr=$tr_adaptor->fetch_all_by_Slice($slice);
 #	else {$found++;}		
 #     }
 #		unless ($found) {print_self ($html,'Element not found within 1 Kb', 1);}
+unless ($sites[0]) {
+    print $html->h4("Your site was not found!");
+exit();
+}
 print $html->h4("Please choose the appropriate combination (transcript, position, sequence) and click the submit button");
       #print "This gene has " . count_refseq_tr($gene) . " transcript(s) in RefSeq and $censtr in Ensembl" . $html->br;
     print " <FORM NAME=\"chrcoord\" onSubmit='javascript:SendInfo();'>";

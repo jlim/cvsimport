@@ -8,21 +8,24 @@
 <body>
 <FORM NAME="usersform" action="http://www.pazar.info/cgi-bin/sWI/get_coordinates.cgi">
  <p>
- Auxilliary database
+<!-- Auxilliary database
  <select name="auxDB">
       <option value="GeneKeyDB">GeneKeyDB</option>
       <option value="EnsEMBL" selected>EnsEMBL</option>
     </select>
+-->
   <p> Gene ID 
     <input name="geneid" maxlength="25" type="text" />
     Gene DB 
     <select name="genedb">
-      <option value="nm">Refseq</option>
-      <option value="enst">Ensembl transcript</option>
-      <option value="ens">Ensembl gene</option>
-      <option value="locuslink">Locus link</option>
-      <option value="swissprot">Swiss prot</option>
-      <option value="accn">Genbank</option>
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+      <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
     </select>
   </p>
   <p>approximate position of the element relative to the most common transcription 
