@@ -61,7 +61,7 @@ my $dbaccn = $params{'genedb'};
 my ($gene,$ens,$err);
 
 if (!$accn) {
-    print "<p class=\"warning\">Please provide a gene ID!</p>\n";
+    print "<p class=\"warning\">An error occurred!</p>\n";
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
 	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {
@@ -84,12 +84,14 @@ if (!$accn) {
 	($gene,$ens,$err) =convert_id($gkdb,$dbaccn,$accn);
 	if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     }
-print "<span>$accn $ens $gene</span><br>";
-unless (($gene)&&($ens)) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
-else {print "Gene symbol: ". $gkdb->llid_to_sym($gene),$query->br;}
-my $type = $params{'radiobutton'};
+    my $sym;
+    unless (($gene)&&($ens)) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+    else {
+	$sym= $gkdb->llid_to_sym($gene);
+	print "Gene symbol: ". $sym,$query->br;}
+    my $type = $params{'radiobutton'};
 
- next_page(\%params,$gene,$ens,$query,$pazar); 
+ next_page(\%params,$sym,$gene,$ens,$query,$pazar); 
 my %input;
 my $err;
 #Check here if the start is correct and if alternative TSSs exist
@@ -138,36 +140,37 @@ return 1,$corrected;
 
 
 sub next_page {
-my ($params,$gene,$ens,$html,$pazar)=@_;
-my %params=%{$params};
+    my ($params,$sym,$gene,$ens,$html,$pazar)=@_;
+    my %params=%{$params};
 
-my $region=$params{start};
-my $element=$params{sequence};
+    my $region=$params{start};
+    my $element=$params{sequence};
+    my $length=length($element);
 #my ($trf_llid,$trfens,$trferr) =convert_id($params{TFDB},$params{TF});
 
-my ($enstr,$sadapt,$proceed,%tr,%sites,%tss);
-	my $precisetr;
-   
-     print ("Gene $ens (Ensembl)" . $html->br);
-     print ("Gene $gene (EntrezGene)" . $html->br);
-      #Get the transcript ids and organism so we can look fot alt TSSs and upstream se
-     
-     #$org=$pazar->getorg($gene);
+#my ($enstr,$sadapt,$proceed,%tr,%sites,%tss);
+#	my $precisetr;
+    
+    print ("Gene $ens (Ensembl)" . $html->br);
+    print ("Gene $gene (EntrezGene)" . $html->br);
+    #Get the transcript ids and organism so we can look fot alt TSSs and upstream se
+    
+    #$org=$pazar->getorg($gene);
     my ($chr,$build,$begin,$end,$orient)=$ensdb->get_ens_chr($ens);
-    $org=$ensdb->current_org();
+    my $org=$ensdb->current_org();
     unless ($chr) {print $query->h1("This gene is not mapped in the genome or was not found in the current ensembl release"); exit();}
     #We need now an ensembl adaptor to get the sequence
     my $sadapt=$ensdb->get_ens_adaptor;
     my $adapt=$sadapt->get_SliceAdaptor();
-my $slice = $adapt->fetch_by_region('chromosome',$chr,$begin,$end,$orient); 
-     print ("Species: $org" . $html->br);
-     #print ("Gene chromosome location: chrosomosome $chr, build $build, on $orient strand, begin $begin" . $html->br);
-	$params{build}=$build;
-	$params{strand}=$orient;
-	$params{upstart}=$begin;
-	$params{chromosome}=$chr;
-	$params{llid}=$gene;
-my $found;
+    my $slice = $adapt->fetch_by_region('chromosome',$chr,$begin,$end,$orient); 
+    print ("Species: $org" . $html->br);
+    #print ("Gene chromosome location: chrosomosome $chr, build $build, on $orient strand, begin $begin" . $html->br);
+# 	$params{build}=$build;
+# 	$params{strand}=$orient;
+# 	$params{upstart}=$begin;
+# 	$params{chromosome}=$chr;
+# 	$params{llid}=$gene;
+#my $found;
 
 print "
 <script language=\"javascript\">
@@ -175,46 +178,52 @@ print "
 function SendInfo(){
 var arg = document.chrcoord.start_end.options[document.chrcoord.start_end.selectedIndex].value;
 var txt = document.chrcoord.start_end.options[document.chrcoord.start_end.selectedIndex].text; 
-var sel = window.opener.NewOption(arg,txt);
+var sel = window.opener.NewOption(arg);
 window.close();
 } 
 </SCRIPT>
 ";
 my $tr_adaptor  = $sadapt->get_TranscriptAdaptor();
 my $enstr=$tr_adaptor->fetch_all_by_Slice($slice);
-    my (@sites,%labels);
-     foreach my $transcript (@$enstr) {
-     #print "TR:",$row->[0];
-     # my $transcript=$dbadapt->fetch_by_dbID($row->[0]);
-      my $tr=$transcript->stable_id;
-      #print $tr,$html->br;
-      my ($tss,$seq)=getseq($transcript,$adapt,$chr,$begin,$end,$orient,$region);
-       #print $tss,$seq,$html->br;
-       #print join(':',$seq,$element,$region,$tss),$html->br;
-	my ($nf,$site,$precise)=suggest_pos($seq,$element,$region,$tss);
+my (@sites,%labels);
+foreach my $transcript (@$enstr) {
+    #print "TR:",$row->[0];
+    # my $transcript=$dbadapt->fetch_by_dbID($row->[0]);
+    my $tr=$transcript->stable_id;
+    #print $tr,$html->br;
+    my ($tss,$seq,$inverted)=getseq($transcript,$adapt,$chr,$begin,$end,$orient,$region,$length);
+    #print $tss,$seq,$html->br;
+    #print join(':',$seq,$element,$region,$tss),$html->br;
+    my ($nf,$site,$precise)=suggest_pos($seq,$inverted,$element,$region,$tss);
     #print 'SITES',Dumper($site),$html->br;
     #print $nf,$site,$precise,$html->br;
-    
-	if ($nf>0) {
-			print  $html->br;
-			print "Found $nf possible sites", $html->br;
-			foreach my $key (keys %{$site}) {
-				my $rel=$site->{$key};
-                my $label=$tr.' '.$rel.' '.$key;
-                my $end=$key+length($element);
-                my $uid=join(':',$chr,$key,$end,$org,$build,$element,$tr,$tss,$tss);#For now no fuzzy bussiness
-                push @sites,$uid;
-                $labels{$uid}=$label;
-				#print ("Found at Abs $key, rel $rel, transcript $tr" . $html->br);#Just to debug
-			}
+
+    if ($nf>0) {
+#	print  $html->br;
+#	print "Found $nf possible sites", $html->br;
+	foreach my $key (keys %{$site}) {
+	    my $rel=$site->{$key};
+	    my $label=$tr.' '.$rel.'('.$key.') '.$element;
+	    my $beg=$key;
+	    my $en=$key+length($element)-1;
+	    unless ($precise==-1) {
+		$strand='+';
+	    } else {
+		$strand='-';
+	    }
+	    my $uid=join(':',$chr,$strand,$beg,$en,$org,$build,$element,$ens,$tr,$tss,$tss,$sym);#For now no fuzzy bussiness
+		push @sites,$uid;
+	    $labels{$uid}=$label;
+	    #print ("Found at Abs $key, rel $rel, transcript $tr" . $html->br);#Just to debug
 	}
-	
-	$tr{$tr}=$seq;
-	$sites{$tr}=$site;
-	$tss{$tr}=$tss;	
-#      print ("Transcript location: $tr: $tss" . $html->br);
+    }
+}   
+#    $tr{$tr}=$seq;
+#    $sites{$tr}=$site;
+#    $tss{$tr}=$tss;	
+##      print ("Transcript location: $tr: $tss" . $html->br);
 #      print ("Target sequence: $region/$element/$seq" . $html->br);
-      }
+
 #	else {$found++;}		
 #     }
 #		unless ($found) {print_self ($html,'Element not found within 1 Kb', 1);}
@@ -232,42 +241,40 @@ print $html->h4("Please choose the appropriate combination (transcript, position
                                 #-multiple=>'true',
                                 -labels=>\%labels
                                 );
-     print $html->submit(-name=>'Set coordinates',-value=>'submit',-onClick=>'SendInfo(); window.close;');
+     print $html->submit(-name=>'Set coordinates',-value=>'submit');
      print '    <input name="cancel" value="cancel" type="reset">';
      print '</form>';
 exit();
 }
 
 sub getseq {
-my ($id, $adapt, $chr,$begin,$end, $orient, $region)=@_;
-
-my $l;
+my ($id, $adapt, $chr,$begin,$end, $orient, $region,$length)=@_;
+my ($l,$st,$en,$tss);
 #Let's see how much we want
 if ($region<0) {
-	$l=1000-$region;
-	$region=$l;
-}
-else {
-	$region+=100;
-	$l=$region;
+	$l=1000-$region+$length;
+} else {
+	$l=$region+1000+$length;
 }
 #my $upstream =  Bio::EnsEMBL::Upstream->new(-transcript=>$id,-length=>$l);
 if ($orient==1) {
-	$start=$begin-$region;
-	$end=$begin;
-}
-else {
-   	$start=$end-1000;
-        $end=$end+$region;
+	$st=$begin-$l;
+	$en=$begin+$l;
+	$tss=$begin;
+} else {
+   	$st=$end-$l;
+        $en=$end+$l;
+	$tss=$end;
 }
 my $slice;
 #print "$start $end $region $orient";
-$slice = $adapt->fetch_by_region('chromosome',$chr,$start,$end,$orient);
+$slice = $adapt->fetch_by_region('chromosome',$chr,$st,$en,$orient);
 unless ($orient==1) {
 	my $rsl=$slice->invert;
-	return $begin,$rsl->seq;
+	return $tss,$rsl->seq,$slice->seq;
 }
-return $begin,$slice->seq;
+my $rsl=$slice->invert;
+return $tss,$slice->seq,$rsl->seq;
 }
 
 sub display_check {
@@ -318,37 +325,43 @@ exit;
 
 #What if pos is not ok- suggest some positions (both chromosome and relative)
 sub suggest_pos {
-my ($region,$seq,$pos,$upstart)=@_;
-my $l=length($region);
-my $t=substr($region, $l+$pos, length($seq));
-return 1,0,1 if ($t eq $seq);
-my %site;
-my $i=0;
-my $precise;
-while ($region=~m/$seq/ig) {
+    my ($region,$inverted,$seq,$pos,$upstart)=@_;
+###remember sequence number starts at 0
+    my $l=((length($region)-1)/2);
+    my %site;
+    my $i=0;
+    my $precise;
+    while ($region=~m/$seq/ig) {
 	$precise=1 if (($-[0]-$l) == $pos);
-	$site{$-[0]+$upstart}=$-[0]-$l;	
+	$site{$-[0]-$l+$upstart}=$-[0]-$l;
 	$i++;
-}
-return $i,\%site,$precise;
+    }
+    if ($i==0) {
+	while ($inverted=~m/$seq/ig) {
+	    $precise=-1;
+	    $site{$l-($-[0]+length($seq)-1)+$upstart}=$l-($-[0]+length($seq)-1);
+	    $i++;
+	}
+    }
+    return $i,\%site,$precise;
 }
 	
-sub read_pos {
-	my $params=shift;
-	my $user=$params->{userid};
-	my $analysis=$params->{aname};
-	my $file=$user ."\_".$analysis . ".pos.tmp";
-	open (POS,$file)||die;
-	while (my $buf=<POS>) {
-		chomp $buf;
-		my ($t1,$v1,$t2,$v2)=split(/\t/,$buf);
-		$params->{$t1}=$v1;
-		$params->{$t2}=$v2;
-	}
-	close POS;
-	unlink($file);
-	return %{$params};
-}
+# sub read_pos {
+# 	my $params=shift;
+# 	my $userid=shift;
+# 	my $analysis=$params->{aname};
+# 	my $file=$userid ."\_".$analysis . ".pos.tmp";
+# 	open (POS,$file)||die;
+# 	while (my $buf=<POS>) {
+# 		chomp $buf;
+# 		my ($t1,$v1,$t2,$v2)=split(/\t/,$buf);
+# 		$params->{$t1}=$v1;
+# 		$params->{$t2}=$v2;
+# 	}
+# 	close POS;
+# 	unlink($file);
+# 	return %{$params};
+# }
 
 
 sub filename {

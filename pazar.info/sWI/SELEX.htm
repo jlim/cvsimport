@@ -27,22 +27,19 @@ function MM_validateForm() { //v4.0
 </script>
 </head>
 <body>
-<h1>Describe your Cis Regulatory Element<br>
-</h1>
+<h1>Describe your Binding Sequence</h1>
 
-<form style="height: 546px;" action="http://serverpath/psite_get_cre.cgi" method="post" name="CRE">
-  <h4>Interaction type between the TF complex (factor) and this CRE </h4>
+<form style="height: 546px;" action="http://serverpath/addcre.cgi" method="post" name="CRE">
+  <h3>Interaction type between the TF complex (factor) and this sequence </h3>
   <table width="200">
     <tr>
       <td><label>
-        <input name="inttype" type="radio" value="qual" onClick="CRE.interact0.disabled=true;CRE.interactscale.disabled=true;CRE.qualitative.disabled=false;
-		CRE.qualitative.focus();">
+        <input name="inttype" type="radio" value="qual" onClick="CRE.interact0.disabled=true;CRE.interactscale.disabled=true;CRE.qual.disabled=false;CRE.qual.focus();">
         qualitative</label></td>
     </tr>
     <tr>
       <td><label>
-        <input name="inttype" type="radio" onClick="CRE.interact0.disabled=false;
-		CRE.qualitative.disabled=true;CRE.interactscale.disabled=false; CRE.interact0.focus();" value="quan" checked>
+        <input name="inttype" type="radio" value="quan" checked="checked" onClick="CRE.interact0.disabled=false;CRE.qual.disabled=true;CRE.interactscale.disabled=false; CRE.interact0.focus();">
         quantitative</label></td>
     </tr>
   </table>
@@ -58,7 +55,7 @@ function MM_validateForm() { //v4.0
     </select>
   </p>
   <p>qualitative 
-    <select name="qualitative" id="qualitative" disabled="true">
+    <select name="qual" id="qual" disabled="true">
       <option value="saturation">saturation</option>
       <option value="good">good</option>
       <option value="marginal" selected>marginal</option>
@@ -66,18 +63,27 @@ function MM_validateForm() { //v4.0
       <option value="ND">ND</option>
     </select>
   </p>
-  <p>Method (select from list or add the name and the description in the box if 
-    not available): </p>
-  <p> 
-    <input name="newmethod" type="text" id="newmethod">
-    description </p>
+  <p>Method (select from list or add the name and the description in the box if not available): </p><p> 
+    <input name="newmethod" type="text" id="newmethod"></p>
+  <p>
+  Description </p>
   <p> 
     <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <p>reference 
+  <p>Cell Type 
+    <input name="cell" type="text" id="cell">
+    Cell Status 
+    <select name="cellstat">
+      <option value="primary">primary</option>
+      <option value="cell line">cell line</option>
+    </select>
+    Tissue 
+    <input name="tissue" type="text" id="tissue"></p>
+    <p>Reference (PubMed ID) 
     <input name="reference" type="text" id="reference">
   </p>
   <hr>
+ <h3>Sequence Description </h3>
   <p>sequence 
     <input name="sequence" type="text" id="sequence">
     construct name 

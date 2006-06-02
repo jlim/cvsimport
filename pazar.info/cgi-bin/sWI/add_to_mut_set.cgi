@@ -1,26 +1,34 @@
 #!/usr/bin/perl
+
 use CGI qw( :all);
 use CGI::Debug;#(report => everything, on => anything);
-use strict;
-#
-my $selfpage="/srv/www/htdocs/genekeydb/psite/mutation.htm";
-#my $basedir="/srv/www/cgi-bin/genekeydb/psite";
-#chdir($basedir);
+
+require '../getsession.pl';
+
+my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
+my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
+my $cgipath=$ENV{PAZARCGIPATH}.'/sWI';
+my $selfpage="$docroot/mutation.htm";
 
 my $query=new CGI;
 my %params = %{$query->Vars};
 my $input = $params{'submit'};
-my $user=$params{'user'};
+my $userid=$info{userid};
 my $analysis=$params{'aname'};
 unless ($params{'file'} ) {
 	$params{'file'} = $user ."\_".$analysis . ".pos.tmp";
 }
-my $file=$params{file};
+my $file=$params{'file'};
+my $tmpdir="$cgipath/tmp";
+chdir($tmpdir);
+mkdir($userid) unless (-e $userid);
+chdir $userid;
 unlink ($file) if (-e $file);
+
 SUBMIT: {
 if ($input eq 'cancel') { if (-e $file) {unlink($file);} exit();}#Remove the file!
 if ($input eq 'Add') { last SUBMIT;} #Do what you normally do (add and write
-if ($input eq 'Done') { &add_to_file(\%params,$query); exit();}#JUst in case we decide we need more stuff to add
+if ($input eq 'Done') { &add_to_file($file,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
 }
 
 
@@ -38,10 +46,11 @@ foreach my $key (keys %params) {
 }
 print $query->header;
 while (my $buf=<SELF>) {
+    $buf=~s/serverpath/$cgiroot/;
 	if ($buf=~/body/i) {$seen{body}++;}
 	if ($buf=~/\<form/i) {  
 		print $buf;
-		print "\<input name=\"userid\" type=\"hidden\" value=\"$user\"\>"; 
+		print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>"; 
 		print "\<input name=\"aname\" type=\"hidden\" value=\"$analysis\"\>";
 		print "\<input name=\"file\" type=\"hidden\" value=\"$file\"\>";
 		next;
@@ -89,20 +98,19 @@ print " </p>  <hr><input value=\"Add more to this set\" name=\"Add\" type=\"subm
 	<p> <input name=\"submit\" id=\"submit\"  value=\"Done\"
 type=\"submit\">\n
 	<input onclick=\"javascript:window\.close();\" name=\"cancel\" id=\"cancel\" value=\"Cancel\" type=\"Submit\">\n
-	</p>  <hr><input name=\"user\" type=\"hidden\" value=\"$user\"\>
-\<input name=\"aname\" type=\"hidden\" value=\"aname\"\></form>
+	</p></form>
 </body> </html>\n";	
 close SELF;
 exit;
 
 
 sub add_to_file {
-my ($params,$query)=@_;
-chdir($params{user});
+my ($file,$params,$query)=@_;
+
 #Clean first just in case
 
 my %params=%{$params};
-my $file=$params{file};
+
 unless ($file) {die "Can't open $file";}
 open (POS,">$file")||die ;
 my @all=grep(/mpos/,keys %params);

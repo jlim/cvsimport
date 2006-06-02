@@ -3,7 +3,7 @@
 use HTML::Template;
 use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
-
+use pazar::talk;
 
 require '../getsession.pl';
 
@@ -93,7 +93,7 @@ my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
 my $selfpage="$docroot/TFcentric.htm";
 my $nextpage="$docroot/TFcentric_CRE.htm";
 
-my @voc=qw(TF TFDB  family class);
+my @voc=qw(TF TFDB  family class modifications);
 my $query=new CGI;
 my %params = %{$query->Vars};
 
@@ -102,13 +102,14 @@ my $input = $params{'submit'};
 my $user=$info{user};
 my $pass=$info{pass};
 my $analysis=$params{'aname'};
+my $an_desc=$params{'analysis_desc'};
 my $auxDB=$params{'auxDB'};
-my $userid=$params{'userid'};
+my $proj=$params{'project'};
 
 SUBMIT: {
 if ($input eq 'cancel') {  exit();}
 if ($params{'AddTF'}) { last SUBMIT;} #Do what you normally do (add and write)
-if ($params{'addtocomplex'}) { &next_page; exit();}#JUst in case we decide we need more stuff to add
+if ($params{'addtocomplex'}) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
 }
 
 #TODO: checks recognizing the genes
@@ -122,14 +123,14 @@ my $next=$i;
 
 #print "Next is : $next i is $i";
 foreach my $key (keys %params) {
-            next if ($key eq 'aname')||($key eq 'file')||($key eq 'user')||($key=~/TFcomplex/)||($key=~/modification/);
+            next if ($key eq 'aname')||($key eq 'file')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
             #print $key,"__";
             if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tf{$id}=$params{$key};}
             if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tfdb{$id}=$params{$key}; }
             if ($key=~/class/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $class{$id}=$params{$key}; }
             if ($key=~/family/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $family{$id}=$params{$key}; }
             if ($key=~/interact/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $interact{$id}=$params{$key}; }
- #           if ($key=~/modific/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $modif{$id}=$params{$key};  }
+            if ($key=~/modific/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $modif{$id}=$params{$key};  }
             
             print "\<input name=\"$key\" type=\"hidden\" value=\"$params{$key}\"\>"; 
 }
@@ -140,14 +141,14 @@ while (my $buf=<SELF>) {
         print $buf;
         next;
     }
-    if (($buf=~/modifications/i)&&($params{modifications})) {
-        $buf=~s/name/value=\"$params{modifications}\" name/;
-    }
-       if (($buf=~/organism/i)&&($params{organism})) {
-        $buf=~s/name/value=\"$params{organism}\" name/;
-    }
-       if (($buf=~/build/i)&&($params{build})) {
-        $buf=~s/name/value=\"$params{build}\" name/;
+#    if (($buf=~/modifications/i)&&($params{modifications})) {
+#        $buf=~s/name/value=\"$params{modifications}\" name/;
+#    }
+#       if (($buf=~/organism/i)&&($params{organism})) {
+#        $buf=~s/name/value=\"$params{organism}\" name/;
+#    }
+       if (($buf=~/pubmed/i)&&($params{pubmed})) {
+        $buf=~s/name/value=\"$params{pubmed}\" name/;
     }
     if (($buf=~/TFcomplex/i)&&($params{TFcomplex})) {
         $buf=~s/name/value=\"$params{TFcomplex}\" name/;
@@ -155,12 +156,13 @@ while (my $buf=<SELF>) {
     print $buf;
 	if ($buf=~/body/i) {$seen{body}++;}
 	if ($buf=~/\<form/i) {$seen{form}++;} 
-	if ($buf=~/modifications/i) {$seen{modif}++;} 
+	if ($buf=~/pubmed/i) {$seen{modif}++;} 
 	if (($buf=~/\<hr\>/)&&($seen{modif})&&($started)) { 
         $started=0;
-		print "\<input name=\"aname\" type=\"hidden\" value=\"$analysis\"\>";
-		print "\<input name=\"auxDB\" type=\"hidden\" value=\"$auxDB\"\>";
-		print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>";
+	print "\<input name=\"aname\" type=\"hidden\" value=\"$analysis\"\>";
+	print "\<input name=\"analysis_desc\" type=\"hidden\" value=\"$an_desc\"\>";
+	print "\<input name=\"auxDB\" type=\"hidden\" value=\"$auxDB\"\>";
+	print "\<input name=\"project\" type=\"hidden\" value=\"$proj\"\>";
 #        for my $j (1..$i) {
 #            my $k1='TF' . $j;
 #	        my $k2='TFDB' . $j;
@@ -183,7 +185,7 @@ while (my $buf=<SELF>) {
                     if ($key eq 'class') {$val=$class{$k}; last VAL;}
                     if ($key eq 'family') {$val=$family{$k}; last VAL;}
                     if ($key eq 'interact') {$val=$interact{$k}; last VAL;}
-                   # if ($key eq 'modifications') {$val=$modif{$k}; next VAL;}
+                    if ($key eq 'modifications') {$val=$modif{$k}; next VAL;}
                 }
                 print $lkey,' ',$query->textfield (-label=>$lkey,-name=>$lkey,-size=>16, -value=>$val), $query->br; 
             }
@@ -194,40 +196,65 @@ while (my $buf=<SELF>) {
 exit();
 
 sub next_page {
-unless ($params{userid}) {
-    print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
+    my ($user,$pass,$params,$query)=@_;
+    my %params=%{$params};
+    unless ($user&&$pass) {
+	print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
-print $template_tail->output;
-    exit();
-}
-my @numbered=qw(TF TFDB interact class family);
-foreach my $mp(keys %params) {#Add 0 to the 0 key
-my $key=$mp;
-    if ((grep (/\b$mp\b/,@numbered))&&($mp!~/\d/)) {   
-        $key .='0' ;
-	    $params{$key}=$params{$mp};
-        delete $params{$mp};
+	my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+	print $template_tail->output;
+	exit();
     }
-}
-print $query->start_form(-method=>'POST',-target=>'new',-width=>310,-height=>240,-toolbar=>0,-location=>0,-directories=>0,-status=>0,
-                            -scrollbars=>0,-menubar=>0,-resizable=>0,
-                            -action=>'TFcentric_CRE.cgi');
-&forward_args($query,\%params);
-print $query->h2('TF data accepted, please add CRE data now');
-print $query->h2('We suggest you should not make more than 1 submission simultanuously');
-print $query->h3('Do not close this window if you want to make more than one CRE submissions');
-print $query->h3('Just click the appropriate button again once you have completed a submission');
-print $query->submit(-name=>'submit',
-                        -value=>'Add CRE to which the TF/TF complex binds');
-print $query->h4(' or ');
-print $query->submit(-name=>'submit',
-                        -value=>'Add SELEX or similar artificial entry');
-print $query->endform;
+    my @numbered=qw(TF TFDB interact class family modifications);
+    my @db;
+    foreach my $dbkey (grep(/TFDB/,keys %params)) {
+	push @db, $params{$dbkey};
+    }
+    my @tf;
+    foreach my $tfkey (grep(/^TF([0-9]*)$/,keys %params)) {
+	push @tf, $params{$tfkey};
+    }
+
+    my $tfs=&check_TF(\@db,\@tf);
+    my %tfs=%$tfs;
+ #Add 0 to the 0 key
+    foreach my $mp(keys %params) {
+	my $key=$mp;
+	if ((grep (/\b$mp\b/,@numbered))&&($mp!~/\d/)) {   
+	    $key .='0' ;
+	    $params{$key}=$params{$mp};
+	    delete $params{$mp};
+	}
+	foreach my $trans (keys %tfs) {
+	    if ($params{$key} eq $trans) {
+		my $ens_key='ENS_'.$key;
+		$params{$ens_key}=$tfs{$trans};
+	    }
+	}
+    }
+
+    print $query->start_form(-method=>'POST',-target=>'new',-width=>310,-height=>240,-toolbar=>0,-location=>0,-directories=>0,-status=>0,
+			     -scrollbars=>0,-menubar=>0,-resizable=>0,
+			     -action=>'TFcentric_CRE.cgi');
+    &forward_args($query,\%params);
+    print $query->h2('TF data accepted:');
+    foreach my $trans (keys %tfs) {
+	print "The provided TF $trans has been successfully converted to the Ensembl transcript ID $tfs{$trans}.<br>";
+    }
+    print $query->h2('Please add CRE data now');
+    print $query->h2('We suggest you should not make more than 1 submission simultanuously');
+    print $query->h3('Do not close this window if you want to make more than one CRE submissions');
+    print $query->h3('Just click the appropriate button again once you have completed a submission');
+    print $query->submit(-name=>'submit',
+			 -value=>'Add CRE to which the TF/TF complex binds');
+    print $query->h4(' or ');
+    print $query->submit(-name=>'submit',
+			 -value=>'Add SELEX or similar artificial entry');
+    print $query->endform;
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
-print $template_tail->output;
-exit();
+    my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+    print $template_tail->output;
+    exit();
 }
 
 sub forward_args {
@@ -237,5 +264,42 @@ foreach my $key (keys %params) {
     print $query->hidden($key,$params{$key});
 }
 }
-exit;
 
+sub check_TF {
+    my ($db,$tf)=@_;
+
+    my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+
+    my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
+
+    my %factors;
+    for (my $i=0;$i<@$db;$i++) {
+	my $accn=@$tf[$i];
+	my $dbaccn=@$db[$i];
+	my @trans;
+	if ($dbaccn eq 'EnsEMBL_gene') {
+	    @trans = $gkdb->ens_transcripts_by_gene($accn);
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
+	    push @trans,$accn;
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	} elsif ($dbaccn eq 'EntrezGene') {
+	    my @gene=$gkdb->llid_to_ens($accn);
+	    unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
+	} elsif ($dbaccn eq 'refseq') {
+	    @trans=$gkdb->nm_to_enst($accn);
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	} elsif ($dbaccn eq 'swissprot') {
+	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
+	    $sp->execute($accn)||die;
+	    my $species=$sp->fetchrow_array();
+	    if (!$species) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	    $ensdb->change_mart_organism($species);
+	    @trans =$ensdb->swissprot_to_enst($accn);
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	}
+	$factors{$accn}=$trans[0];
+    }
+    return \%factors;
+}

@@ -63,8 +63,8 @@ function onoff(objref) {
 	return;
 }
 
-function open_cgi(user,aname,type,con) {
-params="user="+user+";"+"aname="+aname+";"+"file="+con+";"+"type="+type+";";
+function open_cgi(aname,type,con) {
+params="aname="+aname+";"+"file="+con+";"+"type="+type+";";
 if (type=='mutation') {
 window.open('http://www.pazar.info/cgi-bin/sWI/add_to_mut_set.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
 }
@@ -131,6 +131,7 @@ print "Content-Type: text/html\n\n", $template->output;
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
 my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
 my $docpath=$ENV{SERVER_NAME}.'/sWI';
+my $cgipath=$ENV{PAZARCGIPATH}.'/sWI';
 
 our $query=new CGI;
 
@@ -146,7 +147,7 @@ my $proj = $params{'project'};
 
 my $nextpage="$docroot/creanalysis.htm";
 my $alterpage="$docroot/TFcentric.htm";
-my $tmpdir="$cgiroot/tmp";
+my $tmpdir="$cgipath/tmp";
 chdir($tmpdir);
 mkdir($userid) unless (-e $userid);
 chdir $userid;
@@ -176,7 +177,6 @@ while (my $buf=<TFC>) {
     print $buf;
     if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
         &forward_args;
-      print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>";
       print "\<input name=\"filebase\" type=\"hidden\" value=\"$file\"\>";
 #      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
     }
@@ -205,8 +205,7 @@ while (my $buf=<NEXT>) {
 	  #     print "$key $val",$html->br;
 	  print "\<input name=\"$key\" type=\"hidden\" value=\"$val\"\>";
       }
-      print "\<input name=\"userid\" type=\"hidden\" value=\"$userid\"\>";
-      print "\<input name=\"filebase\" type=\"hidden\" value=\"$file\"\>";
+      print "\<input name=\"file\" type=\"hidden\" value=\"$file\"\>";
 #      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
       next;
   }

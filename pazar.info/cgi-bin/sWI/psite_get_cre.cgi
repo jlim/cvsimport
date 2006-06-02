@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 
+use lib $ENV{ENS_API};
+
 use HTML::Template;
 #use CGI::Debug (report=>'everything', on=>'anything');
 use CGI::Debug;
 
 use CGI qw( :all);
-use GKDB;
 use DBI;
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use Bio::EnsEMBL::DBSQL::TranscriptAdaptor;
@@ -124,127 +125,35 @@ my %params = %{$query->Vars};
 our $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
 our $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
 
-our @tdbs=qw(refseq ensembl_transcript accn);
-
 my $user=$info{user};
 my $pass=$info{pass};
-    
-our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
-		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{organism});
 
 unless (($user)&&($pass)) {
     &goback(2,$query);
 }
 
-
-=Description
-Get all transcripts and check the sequence and match the correct position
-and the respective transcript id.
-=cut
-undef $id;
-
-#my $selfpage="/$docroot/creanalysis.htm";
-
-#open (SELF, $selfpage) ||die;
-
-my $input = $params{'submit'};
-my $cs = $params{'checkseq'};
-my $geneid = $params{'geneid'};
-my $genedb = $params{'genedb'};
-my ($gene,$err);
-
- next_page(\%params,$gene,$ens,$query); 
-exit();
-
-sub convert_id {
- my ($genedb,$geneid,$ens)=@_;
-undef $id;
-      my $add=$genedb . "_to_llid";
-# print "Working on $geneid in $genedb; $add";
-     eval "$add($geneid);";
-     warn "Converting failed: $@" if ($@);
-my $ensembl;
-if ($id) { 
-  $ensembl=$ens?$ens:GKDB::getensembl($id) ;
-}
-return $id,$ensembl,$@;
-}
-
-
-# sub print_self {
-# my ($q,$message,$state)=@_;
-#  while (my $buf=<SELF>) {
-#   print $buf;
-#   if ($buf=~/\<\/head\>/) {
-#     print $q->h2("An error occurred:") if ($state==1);
-#     print $q->h3($message);
-#   }
-#  }
-# }
-
-sub checkseq {
-my ($params,$gene,$html)=@_;
-print "Checking sequence now..." . $html->br;
-TYPE: {
-	if ($params{'radiobutton'} eq 'region') { last TYPE;}
-	if ($params{'radiobutton'} eq 'exact') { last TYPE;}
-	if ($params{'radiobutton'} eq 'point mutation') {last TYPE;} #%params=read_pos(\%params); last TYPE;}
-}
-return 1,$corrected;
-}
-
-
-
-sub next_page {
-my ($params,$gene,$ens,$html)=@_;
-my %params=%{$params};
 my $aid=$params{aname};
-my $userid=$params{userid};
 my $region=$params{start};
 my $element=$params{sequence};
 #my ($trf_llid,$trfens,$trferr) =convert_id($params{TFDB},$params{TF});
 my $selfpage="$docroot/condition1.htm";
 open (SELF, $selfpage) ||die;
-my ($org,$enstr,$sadapt,$proceed,%tr,%sites,%tss);
-	my $precisetr;
 while (my $buf=<SELF>) {
-	if ($buf=~/action/i) {
-	    $buf=~s/serverpath/$cgiroot/i;
+    if (($buf=~/\<form/) && ($buf=~/action\=/)) {
+	$buf=~s/serverpath/$cgiroot/i;
+    }
+    print $buf;
+    if (($buf=~/\<form/) && ($buf=~/action\=/)) {
+	foreach my $key (keys %params) {
+	    my $val=$params{$key};
+	    print "\<input name=\"$key\" type=\"hidden\" value=\"$val\"\>";
 	}
-  print $buf;
-  if ($buf=~/\<\/head\>/) {
-#    print $html->h3("Analysis $aid");
-#my $userid='skirov'; #Debug purpose only 
-# print $html->h3("For user $userid");
- 
-    my ($chr,$build,$begin,$end)=($params{chromosome},$params{build},$params{end});
-    
-
-  if (($buf=~/\<form/) && ($buf=~/action\=/)) {
-    foreach my $key (keys %params) {
-      my $val=$params{$key};
-      print "\<input name=\"$key\" type=\"hidden\" value=\"$val\"\>";
     }
-    my $i;
-    foreach $row (@{$enstr}) {
-      my $tr=$row->[0];
-      $i++;
-      print "\<input name=\"transcript$i\" type=\"hidden\" value=\"$tr\"\>";
-    }
-    print "\<input name=\"specie\" type=\"hidden\" value=\"$org\"\>";
-    print "\<input name=\"userid\" type=\"hidden\" value=\"$user\"\>";
-    print "\<input name=\"aname\" type=\"hidden\" value=\"$aid\"\>";
-    print "\<input name=\"trf_llid\" type=\"hidden\" value=\"$trf_llid\"\>";
-    print "\<input name=\"ensgene\" type=\"hidden\" value=\"$ens\"\>";
-    print "\<input name=\"llid\" type=\"hidden\" value=\"$gene\"\>";
-    print "\<input name=\"selected_transcript\" type=\"hidden\" value=\"$precisetr\"\>";
-    print "\<input name=\"type\" type=\"hidden\" value=\"$params{'radiobutton'}\"\>";
-  }
-  if ($buf=~/Method name/) {
+    if ($buf=~/Method name/) {
 	my @methods;
-    	 push @methods,('',$regdb->known_methods);
-	        print $query->scrolling_list('methodname',\@methods,1,'true');
-}
+	push @methods,('',$regdb->known_methods);
+	print $query->scrolling_list('methodname',\@methods,1,'true');
+    }
 }
 }
 close SELF;
@@ -348,55 +257,6 @@ print $template_tail->output;
 exit;
 }
 
-#Get all transcripts upstream regions (if alternative) and see if anyone matches
-
-  sub  accn_to_llid {
-    my $in=shift;
-	   $in=~s/[^\d\w]//g;
-     $id= GKDB::get_ll_id($in);
-  }
-
-
-  sub  ens_to_llid {
-    my $in=shift;
-	$in=~s/[^\d\w]//g;
-     $id=GKDB::ensembl_to_ll($in);
-  }
-
-  sub  nm_to_llid {
-    my $in=shift;
-	$in=~s/[^\d\w]//g;
-    $id=GKDB::nm_to_ll($in);
-  }
-  
-   sub  swissprot_to_llid {
-    my $in=shift;
-	$in=~s/[^\d\w]//g;
-    $id=GKDB::sprot_to_ll($in);
-  }
-
-  sub  np_ll_llid {
-    my @in=shift;
-	$in=~s/[^\d\w]//g;
-     $id=GKDB::getensembl($in);
-  }
-
-  sub  symbol_to_llid {
-    my @in=@_;
-    foreach my $in (@in) {
-	chomp $in;
-	$in=~s/[^\d\w]//g;
-	my @x=GKDB::sym_to_ll(uc($in));
-     push @res,join(",",@x);
-    }
-  }
-  
-  sub count_refseq_tr {
-    my $ll=shift;
-    my $ch=$GKDB::dbh->prepare("select count(*) from ll_refseq_nm where ll_id=?")||die $DBI::errstr;
-    $ch->execute($ll)  ||die $DBI::errstr;
-    return $ch->fetchrow_array;
-  }
 
 #What if pos is not ok- suggest some positions (both chromosome and relative)
 sub suggest_pos {
@@ -415,22 +275,22 @@ while ($region=~m/$seq/ig) {
 return $i,\%site,$precise;
 }
 	
-sub read_pos {
-	my $params=shift;
-	my $user=$params->{userid};
-	my $analysis=$params->{aname};
-	my $file=$user ."\_".$analysis . ".pos.tmp";
-	open (POS,$file)||die;
-	while (my $buf=<POS>) {
-		chomp $buf;
-		my ($t1,$v1,$t2,$v2)=split(/\t/,$buf);
-		$params->{$t1}=$v1;
-		$params->{$t2}=$v2;
-	}
-	close POS;
-	unlink($file);
-	return %{$params};
-}
+# sub read_pos {
+# 	my $params=shift;
+# 	my $user=$params->{userid};
+# 	my $analysis=$params->{aname};
+# 	my $file=$user ."\_".$analysis . ".pos.tmp";
+# 	open (POS,$file)||die;
+# 	while (my $buf=<POS>) {
+# 		chomp $buf;
+# 		my ($t1,$v1,$t2,$v2)=split(/\t/,$buf);
+# 		$params->{$t1}=$v1;
+# 		$params->{$t2}=$v2;
+# 	}
+# 	close POS;
+# 	unlink($file);
+# 	return %{$params};
+# }
 
 
 sub filename {

@@ -2,42 +2,46 @@
  <form action="http://serverpath/TFcentric.cgi" method="post" name="MUT"> 
  <hr style="width: 100%; height: 2px;">
   <p>TF complex name 
-    <input name="TFcomplex" type="text" id="TFcomplex">
-    (Leave blank if describing a single transcription factor)</p>
-  <p>modifications 
-    <input type="text" name="modifications">
+    <input name="TFcomplex" type="text" id="TFcomplex"></p>
   <p>Pubmed (if published) 
     <input name="pubmed" type="text" id="pubmed">
-  
+  </p>
   <hr>
   TF 
   <input name="TF" maxlength="25" type="text">
   TF Database 
   <select name="TFDB">
-    <option value="refseq">Refseq</option>
-    <option value="ensembl_transcript">Ensembl transcript</option>
-    <option value="ensembl">Ensembl gene</option>
-    <option value="locuslink">Locus link</option>
-    <option value="swissprot">Swiss prot</option>
-    <option value="accn">Genbank</option>
+    <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+       <option value="refseq"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
   </select>
+<!--
   <p> Database build (if known) 
     <input name="build" type="text" id="build">
   </p>
   <p>Organism (mandatory if you selected EnsEMBL as your auxilliary database) 
     <input name="organism" type="text" id="organism">
   </p>
+-->
   <p>class
     <input type="text" name="class">
   </p>
   <p>family 
     <input type="text" name="family">
   </p>
+  <p>modifications (Optional) 
+    <input type="text" name="modifications">
+  </p>
   <p>
-    <input name="AddTF" type="submit" id="AddTF" onClick="MM_validateForm('TF','','R');return document.MM_returnValue" value="Add more TFs to this complex">
+    <input name="AddTF" type="submit" id="AddTF" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Add more TFs to this complex">
   </p>
   <hr>
-  <input name="addtocomplex" type="submit" id="addtocomplex" onClick="MM_validateForm('TF','','R');return document.MM_returnValue" value="Proceed to CRE section" >
+  <input name="addtocomplex" type="submit" id="addtocomplex" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Proceed to CRE section" >
   <br>
   <p> 
     <input  name="cancel" id="cancel" value="Cancel" type="submit">

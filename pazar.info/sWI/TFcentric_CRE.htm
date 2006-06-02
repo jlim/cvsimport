@@ -1,19 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  <title>CRE analysis</title>
+
+  
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+  <script language="javascript">
+<!--
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+function MM_validateForm() { //v4.0
+  var i,p,q,nm,test,num,min,max,errors='',args=MM_validateForm.arguments;
+  for (i=0; i<(args.length-2); i+=3) { test=args[i+2]; val=MM_findObj(args[i]);
+    if (val) { nm=val.name; if ((val=val.value)!="") {
+      if (test.indexOf('isEmail')!=-1) { p=val.indexOf('@');
+        if (p<1 || p==(val.length-1)) errors+='- '+nm+' must contain an e-mail address.\n';
+      } else if (test!='R') { num = parseFloat(val);
+        if (isNaN(val)) errors+='- '+nm+' must contain a number.\n';
+        if (test.indexOf('inRange') != -1) { p=test.indexOf(':');
+          min=test.substring(8,p); max=test.substring(p+1);
+          if (num<min || max<num) errors+='- '+nm+' must contain a number between '+min+' and '+max+'.\n';
+    } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
+  } if (errors) alert('The following error(s) occurred:\n'+errors);
+  document.MM_returnValue = (errors == '');
+}
+function ActivateCheckBox ()
+{
+document.form.pubmedid.disabled = false;
+if ( document.form.published.value == 'Yes' )
+{
+document.form.pubmedid.disabled = false;
+}
+else
+{
+document.form.pubmedid.disabled = true;
+}
+}
+
+function MM_openBrWindow(theURL,winName,features) { //v2.0
+  window.open(theURL,winName,features);
+}
+
+function onoff(objref) {
+	if (objref.disabled==true ) {
+		objref.disabled=false;} 
+		else {
+		objref.disabled=true;}
+	return;
+}
+function NewOption(arg){
+var args=arg.split(":");
+st=document.getElementById('start');
+st.value=args[2];
+endel=document.getElementById('end');
+endel.value=args[3];
+chrel=document.getElementById('chromosome');
+chrel.value=args[0];
+orgrel=document.getElementById('organism');
+orgrel.value=args[4];
+buildrel=document.getElementById('build');
+buildrel.value=args[5];
+seqrel=document.getElementById('sequence');
+seqrel.value=args[6];
+trel=document.getElementById('tid');
+trel.value=args[8];
+fstrel=document.getElementById('fstart');
+fstrel.value=args[9];
+fendrel=document.getElementById('fend');
+fendrel.value=args[10];
+gidrel=document.getElementById('gid');
+gidrel.value=args[7];
+strrel=document.getElementById('str');
+strrel.value=args[1];
+giddesc=document.getElementById('giddesc');
+giddesc.value=args[11];
+}
+
+function PopUp(PopUpUrl){
+var ScreenWidth=window.screen.width;
+var ScreenHeight=window.screen.height;
+var movefromedge=0;
+placementx=(ScreenWidth/2)-((580)/500);
+placementy=(ScreenHeight/2)-((380+10)/6);
+WinPop=window.open(PopUpUrl,"","width=580,height=380,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1,left="+placementx+",top="+placementy+",screenX="+placementx+",screenY="+placementy+",");
+}
+
+function MM_callJS(jsStr) { //v2.0
+  return eval(jsStr)
+}
+
+function MM_popupMsg(msg) { //v1.0
+  alert(msg);
+}
+//-->
+</script>
+</head>
+<body>
 <h1>Describe your Cis Regulatory Element</h1>
 
-<form style="height: 546px;" action="http://serverpath/psite_get_cre.cgi" method="post" name="CRE">
-  <h4>General description</h4>
-  <h4>Interaction type between the TF complex (factor) and this CRE </h4>
+<form style="height: 546px;" action="http://serverpath/addcre.cgi" method="post" name="CRE">
+  <h3>Interaction type between the TF complex (factor) and this CRE </h3>
   <table width="200">
     <tr> 
       <td><label> 
-        <input name="inttype" type="radio" value="qual" onClick="CRE.interact0.disabled=true;CRE.interactscale.disabled=true;CRE.qual.disabled=false;
-		CRE.qual.focus();">
+        <input name="inttype" type="radio" value="qual" onClick="CRE.interact0.disabled=true;CRE.interactscale.disabled=true;CRE.qual.disabled=false;CRE.qual.focus();">
         qualitative</label></td>
     </tr>
     <tr> 
       <td><label> 
-        <input name="inttype" type="radio" onClick="CRE.interact0.disabled=false;
-		CRE.qual.disabled=true;CRE.interactscale.disabled=false; CRE.interact0.focus();" value="quan" checked>
+        <input name="inttype" type="radio" value="quan" checked="checked" onClick="CRE.interact0.disabled=false;CRE.qual.disabled=true;CRE.interactscale.disabled=false; CRE.interact0.focus();">
         quantitative</label></td>
     </tr>
   </table>
@@ -37,32 +138,42 @@
       <option value="ND">ND</option>
     </select>
   </p>
-  <p>Method (select from list or add the name and the description in the box if 
-    not available): </p>
+  <p>Method (select from list or add the name and the description in the box if not available)</p><p>
+ <input name="newmethod" type="text" id="newmethod"></p>
   <p> 
-    <input name="newmethod" type="text" id="newmethod">
-    description </p>
+    Description </p>
   <p>
     <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <p>cell type 
+  <p>Cell Type 
     <input name="cell" type="text" id="cell">
-    cell status 
-    <select name="select">
+    Cell Status 
+    <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select>
-    tissue 
-    <input name="tissue" type="text" id="tissue">
-    reference (PubMed ID) 
+    Tissue 
+    <input name="tissue" type="text" id="tissue"></p>
+    <p>Reference (PubMed ID) 
     <input name="reference" type="text" id="reference">
   </p>
   <hr>
   <h3>CRE genome location data</h3>
   <h4>Enter here unique genome identification parameters in chromosome coordinates.</h4>
-  <p>The chromosome coordinates should be correct for the current Ensembl release 
-    and the respective genome build. The best way to set those is through the 
-    'Get chromosome coordinates' button.</p>
+  <p>The chromosome coordinates should be correct for the current Ensembl release and the respective genome build.<br>
+The best way to set those is through the 'Get chromosome coordinates' button.</p>
+  <p>sequence
+    <input name="sequence" type="text" id="sequence">
+    name (optional)
+    <input name="seqname" type="text" id="seqname">
+    quality 
+    <select name="quality">
+      <option selected="selected" value="NA">NA</option>
+      <option value="PREDICTED">PREDICTED</option>
+      <option value="TESTED">TESTED</option>
+      <option value="CONSERVED">CONSERVED</option>
+    </select>
+  </p>
   <p> start 
     <input name="start" type="text" id="start">
     end 
@@ -70,28 +181,52 @@
   </p>
   <p>chromosome 
     <input type="text" name="chromosome" id="chromosome">
-  </p>
-  <p>oranism 
+    strand 
+    <input name="str" type="text" id="str">
+    <input name="build" type="hidden" id="build">
+ </p>
+  <p>organism 
     <input name="organism" type="text" id="organism">
-    Genome Build 
-    <input name="build" type="text" id="build">
+   </p>
+  <p> Gene ID 
+    <input id="gid" name="gid" maxlength="25" type="text">
+    Gene DB 
+    <select name="genedb">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+      <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+    </select>
   </p>
-  <p>sequence (optional) 
-    <input name="sequence" type="text" id="sequence">
+  <p>Gene Description (optional) 
+    <input name="giddesc" type="text" id="giddesc">
   </p>
-  <p>Ensembl representative transcript stable id (optional) 
+  <p>Representative Transcript (optional) 
     <input name="tid" type="text" id="tid">
+    Transcript DB 
+    <select name="transdb">
+      <option value="EnsEMBL_transcript" selected> EnsEMBL
+transcript
+ID</option>
+      <option value="refseq"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+    </select>
   </p>
-  <p>TSR definition start (optional) 
+  <p>Transcription Start Region Start (optional) 
     <input name="fstart" type="text" id="fstart">
-    TSR definition end (optional) 
+    Transcription Start Region End (optional) 
     <input name="fend" type="text" id="fend">
   </p>
   <p>
     <input name="chrcoord" type="button" id="chrcoord" onclick="PopUp('http://htpath/chrcoordinates.htm')" value="Get Chromosome Coordinates">
   </p>
   <p> 
-    <input name="submit" type="submit" id="submit" onClick="MM_validateForm('interact0','','NisNum','start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','build','','R','tid','','R');return document.MM_returnValue" value="Next">
+    <input name="submit" type="submit" id="submit" onClick="MM_validateForm('interact0','','NisNum','start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','strand','','R','gid','','R');return document.MM_returnValue" value="Next">
     <input name="cancel" id="cancel" value="Cancel" type="reset">
-  </p>
+  </p><br>
   </form>
+</body></html>
