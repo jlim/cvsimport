@@ -61,7 +61,8 @@ if ($loggedin eq 'true') {
 }
 
 undef(my $flashvars);
-for (my $i=0;$i<10;$i++) {
+my $i=0;
+while ($i<10) {
     my $num=sprintf("%02d",($i+1));
     if ($desc[$i]) {
 	my $PTtag='PTM'.$num;
@@ -88,8 +89,164 @@ for (my $i=0;$i<10;$i++) {
 	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
 	}
     }
+    $i++;
 }
- 
+my $j=0;
+while (10<=$i&&$i<20) {
+    my $num=sprintf("%02d",($j+1));
+    if ($desc[$i]) {
+	my $PTtag='PT1'.$num;
+	my $PTval=$desc[$i]->{name};
+	my $PDtag='PD1'.$num;
+	my $PDval=$desc[$i]->{description}||'No description available';
+	my $PUtag='PU1'.$num;
+	my $PUval='project.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    } else {
+	my $PTtag='PT1'.$num;
+	my $PTval='For Lease';
+	my $PDtag='PD1'.$num;
+	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
+	my $PUtag='PU1'.$num;
+	my $PUval='register.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    }
+    $i++;
+    $j++;
+}
+$j=0;
+while (20<=$i&&$i<30) {
+    my $num=sprintf("%02d",($j+1));
+    if ($desc[$i]) {
+	my $PTtag='PT2'.$num;
+	my $PTval=$desc[$i]->{name};
+	my $PDtag='PD2'.$num;
+	my $PDval=$desc[$i]->{description}||'No description available';
+	my $PUtag='PU2'.$num;
+	my $PUval='project.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    } else {
+	my $PTtag='PT2'.$num;
+	my $PTval='For Lease';
+	my $PDtag='PD2'.$num;
+	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
+	my $PUtag='PU2'.$num;
+	my $PUval='register.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    }
+    $i++;
+    $j++;
+}
+$j=0;
+while (30<=$i&&$i<40) {
+    my $num=sprintf("%02d",($j+1));
+    if ($desc[$i]) {
+	my $PTtag='PT3'.$num;
+	my $PTval=$desc[$i]->{name};
+	my $PDtag='PD3'.$num;
+	my $PDval=$desc[$i]->{description}||'No description available';
+	my $PUtag='PU3'.$num;
+	my $PUval='project.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    } else {
+	my $PTtag='PT3'.$num;
+	my $PTval='For Lease';
+	my $PDtag='PD3'.$num;
+	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
+	my $PUtag='PU3'.$num;
+	my $PUval='register.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    }
+    $i++;
+    $j++;
+}
+$j=0;
+ while (40<=$i&&$i<50) {
+    my $num=sprintf("%02d",($j+1));
+    if ($desc[$i]) {
+	my $PTtag='PT4'.$num;
+	my $PTval=$desc[$i]->{name};
+	my $PDtag='PD4'.$num;
+	my $PDval=$desc[$i]->{description}||'No description available';
+	my $PUtag='PU4'.$num;
+	my $PUval='project.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    } else {
+	my $PTtag='PT4'.$num;
+	my $PTval='For Lease';
+	my $PDtag='PD4'.$num;
+	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
+	my $PUtag='PU4'.$num;
+	my $PUval='register.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    }
+    $i++;
+    $j++;
+}
+$j=0;
+while (50<=$i&&$i<60) {
+    my $num=sprintf("%02d",($j+1));
+    if ($desc[$i]) {
+	my $PTtag='PT5'.$num;
+	my $PTval=$desc[$i]->{name};
+	my $PDtag='PD5'.$num;
+	my $PDval=$desc[$i]->{description}||'No description available';
+	my $PUtag='PU5'.$num;
+	my $PUval='project.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    } else {
+	my $PTtag='PT5'.$num;
+	my $PTval='For Lease';
+	my $PDtag='PD5'.$num;
+	my $PDval='This space is currently unoccupied. Open your own store in this great location. Rent is free.';
+	my $PUtag='PU5'.$num;
+	my $PUval='register.pl';
+	if (!$flashvars) {
+	    $flashvars=$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	} else {
+	    $flashvars.="&".$PTtag."=".$PTval."&".$PDtag."=".$PDval."&".$PUtag."=".$PUval;
+	}
+    }
+    $i++;
+    $j++;
+}
+
 
                  
 print<<page;
