@@ -3,9 +3,34 @@
   <title>CRE analysis: Experimental Evidence</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <script language="javascript">
+<!--
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+function MM_validateForm() { //v4.0
+  var i,p,q,nm,test,num,min,max,errors='',args=MM_validateForm.arguments;
+  for (i=0; i<(args.length-2); i+=3) { test=args[i+2]; val=MM_findObj(args[i]);
+    if (val) { nm=val.name; if ((val=val.value)!="") {
+      if (test.indexOf('isEmail')!=-1) { p=val.indexOf('@');
+        if (p<1 || p==(val.length-1)) errors+='- '+nm+' must contain an e-mail address.\n';
+      } else if (test!='R') { num = parseFloat(val);
+        if (isNaN(val)) errors+='- '+nm+' must contain a number.\n';
+        if (test.indexOf('inRange') != -1) { p=test.indexOf(':');
+          min=test.substring(8,p); max=test.substring(p+1);
+          if (num<min || max<num) errors+='- '+nm+' must contain a number between '+min+' and '+max+'.\n';
+    } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
+  } if (errors) alert('The following error(s) occurred:\n'+errors);
+  document.MM_returnValue = (errors == '');
+}
+//-->
+</script>
 </head>
 <body>
-<form style="height: 546px;" action="http://serverpath/accept_entry.cgi" method="post" name="COND">
+<form style="height: 546px;" action="http://serverpath/addevid.cgi" method="post" name="COND">
   <h2>Experimental Evidence for a role in regulating Gene Expression</h2>
   <h3>Method description</h3>
   <h4>Explain what method was
@@ -34,24 +59,22 @@ applied to this particular element/subelement</h4>
 (if any). Please do not fill anything if not applicable.</h3>
   <h4>Development Time/Timepoint</h4>
   <p> 
-  <input name="time_dev" value="0" size="5" maxlength="5"
+  Exactly <input name="time_dev" value="0" size="5" maxlength="5"
+ type="text">   OR    Range-start 
+  <input name="range_start" id="range_start" value="0" size="5" maxlength="5"
  type="text">
-  <select name="dev_tscale" size="1" id="select">
+Range-end 
+  <input name="range_end" id="range_end" value="0" size="5" maxlength="5"
+ type="text"></p>
+  <p>Scale <select name="dev_tscale" size="1" id="select">
   <option value="min">minutes</option>
   <option value="hr" selected="selected">hours</option>
   <option value="days">days</option>
   <option value="years">years</option>
   <option value="other">other</option>
-  </select>
+  </select><br>
   </p>
-<p>Range-start 
-  <input name="range_start" value="0" size="5" maxlength="5"
- type="text">
-Range-end 
-  <input name="range_end" value="0" size="5" maxlength="5"
- type="text"></p>
-<p>Description <input name="dev_desc"
- size="5" type="text"> </p>
+<p>Description <textarea name="dev_desc" cols="120" rows="2"> </textarea></p>
   <h4>Physiological conditions</h4>
   <p>Condition <input name="phys_cond" maxlength="25" type="text">
 Concentration/Quantity/Stage <input name="phys_quant" size="5"
@@ -102,7 +125,7 @@ Concentration/Quantity <input name="env_conc" size="5" type="text">
     </select>
   </p>
   <hr>
-  <p><input name="submit" value="Submit Data" type="submit">
+  <p><input name="submit" value="Submit Data" type="submit" onClick="MM_validateForm('effect0','','NisNum','range_start','','NisNum','range_end','','NisNum');return document.MM_returnValue">
      <input name="cancel" value="cancel" type="reset"><br> </p><br>
 </form>
 </body></html>

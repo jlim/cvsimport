@@ -93,7 +93,7 @@ while (my $buf=<SELF>) {
     if ($buf=~/pubmed/i) {$seen{modif}++;} 
     if (($buf=~/\<hr\>/)&&($seen{modif})&&($started)) { 
         $started=0;
-	&forward_args;
+	&forward_args();
 #        for my $j (1..$i) {
 #            my $k1='TF' . $j;
 #	        my $k2='TFDB' . $j;
@@ -132,8 +132,11 @@ while (my $buf=<SELF>) {
 exit();
 
 sub forward_args {
+my @voc=qw(TF TFDB family class modifications TFcomplex cell cellstat interact0 interactscale inttype methodname newmethod newmethoddesc pubmed reference tissue);
 foreach my $key (keys %params) {
-    print $query->hidden($key,$params{$key});
+    unless (grep(/^$key$/,@voc)) {
+	print $query->hidden($key,$params{$key});
+    }
 }
 }
 

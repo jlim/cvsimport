@@ -1,5 +1,6 @@
 <h2>Describe your Cis Regulatory
 Element</h2>
+
 <form style="height: 546px;" action="" method="post" name="CRE" target="">
     <p><input name="reg_type" value="reg_seq" checked="checked" onclick="CRE.sequence.disabled = false;CRE.seqname.disabled = false;CRE.start.disabled = false;CRE.end.disabled = false;CRE.chromosome.disabled = false;CRE.quality.disabled = false;CRE.str.disabled = false;CRE.build.disabled = false;CRE.organism.disabled = false;CRE.gid.disabled = false;CRE.genedb.disabled = false;CRE.giddesc.disabled = false;CRE.tid.disabled = false;CRE.transdb.disabled = false;CRE.fstart.disabled = false;CRE.fend.disabled = false;CRE.constructname.disabled = true;CRE.csequence.disabled = true;CRE.artificialcomment.disabled = true;" type="radio">
     Genomic Sequence
@@ -75,12 +76,12 @@ ID</option>
   <hr>
   <h3>Artificial Sequence data</h3>
   <p>sequence 
-    <input name="csequence" type="text" id="csequence">
+    <input name="csequence" type="text" id="csequence" disabled="true">
     construct name 
-    <input name="constructname" type="text" id="constructname">
+    <input name="constructname" type="text" id="constructname" disabled="true">
   </p>
   <p>comment 
-    <textarea name="artificialcomment" cols="120" rows="2" id="artificialcomment"></textarea>
+    <textarea name="artificialcomment" cols="120" rows="2" id="artificialcomment" disabled="true"></textarea>
   </p>
 
 

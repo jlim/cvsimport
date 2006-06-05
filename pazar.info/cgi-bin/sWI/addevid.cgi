@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use CGI qw( :all);
-#use CGI::Debug(report => everything, on => anything);
+use CGI::Debug(report => everything, on => anything);
 use pazar::talk;
 use pazar;
 use pazar::reg_seq;
@@ -64,7 +64,7 @@ if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
 my $evidid=$pazar->table_insert('evidence','curated','provisional');
 
 my $timeid;
-if ($params{time_dev}!=0) {
+if ($params{time_dev}!=0 || $params{range_start}!=0 || $params{range_end}!=0) {
     $timeid=$pazar->table_insert('time',$params{time_dev},$params{dev_desc},$params{dev_tscale},$params{range_start},$params{range_end});
 }
 
@@ -91,7 +91,7 @@ if ($params{phys_cond} && $params{phys_cond} ne '') {
 my ($quant,$qual,$qscale);
 if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale};}
 else { $qual=$params{effectqual}||'NA'; }
-my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale);
+my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,'');
 $pazar->add_output('expression',$expression);
 
 $pazar->store_analysis($aid);
@@ -342,18 +342,19 @@ sub check_aname {
     my $i=1;
     my $aid;
     while ($unique==0) {
-    $aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
-    if ($aid) {
-	return $aid;
-	exit();
-    } else {
-	$dh->execute($aname)||die;
-	my $exist=$dh->fetchrow_array;
-	if ($exist) {
-	    $aname=$aname.'_'.$i;
-	    $i++;
+	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
+	if ($aid) {
+	    return $aid;
+	    exit();
 	} else {
-	    $unique=1;
+	    $dh->execute($aname)||die;
+	    my $exist=$dh->fetchrow_array;
+	    if ($exist) {
+		$aname=$aname.'_'.$i;
+		$i++;
+	    } else {
+		$unique=1;
+	    }
 	}
     }
     $aid=$pazar->table_insert('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);

@@ -62,6 +62,15 @@ function MM_validateForm() { //v4.0
   document.MM_returnValue = (errors == '');
 }
 
+function setCount(target){
+if(target == 0) 
+{
+document.SEQ.action="http://www.pazar.info/cgi-bin/sWI/TFcentric_CRE.cgi";
+document.SEQ.target="Window3";
+window.open('about:blank','Window3','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+}
+}
+
 function PopUp(PopUpUrl){
 var ScreenWidth=window.screen.width;
 var ScreenHeight=window.screen.height;
@@ -233,9 +242,8 @@ sub next_page {
 	}
     }
 
-    print $query->start_form(-method=>'POST',-target=>'new',-width=>310,-height=>240,-toolbar=>0,-location=>0,-directories=>0,-status=>0,
-			     -scrollbars=>0,-menubar=>0,-resizable=>0,
-			     -action=>'TFcentric_CRE.cgi');
+    print $query->start_form(-method=>'POST',-target=>'',
+			     -action=>'',-name=>'SEQ');
     &forward_args($query,\%params);
     print $query->h2('TF data accepted:');
     foreach my $trans (keys %tfs) {
@@ -246,10 +254,12 @@ sub next_page {
     print $query->h3('Do not close this window if you want to make more than one CRE submissions');
     print $query->h3('Just click the appropriate button again once you have completed a submission');
     print $query->submit(-name=>'submit',
-			 -value=>'Add CRE to which the TF/TF complex binds');
+			 -value=>'Add CRE to which the TF/TF complex binds',
+                         -onClick=>"setCount(0)");
     print $query->h4(' or ');
     print $query->submit(-name=>'submit',
-			 -value=>'Add SELEX or similar artificial entry');
+			 -value=>'Add SELEX or similar artificial entry',
+                         -onClick=>"setCount(0)");
     print $query->endform;
 # print out the html tail template
     my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
