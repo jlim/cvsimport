@@ -2,33 +2,31 @@
 
 use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
-
+use pazar::talk;
 use pazar;
 use pazar::reg_seq;
-use pazar::talk;
-use pazar::tf;
-use pazar::tf::tfcomplex;
-use pazar::tf::subunit;
 
- require '../getsession.pl';
+require '../getsession.pl';
 
-my @voc=qw(TF TFDB  family class);
-our $query=new CGI;
+#SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
+my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
+my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
+
+my $sitepage="$docroot/creanalysis.htm";
+my $evidpage="$docroot/condition1.htm";
+
+my $query=new CGI;
 my %params = %{$query->Vars};
 
-my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-
-our @tdbs=qw(refseq ensembl_transcript accn);
-
+my $input = $params{'submit'};
 my $user=$info{user};
 my $pass=$info{pass};
+my $analysis=$params{'aname'};
+my $an_desc=$params{'analysis_desc'};
+my $auxDB=$params{'auxDB'};
+my $proj=$params{'project'};
 
 print $query->header;
-
-unless (($user)&&($pass)) {
-    print $query->h3("An error occurred- not a valid user? If you believe this is an error e-mail us and describe the problem");
-}
 
 my $pazar=new 
 pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
@@ -38,40 +36,16 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
-# my ($auxh,$auxname,$auxpass,$auxuser,$auxdrv);
-# if ($params{auxDB} =~/ensembl/i) {
-#     $auxh=$ENV{ENS_HOST};
-#     $auxuser=$ENV{ENS_USER};
-#     $auxpass=$ENV{ENS_PASS};
-#     $auxdrv=$ENV{ENS_DRV}||'mysql';
-# }
-# if ($params{auxDB} =~/genekeydb/i) {
-#     $auxh=$ENV{GKDB_HOST};
-#     $auxuser=$ENV{GKDB_USER};
-#     $auxpass=$ENV{GKDB_PASS};
-#       $auxdrv=$ENV{GKDB_DRV}||'mysql';
-# }
-
-# our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
-# 		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{organism});
 
 my ($regid,$type);
-if (($params{CREtype})&&($params{CREtype}=~/SELEX/)) {
+if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
     $regid=store_artifical($pazar,$query,\%params);
-     $type='construct';
-} elsif (($params{CREtype})&&($params{CREtype}=~/CRE/)) {
+    $type='construct';
+} elsif (($params{reg_type})&&($params{reg_type}=~/reg_seq/)) {
     $regid=store_natural($pazar,$ensdb,$gkdb,$query,\%params);
     $type='reg_seq';
 }
 $pazar->add_input($type,$regid);
-
-
-#my $timeid;
-#if ($params{time_dev}!=0) {
-#    $timeid=$pazar->table_insert('time',$params{time_dev},undef,$params{dev_tscale});
-#    my $sampleid=$pazar->table_insert('sample','',$cellid,$timeid);
-#    $pazar->add_input('sample',$sampleid);
-#}
 my ($cellid,$refid,$methid);
 if (($params{newmethod})&&($params{newmethod}=~/[\w\d]/)) {
     $methid=$pazar->table_insert('method',$params{newmethod},$params{newmethoddesc});
@@ -89,14 +63,37 @@ if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
 #Let's make sure initial manual submissions are categorized as curated, but provisional 
 my $evidid=$pazar->table_insert('evidence','curated','provisional');
 
+my $timeid;
+if ($params{time_dev}!=0) {
+    $timeid=$pazar->table_insert('time',$params{time_dev},$params{dev_desc},$params{dev_tscale},$params{range_start},$params{range_end});
+}
+
 $methid||=0;
 $cellid||=0;
 $refid||=0;
 $evidid||=0;
-my $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
+$timeid||=0;
+my $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$params{analysis_desc});
 
-my $tfid=store_TFs($pazar,$ensdb,\%params); 
-$pazar->add_input('funct_tf',$tfid);
+if ($params{env_comp} && $params{env_comp} ne '') {
+    my $conc=$params{env_conc}||'na';
+    my $molecule=$params{env_comp}||'na';
+    my $scale=$params{env_scale}||'na';
+    $condid=$pazar->table_insert('condition','environmental',$molecule,'na',$conc,$scale);
+    $pazar->add_input('condition',$condid);
+}
+if ($params{phys_cond} && $params{phys_cond} ne '') {
+    my $conc=$params{phys_quant}||'na';
+    my $scale=$params{phys_scale}||'na';
+    my $physid=$pazar->table_insert('condition','physical','na',$params{phys_cond},$conc,$scale);
+    $pazar->add_input('condition',$physid);
+}
+my ($quant,$qual,$qscale);
+if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale};}
+else { $qual=$params{effectqual}||'NA'; }
+my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale);
+$pazar->add_output('expression',$expression);
+
 $pazar->store_analysis($aid);
 $pazar->reset_inputs;
 $pazar->reset_outputs;
@@ -104,20 +101,48 @@ $pazar->reset_outputs;
 print $query->h1("Submission successful!");
 print $query->h2("Please close this window now");
 print $query->button(-name=>'close',
-                          -value=>'Close window',
-                          -onClick=>"window.close()");
+		     -value=>'Close window',
+		     -onClick=>"window.close()");
 print $query->br;
 
-if ($type eq 'construct') {
-print $query->h2("Or add additional artificial binding sequences to this TF");
-    print $query->start_form(-method=>'POST',
-                           -action=>"http://$cgiroot/TFcentric_CRE.cgi", -name=>'chr');
-    &forward_args;
-    print $query->submit(-name=>'Add more similar',
-                          -value=>'Add more similar',);
-    print $query->br;
+sub check_TF {
+    my ($db,$tf)=@_;
+
+    my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+
+    my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
+
+    my %factors;
+    for (my $i=0;$i<@$db;$i++) {
+	my $accn=@$tf[$i];
+	my $dbaccn=@$db[$i];
+	my @trans;
+	if ($dbaccn eq 'EnsEMBL_gene') {
+	    @trans = $gkdb->ens_transcripts_by_gene($accn);
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
+	    push @trans,$accn;
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	} elsif ($dbaccn eq 'EntrezGene') {
+	    my @gene=$gkdb->llid_to_ens($accn);
+	    unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
+	} elsif ($dbaccn eq 'refseq') {
+	    @trans=$gkdb->nm_to_enst($accn);
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	} elsif ($dbaccn eq 'swissprot') {
+	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
+	    $sp->execute($accn)||die;
+	    my $species=$sp->fetchrow_array();
+	    if (!$species) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	    $ensdb->change_mart_organism($species);
+	    @trans =$ensdb->swissprot_to_enst($accn);
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	}
+	$factors{$accn}=$trans[0];
+    }
+    return \%factors;
 }
-print $query->end_form;
 
 sub store_TFs {
 my ($pazar,$ensdb,$params)=@_;
@@ -286,14 +311,6 @@ sub store_artifical {
     return $pazar->table_insert('construct',$params{constructname},$params{artificialcomment},$params{sequence});
 }
 
-sub forward_args {
-foreach my $key (keys %params) {
-    print $query->hidden($key,$params{$key});
-}
- print $query->hidden('remember','yes');
-
-}
-
 sub getseq {
 my ($chr,$begin,$end)=@_;
 my $sadapt=$ensdb->get_ens_adaptor;
@@ -317,7 +334,7 @@ return $ensembl[0];
 }
 
 sub check_aname {
-    my ($pazar,$aname,$proj,$userid,$evidid,$methid,$cellid,$refid,$desc)=@_;
+    my ($pazar,$aname,$proj,$userid,$evidid,$methid,$cellid,$timeid,$refid,$desc)=@_;
     $aname=uc($aname);
     my $projid=$pazar->get_projectid;
     my $dh=$pazar->prepare("select count(*) from analysis where project_id='$projid' and name=?")||die;
@@ -325,21 +342,20 @@ sub check_aname {
     my $i=1;
     my $aid;
     while ($unique==0) {
-	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,0,$refid,$desc);
-	if ($aid) {
-	    return $aid;
-	    exit();
+    $aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
+    if ($aid) {
+	return $aid;
+	exit();
+    } else {
+	$dh->execute($aname)||die;
+	my $exist=$dh->fetchrow_array;
+	if ($exist) {
+	    $aname=$aname.'_'.$i;
+	    $i++;
 	} else {
-	    $dh->execute($aname)||die;
-	    my $exist=$dh->fetchrow_array;
-	    if ($exist) {
-		$aname=$aname.'_'.$i;
-		$i++;
-	    } else {
-		$unique=1;
-	    }
+	    $unique=1;
 	}
     }
-    $aid=$pazar->table_insert('analysis',$userid,$evidid,$aname,$methid,$cellid,'',$refid,$desc);
+    $aid=$pazar->table_insert('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
     return $aid;
 }

@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+  <title>CRE analysis: TF complexes</title>
+
+    
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+  
+  <script language="javascript">
+<!--
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_validateForm() { //v4.0
+  var i,p,q,nm,test,num,min,max,errors='',args=MM_validateForm.arguments;
+  for (i=0; i<(args.length-2); i+=3) { test=args[i+2]; val=MM_findObj(args[i]);
+    if (val && val.disabled==false) { nm=val.name; if ((val=val.value)!="") {
+      if (test.indexOf('isEmail')!=-1) { p=val.indexOf('@');
+        if (p<1 || p==(val.length-1)) errors+='- '+nm+' must contain an e-mail address.\n';
+      } else if (test!='R') { num = parseFloat(val);
+        if (isNaN(val)) errors+='- '+nm+' must contain a number.\n';
+        if (test.indexOf('inRange') != -1) { p=test.indexOf(':');
+          min=test.substring(8,p); max=test.substring(p+1);
+          if (num<min || max<num) errors+='- '+nm+' must contain a number between '+min+' and '+max+'.\n';
+    } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
+  } if (errors) alert('The following error(s) occurred:\n'+errors);
+  document.MM_returnValue = (errors == '');
+}
+//-->
+  </script></head>
+<body>
+<h1>TF complex components</h1>
+ <form action="http://serverpath/TFcomplex.cgi" method="post" name="MUT"> 
+ <hr style="width: 100%; height: 2px;">
+  <p>TF complex name 
+    <input name="TFcomplex" type="text" id="TFcomplex"></p>
+  <p>Pubmed (if published) 
+    <input name="pubmed" type="text" id="pubmed">
+  </p>
+  <hr>
+  TF 
+  <input name="TF" maxlength="25" type="text">
+  TF Database 
+  <select name="TFDB">
+    <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+       <option value="refseq"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+  </select>
+  <p>class
+    <input type="text" name="class">
+  </p>
+  <p>family 
+    <input type="text" name="family">
+  </p>
+  <p>modifications (Optional) 
+    <input type="text" name="modifications">
+  </p>
+  <input name="add" type="submit" id="add" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Add more TFs to this complex">
+  <br>
+  <hr>
+  <h3>Interaction type between the TF complex (factor) and this sequence </h3>
+  <table width="200">
+    <tr>
+      <td><label>
+        <input name="inttype" type="radio" value="qual" onClick="MUT.interact0.disabled=true;MUT.interactscale.disabled=true;MUT.qual.disabled=false;MUT.qual.focus();">
+        qualitative</label></td>
+    </tr>
+    <tr>
+      <td><label>
+        <input name="inttype" type="radio" value="quan" checked="checked" onClick="MUT.interact0.disabled=false;MUT.qual.disabled=true;MUT.interactscale.disabled=false; MUT.interact0.focus();">
+        quantitative</label></td>
+    </tr>
+  </table>
+  <p>quantitative 
+    <input name="interact0" type="text" id="interact0">
+  </p>
+  <p>scale
+    <select name="interactscale" id="interactscale">
+      <option value="percent" selected>percent</option>
+      <option value="absolute">absolute</option>
+      <option value="relative">relative</option>
+      <option value="fold">fold</option>
+    </select>
+  </p>
+  <p>qualitative 
+    <select name="qual" id="qual" disabled="true">
+      <option value="saturation">saturation</option>
+      <option value="good">good</option>
+      <option value="marginal" selected>marginal</option>
+      <option value="poor">poor</option>
+      <option value="none">none</option>
+      <option value="NA">NA</option>
+    </select>
+  </p>
+  <p>Method (select from list or add the name and the description in the box if not available): </p><p> 
+    <input name="newmethod" type="text" id="newmethod"></p>
+  <p>
+  Description </p>
+  <p> 
+    <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
+  </p>
+  <p>Cell Type 
+    <input name="cell" type="text" id="cell">
+    Cell Status 
+    <select name="cellstat">
+      <option value="primary">primary</option>
+      <option value="cell line">cell line</option>
+    </select>
+    Tissue 
+    <input name="tissue" type="text" id="tissue"></p>
+    <p>Reference (PubMed ID) 
+    <input name="reference" type="text" id="reference">
+  </p>
+  <hr>
+   <p> 
+    <input name="submit" id="submit" value="Done" type="submit">
+  <input onclick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue;window.close();" name="cancel" id="cancel" value="Cancel" type="submit">
+  </p>
+  <hr></form>
+</body></html>

@@ -123,7 +123,7 @@ my $next=$i;
 
 #print "Next is : $next i is $i";
 foreach my $key (keys %params) {
-            next if ($key eq 'aname')||($key eq 'file')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
+            next if ($key eq 'aname')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
             #print $key,"__";
             if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tf{$id}=$params{$key};}
             if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tfdb{$id}=$params{$key}; }

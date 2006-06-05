@@ -1,36 +1,27 @@
-<h1>Describe your Cis Regulatory
-Element</h1>
-
-<form style="height: 546px;" action="http://serverpath/psite_get_cre.cgi" method="post" name="CRE">
-  <br>
-  <hr style="width: 100%; height: 2px;">
-  <h2>Transcription factor/complex binding to this CRE (if known)</h2>
-  <p>
-    <input value="Add TF/TF complex" name="TFcomplexadd" onclick="open_cgi(CRE.aname.value,'TFcomplex',file);" type="button">
-  </p>
-  <hr>
-  <h2>CRE details</h2>
-  <p>Gene/CRE description</p>
-  <p>
-    <textarea name="genedesc" cols="80" id="genedesc"></textarea>
-  </p>
-  <input name="mutset" value="no" type="hidden">
-  Type 
-  <p> 
-    <input name="reg_type" onclick="CRE.end.disabled = true; CRE.sequence.disabled = false;  CRE.Add.disabled=true; CRE.mpos.disabled=true; CRE.mutantid.disabled=true;
- CRE.mutantdesc.disabled=true; CRE.constructname.disabled=true; CRE.constructdescr.disabled=true; CRE.mutbase.disabled = true; CRE.cseq.disabled=true; sequence.focus()" value="exact" checked="checked" type="radio">
-    Exact 
-    <input name="reg_type" value="region" onclick="CRE.end.disabled = false; CRE.sequence.disabled = true; CRE.Add.disabled=true; CRE.mpos.disabled=true; CRE.mutantid.disabled=true; CRE.mutantdesc.disabled=true; CRE.mutbase.disabled = true; CRE.constructname.disabled=true; CRE.constructdescr.disabled=true; CRE.cseq.disabled=true;" type="radio">
-    Region 
-    <input name="reg_type" value="point mutation" onclick=" CRE.mutbase.disabled = false; CRE.sequence.disabled = false; CRE.end.disabled = true; CRE.mpos.disabled=false; CRE.Add.disabled=false; CRE.mutantid.disabled=false; CRE.mutantdesc.disabled=false; CRE.constructname.disabled=true; CRE.constructdescr.disabled=true; CRE.cseq.disabled=true;" type="radio">
-    Point mutation 
-    <input type="radio" name="reg_type" value="construct" onclick=" CRE.end.disabled = true; CRE.sequence.disabled = false;  CRE.Add.disabled=true; CRE.mpos.disabled=true; CRE.mutantid.disabled=true; CRE.mutantdesc.disabled=true; CRE.mutbase.disabled = true; sequence.focus(); CRE.constructname.disabled=false; CRE.cseq.disabled=false; CRE.constructdescr.disabled=false;">
-    Construct</p>
+<h2>Describe your Cis Regulatory
+Element</h2>
+<form style="height: 546px;" action="" method="post" name="CRE" target="">
+    <p><input name="reg_type" value="reg_seq" checked="checked" onclick="CRE.sequence.disabled = false;CRE.seqname.disabled = false;CRE.start.disabled = false;CRE.end.disabled = false;CRE.chromosome.disabled = false;CRE.quality.disabled = false;CRE.str.disabled = false;CRE.build.disabled = false;CRE.organism.disabled = false;CRE.gid.disabled = false;CRE.genedb.disabled = false;CRE.giddesc.disabled = false;CRE.tid.disabled = false;CRE.transdb.disabled = false;CRE.fstart.disabled = false;CRE.fend.disabled = false;CRE.constructname.disabled = true;CRE.csequence.disabled = true;CRE.artificialcomment.disabled = true;" type="radio">
+    Genomic Sequence
+    <input type="radio" name="reg_type" value="construct" onclick="CRE.sequence.disabled = true;CRE.seqname.disabled = true;CRE.start.disabled = true;CRE.end.disabled = true;CRE.chromosome.disabled = true;CRE.quality.disabled = true;CRE.str.disabled = true;CRE.build.disabled = true;CRE.organism.disabled = true;CRE.gid.disabled = true;CRE.genedb.disabled = true;CRE.giddesc.disabled = true;CRE.tid.disabled = true;CRE.transdb.disabled = true;CRE.fstart.disabled = true;CRE.fend.disabled = true;CRE.constructname.disabled = false;CRE.csequence.disabled = false;CRE.artificialcomment.disabled = false;">
+    Artificial Sequence</p>
+<hr>
   <h3>CRE genome location data</h3>
   <h4>Enter here unique genome identification parameters in chromosome coordinates.</h4>
-  <p>The chromosome coordinates should be correct for the current Ensembl release 
-    and the respective genome build. The best way to set those is through the 
-    'Get chromosome coordinates' button.</p>
+  <p>The chromosome coordinates should be correct for the current Ensembl release and the respective genome build.<br>
+The best way to set those is through the 'Get chromosome coordinates' button.</p>
+  <p>sequence
+    <input name="sequence" type="text" id="sequence">
+    name (optional)
+    <input name="seqname" type="text" id="seqname">
+    quality 
+    <select name="quality" id="quality">
+      <option selected="selected" value="NA">NA</option>
+      <option value="PREDICTED">PREDICTED</option>
+      <option value="TESTED">TESTED</option>
+      <option value="CONSERVED">CONSERVED</option>
+    </select>
+  </p>
   <p> start 
     <input name="start" type="text" id="start">
     end 
@@ -38,64 +29,74 @@ Element</h1>
   </p>
   <p>chromosome 
     <input type="text" name="chromosome" id="chromosome">
-  </p>
-  <p>oranism 
+    strand 
+    <input name="str" type="text" id="str">
+    <input name="build" type="hidden" id="build">
+ </p>
+  <p>organism 
     <input name="organism" type="text" id="organism">
-    Genome Build 
-    <input name="build" type="text" id="build">
+   </p>
+  <p> Gene ID 
+    <input id="gid" name="gid" maxlength="25" type="text">
+    Gene DB 
+    <select name="genedb" id="genedb">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+      <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+    </select>
   </p>
-  <p>sequence (optional) 
-    <input name="sequence" type="text" id="sequence">
+  <p>Gene Description (optional) 
+    <input name="giddesc" type="text" id="giddesc">
   </p>
-  <p>Ensembl representative transcript stable id (optional) 
+  <p>Representative Transcript (optional) 
     <input name="tid" type="text" id="tid">
+    Transcript DB 
+    <select name="transdb">
+      <option value="EnsEMBL_transcript" selected> EnsEMBL
+transcript
+ID</option>
+      <option value="refseq"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+    </select>
   </p>
-  <p>TSR definition start (optional) 
+  <p>Transcription Start Region Start (optional) 
     <input name="fstart" type="text" id="fstart">
-    TSR definition end (optional) 
+    Transcription Start Region End (optional) 
     <input name="fend" type="text" id="fend">
   </p>
-  <p> 
+  <p>
     <input name="chrcoord" type="button" id="chrcoord" value="Get Chromosome Coordinates" tooltiptext="Press to get the coordinates from the current Ensembl release" onMouseOver="return escape('test')" onclick="PopUp('http://htpath/chrcoordinates.htm')" >
   </p>
   <hr>
-  <p>Construct name 
-    <input name="constructname" type="text" disabled="true" size="32" maxlength="64">
-    Construct Sequence 
-    <input name="cseq" type="text" id="cseq" size="40" disabled="true">
+  <h3>Artificial Sequence data</h3>
+  <p>sequence 
+    <input name="csequence" type="text" id="csequence">
+    construct name 
+    <input name="constructname" type="text" id="constructname">
   </p>
+  <p>comment 
+    <textarea name="artificialcomment" cols="120" rows="2" id="artificialcomment"></textarea>
+  </p>
+
+
+  <hr style="width: 100%; height: 2px;">
+  <h2>Transcription factor/complex binding to this CRE (if known)</h2>
   <p>
-    <textarea name="constructdescr" cols="80" id="constructdescr" disabled="true" ></textarea>
-    Construct description </p>
-<p> Do you want a check to be performed for conservation within this region (might be slow)?
- <input type="checkbox" name="Check for conservation" value="conscheck" checked
-onclick="onoff(CRE.groupcons)";></p>
-If yes what groups of species?
-<select name="groupcons"  multiple>
-<option value="mammals">Mammals</option>
-<option value="insects">Insects</option>
-<option value="fish">Fish</option></select>
-  <p> (relative (to the
-transcription start site, please type -35 for a sequence starting 35 bp
-before the transcription start (TSS)site and 35 if the site is
-downstream of the TSS, for example in the 5' UTR) </p>
-  <p>&nbsp; </p>
-  <p>mutation
-position in element <input size="5" disabled="disabled" name="mpos"><br>
+    <input value="Add Interaction Evidence" name="TFcomplexadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','sequence','','R');setCount(0);return document.MM_returnValue;">
   </p>
-  <p>mutant name <input disabled="disabled" name="mutantid"><br>
+  <hr style="width: 100%; height: 2px;">
+  <h2>Other Experimental Evidence for a Role of this CRE in Regulating Gene Expression</h2>
+  <p>
+    <input value="Add Experimental Evidence" name="Evidadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','sequence','','R');setCount(1);return document.MM_returnValue;">
   </p>
-Mutant
-descritption<br>
-  <p><textarea disabled="disabled" cols="80" rows="2" name="mutantdesc"></textarea></p>
-  <p>mutated to
-  <select name="mutbase" disabled="true"><option value="a">A</option><option value="c">C</option><option value="g">G</option><option value="t">T</option></select>
-  </p>
-  <input disabled="disabled" value="Add to set of mutations" name="Add" onclick="CRE.mpos.disabled=true; CRE.mutbase.disabled=true; open_cgi(CRE.aname.value,'mutation',file);" type="button"><br>
-  <br>
   <hr>
   <p> 
-    <input name="submit" id="submit" value="Next" type="submit">
-    <input name="cancel" id="cancel" value="Cancel" type="reset">
-  </p>
+    <input name="done" id="done" value="Done" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','sequence','','R');setCount(2);return document.MM_returnValue;">
+    <input name="cancel" id="cancel" value="Clear" type="reset"><br>
+  </p><br>
   </form>

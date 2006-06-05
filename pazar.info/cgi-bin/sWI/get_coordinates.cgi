@@ -1,17 +1,10 @@
 #!/usr/bin/perl
 
-use lib $ENV{ENS_API};
-
 use Exporter;
 use CGI qw( :all);
 #use CGI::Debug (report=>'everything', on=>'anything');
 #use GKDB;
 use DBI;
-use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use Bio::EnsEMBL::DBSQL::TranscriptAdaptor;
-use Bio::EnsEMBL::DBSQL::SliceAdaptor;
-use Bio::EnsEMBL::Transcript;
-use Bio::EnsEMBL::Upstream;
 use Data::Dumper;
 use pazar;
 use pazar::talk;
@@ -346,43 +339,3 @@ sub suggest_pos {
     return $i,\%site,$precise;
 }
 	
-# sub read_pos {
-# 	my $params=shift;
-# 	my $userid=shift;
-# 	my $analysis=$params->{aname};
-# 	my $file=$userid ."\_".$analysis . ".pos.tmp";
-# 	open (POS,$file)||die;
-# 	while (my $buf=<POS>) {
-# 		chomp $buf;
-# 		my ($t1,$v1,$t2,$v2)=split(/\t/,$buf);
-# 		$params->{$t1}=$v1;
-# 		$params->{$t2}=$v2;
-# 	}
-# 	close POS;
-# 	unlink($file);
-# 	return %{$params};
-# }
-
-
-sub filename {
- my $fn;
- my $_rand;
-
- my $fnl = $_[0];
- if (!$fnl) {
-  $fnl = 10;
- }
-
- my @chars = split(" ",
- "a b c d e f g h i j k l m n o p q r s t u v w x y z 
-  - _ % # |
-  0 1 2 3 4 5 6 7 8 9");
-
- srand;
-
- for (my $i=0; $i <= $fnl ;$i++) {
-  $_rand = int(rand 41);
-  $fn .= $chars[$_rand];
- }
- return $fn;
-}

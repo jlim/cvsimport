@@ -25,7 +25,7 @@ function MM_findObj(n, d) { //v4.01
 function MM_validateForm() { //v4.0
   var i,p,q,nm,test,num,min,max,errors='',args=MM_validateForm.arguments;
   for (i=0; i<(args.length-2); i+=3) { test=args[i+2]; val=MM_findObj(args[i]);
-    if (val) { nm=val.name; if ((val=val.value)!="") {
+    if (val && val.disabled==false) { nm=val.name; if ((val=val.value)!="") {
       if (test.indexOf('isEmail')!=-1) { p=val.indexOf('@');
         if (p<1 || p==(val.length-1)) errors+='- '+nm+' must contain an e-mail address.\n';
       } else if (test!='R') { num = parseFloat(val);
@@ -63,37 +63,33 @@ function onoff(objref) {
 	return;
 }
 
-function open_cgi(aname,type,con) {
-params="aname="+aname+";"+"file="+con+";"+"type="+type+";";
-if (type=='mutation') {
-window.open('http://www.pazar.info/cgi-bin/sWI/add_to_mut_set.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
-}
-else {
-window.open('http://www.pazar.info/cgi-bin/sWI/add_to_TF_complex.cgi?'+params,'Mset','width=800,height=800,resizable=yes,menubar=yes,scrollbars=yes'); 
-}
-}
-
 function NewOption(arg){
 //alert('The pager number & (val)')
 var args=arg.split(":");
 st=document.getElementById('start');
-st.value=args[1];
+st.value=args[2];
 endel=document.getElementById('end');
-endel.value=args[2];
+endel.value=args[3];
 chrel=document.getElementById('chromosome');
 chrel.value=args[0];
 orgrel=document.getElementById('organism');
-orgrel.value=args[3];
+orgrel.value=args[4];
 buildrel=document.getElementById('build');
-buildrel.value=args[4];
+buildrel.value=args[5];
 seqrel=document.getElementById('sequence');
-seqrel.value=args[5];
+seqrel.value=args[6];
 trel=document.getElementById('tid');
-trel.value=args[6];
+trel.value=args[8];
 fstrel=document.getElementById('fstart');
-fstrel.value=args[7];
+fstrel.value=args[9];
 fendrel=document.getElementById('fend');
-fendrel.value=args[8];
+fendrel.value=args[10];
+gidrel=document.getElementById('gid');
+gidrel.value=args[7];
+strrel=document.getElementById('str');
+strrel.value=args[1];
+giddesc=document.getElementById('giddesc');
+giddesc.value=args[11];
 }
 
 function PopUp(PopUpUrl){
@@ -103,6 +99,28 @@ var movefromedge=0;
 placementx=(ScreenWidth/2)-((580)/500);
 placementy=(ScreenHeight/2)-((380+10)/6);
 WinPop=window.open(PopUpUrl,"","width=580,height=380,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1,left="+placementx+",top="+placementy+",screenX="+placementx+",screenY="+placementy+",");
+}
+
+function setCount(target){
+    if (document.MM_returnValue) {
+if(target == 0) 
+{
+document.CRE.action="http://www.pazar.info/cgi-bin/sWI/TFcomplex.cgi";
+document.CRE.target="Window1";
+window.open('about:blank','Window1','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+}
+if(target == 1) 
+{
+document.CRE.action="http://www.pazar.info/cgi-bin/sWI/psite_get_cre.cgi";
+document.CRE.target="Window2";
+window.open('about:blank','Window2','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+}
+if(target == 2) 
+{
+document.CRE.action="http://www.pazar.info/cgi-bin/sWI/accept_cre.cgi";
+document.CRE.target="_self";
+}
+}
 }
 
 function MM_callJS(jsStr) { //v2.0
@@ -147,12 +165,6 @@ my $proj = $params{'project'};
 
 my $nextpage="$docroot/creanalysis.htm";
 my $alterpage="$docroot/TFcentric.htm";
-my $tmpdir="$cgipath/tmp";
-chdir($tmpdir);
-mkdir($userid) unless (-e $userid);
-chdir $userid;
-system ("rm -fr *");
-my $file=filename(length(10));
 
 my $pazar = pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
@@ -177,8 +189,6 @@ while (my $buf=<TFC>) {
     print $buf;
     if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
         &forward_args;
-      print "\<input name=\"filebase\" type=\"hidden\" value=\"$file\"\>";
-#      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
     }
 }
 close TFC;
@@ -191,11 +201,6 @@ exit();
 open (NEXT, $nextpage) ||die;
 while (my $buf=<NEXT>) {
     $buf=~s/htpath/$docpath/;
-  if (($buf=~/TFcomplexadd/)||($buf=~/Add to set of mutations/)) {
-    $buf=~s/file/'$file'/;
-     print $buf;
-     next;
-  }
   if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
 	    $buf=~s/serverpath/$cgiroot/i;
       print $buf;
@@ -205,8 +210,6 @@ while (my $buf=<NEXT>) {
 	  #     print "$key $val",$html->br;
 	  print "\<input name=\"$key\" type=\"hidden\" value=\"$val\"\>";
       }
-      print "\<input name=\"file\" type=\"hidden\" value=\"$file\"\>";
-#      print "\<input name=\"auxDB\" type=\"hidden\" value=\"$talkdb\"\>";
       next;
   }
   print $buf;
@@ -235,28 +238,6 @@ exit();
 	  }
 }
 
-sub filename {
- my $fn;
- my $_rand;
-
- my $fnl = $_[0];
- if (!$fnl) {
-  $fnl = 10;
- }
-
- my @chars = split(" ",
- "a b c d e f g h i j k l m n o p q r s t u v w x y z 
-  0 1 2 3 4 5 6 7 8 9");
-
- srand;
-
- for (my $i=0; $i <= $fnl ;$i++) {
-  $_rand = int(rand 41);
-  $fn .= $chars[$_rand];
- }
- return $fn;
-}
-
 sub goback
  {
 my $err=shift;
@@ -269,9 +250,7 @@ print $query->h1("An error has occured because ");
 print $query->h2($message);
 #print a({href=>"http://watson.lsd.ornl.gov/genekeydb/psite/entryform1.htm"},"Go Back");
 #print $query->redirect('http://somewhere.else/in/movie/land');
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
-print $template_tail->output;
+
 exit(0);
 }
 
