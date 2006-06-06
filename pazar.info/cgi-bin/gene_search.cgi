@@ -119,7 +119,7 @@ if (!$accn) {
 	<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
 	<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$species</td></tr>
 	</table>
-	HEADER_TABLE
+HEADER_TABLE
 
 
 
