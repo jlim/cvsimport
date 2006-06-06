@@ -21,6 +21,9 @@ my $ucsc_sync = "false";
 my $pazar_version = "";
 my $ucscdb = "";
 
+#number of base pairs around start and end coordinates in browser display
+my $flanking_bp = 50;
+
 #species name mapping
 
 #pazar to ensembl
@@ -170,12 +173,12 @@ else
 #print the header
     if($params{resource} eq 'ucsc')
     {
-	$header = "browser position chr".$params{chr}.":".$params{start}."-".$params{end}."\n";
+	$header = "browser position chr".$params{chr}.":".($params{start}-$flanking_bp)."-".($params{end}+$flanking_bp)."\n";
 	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"http://www.pazar.info/mapping/\"";
     }
     elsif($params{resource} eq 'ensembl')
     {
-	$header = "browser position chr".$params{chr}.":".$params{start}."-".$params{end}."\n";
+	$header = "browser position chr".$params{chr}.":".($params{start}-$flanking_bp)."-".($params{end}+$flanking_bp)."\n";
 	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"http://www.pazar.info/mapping/\"";
     }
 
@@ -191,7 +194,9 @@ else
 	    my $regseq=$dbh->get_reg_seq_by_regseq_id($rsid);
 
 	    my @rest;
+=pod
 	    push @rest,'sequence'.'="'.$regseq->seq.'"';
+
 	    push @rest,'db_seqinfo'.'="'.$regseq->seq_dbname.":".$regseq->seq_dbassembly.'"';
 	    if ($regseq->gene_description) {
 		push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description.'"';
@@ -199,7 +204,19 @@ else
 		push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.'"';
 	    }
 	    push @rest,'species'.'="'.$regseq->binomial_species.'"';
-	    
+=cut
+
+	    push @rest,'sequence'.'='.$regseq->seq;
+
+	    push @rest,'db_seqinfo'.'='.$regseq->seq_dbname.":".$regseq->seq_dbassembly;
+	    if ($regseq->gene_description) {
+		push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description;
+	    } else {
+		push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession;
+	    }
+	    push @rest,'species'.'='.$regseq->binomial_species;
+
+
 	    my $rest=join(';',@rest);
 	    my $rsid7d = sprintf "%07d",$rsid;
 	    my $id="RS".$rsid7d;
@@ -247,7 +264,10 @@ else
 #if ensembl is sync, use current one, else use specified ensembl version
 	unless ($ensembl_sync eq "sync")
 	{
+#take latter part of ensembl_sync and create url from it
+	    my @ens_ver_date = split('_',$ensembl_sync);
 
+	    $ensembl_url=$ens_ver_date[1].".archive.ensembl.org";
 #pick proper url depending on ensembl version
     
 #    * v37 Feb 2006 - feb2006.archive.ensembl.org
