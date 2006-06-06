@@ -248,7 +248,7 @@ COLNAMES
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
 		}
-		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='submit' name='ucsc' value='ucsc'><br><input type='submit' name='ensembl' value='ensembl'></td>";	       
+		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\"><br><input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\"></td>";
 		print "</tr></form></table>";
 		print "<p></td></tr>";
 
