@@ -208,7 +208,7 @@ HEADER_TABLE
 		    <tr>
 		    <td width="150" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
 		    
-		    COLNAMES
+COLNAMES
 
 		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Gene/Transcript ID</span></td>";
 
