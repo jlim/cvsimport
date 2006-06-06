@@ -123,7 +123,7 @@ function MM_popupMsg(msg) { //v1.0
       <option value="percent" selected>percent</option>
       <option value="absolute">absolute</option>
       <option value="relative">relative</option>
-      <option value="saturation">saturation</option>
+      <option value="fold">fold</option>
     </select>
   </p>
   <p>qualitative 
@@ -132,14 +132,14 @@ function MM_popupMsg(msg) { //v1.0
       <option value="good">good</option>
       <option value="marginal" selected>marginal</option>
       <option value="poor">poor</option>
-      <option value="ND">ND</option>
+      <option value="none">none</option>
+      <option value="NA">NA</option>
     </select>
   </p>
   <p>Method (select from list or add the name and the description in the box if not available)</p><p>
  <input name="newmethod" type="text" id="newmethod"></p>
   <p> 
-    Description </p>
-  <p>
+    Method Description
     <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
   </p>
   <p>Cell Type 
@@ -221,7 +221,8 @@ ID</option>
   <p>
     <input name="chrcoord" type="button" id="chrcoord" onclick="PopUp('http://htpath/chrcoordinates.htm')" value="Get Chromosome Coordinates">
   </p>
-  <p> 
+  <p>
+<hr>
     <input name="submit" type="submit" id="submit" onClick="MM_validateForm('interact0','','NisNum','start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R');return document.MM_returnValue" value="Submit Data">
     <input name="cancel" id="cancel" value="Cancel" type="reset">
   </p><br>

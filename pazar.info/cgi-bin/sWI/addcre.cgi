@@ -102,22 +102,36 @@ $pazar->reset_inputs;
 $pazar->reset_outputs;
 
 print $query->h1("Submission successful!");
-print $query->h2("Please close this window now");
-print $query->button(-name=>'close',
-                          -value=>'Close window',
-                          -onClick=>"window.close()");
-print $query->br;
-
-if ($type eq 'construct') {
-print $query->h2("Or add additional artificial binding sequences to this TF");
+if ($type eq 'reg_seq') {
+    print $query->h2("You can add Mutation information or close this window now");
+    print $query->start_form(-method=>'POST',
+			     -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+    &forward_args($query,\%params);
+    print $query->hidden(-name=>'tfid',-value=>$tfid);
+    print $query->hidden(-name=>'aid',-value=>$aid);
+    print $query->hidden(-name=>'regid',-value=>$regid);
+    print $query->hidden(-name=>'modeAdd',-value=>'Add');
+    print $query->hidden(-name=>'effect',-value=>'interaction');
+    print $query->submit(-name=>'submit',
+			 -value=>'Add Mutation Information',);
+    print $query->br;
+    print $query->br;
+} elsif ($type eq 'construct') {
+    print $query->h2("You can add additional artificial binding sequences to this TF or close this window now");
     print $query->start_form(-method=>'POST',
                            -action=>"http://$cgiroot/TFcentric_CRE.cgi", -name=>'chr');
-    &forward_args;
+    &forward_args($query,\%params);
     print $query->submit(-name=>'Add more similar',
                           -value=>'Add more similar',);
     print $query->br;
+    print $query->br;
 }
+print $query->button(-name=>'close',
+		     -value=>'Close window',
+		     -onClick=>"window.close()");
+print $query->br;
 print $query->end_form;
+exit;
 
 sub store_TFs {
 my ($pazar,$ensdb,$params)=@_;
@@ -287,10 +301,11 @@ sub store_artifical {
 }
 
 sub forward_args {
+    my ($query,$params)=@_;
+    my %params=%{$params};
 foreach my $key (keys %params) {
     print $query->hidden($key,$params{$key});
 }
- print $query->hidden('remember','yes');
 
 }
 

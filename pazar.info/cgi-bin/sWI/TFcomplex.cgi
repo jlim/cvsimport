@@ -213,13 +213,29 @@ sub next_page {
     $pazar->reset_outputs;
 
     print $query->h1("Submission successful!");
-    print $query->h2("Please close this window now");
+    if ($type eq 'reg_seq') {
+	print $query->h2("You can add Mutation information or close this window now");
+	print $query->start_form(-method=>'POST',
+				 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+	&forward_args($query,\%params);
+	print $query->hidden(-name=>'tfid',-value=>$tfid);
+	print $query->hidden(-name=>'aid',-value=>$aid);
+	print $query->hidden(-name=>'regid',-value=>$regid);
+	print $query->hidden(-name=>'modeAdd',-value=>'Add');
+	print $query->submit(-name=>'submit',
+			     -value=>'Add Mutation Information',);
+	print $query->br;
+	print $query->br;
+    } else {
+	print $query->h2("Please close this window now!");
+    }
     print $query->button(-name=>'close',
 			 -value=>'Close window',
 			 -onClick=>"window.close()");
     print $query->br;
+    print $query->end_form;
+    exit;
 }
-
 
 sub check_TF {
     my ($db,$tf)=@_;

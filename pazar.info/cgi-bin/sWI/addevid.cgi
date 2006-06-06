@@ -75,18 +75,21 @@ $evidid||=0;
 $timeid||=0;
 my $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$params{analysis_desc});
 
+my @conds;
 if ($params{env_comp} && $params{env_comp} ne '') {
     my $conc=$params{env_conc}||'na';
     my $molecule=$params{env_comp}||'na';
     my $scale=$params{env_scale}||'na';
-    $condid=$pazar->table_insert('condition','environmental',$molecule,'na',$conc,$scale);
-    $pazar->add_input('condition',$condid);
+    $condid=$pazar->table_insert('bio_condition','environmental',$molecule,'na',$conc,$scale);
+    $pazar->add_input('bio_condition',$condid);
+    push @conds,$condid;
 }
 if ($params{phys_cond} && $params{phys_cond} ne '') {
     my $conc=$params{phys_quant}||'na';
     my $scale=$params{phys_scale}||'na';
-    my $physid=$pazar->table_insert('condition','physical','na',$params{phys_cond},$conc,$scale);
-    $pazar->add_input('condition',$physid);
+    my $physid=$pazar->table_insert('bio_condition','physical','na',$params{phys_cond},$conc,$scale);
+    $pazar->add_input('bio_condition',$physid);
+    push @conds,$condid;
 }
 my ($quant,$qual,$qscale);
 if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale};}
@@ -99,11 +102,34 @@ $pazar->reset_inputs;
 $pazar->reset_outputs;
 
 print $query->h1("Submission successful!");
-print $query->h2("Please close this window now");
+if ($type eq 'reg_seq') {
+    print $query->h2("You can add Mutation information or close this window now");
+    print $query->start_form(-method=>'POST',
+			     -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+    &forward_args($query,\%params);
+    print $query->hidden(-name=>'tfid',-value=>$tfid);
+    print $query->hidden(-name=>'aid',-value=>$aid);
+    print $query->hidden(-name=>'regid',-value=>$regid);
+    my $conds;
+    if (@conds) {
+	$conds=join(":",@conds);
+	print $query->hidden(-name=>'conds',-value=>$conds);
+    }
+    print $query->hidden(-name=>'modeAdd',-value=>'Add');
+    print $query->hidden(-name=>'effect',-value=>'expression');
+    print $query->submit(-name=>'submit',
+			 -value=>'Add Mutation Information',);
+    print $query->br;
+    print $query->br;
+} else {
+    print $query->h2("Please close this window now");
+}
 print $query->button(-name=>'close',
 		     -value=>'Close window',
 		     -onClick=>"window.close()");
 print $query->br;
+print $query->end_form;
+exit;
 
 sub check_TF {
     my ($db,$tf)=@_;
@@ -345,7 +371,6 @@ sub check_aname {
 	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
 	if ($aid) {
 	    return $aid;
-	    exit();
 	} else {
 	    $dh->execute($aname)||die;
 	    my $exist=$dh->fetchrow_array;
@@ -359,4 +384,13 @@ sub check_aname {
     }
     $aid=$pazar->table_insert('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
     return $aid;
+}
+
+sub forward_args {
+    my ($query,$params)=@_;
+    my %params=%{$params};
+foreach my $key (keys %params) {
+    print $query->hidden($key,$params{$key});
+}
+
 }
