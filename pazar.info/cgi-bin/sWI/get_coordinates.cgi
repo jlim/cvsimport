@@ -71,7 +71,7 @@ if (!$accn) {
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
 	$ens=$gene[0];
-	unless ($gene=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
 	$gene=$accn;
     } else {
 	($gene,$ens,$err) =convert_id($gkdb,$dbaccn,$accn);
