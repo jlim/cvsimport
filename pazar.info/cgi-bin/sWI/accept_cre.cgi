@@ -100,12 +100,12 @@ if ($orient==1) {
 } elsif ($orient==-1) {
     $tss=$end;
 }
-if ($params{chromosome} ne $chr) {
+if (uc($params{chromosome}) ne uc($chr)) {
 print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
 exit;
 }
 my $org=$ensdb->current_org();
-if ($params{organism} ne $org) {
+if (uc($params{organism}) ne uc($org)) {
 print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
 exit;
 }
