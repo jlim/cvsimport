@@ -134,7 +134,7 @@ HEADER_TABLE
 		if (@restr_proj) {
 		    push @projects, [$restr_proj[0],$proj];
 #		    push @projects, ["some project",$proj];
-		    =pod
+=pod
 			my $pname = "";
 		    foreach my $p (@projids)
 		    {
@@ -142,7 +142,7 @@ HEADER_TABLE
 		}
 
 		    push @projects, [$pname,$proj];
-		    =cut
+=cut
 		    }
 	    }
 	}
