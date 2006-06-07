@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use CGI qw( :all);
-use CGI::Debug(report => everything, on => anything);
+#use CGI::Debug(report => everything, on => anything);
 use pazar::talk;
 use pazar;
 use pazar::reg_seq;

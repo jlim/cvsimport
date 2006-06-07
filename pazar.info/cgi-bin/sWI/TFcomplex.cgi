@@ -42,8 +42,8 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 
 SUBMIT: {
 if ($input =~/cancel/i) {  exit();}
-if ($params{'Add'}) { last SUBMIT;} #Do what you normally do (add and write)
-if ($input=~/done/i) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
+if ($params{'add'}) { last SUBMIT;} #Do what you normally do (add and write)
+if ($input=~/submit/i) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
 }
 
 #TODO: checks recognizing the genes
@@ -222,6 +222,7 @@ sub next_page {
 	print $query->hidden(-name=>'aid',-value=>$aid);
 	print $query->hidden(-name=>'regid',-value=>$regid);
 	print $query->hidden(-name=>'modeAdd',-value=>'Add');
+	print $query->hidden(-name=>'effect',-value=>'interaction');
 	print $query->submit(-name=>'submit',
 			     -value=>'Add Mutation Information',);
 	print $query->br;

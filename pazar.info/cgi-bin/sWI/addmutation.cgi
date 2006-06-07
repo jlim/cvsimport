@@ -34,7 +34,7 @@ pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 if ($params{modeAdd})  {
-    open (SELF,$selfpage)||die "Cannot Open Page $selfpage";
+    open (SELF,$selfpage)||print "Cannot Open Page $selfpage";
 
     while (my $buf=<SELF>) {
 	$buf=~s/serverpath/$cgiroot/;

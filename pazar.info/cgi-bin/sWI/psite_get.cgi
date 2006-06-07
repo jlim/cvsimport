@@ -165,8 +165,8 @@ my $proj = $params{'project'};
 
 my $nextpage="$docroot/creanalysis.htm";
 my $alterpage="$docroot/TFcentric.htm";
-
-my $pazar = pazar->new( 
+my $pazar;
+eval {$pazar = pazar->new( 
 		       -host          =>    $ENV{PAZAR_host},
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
@@ -174,9 +174,17 @@ my $pazar = pazar->new(
 		       -pazar_pass    =>    $info{pass},
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -drv           =>    'mysql',
-		       -project       =>    $proj);
+			      -project       =>    $proj);};
 
-die "You cannot submit to this project" unless ($pazar->{projectid});
+if ($@) {
+    print "<p class=\"warning\">You cannot submit to this project</p>";
+#    print "error $@";
+    exit;
+}
+unless ($pazar->get_projectid) {
+    print "<p class=\"warning\">You cannot submit to this project</p>";
+    exit;
+}
 my $err=check_input_and_write($pazar,$aid,$proj);
 
 if ($params{TFcentric}) {

@@ -9,14 +9,15 @@
 <form style="height: 546px;" action="http://serverpath/addmutation.cgi" method="post" name="MUT">
 <h3>Mutation Information</h3>
   <p>Sequence
-    <input name="mutseq" type="text" id="mutseq"><br>(the format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use 'N' where the original nucleotides were.)</p>
+    <textarea name="mutseq" id="mutseq" cols="100" rows="2"></textarea><br>
+(the format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use 'N' where the original nucleotides were.)</p>
   <p>Name (optional)
     <input name="mutseqname" type="text" id="mutseqname"></p>
 <p>Method used to make the mutation (select from list or add the name and the description in the box if not available)</p><p>
  <input name="mutnewmethod" type="text" id="mutnewmethod"></p>
   <p> 
     Method Description
-    <textarea name="mutnewmethoddesc" cols="120" rows="2" id="mutnewmethoddesc"></textarea>
+    <textarea name="mutnewmethoddesc" cols="100" rows="2" id="mutnewmethoddesc"></textarea>
   </p>
 <p>Reference (PubMed ID) if any
     <input name="mutref" type="text" id="mutref">
