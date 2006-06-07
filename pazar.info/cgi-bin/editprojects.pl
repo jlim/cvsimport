@@ -31,7 +31,12 @@ $template->param(TITLE => 'PAZAR Project Manager');
 
 $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 	    var themessage = "You are required to complete the following fields: ";
-	    
+	    var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";	    
+	    // might want to be less strict with the description later
+	    var iChars_desc = "!@#$%^&*()+=-[]\\\';,./{}|\":<>";
+	    var pnameSpecialChar = 0;
+
+
 	    if (document.createprojectform.projname.value=="") {
 		themessage = themessage + "\\n - User Name";
 	    }
@@ -40,10 +45,16 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 	    }
 	    if (document.createprojectform.projpasscheck.value=="") {
 		themessage = themessage + "\\n -  Project password re-entry";
-	    }	    
+	    }	   
+
+	    // if no empty fields, change error message
+	    if (themessage == "You are required to complete the following fields: ") {
+		themessage = "";
+	    }
+ 
 	    if (document.createprojectform.projpasscheck.value != document.createprojectform.projpass.value)
 	    {
-		if (themessage == "You are required to complete the following fields: ") {
+		if (themessage == "") {
 		    themessage = "Passwords do not match. Please check them";
 		}
 		else
@@ -51,6 +62,29 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 		    themessage = themessage + "\\n Passwords do not match, please check them";
 		}
 	    }
+
+
+	    for (var i = 0; i < document.createprojectform.projname.value.length; i++) {
+		if (iChars.indexOf(document.createprojectform.projname.value.charAt(i)) != -1) {
+		    pnameSpecialChar = 1;	   
+		}
+	    }
+
+	    if(pnameSpecialChar == 1)
+	    {
+		themessage = themessage + "\\nThe entered project name contains special characters. \nThese are not allowed. Please choose a different project name\n";
+	    }
+
+	    var pdescSpecialChar = 0;
+	    for (var i = 0; i < document.createprojectform.projdesc.value.length; i++) {
+		if (iChars_desc.indexOf(document.createprojectform.projdesc.value.charAt(i)) != -1) {
+		    pdescSpecialChar = 1;
+		}
+	    }
+	    if (pdescSpecialChar == 1)
+	    {
+		themessage = themessage +  "\nThe entered project description contains special characters. \nThese are not allowed. Please choose a different project description\n";	 
+	    }  
 
 	    //alert if fields are empty and cancel form submit
 		if (themessage == "You are required to complete the following fields: ") {
@@ -90,6 +124,33 @@ print "Content-Type: text/html\n\n", $template->output;
 
 print<<javascript;
 <script language="JavaScript">
+
+
+// check for special characters in project name
+function checkProjName
+{
+    var errmsg = "";
+    var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";
+    for (var i = 0; i < document.createprojectform.projname.value.length; i++) {
+	if (iChars.indexOf(document.formname.fieldname.value.charAt(i)) != -1) {
+	    errmsg += "The entered project name contains special characters. \nThese are not allowed. Please choose a different project name\n";	   
+        }
+    }
+
+    for (var i = 0; i < document.createprojectform.projdesc.value.length; i++) {
+	if (iChars.indexOf(document.formname.fieldname.value.charAt(i)) != -1) {
+	    errmsg += "The entered project description contains special characters. \nThese are not allowed. Please choose a different project description\n";	   
+        }
+
+	if (errmsg=="")
+	{
+	    alert(errmsg);
+	    return false;
+	}
+}
+
+
+
 function doDelete(pid)
 {
     var decision = confirm("Do you really want to delete this project? Doing so will remove all public and private stored data for this project as well.");
