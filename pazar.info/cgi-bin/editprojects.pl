@@ -87,7 +87,7 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 	    }  
 
 	    //alert if fields are empty and cancel form submit
-		if (themessage == "You are required to complete the following fields: ") {
+		if (themessage == "") {
 		    var descLength = document.createprojectform.projdesc.value.length;
 		    if(descLength < 301)
 		    {
