@@ -125,32 +125,6 @@ print "Content-Type: text/html\n\n", $template->output;
 print<<javascript;
 <script language="JavaScript">
 
-
-// check for special characters in project name
-function checkProjName
-{
-    var errmsg = "";
-    var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";
-    for (var i = 0; i < document.createprojectform.projname.value.length; i++) {
-	if (iChars.indexOf(document.formname.fieldname.value.charAt(i)) != -1) {
-	    errmsg += "The entered project name contains special characters. \nThese are not allowed. Please choose a different project name\n";	   
-        }
-    }
-
-    for (var i = 0; i < document.createprojectform.projdesc.value.length; i++) {
-	if (iChars.indexOf(document.formname.fieldname.value.charAt(i)) != -1) {
-	    errmsg += "The entered project description contains special characters. \nThese are not allowed. Please choose a different project description\n";	   
-        }
-
-	if (errmsg=="")
-	{
-	    alert(errmsg);
-	    return false;
-	}
-}
-
-
-
 function doDelete(pid)
 {
     var decision = confirm("Do you really want to delete this project? Doing so will remove all public and private stored data for this project as well.");
