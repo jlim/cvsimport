@@ -92,7 +92,7 @@ if ($params{phys_cond} && $params{phys_cond} ne '') {
     push @conds,$condid;
 }
 my ($quant,$qual,$qscale);
-if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale};}
+if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale}; $qual='NA'}
 else { $qual=$params{effectqual}||'NA'; }
 my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,'');
 $pazar->add_output('expression',$expression);
@@ -131,83 +131,6 @@ print $query->br;
 print $query->end_form;
 exit;
 
-sub check_TF {
-    my ($db,$tf)=@_;
-
-    my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-    my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
-
-    my %factors;
-    for (my $i=0;$i<@$db;$i++) {
-	my $accn=@$tf[$i];
-	my $dbaccn=@$db[$i];
-	my @trans;
-	if ($dbaccn eq 'EnsEMBL_gene') {
-	    @trans = $gkdb->ens_transcripts_by_gene($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
-	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
-	    push @trans,$accn;
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
-	} elsif ($dbaccn eq 'EntrezGene') {
-	    my @gene=$gkdb->llid_to_ens($accn);
-	    unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
-	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
-	} elsif ($dbaccn eq 'refseq') {
-	    @trans=$gkdb->nm_to_enst($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
-	} elsif ($dbaccn eq 'swissprot') {
-	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
-	    $sp->execute($accn)||die;
-	    my $species=$sp->fetchrow_array();
-	    if (!$species) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
-	    $ensdb->change_mart_organism($species);
-	    @trans =$ensdb->swissprot_to_enst($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
-	}
-	$factors{$accn}=$trans[0];
-    }
-    return \%factors;
-}
-
-sub store_TFs {
-my ($pazar,$ensdb,$params)=@_;
-#Scanning
-#print Dumper($params);
-%params=%{$params};
-my $tf;
-my @lookup=qw(TF TFDB ENS_TF family class modifications); #Valid properties of a subunit
-$tf->{function}->{modifications}=$params{modifications};
-my $tf=new pazar::tf::tfcomplex(name=>$params{TFcomplex},pmed=>$params{pubmed});
-my ($tfdat);
-foreach my $key (keys %params) {
-    my ($quant,$qual,$qscale);
-    if ($key=~/inttype/i) {
-	if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale};}
-	else { $qual=$params{qual}||'NA'; }
-	$pazar->store_interaction($qual,$quant,$qscale);
-	next;
-    }
-    next unless ($key=~/\d/);
-    my $ind=$key;
-    $ind=~s/\D//g; #Index only
-    my $nkey=$key;
-    $nkey=~s/\d//; #Tag only
-    next unless (grep(/\b$nkey\b/,@lookup));
-    $tfdat->[$ind]->{$nkey}=$params{$key}; #Object created, pass it to regdb, should put here the TF_complex general data too!
-}
-foreach my $udef (@$tfdat) {
-    my $tid=$udef->{ENS_TF};
-    my $gid=$ensdb->ens_transcr_to_gene($tid);
-    my $build=$ensdb->current_release;
-    my $sunit=new pazar::tf::subunit(tid=>$tid,tdb=>'EnsEMBL',class=>$udef->{class},family=>$udef->{family},gdb=>'ensembl',id=>$gid,
-                                tdb_build=>$build,gdb_build=>$build,mod=>$udef->{modifications});
-
-    $tf->add_subunit($sunit);
-}
-
-return $pazar->store_TF_complex($tf);
-}
 
 sub store_natural {
 my ($pazar,$ensdb,$gkdb,$query,$params)=@_;

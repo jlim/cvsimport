@@ -290,7 +290,7 @@ my ($tfdat);
 foreach my $key (keys %params) {
     my ($quant,$qual,$qscale);
     if ($key=~/inttype/i) {
-	if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale};}
+	if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale}; $qual='NA';}
 	else { $qual=$params{qual}||'NA'; }
 	$pazar->store_interaction($qual,$quant,$qscale);
 	next;

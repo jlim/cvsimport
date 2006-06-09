@@ -153,7 +153,7 @@ sub store_mut_inter() {
     }
     my ($quant,$qual,$qscale);
 
-    if ($params{mutinttype} eq 'mutquan' && $params{mutinteract0} && $params{mutinteract0} ne ''){$quant=$params{mutinteract0}; $qscale=$params{mutinteractscale};} else { $qual=$params{mutqual}||'NA'; }
+    if ($params{mutinttype} eq 'mutquan' && $params{mutinteract0} && $params{mutinteract0} ne ''){$quant=$params{mutinteract0}; $qscale=$params{mutinteractscale}; $qual='NA';} else { $qual=$params{mutqual}||'NA'; }
     $pazar->store_interaction($qual,$quant,$qscale);
 
 }
@@ -208,7 +208,7 @@ sub store_mut_expr() {
     }
 
     my ($quant,$qual,$qscale);
-    if ($params{muteffecttype} eq 'mutquan' && $params{muteffect0} && $params{effect0} ne ''){$quant=$params{muteffect0}; $qscale=$params{muteffectscale};}
+    if ($params{muteffecttype} eq 'mutquan' && $params{muteffect0} && $params{effect0} ne ''){$quant=$params{muteffect0}; $qscale=$params{muteffectscale}; $qual='NA';}
     else { $qual=$params{mutqual}||'NA'; }
     my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,'');
     $pazar->add_output('expression',$expression);
