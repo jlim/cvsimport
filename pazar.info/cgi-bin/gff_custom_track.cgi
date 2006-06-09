@@ -206,6 +206,7 @@ else
 	    push @rest,'species'.'="'.$regseq->binomial_species.'"';
 =cut
 
+=pod
 	    push @rest,'sequence'.'='.$regseq->seq;
 
 	    push @rest,'db_seqinfo'.'='.$regseq->seq_dbname.":".$regseq->seq_dbassembly;
@@ -215,12 +216,12 @@ else
 		push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession;
 	    }
 	    push @rest,'species'.'='.$regseq->binomial_species;
+=cut
 
-
-	    my $rest=join(';',@rest);
+#	    my $rest=join(';',@rest);
 	    my $rsid7d = sprintf "%07d",$rsid;
 	    my $id="RS".$rsid7d;
-	    my $gff='chr'. $regseq->chromosome."\t". join("\t",$proj,$id,$regseq->start,$regseq->end,'.',$regseq->strand,'.',$rest);
+	    my $gff='chr'. $regseq->chromosome."\t". join("\t",$proj,$id,$regseq->start,$regseq->end,'.',$regseq->strand,'.',$proj."_".$id);
 	    print GFF $gff."\n";
 	}
     }
