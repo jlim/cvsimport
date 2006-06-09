@@ -94,7 +94,7 @@ if (!$accn) {
 #get the gene name
     my $pazarsth = $dbh->prepare("select * from gene_source where db_accn='$gene'");
     $pazarsth->execute();
-    
+		
 #pazar load tfs from results for each result
     my $res = $pazarsth->fetchrow_hashref;
 
@@ -107,18 +107,18 @@ if (!$accn) {
 
 #get species
 
-    my $species=$ensdb->current_org();
+    my $species = $ensdb->current_org();
 
 #print header
 
-    print<<HEADER_TABLE;
+print<<HEADER_TABLE;
 
-    <table width='1200' border=1 cellspacing=0>
-	<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneName</td></tr>
-	<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene</td></tr>
-	<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
-	<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$species</td></tr>
-	</table>
+<table width='1150' border=1 cellspacing=0>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneName</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$species</td></tr>
+</table>
 HEADER_TABLE
 
 
@@ -135,15 +135,15 @@ HEADER_TABLE
 		    push @projects, [$restr_proj[0],$proj];
 #		    push @projects, ["some project",$proj];
 =pod
-			my $pname = "";
+		    my $pname = "";
 		    foreach my $p (@projids)
 		    {
-		    $pname = $pname.",".$p;
-		}
+			$pname = $pname.",".$p;
+		    }
 
 		    push @projects, [$pname,$proj];
 =cut
-		    }
+		}
 	    }
 	}
 
@@ -165,31 +165,32 @@ HEADER_TABLE
 	if($restrictedproj == 1)
 	{
 	    $dbh = pazar->new( 
-			       -globalsearch  =>    'no',		      
-			       -host          =>    $ENV{PAZAR_host},
-			       -user          =>    $ENV{PAZAR_pubuser},
-			       -pass          =>    $ENV{PAZAR_pubpass},
-			       -dbname        =>    $ENV{PAZAR_name},
-			       -pazar_user    =>    $info{user},
-			       -pazar_pass    =>    $info{pass},
-			       -drv           =>    'mysql',
-			       -project       =>    $projname);
-	}
+                              -globalsearch  =>    'no',		      
+                              -host          =>    $ENV{PAZAR_host},
+			      -user          =>    $ENV{PAZAR_pubuser},
+			      -pass          =>    $ENV{PAZAR_pubpass},
+			      -dbname        =>    $ENV{PAZAR_name},
+			      -pazar_user    =>    $info{user},
+			      -pazar_pass    =>    $info{pass},
+			      -drv           =>    'mysql',
+			      -project       =>    $projname);
+    }
 	else
 	{
 	    $dbh = pazar->new( 
-			       -globalsearch  =>    'no',		      
-			       -host          =>    $ENV{PAZAR_host},
-			       -user          =>    $ENV{PAZAR_pubuser},
-			       -pass          =>    $ENV{PAZAR_pubpass},
-			       -dbname        =>    $ENV{PAZAR_name},
-			       -drv           =>    'mysql',
-			       -project       =>    $projname);
+                              -globalsearch  =>    'no',		      
+                              -host          =>    $ENV{PAZAR_host},
+			      -user          =>    $ENV{PAZAR_pubuser},
+			      -pass          =>    $ENV{PAZAR_pubpass},
+			      -dbname        =>    $ENV{PAZAR_name},
+			      -drv           =>    'mysql',
+			      -project       =>    $projname);
 	}   
 
 #get information for header
 
 #loop through regseqs and print tables
+	my $regseq_counter = 0; # counter for naming forms
 	my @regseqs = $dbh->get_reg_seqs_by_accn($gene); 
 	if (!$regseqs[0]) {
 	    $empty++;
@@ -198,34 +199,39 @@ HEADER_TABLE
 	    my @ens_coords = $ensdb->get_ens_chr($gene);
 	    foreach my $regseq (@regseqs) {
 
+		$regseq_counter = $regseq_counter + 1;
+
 #reset row color
 		$bg_color = 0;
 
 #start table
-		print<<COLNAMES;	    
-		<table width='1200' border=1 cellspacing=0><tr><td>
+print<<COLNAMES;	    
+		<table width='1150' border=1 cellspacing=0><tr><td>
 		    <table width='100%' border="1" cellspacing="0" cellpadding="3">
 		    <tr>
-		    <td width="150" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
+		    <td width="100" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
 		    
 COLNAMES
 
-		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Gene/Transcript ID</span></td>";
+		print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcript ID</span></td>";
 
 		if ($params{tss} eq 'on')
 		{
-		    print "<td width='180' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
+		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
 		}
-		print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
-		print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
-		print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
+		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
+		    print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
 
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
 		}
+		    print "<td width='80' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Display</span></td>";
+
 		print "</tr>";
 		
 #print out default information
+		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 		print "<tr>";
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$projname</td>";
 		
@@ -233,8 +239,8 @@ COLNAMES
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$transcript."</td>";
 
 		if ($params{tss} eq 'on') {
-		    if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
-			print "<td width='180' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
+		    if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
+			print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
 		    }
 		}
 
@@ -245,8 +251,8 @@ COLNAMES
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
 		}
-
-		print "</tr></table>";
+		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></td>";
+		print "</tr></form></table>";
 		print "<p></td></tr>";
 
 ####################### get data objects for retrieving lines of evidence
@@ -256,252 +262,252 @@ COLNAMES
 #make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
 		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
 {
-    print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
+		print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
 }
 ################### BEGIN INTERACTING EVIDENCE SECTION #####################
 #reset row color
-$bg_color = 0;
-my $count=1;
-
-if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
-    
+		$bg_color = 0;
+		my $count=1;
+		
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		    
 #    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 
 #only print table if there is at least one result
 
-    if(scalar(@interactors)>0)
-    {
-	print "<table width='100%' cellspacing=0 border=1><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
-	
-	if ($params{tf} eq 'on') {
-	    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
-	}
-	if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
-	{
-	    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-	}
-	if ($params{tf_reference} eq 'on' || $params{other_reference} eq 'on')
-	{
-	    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
-	}
-	if ($params{tf_interaction} eq 'on')
-	{
-	    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
-	}
-	if ($params{other_effect} eq 'on')
-	{
-	    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
-	}
-	if ($params{tf_evidence} eq 'on' || $params{other_evidence} eq 'on')
-	{
-	    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
-	}
-	print "</tr>";
-    }
-}
-
-
-foreach my $inter (@interactors) {
-    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
-	print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
-	if ($params{tf} eq 'on') {
-	    my $tf = $dbh->create_tf;
-	    my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
-	    print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\">".$complex->name;
-	    while (my $subunit=$complex->next_subunit) {
-		my $db = $subunit->get_tdb;
-		my $tid = $subunit->get_transcript_accession($dbh);
-		my $cl = $subunit->get_class; 
-		my $fam = $subunit->get_fam;
-		if (!$cl || $cl eq '0' || $cl eq 'unknown') {
-		    print $tid."<br>";
-		} elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
-		    print $tid."&nbsp;(".$cl.")<br>";
-		} else {
-		    print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
-		}
-	    }
-	    print "</td>";
-	}
-	my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
-	if ($params{tf_analysis} eq 'on') {
-	    my $aname=$an[2];
-	    my @anal;
-	    push @anal,$aname;
-	    if ($an[3]) {
-		my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-		push @anal,$met[0];
-	    }
-	    if ($an[4]) {
-		my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-		push @anal,$cell[0];
-	    }
-	    if ($an[5]) {
-		my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-		push @anal,$time[0];
-	    }
-	    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-	    print join(':',@anal)."</td>";
-	}
-	if ($params{tf_reference} eq 'on' && $an[6]) {
-	    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-	    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
-	}
-	if ($params{tf_interaction} eq 'on') {
-	    my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
-	    if ($table eq 'interaction') {
-		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">";
-		my @data;
-		for (my $i=0;$i<(@dat-3);$i++) {
-		    if ($dat[$i] && $dat[$i] ne '0') {
-			push @data,$dat[$i];
+		    if(scalar(@interactors)>0)
+		    {
+			print "<table width='100%' cellspacing=0 border=1><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
+			
+			if ($params{tf} eq 'on') {
+			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
+			}
+			if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
+			{
+			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+			}
+			if ($params{tf_reference} eq 'on' || $params{other_reference} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
+			}
+			if ($params{tf_interaction} eq 'on')
+			{
+			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
+			}
+			if ($params{other_effect} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
+			}
+			if ($params{tf_evidence} eq 'on' || $params{other_evidence} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
+			}
+			print "</tr>";
 		    }
 		}
-		print join(":",@data)."</td>";
-	    }
-	}
-	if ($params{other_effect} eq 'on')
-	{
-	    print "<td width='150' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-	}
+		
 
-	if ($params{tf_evidence} eq 'on' && $an[1]) {
-	    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-	    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
-	}
-	$count++;
-	print "</tr>";
-	$bg_color = 1 - $bg_color;
-    }}
+		foreach my $inter (@interactors) {
+		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
+			if ($params{tf} eq 'on') {
+			    my $tf = $dbh->create_tf;
+			    my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
+			    print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\"><b>".$complex->name."</b><br>";
+			    while (my $subunit=$complex->next_subunit) {
+				my $db = $subunit->get_tdb;
+				my $tid = $subunit->get_transcript_accession($dbh);
+				my $cl = $subunit->get_class; 
+				my $fam = $subunit->get_fam;
+				if (!$cl || $cl eq '0' || $cl eq 'unknown') {
+				print $tid."<br>";
+				} elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
+				    print $tid."&nbsp;(".$cl.")<br>";
+				} else {
+				print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
+			    }
+			    }
+			    print "</td>";
+			}
+			my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
+			if ($params{tf_analysis} eq 'on') {
+			    my $aname=$an[2];
+			    my @anal;
+			    push @anal,$aname;
+			    if ($an[3]) {
+				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
+				push @anal,$met[0];
+			    }
+			    if ($an[4]) {
+				my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
+				push @anal,$cell[0];
+			    }
+			    if ($an[5]) {
+				my @time=$dbh->get_data_by_primary_key('time',$an[5]);
+				push @anal,$time[0];
+			    }
+			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+			    print join(':',@anal)."</td>";
+			}
+			if ($params{tf_reference} eq 'on' && $an[6]) {
+			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
+			}
+			if ($params{tf_interaction} eq 'on') {
+			    my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
+			    if ($table eq 'interaction') {
+				print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">";
+				my @data;
+				for (my $i=0;$i<(@dat-3);$i++) {
+				    if ($dat[$i] && $dat[$i] ne '0') {
+					push @data,$dat[$i];
+				    }
+				}
+				print join(":",@data)."</td>";
+			    }
+			}
+			if ($params{other_effect} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+			}
 
-if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
-    
+			if ($params{tf_evidence} eq 'on' && $an[1]) {
+			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
+			}
+			$count++;
+			print "</tr>";
+              $bg_color = 1 - $bg_color;
+		    }}
+
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		    
 #end table that was created if there were results
-    if(scalar(@interactors)>0)
-{
-    print "</table>";
-}		    
-}
+		    if(scalar(@interactors)>0)
+		    {
+			print "</table>";
+		    }		    
+		}
 
 ################### BEGIN OTHER EVIDENCE SECTION #####################
 #reset row color
-$bg_color = 0;
+		$bg_color = 0;
 
-
-
-if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
-    
-    
+		
+		
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		    
+		    		    
 #print table only if results exist
-    if (scalar(@expressors) > 0)
-{
-    print "<table width='100%' border=1 cellspacing=0><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
+		    if (scalar(@expressors) > 0)
+		    {
+			print "<table width='100%' border=1 cellspacing=0><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
 
 # 			if ($params{tf} eq 'on') {
 # 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
 # 			}
-    if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
-    {
-	print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-    }
-    if ($params{other_reference} eq 'on' || $params{tf_reference} eq 'on')
-    {
-	print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
-    }
+			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
+			{
+			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+			}
+			if ($params{other_reference} eq 'on' || $params{tf_reference} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
+			}
 # 			if ($params{tf_interaction} eq 'on')
 # 			{
 # 			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
 # 			}
-    if ($params{other_effect} eq 'on')
-    {
-	print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
-    }
-    if ($params{other_evidence} eq 'on' || $params{tf_evidence} eq 'on')
-    {
-	print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
-    }
-    
-    print "</tr>";
-}
-}
+			if ($params{other_effect} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
+			}
+			if ($params{other_evidence} eq 'on' || $params{tf_evidence} eq 'on')
+			{
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
+			}
+			
+			print "</tr>";
+		    }
+		}
 
 
-foreach my $exp (@expressors) {
-    if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
-	print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
+		foreach my $exp (@expressors) {
+		    if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 
 # 			if ($params{tf} eq 'on') {
 # 			    print "<td width='200' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
 # 			}
 
-	my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
-	if ($params{other_analysis} eq 'on') {
-	    my $aname=$an[2];
-	    my @anal;
-	    push @anal,$aname;
-	    if ($an[3]) {
-		my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-		push @anal,$met[0];
-	    }
-	    if ($an[4]) {
-		my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-		push @anal,$cell[0];
-	    }
-	    if ($an[5]) {
-		my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-		push @anal,$time[0];
-	    }
-	    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-	    print join(':',@anal)."</td>";
-	}
-	if ($params{other_reference} eq 'on' && $an[6]) {
-	    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-	    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
-	}
+			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
+			if ($params{other_analysis} eq 'on') {
+			    my $aname=$an[2];
+			    my @anal;
+			    push @anal,$aname;
+			    if ($an[3]) {
+				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
+				push @anal,$met[0];
+			    }
+			    if ($an[4]) {
+				my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
+				push @anal,$cell[0];
+			    }
+			    if ($an[5]) {
+				my @time=$dbh->get_data_by_primary_key('time',$an[5]);
+				push @anal,$time[0];
+			    }
+			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+			    print join(':',@anal)."</td>";
+			}
+			if ($params{other_reference} eq 'on' && $an[6]) {
+			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
+			}
 # 			if ($params{tf_interaction} eq 'on')
 # 			{
 # 			    print "<td width='100' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
 # 			}
-	if ($params{other_effect} eq 'on') {
-	    my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
-	    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
-	    my @data;
-	    for (my $i=0;$i<(@dat-3);$i++) {
-		if ($dat[$i] && $dat[$i] ne '0') {
-		    push @data,$dat[$i];
-		}
-	    }
-	    print join(":",@data)."</td>";
-	}
-	if ($params{other_evidence} eq 'on' && $an[1]) {
-	    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-	    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
-	}
-	$count++;
-	print "</tr>";
-	$bg_color = 1 - $bg_color;
-    }}
+			if ($params{other_effect} eq 'on') {
+			    my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
+			    my @data;
+			    for (my $i=0;$i<(@dat-3);$i++) {
+				if ($dat[$i] && $dat[$i] ne '0') {
+				    push @data,$dat[$i];
+				}
+			    }
+			    print join(":",@data)."</td>";
+			}
+			if ($params{other_evidence} eq 'on' && $an[1]) {
+			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
+			}
+			$count++;
+			print "</tr>";
+			$bg_color = 1 - $bg_color;
+		    }}
 
-if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
 
 #end table only if results exist
-    if(scalar(@expressors)>0)
-{
-    print "</table>";
-}
-}
+		    if(scalar(@expressors)>0)
+		    {
+			print "</table>";
+		    }
+		}
 
 #end table around evidence
-print "</td></tr></table><br>";
+		print "</td></tr></table><br>";
 
-} #end of regseq loop
-}    
+	    } #end of regseq loop
+	}    
 }
 
 
-if (scalar(@projects)==$empty) {
-    print "<p class=\"warning\">No regulatory sequence was found for gene $gene! Is it really an Ensembl Gene ID?</p>\n";
-}
+    if (scalar(@projects)==$empty) {
+	print "<p class=\"warning\">No regulatory sequence was found for gene $gene! Is it really an Ensembl Gene ID?</p>\n";
+    }
 }
 
 
