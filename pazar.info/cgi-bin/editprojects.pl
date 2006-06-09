@@ -527,8 +527,8 @@ print<<AddFormFoot;
 	    <tr><td >Name</td><td><input type="text" name="projname" maxlength=20></td></tr>
 	    <tr><td >Status</td><td><select name="projstatus"><option name="restricted" value="restricted">restricted<option name="published" value="published">published<option name="open" value="open">open</select></td></tr>
 <tr><td>Description</td><td><textarea name="projdesc" cols=40 rows=6></textarea></td></tr>
-<tr><td >Administrator Password</td><td><input type="password" name="projpass"></td></tr>
-<tr><td >Re-enter Admin Password</td><td><input type="password" name="projpasscheck"></td></tr>
+<tr><td >Administrator Password</td><td><input type="password" name="projpass" maxlength=20></td></tr>
+<tr><td >Re-enter Admin Password</td><td><input type="password" name="projpasscheck" maxlength=20></td></tr>
 <tr><td colspan=2><input type="button" onClick="verifyProjectCreate();" value='Create New Project'></td></tr>
 	    </table>	    
 	    </form>
