@@ -54,7 +54,7 @@ my $dbaccn = $params{'genedb'};
 my ($gene,$ens,$err);
 
 if (!$accn) {
-    print "<p class=\"warning\">An error occurred!</p>\n";
+    print "<p class=\"warning\">An error occurred!<br>Maybe you haven't selected a combination in the list.</p>\n";
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
 	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {
