@@ -282,7 +282,20 @@ if ($param{evidence} eq 'on')
 		if ($type eq 'matrix') {next;}
 		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
 		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
+
+#print ucsc and ensembl links
+
+#get the corresponding regseq object
                     my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+		    my $target_regseq = $regseq[0];
+
+		    print "<td>";
+
+print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br>";
+print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
+		    print "</td>";
+
+
 #		    print Dumper(@regseq);
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 		    if ($param{reg_seq_name} eq 'on') {
