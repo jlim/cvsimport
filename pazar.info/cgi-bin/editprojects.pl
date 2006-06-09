@@ -198,7 +198,7 @@ if ($params{mode} eq 'add')
 	    
 #encrypt password and insert
 	    my $im = Crypt::Imail->new();
-	    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass});	
+	    my $encrypted_pass = $im->encrypt('defaultuser', $params{projpass});	
 
 #delimit quotes in project name and description
 	    my $pname = $params{projname};
@@ -243,7 +243,7 @@ if($params{mode} eq 'adduser')
 {
 #check project password
     my $im = Crypt::Imail->new();
-    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass}); 
+    my $encrypted_pass = $im->encrypt('defaultuser', $params{projpass}); 
     my $chkh=$dbh->prepare("select password from project where project_id=?")||die;
     $chkh->execute($params{pid})||die;
     my ($dbpass) = $chkh->fetchrow_array;
@@ -276,7 +276,7 @@ if($params{mode} eq 'updatedesc')
 {
 #check project password
     my $im = Crypt::Imail->new();
-    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass}); 
+    my $encrypted_pass = $im->encrypt('defaultuser', $params{projpass}); 
     my $chkh=$dbh->prepare("select password from project where project_id=?")||die;
     $chkh->execute($params{pid})||die;
     my ($dbpass) = $chkh->fetchrow_array;
@@ -332,7 +332,7 @@ if ($params{mode} eq 'delete')
 
 #check project password
     my $im = Crypt::Imail->new();
-    my $encrypted_pass = $im->encrypt($params{username}, $params{projpass}); 
+    my $encrypted_pass = $im->encrypt('defaultuser', $params{projpass}); 
     my $chkh=$dbh->prepare("select password from project where project_id=?")||die;
     $chkh->execute($params{pid})||die;
     my ($dbpass) = $chkh->fetchrow_array;
