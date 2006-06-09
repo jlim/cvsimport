@@ -179,13 +179,13 @@ if ($params{mode} eq 'register') {
 	    print " value=\"$params{username}\"";
 	}
 	print "></td></tr>";
-	print "<tr><td >Password</td><td><input type=\"password\" name=\"password\"";
+	print "<tr><td >Password</td><td><input type=\"password\" name=\"password\" maxlength=20";
 	if($pwmatch eq "true")
 	{
 	    print " value=\"$params{password}\"";
 	}
 	print "></td></tr>";
-	print "<tr><td >Re-enter password</td><td><input type=\"password\" name=\"passwordcheck\"";
+	print "<tr><td >Re-enter password</td><td><input type=\"password\" name=\"passwordcheck\" maxlength=20";
 	if($pwmatch eq "true")
 	{
 	    print " value=\"$params{passwordcheck}\"";
@@ -213,8 +213,8 @@ print<<Page_Done;
 	<FORM  name="regform" method="POST" action="register.pl">
 	<table>
 	<tr><td valign="top">User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type="text" name="username" maxlength=64></td></tr>
-	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
-	<tr><td >Re-enter password</td><td> <input type="password" name="passwordcheck"></td></tr>
+	<tr><td >Password</td><td> <input type="password" name="password" maxlength=20></td></tr>
+	<tr><td >Re-enter password</td><td> <input type="password" name="passwordcheck" maxlength=20></td></tr>
 	<tr><td >Affiliation</td><td><input type="text" name="affiliation" maxlength=64></td></tr>
 	<tr><td >First name</td><td><input type="text" name="first" maxlength=32></td></tr>
 	<tr><td >Last name</td><td><input type="text" name="last" maxlength=32></td></tr>
