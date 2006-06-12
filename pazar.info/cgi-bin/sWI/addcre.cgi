@@ -55,7 +55,8 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 # our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
 # 		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{organism});
 
-my ($regid,$type);
+my ($regid,$type,$tfid,$aid);
+eval {
 if (($params{CREtype})&&($params{CREtype}=~/SELEX/)) {
     $regid=store_artifical($pazar,$query,\%params);
      $type='construct';
@@ -93,13 +94,18 @@ $methid||=0;
 $cellid||=0;
 $refid||=0;
 $evidid||=0;
-my $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
+$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
 
-my $tfid=store_TFs($pazar,$ensdb,\%params); 
+$tfid=store_TFs($pazar,$ensdb,\%params); 
 $pazar->add_input('funct_tf',$tfid);
 $pazar->store_analysis($aid);
 $pazar->reset_inputs;
 $pazar->reset_outputs;
+};
+
+if ($@) {
+    print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+}
 
 print $query->h1("Submission successful!");
 if ($type eq 'reg_seq') {

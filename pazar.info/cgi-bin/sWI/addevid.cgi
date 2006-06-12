@@ -37,7 +37,9 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
 
-my ($regid,$type);
+my ($regid,$type,$aid);
+my @conds;
+eval {
 if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
     $regid=store_artifical($pazar,$query,\%params);
     $type='construct';
@@ -73,9 +75,8 @@ $cellid||=0;
 $refid||=0;
 $evidid||=0;
 $timeid||=0;
-my $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$params{analysis_desc});
+$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$params{analysis_desc});
 
-my @conds;
 if ($params{env_comp} && $params{env_comp} ne '') {
     my $conc=$params{env_conc}||'na';
     my $molecule=$params{env_comp}||'na';
@@ -100,6 +101,11 @@ $pazar->add_output('expression',$expression);
 $pazar->store_analysis($aid);
 $pazar->reset_inputs;
 $pazar->reset_outputs;
+};
+
+if ($@) {
+    print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+}
 
 print $query->h1("Submission successful!");
 if ($type eq 'reg_seq') {
@@ -107,7 +113,6 @@ if ($type eq 'reg_seq') {
     print $query->start_form(-method=>'POST',
 			     -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
     &forward_args($query,\%params);
-    print $query->hidden(-name=>'tfid',-value=>$tfid);
     print $query->hidden(-name=>'aid',-value=>$aid);
     print $query->hidden(-name=>'regid',-value=>$regid);
     my $conds;

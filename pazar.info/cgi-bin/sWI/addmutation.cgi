@@ -51,20 +51,28 @@ if ($params{modeAdd})  {
     exit();
 } elsif ($params{modeDone})  {
     if ($params{effect}=~/interaction/i) {
-	&store_mut_inter($pazar,$query,\%params);
-	
-	$pazar->add_input('funct_tf',$params{tfid});
-	$pazar->store_analysis($params{aid});
-	$pazar->reset_inputs;
-	$pazar->reset_outputs;
+	eval {
+	    &store_mut_inter($pazar,$query,\%params);
+	    
+	    $pazar->add_input('funct_tf',$params{tfid});
+	    $pazar->store_analysis($params{aid});
+	    $pazar->reset_inputs;
+	    $pazar->reset_outputs;
+	};
     }  elsif ($params{effect}=~/expression/i) {
-	&store_mut_expr($pazar,$query,\%params);
-	
-	$pazar->store_analysis($params{aid});
-	$pazar->reset_inputs;
-	$pazar->reset_outputs;
-
+	eval {
+	    &store_mut_expr($pazar,$query,\%params);
+	    
+	    $pazar->store_analysis($params{aid});
+	    $pazar->reset_inputs;
+	    $pazar->reset_outputs;
+	};
     }
+
+if ($@) {
+    print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+}
+
 print $query->h1("Submission successful!");
 print $query->h2("You can add Mutation information or close this window now");
 print $query->start_form(-method=>'POST',

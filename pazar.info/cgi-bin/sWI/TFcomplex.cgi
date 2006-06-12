@@ -174,7 +174,8 @@ sub next_page {
 	    }
 	}
     }
-    my ($regid,$type);
+    my ($regid,$type,$tfid,$aid);
+    eval {
     if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
 	$regid=store_artifical($pazar,$query,\%params);
 	$type='construct';
@@ -204,13 +205,18 @@ sub next_page {
     $cellid||=0;
     $refid||=0;
     $evidid||=0;
-    my $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
+    $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
 
-    my $tfid=store_TFs($pazar,$ensdb,\%params); 
+    $tfid=store_TFs($pazar,$ensdb,\%params); 
     $pazar->add_input('funct_tf',$tfid);
     $pazar->store_analysis($aid);
     $pazar->reset_inputs;
     $pazar->reset_outputs;
+};
+
+    if ($@) {
+	print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+    }
 
     print $query->h1("Submission successful!");
     if ($type eq 'reg_seq') {

@@ -34,11 +34,14 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 
 my ($regid,$type);
 if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
-    $regid=store_artifical($pazar,$query,\%params);
+    eval {$regid=store_artifical($pazar,$query,\%params);};
     $type='construct';
 } elsif (($params{reg_type})&&($params{reg_type}=~/reg_seq/)) {
-    $regid=store_natural($pazar,$ensdb,$gkdb,$query,\%params);
+    eval {$regid=store_natural($pazar,$ensdb,$gkdb,$query,\%params);};
     $type='reg_seq';
+}
+if ($@) {
+    print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
 }
 print "
 <script language=\"javascript\">
