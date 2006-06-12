@@ -141,6 +141,7 @@ sub next_page {
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the sequence<br>$element<br>";
+	exit();
     }
     my $length=length($element);
 #my ($trf_llid,$trfens,$trferr) =convert_id($params{TFDB},$params{TF});

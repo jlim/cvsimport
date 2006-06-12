@@ -105,6 +105,7 @@ $pazar->reset_outputs;
 
 if ($@) {
     print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+    exit();
 }
 
 print $query->h1("Submission successful!");
@@ -207,6 +208,7 @@ if ($params{sequence} && $params{sequence} ne '') {
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the sequence<br>$element<br>";
+	exit();
     }
     if (uc($seq) ne uc($element)) {
 #reverse complement the seq
@@ -271,6 +273,7 @@ sub store_artifical {
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the sequence<br>$element<br>";
+	exit();
     }
     return $pazar->table_insert('construct',$params{constructname},$params{artificialcomment},$element);
 }

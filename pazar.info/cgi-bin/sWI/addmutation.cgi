@@ -71,6 +71,7 @@ if ($params{modeAdd})  {
 
 if ($@) {
     print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+    exit();
 }
 
 print $query->h1("Submission successful!");
@@ -122,11 +123,13 @@ sub store_mut_inter() {
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the sequence<br>$element<br>";
+	exit();
     }
     my $mutelement=$params{mutseq};
     $mutelement=~s/\s*//g;
     if ($mutelement=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the mutated sequence<br>$mutelement<br>";
+	exit();
     }
 
     if (length($element)!=length($mutelement)) {
@@ -188,11 +191,13 @@ sub store_mut_expr() {
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the sequence<br>$element<br>";
+	exit();
     }
     my $mutelement=$params{mutseq};
     $mutelement=~s/\s*//g;
     if ($mutelement=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the mutated sequence<br>$mutelement<br>";
+	exit();
     }
     if (length($element)!=length($mutelement)) {
 	print "<h3>The length of the mutant sequence should be the same that the original sequence. If the mutation involves deletion replace original nucleotides with 'N' in the mutant sequence!</h3>";
@@ -229,6 +234,7 @@ sub store_mut_expr() {
     }
     if ($mutations == 0) {
 	print "<h3>The format of the mutant sequence should be lowercase where the nucleotide are unchaged and UPPERCASE for the mutated nucleotides!</h3>";
+	exit();
     }
 
     foreach (keys %mutants) {

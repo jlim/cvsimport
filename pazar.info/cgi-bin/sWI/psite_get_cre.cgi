@@ -164,6 +164,7 @@ if ($params{sequence} && $params{sequence} ne '') {
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
 	print "Unknown character used in the sequence<br>$element<br>";
+	exit();
     }
     if (uc($seq) ne uc($element)) {
 #reverse complement the seq
