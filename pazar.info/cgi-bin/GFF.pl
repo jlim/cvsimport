@@ -16,8 +16,11 @@ print<<page;
 <p class="title2">Overview:</p>
 <p>The PAZAR GFF format (<a href="http://www.sanger.ac.uk/Software/formats/GFF/" target="_blank">What is GFF?</a>) is intended to capture simple annotations. It is not meant to record a detailed annotation. Please use the XML format if you want more options.
 One record is on a unique line and holds one annotation for one sequence, this annotation coming either from an interaction OR an expression experiment (NOT BOTH IN THE SAME RECORD). An interaction will be stored as 'good' and an expression as 'induced'. If a mutant sequence is reported it is assumed that this mutant has an impaired activity compared to the annotation of the original sequence(interaction = 'none' or expression = 'no change').</p>
-<p class="title2">PAZAR GFF format (uppercase are mandatory fields):</p>
-<p>SEQNAME	SOURCE	FEATURE	START	END	SCORE	STRAND	FRAME	SEQUENCE=""; DB_SEQINFO="DATABASE:ASSEMBLY"; SPECIES="BINOMIAL FORMAT"; DB_GENEINFO="DATABASE:ACCESSION:name"; band=""; db_transcriptinfo="DATABASE:ACCESSION:name"; transcript_start=""; analysis_name=""; db_tfinfo="DATABASE:ACCESSION:NAME"; method=""; evidence=""; pmid=""; expression="CELL:SPECIES:time:time_scale"; impaired_mutant="";</p>
+<p class="title2">PAZAR GFF format:</p>
+<p class="bold">Fields are: &lt;seqname&gt;&nbsp; &lt;source&gt;&nbsp; &lt;feature&gt;&nbsp; &lt;start&gt&nbsp;; &lt;end&gt;&nbsp; &lt;score&gt;&nbsp; &lt;strand&gt;&nbsp; &lt;frame&gt;&nbsp; [attributes]</p>
+<p>Those 9 fields are tab-delimited.<br>
+The attribute field must have a tag value structure with the following syntax, flattened onto one line by semicolon separators:<br>
+tag1="value1";tag2="value2"</p>
 <p class="title2">Description:</p>
 <p><span class="title4">Mandatory Fields</span><br>
 <b>seqname</b> - The name of the sequence. Must be a chromosome.<br>

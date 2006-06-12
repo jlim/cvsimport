@@ -250,7 +250,7 @@ while (50<=$i&&$i<60) {
 
                  
 print<<page;
-<table border="0" cellpadding="0" cellspacing="0" width="500" height="5">
+<table border="0" cellpadding="0" cellspacing="0" width="550">
 <tbody><tr><td style="font-weight:bold;text-align:justify">
 PAZAR can be searched by <a href="http://www.pazar.info/cgi-bin/gsearch.pl">Gene</a>, <a href="http://www.pazar.info/cgi-bin/tfsearch.pl">Transcription Factor</a> or <a href="http://www.pazar.info/cgi-bin/profilesearch.pl">Profile</a> by clicking on one of the department stores below.<br>
 Each project in PAZAR is a boutique in the mall. You can limit your search to a specific project by clicking on the corresponding boutique on the mall map.<br>
