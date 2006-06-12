@@ -221,6 +221,7 @@ COLNAMES
 		}
 		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
 		    print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>";
 		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
 
 		if ($params{quality} eq 'on') {
@@ -246,6 +247,11 @@ COLNAMES
 
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
 		print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
+
+		    my $rsid = $regseq->accession_number;
+		    my $rsid7d = sprintf "%07d",$rsid;
+		    my $id="RS".$rsid7d;
+		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$id."&nbsp;</td>";
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
 
 		if ($params{quality} eq 'on') {
