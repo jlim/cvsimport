@@ -118,7 +118,18 @@ sub store_mut_inter() {
 	print "<h3>An error occured!</h3>";
 	exit;
     }
-    if (length($params{sequence})!=length($params{mutseq})) {
+    my $element=$params{sequence};
+    $element=~s/\s*//g;
+    if ($element=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the sequence<br>$element<br>";
+    }
+    my $mutelement=$params{mutseq};
+    $mutelement=~s/\s*//g;
+    if ($mutelement=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the mutated sequence<br>$mutelement<br>";
+    }
+
+    if (length($element)!=length($mutelement)) {
 	print "<h3>The length of the mutant sequence should be the same that the original sequence. If the mutation involves deletion replace original nucleotides with 'N' in the mutant sequence!</h3>";
 	exit;
     }
@@ -136,12 +147,12 @@ sub store_mut_inter() {
     $methid||=0;
     $refid||=0;
     my $mutname = $params{mutseqname}||'NA';
-    my $mutsetid = $pazar->table_insert('mutation_set',$params{regid},$mutname,$methid,$refid,$params{mutseq},undef);
+    my $mutsetid = $pazar->table_insert('mutation_set',$params{regid},$mutname,$methid,$refid,$mutelement,undef);
     $pazar->add_input('mutation_set',$mutsetid);
     my %mutants;
     my $mutations = 0;
-    for (my $pos=0;$pos<length($params{mutseq});$pos++) {
-	my $base = substr($params{mutseq}, $pos, 1);
+    for (my $pos=0;$pos<length($mutelement);$pos++) {
+	my $base = substr($mutelement, $pos, 1);
 	if ($base =~ /[ACGT]/) {
 	    $mutants{$pos}=lc($base);
 	    $mutations++;
@@ -173,7 +184,17 @@ sub store_mut_expr() {
 	print "<h3>An error occured!</h3>";
 	exit;
     }
-    if (length($params{sequence})!=length($params{mutseq})) {
+    my $element=$params{sequence};
+    $element=~s/\s*//g;
+    if ($element=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the sequence<br>$element<br>";
+    }
+    my $mutelement=$params{mutseq};
+    $mutelement=~s/\s*//g;
+    if ($mutelement=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the mutated sequence<br>$mutelement<br>";
+    }
+    if (length($element)!=length($mutelement)) {
 	print "<h3>The length of the mutant sequence should be the same that the original sequence. If the mutation involves deletion replace original nucleotides with 'N' in the mutant sequence!</h3>";
 	exit;
     }
@@ -191,12 +212,12 @@ sub store_mut_expr() {
     $methid||=0;
     $refid||=0;
     my $mutname = $params{mutseqname}||'NA';
-    my $mutsetid = $pazar->table_insert('mutation_set',$params{regid},$mutname,$methid,$refid,$params{mutseq},undef);
+    my $mutsetid = $pazar->table_insert('mutation_set',$params{regid},$mutname,$methid,$refid,$mutelement,undef);
     $pazar->add_input('mutation_set',$mutsetid);
     my %mutants;
     my $mutations = 0;
-    for (my $pos=0;$pos<length($params{mutseq});$pos++) {
-	my $base = substr($params{mutseq}, $pos, 1);
+    for (my $pos=0;$pos<length($mutelement);$pos++) {
+	my $base = substr($mutelement, $pos, 1);
 	if ($base =~ /[ACGT]/) {
 	    $mutants{$pos}=lc($base);
 	    $mutations++;

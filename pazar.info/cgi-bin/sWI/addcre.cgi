@@ -244,13 +244,18 @@ exit;
 my $seq=&getseq($chr,$params{start},$params{end});
 my $strand;
 if ($params{sequence} && $params{sequence} ne '') {
-    if (uc($seq) ne uc($params{sequence})) {
+    my $element=$params{sequence};
+    $element=~s/\s*//g;
+    if ($element=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the sequence<br>$element<br>";
+    }
+    if (uc($seq) ne uc($element)) {
 #reverse complement the seq
 	my $rcseq = reverse ($seq);
 	$rcseq =~ tr/ACTGactg/TGACtgac/;
 	$seq=$rcseq;
-	if (uc($seq) ne uc($params{sequence})) {
-	    print $query->h3("The provided sequence $params{sequence} doesn't fit with the provided coordinates!<br>Please use the Get Chromosome Coordinates button to fetch the correct coordinates!");
+	if (uc($seq) ne uc($element)) {
+	    print $query->h3("The provided sequence $element doesn't fit with the provided coordinates!<br>Please use the Get Chromosome Coordinates button to fetch the correct coordinates!");
 	    exit;
 	} else {
 	    $strand='-';
@@ -303,7 +308,12 @@ return $rsid;
 sub store_artifical {
     my ($pazar,$query,$params)=@_;
     my %params=%{$params};
-    return $pazar->table_insert('construct',$params{constructname},$params{artificialcomment},$params{sequence});
+    my $element=$params{csequence};
+    $element=~s/\s*//g;
+    if ($element=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the sequence<br>$element<br>";
+    }
+    return $pazar->table_insert('construct',$params{constructname},$params{artificialcomment},$element);
 }
 
 sub forward_args {

@@ -138,6 +138,10 @@ sub next_page {
 
     my $region=$params{start};
     my $element=$params{sequence};
+    $element=~s/\s*//g;
+    if ($element=~/[^agctnAGCTN]/) {
+	print "Unknown character used in the sequence<br>$element<br>";
+    }
     my $length=length($element);
 #my ($trf_llid,$trfens,$trferr) =convert_id($params{TFDB},$params{TF});
 
