@@ -1113,7 +1113,7 @@ COLNAMES
 	if ($params{at_reg_seq} eq 'on' || $params{at_construct} eq 'on')
 {
 	    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
-	    if ($param{reg_seq} eq 'on')
+	    if ($params{at_reg_seq} eq 'on')
 	    {
 		print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>"
 	    }
@@ -1168,7 +1168,7 @@ if ($params{at_evidence} eq 'on')
 }
 
 #print heading for ucsc/ensembl links column if reg_seq is on
-if($param{reg_seq} eq 'on')
+if($params{at_reg_seq} eq 'on')
 {
     print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</td>";
 }
@@ -1229,7 +1229,7 @@ while (my $site=$complex->next_target) {
 	if ($params{at_quality} eq 'on') {
 	    print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->quality."</td>";
 	}
-	if ($param{description} eq 'on') {
+	if ($params{at_description} eq 'on') {
 	    if($site->get_desc)
 	    {
 		print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_desc."</td>";			   
@@ -1349,7 +1349,7 @@ else
 
 #print ucsc and ensembl links at the end of the row if target is a refseq
 #get the corresponding regseq object
-if($param{reg_seq} eq 'on')
+if($params{at_reg_seq} eq 'on')
 {
     if ($type eq 'reg_seq') {
 	my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
