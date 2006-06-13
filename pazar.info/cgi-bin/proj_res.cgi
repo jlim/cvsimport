@@ -420,7 +420,7 @@ print<<HEADER_TABLE;
 HEADER_TABLE
                 $prev_gene_accn = $gene_accn;
 	    }
-	    &print_gene_attr($dbh, $ensdb, $regseq, \@inters, \@exprs, %param,$display_counter);
+	    &print_gene_attr($dbh, $ensdb, $regseq, \@inters, \@exprs, $param,$display_counter);
 	    $display_counter++;
 	}
     }
@@ -754,9 +754,10 @@ sub select {
 }
 
 sub print_gene_attr {
-    my ($dbh, $ensdb, $regseq, $inters, $exprs, %params,$regseq_counter) = @_;
+    my ($dbh, $ensdb, $regseq, $inters, $exprs, $params,$regseq_counter) = @_;
     my @interactors = @$inters;
     my @expressors = @$exprs;
+    my %params=%{$params};
 
 #start table
 print<<COLNAMES;	    
