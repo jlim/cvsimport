@@ -147,12 +147,16 @@ HEADER_TABLE
 	    }
 	}
 
+	my $regseq_counter = 0; # counter for naming forms
 
     foreach my $arrayref (@projects) {
 	my $projname = $arrayref->[0];
+
 	
 #use different connection if it's one of user's restricted projects
 	my $restrictedproj = 0;
+
+
 	foreach $pid (@projids)
 	{	    
 	    if("$pid" eq "$arrayref->[1]")
@@ -190,8 +194,10 @@ HEADER_TABLE
 #get information for header
 
 #loop through regseqs and print tables
-	my $regseq_counter = 0; # counter for naming forms
+
 	my @regseqs = $dbh->get_reg_seqs_by_accn($gene); 
+
+
 	if (!$regseqs[0]) {
 	    $empty++;
 	    next;
@@ -200,7 +206,6 @@ HEADER_TABLE
 	    foreach my $regseq (@regseqs) {
 
 		$regseq_counter = $regseq_counter + 1;
-
 #reset row color
 		$bg_color = 0;
 
@@ -232,7 +237,7 @@ COLNAMES
 		print "</tr>";
 		
 #print out default information
-		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
+		print "<form name='display".$regseq_counter."' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 		print "<tr>";
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$projname</td>";
 		
@@ -248,18 +253,20 @@ COLNAMES
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
 		print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
 
-		    my $rsid = $regseq->accession_number;
-		    my $rsid7d = sprintf "%07d",$rsid;
-		    my $id="RS".$rsid7d;
+		my $rsid = $regseq->accession_number;
+		my $rsid7d = sprintf "%07d",$rsid;
+		my $id="RS".$rsid7d;
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$id."&nbsp;</td>";
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
 
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
 		}
-		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></td>";
+		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ucsc';document.display".$regseq_counter.".submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ensembl';document.display".$regseq_counter.".submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ensembl';\">--></td>";
 		print "</tr></form></table>";
 		print "<p></td></tr>";
+
+
 
 ####################### get data objects for retrieving lines of evidence
 		my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
