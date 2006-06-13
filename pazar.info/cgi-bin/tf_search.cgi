@@ -218,7 +218,12 @@ COLNAMES
 if ($param{reg_seq} eq 'on' || $param{construct} eq 'on')
 {
 	    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+	    if ($param{reg_seq} eq 'on')
+	    {
+		print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>"
+	    }
 }
+
 
 if ($param{reg_seq_name} eq 'on' || $param{construct_name} eq 'on')
 {
@@ -268,6 +273,13 @@ if ($param{evidence} eq 'on')
     print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Evidence</span></td>";
 }
 
+
+#print heading for ucsc/ensembl links column if reg_seq is on
+if($param{reg_seq} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</td>";
+}
+
     print "</tr>\n";
 
 
@@ -280,25 +292,20 @@ if ($param{evidence} eq 'on')
 		$seqcounter++;
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
+
 		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
 
-#print ucsc and ensembl links
+		    my $rsid = $site->get_dbid;
+		    my $rsid7d = sprintf "%07d",$rsid;
+		    my $id="RS".$rsid7d;
 
-#get the corresponding regseq object
-                    my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
-		    my $target_regseq = $regseq[0];
-
-		    print "<td>";
-
-print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br>";
-print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
-		    print "</td>";
-
+		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td><td bgcolor=\"$colors{$bg_color}\">".$id."</td>";
+		
+		    my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 
 #		    print Dumper(@regseq);
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
-		    if ($param{reg_seq_name} eq 'on') {
+		    if ($param{reg_seq_name} eq 'on' || $param{construct_name} eq 'on') {
 			if($site->get_name)
 			{
 			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
@@ -341,7 +348,7 @@ print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ens
 		if ($type eq 'construct' && $param{construct} eq 'on') {
 		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>";
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
-		    if ($param{construct_name} eq 'on') {
+		    if ($param{construct_name} eq 'on' || $param{reg_seq_name} eq 'on') {
 			print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
 		    }
 
@@ -377,7 +384,11 @@ print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ens
 		    }
                 }
 
-## do the following regardless of target type
+
+
+## do the following regardless of target type, but only if corresponding checkbox is on
+if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $param{construct} eq 'on'))
+{
 		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
 		if ($param{analysis} eq 'on') {
 		    my $aname=$an[2];
@@ -435,6 +446,25 @@ print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ens
 			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
                     }
 		}
+}
+#print ucsc and ensembl links at the end of the row if target is a refseq
+#get the corresponding regseq object
+		if($param{reg_seq} eq 'on')
+		{
+		    if ($type eq 'reg_seq') {
+			my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+			my $target_regseq = $regseq[0];			
+			print "<td>";			
+			print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br>";
+			print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
+			print "</td>";
+		    }
+		    else
+		    {
+			print "<td>&nbsp;</td>";
+		    }
+		}
+
                 print "</tr>";
 		$count++;
 		my $construct_name=$accn."_site".$count;
