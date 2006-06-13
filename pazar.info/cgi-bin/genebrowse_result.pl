@@ -128,7 +128,7 @@ foreach my $arrayref (@alpharesults)
     <tr>
  <td width="100" valign="top" bgcolor="$colors{$bg_color}">$projname</td>
 <td width="100" valign="top" bgcolor="$colors{$bg_color}">$arrayref->[3]</td>
- <td width="187" valign="top" bgcolor="$colors{$bg_color}"><a name="#$arrayref->[2]"><a href="#$arrayref->[2]" onClick="javascript:window.opener.document.gene_search.geneID.value='$arrayref->[2]';window.opener.document.gene_search.ID_list.options[0].selected=true;window.opener.focus();">$arrayref->[2]</a></td><td width="100" valign="top" bgcolor="$colors{$bg_color}">$description</td>
+ <td width="187" valign="top" bgcolor="$colors{$bg_color}"><a name="#$arrayref->[2]"><a href="#$arrayref->[2]" onClick="javascript:window.opener.document.gene_search.geneID.value='$arrayref->[2]';window.opener.document.gene_search.ID_list.options[0].selected=true;window.opener.focus();window.close();">$arrayref->[2]</a></td><td width="100" valign="top" bgcolor="$colors{$bg_color}">$description</td>
 Page_Done
 
 print  "</tr>";

@@ -190,6 +190,7 @@ if ($param{view} eq 'gene-centric') {
     my $filt=0;
     my @sorted_regseqs = sort {$a->gene_accession cmp $b->gene_accession} @reg_seqs;
     my $prev_gene_accn;
+    my $display_counter=0;
     foreach my $regseq (@sorted_regseqs) {
 
 ### length filter
@@ -419,7 +420,8 @@ print<<HEADER_TABLE;
 HEADER_TABLE
                 $prev_gene_accn = $gene_accn;
 	    }
-	    &print_gene_attr($dbh, $ensdb, $regseq, \@inters, \@exprs, %param);
+	    &print_gene_attr($dbh, $ensdb, $regseq, \@inters, \@exprs, %param,$display_counter);
+	    $display_counter++;
 	}
     }
     if (!@filters) {push @filters, 'none';}
@@ -752,7 +754,7 @@ sub select {
 }
 
 sub print_gene_attr {
-    my ($dbh, $ensdb, $regseq, $inters, $exprs, %params) = @_;
+    my ($dbh, $ensdb, $regseq, $inters, $exprs, %params,$regseq_counter) = @_;
     my @interactors = @$inters;
     my @expressors = @$exprs;
 

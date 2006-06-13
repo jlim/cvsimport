@@ -95,7 +95,7 @@ Page_Done
     print<<Page_Done;
     <tr>
       <td width="100" valign="top" bgcolor="$colors{$bg_color}">$projname</td>
- <td width="187" valign="top" bgcolor="$colors{$bg_color}"><a name="#$arrayref->[1]"><a href="#$arrayref->[1]" onClick="javascript:window.opener.document.tf_search.geneID.value='$arrayref->[1]';window.opener.document.tf_search.ID_list.options[5].selected=true;window.opener.focus();">$arrayref->[1]</a></td>
+ <td width="187" valign="top" bgcolor="$colors{$bg_color}"><a name="#$arrayref->[1]"><a href="#$arrayref->[1]" onClick="javascript:window.opener.document.tf_search.geneID.value='$arrayref->[1]';window.opener.document.tf_search.ID_list.options[5].selected=true;window.opener.focus();window.close();">$arrayref->[1]</a></td>
 Page_Done
 
     #get classes,families, transcript accessions
@@ -119,7 +119,7 @@ Page_Done
     my @accns;
     foreach my $ta (@transcript_accessions)
     {
-	my $ta_link="<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$ta';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$ta."</a>";
+	my $ta_link="<a href=\"#$arrayref->[1]\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$ta';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();window.close();\">".$ta."</a>";
 	push @accns, $ta_link;
     }
     print join('<br>',@accns);

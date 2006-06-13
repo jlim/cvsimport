@@ -148,11 +148,11 @@ print "<li><a name='#$tf_name'><b>".$tf_name."</b><br>";
 my @tfdatas=sort(@{$tf_subunit{$proj_name}{$tf_name}});
 foreach my $tf_data (@tfdatas) {
 if (!$tf_data->{class} || $tf_data->{class} eq '0') {
-print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$tf_data->{accn}."</a><br>";
+print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();window.close();\">".$tf_data->{accn}."</a><br>";
 } elsif (!$tf_data->{family} || $tf_data->{family} eq '0') {
-    print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}.")<br>";
+    print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();window.close();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}.")<br>";
 } else {
-    print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}.", ".$tf_data->{family}.")<br>";
+    print "<a href=\"#$tf_name\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{accn}';window.opener.document.tf_search.ID_list.options[1].selected=true;window.opener.focus();window.close();\">".$tf_data->{accn}."</a>   (".$tf_data->{class}.", ".$tf_data->{family}.")<br>";
 }
 }
 print "</li>";
