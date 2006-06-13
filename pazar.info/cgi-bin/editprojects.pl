@@ -558,7 +558,7 @@ print<<Error_Page_2;
 
 Error_Page_2
 	}
-    $dbh->disconnect;
+
 }
 else {      
 

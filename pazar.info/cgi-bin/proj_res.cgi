@@ -219,6 +219,12 @@ my $filter =
 	}
 	my @inters;
 	my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
+	my $datalinks=0;
+	if (!@interactors) {
+	    unless ($param{tf_filter} eq 'on' || $param{class_filter} eq 'on' || $param{interaction_filter} eq 'on' || $param{evidence_filter} eq 'on' || $param{method_filter} eq 'on') {
+		$datalinks++;
+	    }
+	}
        	foreach my $inter (@interactors) {
 
 ### TF filter
@@ -321,6 +327,11 @@ my $filter =
 	}
 	my @exprs;
 	my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
+	if (!@expressors) {
+	    unless ($param{expression_filter} eq 'on' || $param{evidence_filter} eq 'on' || $param{method_filter} eq 'on') {
+		$datalinks++;
+	    }
+	}
        	foreach my $expr (@expressors) {
 
 ### expression filter
@@ -385,7 +396,7 @@ my $filter =
 	    print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
 	    print "<p class=\"title3\">Results: </p>";
 	}
-	if ($exprs[0] || $inters[0]) {
+	if ($exprs[0] || $inters[0] || $datalinks==2) {
 	    $filt=1;
 	    my $gene_accn = $regseq->gene_accession;
 	    my $gene_desc = $regseq->gene_description || '';
@@ -399,11 +410,11 @@ my $filter =
 
 print<<HEADER_TABLE;
 
-<table width='1200' border=1 cellspacing=0>
-<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_desc</td></tr>
-<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_accn</td></tr>
-<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
-<tr><td width='100' align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_sp</td></tr>
+<table width='1150' border=1 cellspacing=0>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_desc</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_accn</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
+<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene_sp</td></tr>
 </table>
 HEADER_TABLE
                 $prev_gene_accn = $gene_accn;
@@ -747,10 +758,10 @@ sub print_gene_attr {
 
 #start table
 print<<COLNAMES;	    
-		<table width='1200' border=1 cellspacing=0><tr><td>
+		<table width='1150' border=1 cellspacing=0><tr><td>
 		    <table width='100%' border="1" cellspacing="0" cellpadding="3">
 		    <tr>
-		    <td width="150" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
+		    <td width="100" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
 		    
 COLNAMES
 
@@ -758,18 +769,22 @@ print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class
 
     if ($params{at_tss} eq 'on')
     {
-	print "<td width='180' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
+	print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
     }
     print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
     print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>";
     print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
 
     if ($params{at_quality} eq 'on') {
 	print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
     }
+    print "<td width='80' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Display</span></td>";
+
     print "</tr>";
     
 #print out default information
+    print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
     print "<tr>";
     print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$proj</td>";
     
@@ -777,20 +792,26 @@ print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class
     print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$transcript."</td>";
 
     if ($params{at_tss} eq 'on') {
-	if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
-	    print "<td width='180' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
+	if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
+	    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
 	}
     }
 
     print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
     print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
+
+    my $rsid = $regseq->accession_number;
+    my $rsid7d = sprintf "%07d",$rsid;
+    my $id="RS".$rsid7d;
+    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$id."&nbsp;</td>";
     print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
 
     if ($params{at_quality} eq 'on') {
 	print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
     }
+    print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></td>";
 
-    print "</tr></table>";
+    print "</tr></form></table>";
     print "<p></td></tr>";
 
 #make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
@@ -1092,6 +1113,10 @@ COLNAMES
 	if ($params{at_reg_seq} eq 'on' || $params{at_construct} eq 'on')
 {
 	    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
+	    if ($param{reg_seq} eq 'on')
+	    {
+		print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>"
+	    }
 	}
 
 	if ($params{at_reg_seq_name} eq 'on' || $params{at_construct_name} eq 'on')
@@ -1142,6 +1167,13 @@ if ($params{at_evidence} eq 'on')
     print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Evidence</span></td>";
 }
 
+#print heading for ucsc/ensembl links column if reg_seq is on
+if($param{reg_seq} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</td>";
+}
+
+
 print "</tr>\n";
 
 
@@ -1162,7 +1194,12 @@ while (my $site=$complex->next_target) {
 	    }
 	}
 	unless ($found==1) {next;}
-	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>\n";
+
+	my $rsid = $site->get_dbid;
+	my $rsid7d = sprintf "%07d",$rsid;
+	my $id="RS".$rsid7d;
+
+	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".chopstr($site->get_seq,40)."</td><td bgcolor=\"$colors{$bg_color}\">".$id."</td>\n";
 	my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 #		    print Dumper(@regseq);
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
@@ -1211,7 +1248,7 @@ while (my $site=$complex->next_target) {
 	    }
 	}
 	unless ($found==1) {next;}
-	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".$site->get_seq."</td>\n";
+	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".chopstr($site->get_seq,40)."</td>\n";
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 	if ($params{at_construct_name} eq 'on') {
 	    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
@@ -1309,6 +1346,25 @@ else
     print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
 }
 }
+
+#print ucsc and ensembl links at the end of the row if target is a refseq
+#get the corresponding regseq object
+if($param{reg_seq} eq 'on')
+{
+    if ($type eq 'reg_seq') {
+	my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+	my $target_regseq = $regseq[0];			
+	print "<td>";			
+	print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br>";
+	print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
+	print "</td>";
+    }
+    else
+    {
+	print "<td>&nbsp;</td>";
+    }
+}
+
 print "</tr>";
 $count++;
 my $construct_name=$tfname."_site".$count;
@@ -1321,30 +1377,30 @@ print "</table><br>\n";
 close (TMP);
 
 if ($params{at_profile} eq 'on') {
-if ($count<2) {
-    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
-    exit;
-} else {
+    if ($count<2) {
+	print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
+	exit;
+    } else {
 
-    my $patterngen =
-	TFBS::PatternGen::MEME->new(-seq_file=> "$file",
-    -binary => 'meme',
-    -additional_params => '-mod oops');
-my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
+	my $patterngen =
+	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
+					-binary => 'meme',
+					-additional_params => '-mod oops');
+	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
 #print a human readable format of the matrix
-my $prettystring = $pfm->prettyprint();
-my @matrixlines = split /\n/, $prettystring;
-$prettystring = join "<BR>\n", @matrixlines;
-$prettystring =~ s/ /\&nbsp\;/g;
-print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td ><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
+	my $prettystring = $pfm->prettyprint();
+	my @matrixlines = split /\n/, $prettystring;
+	$prettystring = join "<BR>\n", @matrixlines;
+	$prettystring =~ s/ /\&nbsp\;/g;
+	print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td ><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
-my $logo = $tfname.".png";
-my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
-print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
-print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
-print "</table><br>\n";
+	my $logo = $tfname.".png";
+	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
+	print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
+	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
+	print "</table><br>\n";
 ########### end of HTML table
-}
+    }
 }
 }
 }
