@@ -118,7 +118,7 @@ if (!$accn) {
     my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
     open (TMP, ">$file");
 ####start of form
-    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl')'>";
+    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl'>";
     print "<input type='hidden' name='accn' value='$accn'";
 
     foreach my $trans (@trans) {
@@ -169,7 +169,7 @@ my %colors = (0 => "#fffff0",
 	    
 ########### start of HTML table
 	    $tfcount++;
-	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
+	    print "<p><table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
 	print<<COLNAMES;
 <tr>
       <td width="100" align="center" valign="top" bgcolor="#e65656"><span class="title4">Project</span></td>
@@ -277,7 +277,7 @@ if ($param{evidence} eq 'on')
 #print heading for ucsc/ensembl links column if reg_seq is on
 if($param{reg_seq} eq 'on')
 {
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</td>";
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</span></td>";
 }
 
     print "</tr>\n";
