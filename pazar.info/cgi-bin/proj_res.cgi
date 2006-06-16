@@ -1249,10 +1249,10 @@ while (my $site=$complex->next_target) {
 	unless ($found==1) {next;}
 	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".chopstr($site->get_seq,40)."</td>\n";
 #if regseq is on, there will be a regseq id column. This needs to be a blank cel
-		    if($param{reg_seq} eq 'on')
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
+	if($param{at_reg_seq} eq 'on')
+	{
+	    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+	}
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 	if ($params{at_construct_name} eq 'on') {
 	    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
