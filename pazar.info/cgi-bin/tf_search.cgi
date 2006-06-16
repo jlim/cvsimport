@@ -118,7 +118,7 @@ if (!$accn) {
     my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
     open (TMP, ">$file");
 ####start of form
-    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl'>";
+    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl')'>";
     print "<input type='hidden' name='accn' value='$accn'";
 
     foreach my $trans (@trans) {
@@ -169,7 +169,7 @@ my %colors = (0 => "#fffff0",
 	    
 ########### start of HTML table
 	    $tfcount++;
-	    print "<p><table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
+	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
 	print<<COLNAMES;
 <tr>
       <td width="100" align="center" valign="top" bgcolor="#e65656"><span class="title4">Project</span></td>
@@ -254,10 +254,10 @@ if ($param{description} eq 'on')
     print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Description</span></td>";
 }
 
-#if ($param{analysis} eq 'on')
-#{
-#    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Analysis</span></td>";
-#}
+if ($param{analysis} eq 'on')
+{
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Analysis</span></td>";
+}
 
 if ($param{reference} eq 'on')
 {
@@ -277,7 +277,7 @@ if ($param{evidence} eq 'on')
 #print heading for ucsc/ensembl links column if reg_seq is on
 if($param{reg_seq} eq 'on')
 {
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</span></td>";
+    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</td>";
 }
 
     print "</tr>\n";
@@ -396,7 +396,6 @@ if($param{reg_seq} eq 'on')
 if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $param{construct} eq 'on'))
 {
 		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
-=pod
 		if ($param{analysis} eq 'on') {
 		    my $aname=$an[2];
 		    my @anal;
@@ -416,7 +415,6 @@ if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $
 		    print "<td bgcolor=\"$colors{$bg_color}\">";
 		    print join(':',@anal)."&nbsp;</td>";
 		}
-=cut
 		if ($param{reference} eq 'on') {
                    if ($an[6])
                    {

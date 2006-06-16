@@ -147,16 +147,12 @@ HEADER_TABLE
 	    }
 	}
 
-	my $regseq_counter = 0; # counter for naming forms
 
     foreach my $arrayref (@projects) {
 	my $projname = $arrayref->[0];
-
 	
 #use different connection if it's one of user's restricted projects
 	my $restrictedproj = 0;
-
-
 	foreach $pid (@projids)
 	{	    
 	    if("$pid" eq "$arrayref->[1]")
@@ -194,10 +190,8 @@ HEADER_TABLE
 #get information for header
 
 #loop through regseqs and print tables
-
+	my $regseq_counter = 0; # counter for naming forms
 	my @regseqs = $dbh->get_reg_seqs_by_accn($gene); 
-
-
 	if (!$regseqs[0]) {
 	    $empty++;
 	    next;
@@ -206,6 +200,7 @@ HEADER_TABLE
 	    foreach my $regseq (@regseqs) {
 
 		$regseq_counter = $regseq_counter + 1;
+
 #reset row color
 		$bg_color = 0;
 
@@ -237,7 +232,7 @@ COLNAMES
 		print "</tr>";
 		
 #print out default information
-		print "<form name='display".$regseq_counter."' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
+		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 		print "<tr>";
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$projname</td>";
 		
@@ -253,28 +248,25 @@ COLNAMES
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
 		print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
 
-		my $rsid = $regseq->accession_number;
-		my $rsid7d = sprintf "%07d",$rsid;
-		my $id="RS".$rsid7d;
+		    my $rsid = $regseq->accession_number;
+		    my $rsid7d = sprintf "%07d",$rsid;
+		    my $id="RS".$rsid7d;
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$id."&nbsp;</td>";
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
 
 		if ($params{quality} eq 'on') {
 		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
 		}
-		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ucsc';document.display".$regseq_counter.".submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ensembl';document.display".$regseq_counter.".submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display".$regseq_counter.".resource.value='ensembl';\">--></td>";
+		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></td>";
 		print "</tr></form></table>";
 		print "<p></td></tr>";
-
-
 
 ####################### get data objects for retrieving lines of evidence
 		my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
 		my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
 ########################
 #make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
-#		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
-		if((scalar(@interactors)>0 && ($params{tf} eq 'on'|| $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
+		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
 {
 		print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
 }
@@ -283,9 +275,10 @@ COLNAMES
 		$bg_color = 0;
 		my $count=1;
 		
-#		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
 		    
-		if ($params{tf} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+#    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+
 #only print table if there is at least one result
 
 		    if(scalar(@interactors)>0)
@@ -295,10 +288,10 @@ COLNAMES
 			if ($params{tf} eq 'on') {
 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
 			}
-#			if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
-#			{
-#			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-#			}
+			if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
+			{
+			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+			}
 			if ($params{tf_reference} eq 'on' || $params{other_reference} eq 'on')
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
@@ -321,8 +314,7 @@ COLNAMES
 		
 
 		foreach my $inter (@interactors) {
-#		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
-		    if ($params{tf} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
 			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 			if ($params{tf} eq 'on') {
 			    my $tf = $dbh->create_tf;
@@ -343,9 +335,7 @@ COLNAMES
 			    }
 			    print "</td>";
 			}
-
 			my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
-=pod
 			if ($params{tf_analysis} eq 'on') {
 			    my $aname=$an[2];
 			    my @anal;
@@ -365,7 +355,6 @@ COLNAMES
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 			    print join(':',@anal)."</td>";
 			}
-=cut
 			if ($params{tf_reference} eq 'on' && $an[6]) {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
@@ -397,8 +386,8 @@ COLNAMES
               $bg_color = 1 - $bg_color;
 		    }}
 
-#		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
-		if ($params{tf} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {		    
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		    
 #end table that was created if there were results
 		    if(scalar(@interactors)>0)
 		    {
@@ -412,8 +401,8 @@ COLNAMES
 
 		
 		
-#		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
-		if ($params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {		    
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		    
 		    		    
 #print table only if results exist
 		    if (scalar(@expressors) > 0)
@@ -423,10 +412,10 @@ COLNAMES
 # 			if ($params{tf} eq 'on') {
 # 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
 # 			}
-#			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
-#			{
-#			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-#			}
+			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
+			{
+			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+			}
 			if ($params{other_reference} eq 'on' || $params{tf_reference} eq 'on')
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
@@ -458,7 +447,6 @@ COLNAMES
 # 			}
 
 			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
-=pod
 			if ($params{other_analysis} eq 'on') {
 			    my $aname=$an[2];
 			    my @anal;
@@ -478,7 +466,6 @@ COLNAMES
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 			    print join(':',@anal)."</td>";
 			}
-=cut
 			if ($params{other_reference} eq 'on' && $an[6]) {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
@@ -507,8 +494,8 @@ COLNAMES
 			$bg_color = 1 - $bg_color;
 		    }}
 
-#		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
-		if ($params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+
 #end table only if results exist
 		    if(scalar(@expressors)>0)
 		    {
