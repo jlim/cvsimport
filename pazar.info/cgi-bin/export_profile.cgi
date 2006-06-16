@@ -97,6 +97,11 @@ COLNAMES
 
 		my $matrixref = $a."\n".$c."\n".$g."\n".$t;
 		my $pfm = TFBS::Matrix::PFM->new(-matrix => $matrixref);
+#print a human readable format of the matrix
+		my $prettystring = $pfm->prettyprint();
+		my @matrixlines = split /\n/, $prettystring;
+		$prettystring = join "<BR>\n", @matrixlines;
+		$prettystring =~ s/ /\&nbsp\;/g;
 
 #alter file name by adding random number with current time as seed
 		srand(time() ^ ($$ + ($$ << 15) ) );
@@ -156,7 +161,7 @@ COLNAMES
 					  pmid => $pmid,
 					  method => $exptype,
 					  transcript => $tfs,
-					  pfm => $matrixref,
+					  pfm => $prettystring,
 					  pazar_id => $mid,
                                           logo => $logo};
 		    }
@@ -207,11 +212,7 @@ $bg_color=1-$bg_color;
 } elsif ($param{mode} eq 'details') {
 
     my $logo = $param{logo}."_400.png";
-    my @matrix = split(/\n/,$param{pfm});
-    my $prettystring = "A [ ".$matrix[0]." ]<br>"
-                      ."C [ ".$matrix[1]." ]<br>"
-                      ."G [ ".$matrix[2]." ]<br>"
-                      ."T [ ".$matrix[3]." ]<br>";
+    my $prettystring = $param{pfm};
 
 ########### start of HTML table
     print $get->header("text/html");
@@ -220,7 +221,7 @@ print<<DETAILS;
 <head><title>PAZAR - TF Profiles</title></head>
 <body><table width='400' bordercolor='white' bgcolor='white' border=0 cellspacing=0>
 <tr><td width="400" align="center" valign="center"><img src="http://www.pazar.info/tmp/precomputed/$logo"></td></tr>
-<tr><td width="400" align="center" valign="center">$prettystring<br></td></tr>
+<tr><td width="400" align="center" valign="center"><span style="font-family: monospace;">$prettystring<br><br></span></td></tr>
 <tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Matrix Info</span></td></tr>
 <tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
         <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Project</b></td>
