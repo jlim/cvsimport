@@ -273,7 +273,8 @@ COLNAMES
 		my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
 ########################
 #make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
-		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
+#		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
+		if((scalar(@interactors)>0 && ($params{tf} eq 'on'|| $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
 {
 		print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
 }
@@ -282,10 +283,9 @@ COLNAMES
 		$bg_color = 0;
 		my $count=1;
 		
-		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+#		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
 		    
-#    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-
+		if ($params{tf} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
 #only print table if there is at least one result
 
 		    if(scalar(@interactors)>0)
@@ -295,10 +295,10 @@ COLNAMES
 			if ($params{tf} eq 'on') {
 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
 			}
-			if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
-			{
-			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-			}
+#			if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
+#			{
+#			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+#			}
 			if ($params{tf_reference} eq 'on' || $params{other_reference} eq 'on')
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
@@ -321,7 +321,8 @@ COLNAMES
 		
 
 		foreach my $inter (@interactors) {
-		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+#		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		    if ($params{tf} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
 			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 			if ($params{tf} eq 'on') {
 			    my $tf = $dbh->create_tf;
@@ -342,7 +343,9 @@ COLNAMES
 			    }
 			    print "</td>";
 			}
+
 			my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
+=pod
 			if ($params{tf_analysis} eq 'on') {
 			    my $aname=$an[2];
 			    my @anal;
@@ -362,6 +365,7 @@ COLNAMES
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 			    print join(':',@anal)."</td>";
 			}
+=cut
 			if ($params{tf_reference} eq 'on' && $an[6]) {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
@@ -393,8 +397,8 @@ COLNAMES
               $bg_color = 1 - $bg_color;
 		    }}
 
-		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
-		    
+#		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		if ($params{tf} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {		    
 #end table that was created if there were results
 		    if(scalar(@interactors)>0)
 		    {
@@ -408,8 +412,8 @@ COLNAMES
 
 		
 		
-		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
-		    
+#		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		if ($params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {		    
 		    		    
 #print table only if results exist
 		    if (scalar(@expressors) > 0)
@@ -419,10 +423,10 @@ COLNAMES
 # 			if ($params{tf} eq 'on') {
 # 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
 # 			}
-			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
-			{
-			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-			}
+#			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
+#			{
+#			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
+#			}
 			if ($params{other_reference} eq 'on' || $params{tf_reference} eq 'on')
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
@@ -454,6 +458,7 @@ COLNAMES
 # 			}
 
 			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
+=pod
 			if ($params{other_analysis} eq 'on') {
 			    my $aname=$an[2];
 			    my @anal;
@@ -473,6 +478,7 @@ COLNAMES
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 			    print join(':',@anal)."</td>";
 			}
+=cut
 			if ($params{other_reference} eq 'on' && $an[6]) {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
@@ -501,8 +507,8 @@ COLNAMES
 			$bg_color = 1 - $bg_color;
 		    }}
 
-		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
-
+#		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		if ($params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
 #end table only if results exist
 		    if(scalar(@expressors)>0)
 		    {

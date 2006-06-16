@@ -254,10 +254,10 @@ if ($param{description} eq 'on')
     print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Description</span></td>";
 }
 
-if ($param{analysis} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Analysis</span></td>";
-}
+#if ($param{analysis} eq 'on')
+#{
+#    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Analysis</span></td>";
+#}
 
 if ($param{reference} eq 'on')
 {
@@ -396,6 +396,7 @@ if($param{reg_seq} eq 'on')
 if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $param{construct} eq 'on'))
 {
 		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
+=pod
 		if ($param{analysis} eq 'on') {
 		    my $aname=$an[2];
 		    my @anal;
@@ -415,6 +416,7 @@ if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $
 		    print "<td bgcolor=\"$colors{$bg_color}\">";
 		    print join(':',@anal)."&nbsp;</td>";
 		}
+=cut
 		if ($param{reference} eq 'on') {
                    if ($an[6])
                    {
