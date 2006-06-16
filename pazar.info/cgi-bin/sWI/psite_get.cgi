@@ -155,12 +155,9 @@ our $query=new CGI;
 
 my %params=%{$query->Vars};
 my $userid=$info{userid};
-my $talkdb=$params{auxDB};
+
 unless ($userid) {&goback(2,$query);}
 
-my $aid = $params{'aname'};
-my $pubmedid = $params{'pubmedid'};
-my $desc1 = $params{'textarea2'};
 my $proj = $params{'project'};
 
 my $nextpage="$docroot/creanalysis.htm";
@@ -174,7 +171,7 @@ eval {$pazar = pazar->new(
 		       -pazar_pass    =>    $info{pass},
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -drv           =>    'mysql',
-			      -project       =>    $proj);};
+		       -project       =>    $proj);};
 
 if ($@) {
     print "<p class=\"warning\">You cannot submit to this project</p>";
@@ -185,7 +182,13 @@ unless ($pazar->get_projectid) {
     print "<p class=\"warning\">You cannot submit to this project</p>";
     exit;
 }
-my $err=check_input_and_write($pazar,$aid,$proj);
+
+#create a unique analysis name from the analysis id
+my $sth = $pazar->prepare("select max(analysis_id) from analysis");
+$sth->execute||die;
+my $prevaid = $sth->fetchrow_array;
+my $newid = $prevaid+1;
+my $aid = 'analysis_'.$newid;
 
 if ($params{TFcentric}) {
 
@@ -194,10 +197,12 @@ while (my $buf=<TFC>) {
 	if ($buf=~/action/i) {
 		$buf=~s/serverpath/$cgiroot/i;
 	}
-    print $buf;
-    if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
-        &forward_args;
-    }
+	print $buf;
+	if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
+	    print $query->hidden('project', $proj);
+	    print $query->hidden('aname', $aid);
+	    print $query->hidden('analysis_desc', '');
+	}
 }
 close TFC;
 # print out the html tail template
@@ -209,18 +214,14 @@ exit();
 open (NEXT, $nextpage) ||die;
 while (my $buf=<NEXT>) {
     $buf=~s/htpath/$docpath/;
-  if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
-	    $buf=~s/serverpath/$cgiroot/i;
-      print $buf;
-#  unless ($buf=~/method/&&/name/&&/action/) {my $buf=<NEXT>; print $buf;}
-      foreach my $key (keys %params) {
-	  my $val=$params{$key};
-	  #     print "$key $val",$html->br;
-	  print "\<input name=\"$key\" type=\"hidden\" value=\"$val\"\>";
-      }
-      next;
-  }
-  print $buf;
+    $buf=~s/serverpath/$cgiroot/i;
+    print $buf;
+    if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
+	print $query->hidden('project', $proj);
+	print $query->hidden('aname', $aid);
+	print $query->hidden('analysis_desc', '');
+	next;
+    }
 }
 close NEXT;
 
@@ -230,21 +231,6 @@ print $template_tail->output;
 exit();
 
 
-sub check_input_and_write {
-my ($pazar,$aid,$proj)=@_;
-return "Need analysis name" unless ($aid);
-$aid=uc($aid);
-my $projid=$pazar->get_projectid;
-my $dh=$pazar->prepare("select count(*) from analysis where project_id='$projid' and name='$aid'")||die;
-$dh->execute||die;
-my $exist=$dh->fetchrow_array;
-if ($exist) { print "<p class=\"warning\">Analysis $aid for project $proj already exists. Modifying analysis is disabled at the moment.</p>";
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
-print $template_tail->output;
-exit();
-	  }
-}
 
 sub goback
  {
@@ -262,8 +248,3 @@ print $query->h2($message);
 exit(0);
 }
 
-sub forward_args {
-foreach my $key (keys %params) {
-    print $query->hidden($key,$params{$key});
-}
-}

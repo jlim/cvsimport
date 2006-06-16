@@ -337,9 +337,9 @@ COLNAMES
 			}
 			my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
 			if ($params{tf_analysis} eq 'on') {
-			    my $aname=$an[2];
+#			    my $aname=$an[2];
 			    my @anal;
-			    push @anal,$aname;
+#			    push @anal,$aname;
 			    if ($an[3]) {
 				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
 				push @anal,$met[0];
@@ -448,9 +448,9 @@ COLNAMES
 
 			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 			if ($params{other_analysis} eq 'on') {
-			    my $aname=$an[2];
+#			    my $aname=$an[2];
 			    my @anal;
-			    push @anal,$aname;
+#			    push @anal,$aname;
 			    if ($an[3]) {
 				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
 				push @anal,$met[0];

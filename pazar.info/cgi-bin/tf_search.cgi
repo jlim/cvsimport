@@ -397,9 +397,9 @@ if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $
 {
 		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
 		if ($param{analysis} eq 'on') {
-		    my $aname=$an[2];
+#		    my $aname=$an[2];
 		    my @anal;
-		    push @anal,$aname;
+#		    push @anal,$aname;
 		    if ($an[3]) {
 			my @met=$dbh->get_data_by_primary_key('method',$an[3]);
 			push @anal,$met[0];

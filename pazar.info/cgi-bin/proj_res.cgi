@@ -880,9 +880,7 @@ print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class
 	    }
 	    my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
 	    if ($params{at_tf_analysis} eq 'on') {
-		my $aname=$an[2];
 		my @anal;
-		push @anal,$aname;
 		if ($an[3]) {
 		    my @met=$dbh->get_data_by_primary_key('method',$an[3]);
 		    push @anal,$met[0];
@@ -989,9 +987,7 @@ print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class
 
 	    my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 	    if ($params{at_other_analysis} eq 'on') {
-		my $aname=$an[2];
 		my @anal;
-		push @anal,$aname;
 		if ($an[3]) {
 		    my @met=$dbh->get_data_by_primary_key('method',$an[3]);
 		    push @anal,$met[0];
@@ -1252,6 +1248,11 @@ while (my $site=$complex->next_target) {
 	}
 	unless ($found==1) {next;}
 	print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='".$tfname."_seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".chopstr($site->get_seq,40)."</td>\n";
+#if regseq is on, there will be a regseq id column. This needs to be a blank cel
+		    if($param{reg_seq} eq 'on')
+		    {
+			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
+		    }
 #		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
 	if ($params{at_construct_name} eq 'on') {
 	    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
@@ -1294,9 +1295,7 @@ if ($params{at_description} eq 'on') {
 ## do the following regardless of target type
 my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
 if ($params{at_analysis} eq 'on') {
-    my $aname=$an[2];
 my @anal;
-push @anal,$aname;
 if ($an[3]) {
     my @met=$dbh->get_data_by_primary_key('method',$an[3]);
     push @anal,$met[0];
@@ -1357,14 +1356,14 @@ if($params{at_reg_seq} eq 'on')
     if ($type eq 'reg_seq') {
 	my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
 	my $target_regseq = $regseq[0];			
-	print "<td>";			
+	print "<td bgcolor=\"$colors{$bg_color}\">";			
 	print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br>";
 	print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
 	print "</td>";
     }
     else
     {
-	print "<td>&nbsp;</td>";
+	print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
     }
 }
 
