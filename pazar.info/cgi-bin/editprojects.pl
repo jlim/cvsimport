@@ -33,7 +33,7 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 	    var themessage = "You are required to complete the following fields: ";
 	    var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";	    
 	    // might want to be less strict with the description later
-	    var iChars_desc = "!@#$%^&*()+=-[]\\\';,./{}|\":<>";
+	    var iChars_desc = "!@#$%^&*()+=-[]\\\'{}|\"<>";
 	    var pnameSpecialChar = 0;
 
 
