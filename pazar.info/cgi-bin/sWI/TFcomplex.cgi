@@ -57,7 +57,7 @@ my $next=$i;
 
 #print "Next is : $next i is $i";
 foreach my $key (keys %params) {
-            next if ($key eq 'aname')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
+            next if ($key eq 'add')||($key eq 'aname')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
             #print $key,"__";
             if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tf{$id}=$params{$key};}
             if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tfdb{$id}=$params{$key}; }
@@ -132,7 +132,7 @@ while (my $buf=<SELF>) {
 exit();
 
 sub forward_args {
-my @voc=qw(TF TFDB family class modifications TFcomplex cell cellstat interact0 interactscale inttype methodname newmethod newmethoddesc pubmed reference tissue);
+my @voc=qw(add TF TFDB family class modifications TFcomplex cell cellstat interact0 interactscale inttype methodname newmethod newmethoddesc pubmed reference tissue);
 foreach my $key (keys %params) {
     unless (grep(/^$key$/,@voc)) {
 	print $query->hidden($key,$params{$key});
