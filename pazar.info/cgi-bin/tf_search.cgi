@@ -169,7 +169,7 @@ my %colors = (0 => "#fffff0",
 	    
 ########### start of HTML table
 	    $tfcount++;
-	    print "<table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
+	    print "<p><table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
 	print<<COLNAMES;
 <tr>
       <td width="100" align="center" valign="top" bgcolor="#e65656"><span class="title4">Project</span></td>
