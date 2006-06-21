@@ -1178,7 +1178,7 @@ print "</tr>\n";
 
 if (!$complex->{targets}) {
     print "<p class=\"warning\">No target could be found for this TF!</p>\n";
-    next;
+    return 1;
 }
 my $seqcounter = 0;
 while (my $site=$complex->next_target) {
@@ -1381,7 +1381,7 @@ close (TMP);
 if ($params{at_profile} eq 'on') {
     if ($count<2) {
 	print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
-	exit;
+	return 1;
     } else {
 
 	my $patterngen =
