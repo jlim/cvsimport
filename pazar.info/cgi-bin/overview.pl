@@ -37,7 +37,7 @@ Our goal is to be the <b>public repository for regulatory data</b>.</p>
           <p >(1)
 to be OPEN-ACCESS and OPEN-SOURCE, providing a completely transparent
 development and data compilation. In this regard, the PAZAR project is
-now hosted by <a target="_blank" href="http://sourceforge.net/projects/pazar">sourceforge.net</a>, where everyone can go and browse the <a href="http://cvs.sourceforge.net/viewcvs.py/pazar/" target="_blank">CVS
+now hosted by <a target="_blank" href="http://sourceforge.net/projects/pazar">sourceforge.net</a>, where everyone can go and browse the <a href="http://pazar.cvs.sourceforge.net/pazar/" target="_blank">CVS
 repository</a>. A mailing list <a href="http://lists.sourceforge.net/lists/listinfo/pazar-news" target="_blank">'News and Views'</a> is also available in which
 every major development will be posted.</p>
           <p >(2) to function as a boutique system where curators own their data and can release it according to their own will.</p>
