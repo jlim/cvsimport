@@ -548,10 +548,7 @@ print<<AddFormFoot;
 	    </table>	    
 	    </form>
 AddFormFoot
-}
-}
-    else
-    {
+} else  {
 #print error
 print<<Error_Page_1;
 
@@ -574,7 +571,7 @@ print<<Error_Page_2;
 
 Error_Page_2
 	}
-
+}
 }
 else {      
 
