@@ -147,7 +147,7 @@ if($loggedin eq 'true') {
 	my $sth=$pazar->prepare("select project_name from project where project_id=?");
 	$sth->execute($pid);
 	my $result = $sth->fetchrow_array;
-	push @projnames,$result;
+	if ($result ne '') { push @projnames,$result;}
     }
 
     open (NPAGE,$npage)||die;
