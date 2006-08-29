@@ -5,6 +5,7 @@ use Crypt::Imail;
 use CGI qw( :all);
 use HTML::Template;
 use CGI::Session;
+#use CGI::Debug( report => 'everything', on => 'anything' );
 
 my $query=new CGI;
 my %params = %{$query->Vars};
@@ -90,6 +91,19 @@ print<<Page;
         document.editprojects.submit();
         </script>
 Page
+
+    }     elsif ($params{submission} eq 'true') {
+#go to entry.pl script
+print<<Page2;
+	<FORM  name="submission" method="POST" action="http://www.pazar.info/cgi-bin/sWI/entry.pl">
+	<input type="hidden" name="username">      
+	<input type="hidden" name="password">
+	<input type="hidden" name="mode" value="login">
+	</FORM>
+        <script language='JavaScript'>
+        document.submission.submit();
+        </script>
+Page2
 
     } else {
 #return to main page 

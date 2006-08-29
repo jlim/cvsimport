@@ -418,6 +418,21 @@ else
 
 if ($params{mode} eq 'login' || $loggedin eq 'true') 
 {
+    if ($params{submission}='true') {
+#go to entry.pl script
+print<<Page2;
+	<FORM  name="submission" method="POST" action="http://www.pazar.info/cgi-bin/sWI/entry.pl">
+	<input type="hidden" name="username">      
+	<input type="hidden" name="password">
+	<input type="hidden" name="statusmsg" value="$statusmsg">
+	<input type="hidden" name="mode" value="login">
+	</FORM>
+        <script language='JavaScript'>
+        document.submission.submit();
+        </script>
+Page2
+
+    }
 #verify user name and password
     my $im = Crypt::Imail->new();
     my $encrypted_pass = $im->encrypt($params{username}, $params{password}); 
