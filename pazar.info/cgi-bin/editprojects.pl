@@ -548,7 +548,7 @@ print<<AddFormFoot;
 	    </table>	    
 	    </form>
 AddFormFoot
-}}
+}
 }
     else
     {
