@@ -418,7 +418,7 @@ else
 
 if ($params{mode} eq 'login' || $loggedin eq 'true') 
 {
-    if ($params{submission}='true') {
+    if ($params{submission} eq 'true') {
 #go to entry.pl script
 print<<Page2;
 	<FORM  name="submission" method="POST" action="http://www.pazar.info/cgi-bin/sWI/entry.pl">
@@ -432,7 +432,7 @@ print<<Page2;
         </script>
 Page2
 
-    }
+} else {
 #verify user name and password
     my $im = Crypt::Imail->new();
     my $encrypted_pass = $im->encrypt($params{username}, $params{password}); 
@@ -548,6 +548,7 @@ print<<AddFormFoot;
 	    </table>	    
 	    </form>
 AddFormFoot
+}}
 }
     else
     {
