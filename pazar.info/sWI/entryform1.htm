@@ -2,13 +2,9 @@
       <p class="title3">Some hints:</p>
 <p>- You can use this interface to enter data to an already existing project or to a new one. Writing here a new project name will add this project to your project list (see <a href=http://www.pazar.info/cgi-bin/editprojects.pl>My Projects</a>), your user password will be used as a project password and this project will be listed as 'restricted'. If you'd rather use another password and/or want to be in control of your project creation, please go to <a href=http://www.pazar.info/cgi-bin/editprojects.pl>My Projects</a> page to create your project first.</p>
 <p>- TF centric submissions are based on a specific Transcription Factor from which you want to annotate binding sites.<br>CRE centric submissions are annotations of a Cis Regulatory Element (CRE) from which you have experimental evidence of a role in gene regulation (binding or other).</p>
-<form style="height: 546px;"
- action="http://serverpath/psite_get.cgi"
- method="post" name="F1">
- <hr><p><b>Project</b></p>
-  <p>
-    <input name="project" type="text" id="project">
-  </p>
+<form action="http://serverpath/psite_get.cgi" method="post" name="F1">
+ <hr><p><b>Submit to Project: </b>
+</p>
   <p> 
     <input name="TFcentric" type="submit" id="TFcentric" onClick="MM_validateForm('project','','R');return document.MM_returnValue" value="TF centric submissions">
     <input name="CREcentric" type="submit" id="CREcentric" value="CRE centric submisssions" onClick="MM_validateForm('project','','R');return document.MM_returnValue">
