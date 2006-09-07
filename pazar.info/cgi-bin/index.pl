@@ -55,7 +55,7 @@ if ($loggedin eq 'true') {
 	while (my $restr=$restricted->fetchrow_hashref) {
 	    push @desc, {
 		name => $restr->{project_name},
-                description => $project->{description}};
+                description => $restr->{description}};
 	}
     }
 }
