@@ -189,15 +189,11 @@ COLNAMES
     my @families = ();
     my @transcript_accessions = ();
 
-	    while (my $subunit=$complex->next_subunit) {
-		my $tid = $subunit->get_transcript_accession($dbh);
-		my $cl = $subunit->get_class ||'unknown'; 
-		my $fam = $subunit->get_fam ||'unknown';
-
-		push(@classes,$subunit->get_class);
-		push(@families,$subunit->get_fam);
-		push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
-	    }
+    while (my $subunit=$complex->next_subunit) {
+	push(@classes,$subunit->get_class);
+	push(@families,$subunit->get_fam);
+	push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
+    }
     #print subunit information
     print "<td bgcolor=\"#fffff0\">";
     #transcript accession
