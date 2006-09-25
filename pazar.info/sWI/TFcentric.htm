@@ -1,12 +1,16 @@
 <h1>TF complex components</h1>
+ <hr color="black" style="width: 100%; height: 2px;">
+ <form action="http://serverpath/TFcentric.cgi" method="post" name="MYTF">
+<h3>Select from my TFs:  </h3>
+</form><br><hr color="black" style="width: 100%; height: 2px;">
+<p><h3>Enter a new TF:</h3></p>
  <form action="http://serverpath/TFcentric.cgi" method="post" name="MUT"> 
- <hr style="width: 100%; height: 2px;">
   <p>TF complex name 
     <input name="TFcomplex" type="text" id="TFcomplex"></p>
   <p>Pubmed (if published) 
     <input name="pubmed" type="text" id="pubmed">
   </p>
-  <hr>
+  <br><hr><br>
   TF 
   <input name="TF" maxlength="25" type="text">
   TF Database 
@@ -21,21 +25,21 @@ ID</option>
       <option value="swissprot"> Swissprot ID</option>
   </select>
   <p>class
-    <input type="text" name="class">
+    <input type="text" name="class" size="true">
   </p>
   <p>family 
-    <input type="text" name="family">
+    <input type="text" name="family" size="true">
   </p>
   <p>modifications (Optional) 
     <input type="text" name="modifications">
-  </p>
-  <p>
+  </p><br>
+ <hr>
+<p>
     <input name="AddTF" type="submit" id="AddTF" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Add more TFs to this complex">
   </p>
-  <hr>
   <input name="addtocomplex" type="submit" id="addtocomplex" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Proceed to CRE section" >
   <br>
   <p> 
-    <input  name="cancel" id="cancel" value="Cancel" type="submit">
+    <input  name="cancel" id="cancel" value="Cancel" type="reset">
   </p>
   </form>

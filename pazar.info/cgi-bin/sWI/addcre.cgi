@@ -6,20 +6,14 @@ use CGI qw( :all);
 use pazar;
 use pazar::reg_seq;
 use pazar::talk;
-use pazar::tf;
-use pazar::tf::tfcomplex;
-use pazar::tf::subunit;
 
- require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
-my @voc=qw(TF TFDB  family class);
 our $query=new CGI;
 my %params = %{$query->Vars};
 
 my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-
-our @tdbs=qw(refseq ensembl_transcript accn);
 
 my $user=$info{user};
 my $pass=$info{pass};
@@ -55,7 +49,20 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 # our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
 # 		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{organism});
 
-my ($regid,$type,$tfid,$aid);
+if ($params{'mycell'} eq 'Select from existing cell names') {
+    delete $params{'mycell'};
+} elsif ($params{'mycell'}) {
+    $params{'cell'} = $params{'mycell'};
+    delete $params{'mycell'};
+}
+if ($params{'mytissue'} eq 'Select from existing tissue names') {
+    delete $params{'mytissue'};
+} elsif ($params{'mytissue'}) {
+    $params{'tissue'} = $params{'mytissue'};
+    delete $params{'mytissue'};
+}
+
+my ($regid,$type,$aid);
 eval {
 if (($params{CREtype})&&($params{CREtype}=~/SELEX/)) {
     $regid=store_artifical($pazar,$query,\%params);
@@ -81,8 +88,11 @@ else {
     my $meth=$params{methodname}||'NA';
     $methid=$pazar->get_method_id_by_name($meth);
 }
-if (($params{cell})&&($params{cell}=~/[\w\d]/)) {
-    $cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$params{organism});
+my $cellspecies=$params{cellspecies}||'NA';
+if ($params{cell}&&($params{cell}=~/[\w\d]/)) {
+    $cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$cellspecies);
+} elsif ($params{tissue}&&($params{tissue}=~/[\w\d]/)) {
+    $cellid=$pazar->table_insert('cell','na',$params{tissue},'na','na',$cellspecies);
 }
 if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
     $refid=$pazar->table_insert('ref',$params{reference});
@@ -96,7 +106,12 @@ $refid||=0;
 $evidid||=0;
 $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
 
-$tfid=store_TFs($pazar,$ensdb,\%params); 
+my ($quant,$qual,$qscale);
+if ($params{'inttype'} eq 'quan' && $params{'interact0'} && $params{'interact0'} ne ''){$quant=$params{'interact0'}; $qscale=$params{'interactscale'}; $qual='NA';}
+else { $qual=$params{'qual'}||'NA'; }
+$pazar->store_interaction($qual,$quant,$qscale);
+
+my $tfid=$params{'tfid'}; 
 $pazar->add_input('funct_tf',$tfid);
 $pazar->store_analysis($aid);
 $pazar->reset_inputs;
@@ -113,10 +128,13 @@ if ($type eq 'reg_seq') {
     print $query->h2("You can add Mutation information or close this window now");
     print $query->start_form(-method=>'POST',
 			     -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
-    &forward_args($query,\%params);
+#    print $query->hidden(-name=>'aname',-value=>$params{'aname'});
+    print $query->hidden(-name=>'project',-value=>$params{'project'});
+#    print $query->hidden(-name=>'CREtype',-value=>$params{'CREtype'});
     print $query->hidden(-name=>'tfid',-value=>$tfid);
     print $query->hidden(-name=>'aid',-value=>$aid);
     print $query->hidden(-name=>'regid',-value=>$regid);
+    print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
     print $query->hidden(-name=>'modeAdd',-value=>'Add');
     print $query->hidden(-name=>'effect',-value=>'interaction');
     print $query->submit(-name=>'submit',
@@ -127,7 +145,10 @@ if ($type eq 'reg_seq') {
     print $query->h2("You can add additional artificial binding sequences to this TF or close this window now");
     print $query->start_form(-method=>'POST',
                            -action=>"http://$cgiroot/TFcentric_CRE.cgi", -name=>'chr');
-    &forward_args($query,\%params);
+    print $query->hidden(-name=>'CREtype',-value=>$params{'CREtype'});
+    print $query->hidden(-name=>'aname',-value=>$params{'aname'});
+    print $query->hidden(-name=>'project',-value=>$params{'project'});
+    print $query->hidden(-name=>'tfid',-value=>$tfid);
     print $query->submit(-name=>'Add more similar',
                           -value=>'Add more similar',);
     print $query->br;
@@ -140,44 +161,6 @@ print $query->br;
 print $query->end_form;
 exit;
 
-sub store_TFs {
-my ($pazar,$ensdb,$params)=@_;
-#Scanning
-#print Dumper($params);
-%params=%{$params};
-my $tf;
-my @lookup=qw(TF TFDB ENS_TF family class modifications); #Valid properties of a subunit
-$tf->{function}->{modifications}=$params{modifications};
-my $tf=new pazar::tf::tfcomplex(name=>$params{TFcomplex},pmed=>$params{pubmed});
-my ($tfdat);
-foreach my $key (keys %params) {
-    my ($quant,$qual,$qscale);
-    if ($key=~/inttype/i) {
-	if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale}; $qual='NA';}
-	else { $qual=$params{qual}||'NA'; }
-	$pazar->store_interaction($qual,$quant,$qscale);
-	next;
-    }
-    next unless ($key=~/\d/);
-    my $ind=$key;
-    $ind=~s/\D//g; #Index only
-    my $nkey=$key;
-    $nkey=~s/\d//; #Tag only
-    next unless (grep(/\b$nkey\b/,@lookup));
-    $tfdat->[$ind]->{$nkey}=$params{$key}; #Object created, pass it to regdb, should put here the TF_complex general data too!
-}
-foreach my $udef (@$tfdat) {
-    my $tid=$udef->{ENS_TF};
-    my $gid=$ensdb->ens_transcr_to_gene($tid);
-    my $build=$ensdb->current_release;
-    my $sunit=new pazar::tf::subunit(tid=>$tid,tdb=>'EnsEMBL',class=>$udef->{class},family=>$udef->{family},gdb=>'ensembl',id=>$gid,
-                                tdb_build=>$build,gdb_build=>$build,mod=>$udef->{modifications});
-
-    $tf->add_subunit($sunit);
-}
-
-return $pazar->store_TF_complex($tf);
-}
 
 sub store_natural {
 my ($pazar,$ensdb,$gkdb,$query,$params)=@_;

@@ -3,12 +3,17 @@
 use HTML::Template;
 use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
-use pazar::talk;
 
-require '../getsession.pl';
+use pazar;
+use pazar::talk;
+use pazar::tf;
+use pazar::tf::tfcomplex;
+use pazar::tf::subunit;
+
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => '../header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
 $template->param(TITLE => 'TF-centric Submission');
@@ -28,6 +33,13 @@ document.form.pubmedid.disabled = true;
 
 function MM_openBrWindow(theURL,winName,features) { //v2.0
   window.open(theURL,winName,features);
+}
+
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
 }
 
 function onoff(objref) {
@@ -84,12 +96,12 @@ WinPop=window.open(PopUpUrl,"","width=410,height=440,toolbar=1,location=1,direct
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'../logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'../login.pl\'>Log In</a>');
+    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
 }
 
 # send the obligatory Content-Type and print the template output
@@ -115,10 +127,24 @@ my $an_desc=$params{'analysis_desc'};
 my $auxDB=$params{'auxDB'};
 my $proj=$params{'project'};
 
+if ($params{'myclass'} eq 'Select from existing classes') {
+    delete $params{'myclass'};
+} else {
+    $params{'class'} = $params{'myclass'};
+    delete $params{'myclass'};
+}
+if ($params{'myfamily'} eq 'Select from existing families') {
+    delete $params{'myfamily'};
+} else {
+    $params{'family'} = $params{'myfamily'};
+    delete $params{'myfamily'};
+}
+
 SUBMIT: {
-if ($input eq 'cancel') {  exit();}
+if ($params{'cancel'}) {
+exit();}
 if ($params{'AddTF'}) { last SUBMIT;} #Do what you normally do (add and write)
-if ($params{'addtocomplex'}) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
+if ($params{'addtocomplex'}||$params{'mycomplex'}) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
 }
 
 #TODO: checks recognizing the genes
@@ -129,23 +155,25 @@ my $k=1;
 my $next=$i;
 #$next=$i+1 if ($i>0);
 
-
 #print "Next is : $next i is $i";
 foreach my $key (keys %params) {
             next if ($key eq 'aname')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
             #print $key,"__";
-            if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tf{$id}=$params{$key};}
-            if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tfdb{$id}=$params{$key}; }
-            if ($key=~/class/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $class{$id}=$params{$key}; }
-            if ($key=~/family/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $family{$id}=$params{$key}; }
-            if ($key=~/interact/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $interact{$id}=$params{$key}; }
+            if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $tf{$id}=$params{$key};}
+            if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $tfdb{$id}=$params{$key}; }
+            if ($key=~/class/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $class{$id}=$params{$key}; }
+            if ($key=~/family/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $family{$id}=$params{$key}; }
+            if ($key=~/interact/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $interact{$id}=$params{$key}; }
             if ($key=~/modific/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $modif{$id}=$params{$key};  }
             
-            print "\<input name=\"$key\" type=\"hidden\" value=\"$params{$key}\"\>"; 
+#            print "\<input name=\"$key\" type=\"hidden\" value=\"$params{$key}\"\>"; 
 }
 my $started=1;
 while (my $buf=<SELF>) {
     $buf=~s/serverpath/$cgiroot/;
+    if ($buf=~/<hr color/i || $buf=~/mytf/i || $buf=~/my tf/i || $buf=~/new/i) {
+	next;
+    }
     if ($buf=~/validateForm/) {
         print $buf;
         next;
@@ -163,6 +191,19 @@ while (my $buf=<SELF>) {
         $buf=~s/name/value=\"$params{TFcomplex}\" name/;
     }
     print $buf;
+	if ($buf=~/<input type=\"text\" name=\"class\"/i && $params{'hidcla'}) {
+	    my @classes = split(/::/,$params{'hidcla'});
+	    print "<b>  OR  </b>";
+	    print $query->scrolling_list('myclass',\@classes,'1','true');
+	    print $query->hidden('hidcla', $params{'hidcla'});
+	}
+	if ($buf=~/<input type=\"text\" name=\"family\"/i && $params{'hidfam'}) {
+	    my @families = split(/::/,$params{'hidfam'});
+	    print "<b>  OR  </b>";
+	    print $query->scrolling_list('myfamily',\@families,'1','true');
+	    print $query->hidden('hidfam', $params{'hidfam'});
+	}
+
 	if ($buf=~/body/i) {$seen{body}++;}
 	if ($buf=~/\<form/i) {$seen{form}++;} 
 	if ($buf=~/pubmed/i) {$seen{modif}++;} 
@@ -176,10 +217,9 @@ while (my $buf=<SELF>) {
 #            my $k1='TF' . $j;
 #	        my $k2='TFDB' . $j;
 #	        my $sel=uc($params{$k2});
-        print $query->br;
         
         foreach my $k (1..$i) {
-            print "Added complex member $k",$query->br;
+            print "<b>Added complex member $k</b>",$query->br,$query->br;
             foreach my $key (@voc) {
                 my $addon;
                 $addon=$k-1 if ($i>0);
@@ -198,7 +238,7 @@ while (my $buf=<SELF>) {
                 }
                 print $lkey,' ',$query->textfield (-label=>$lkey,-name=>$lkey,-size=>16, -value=>$val), $query->br; 
             }
-            print $query->hr;
+            print $query->br, $query->hr, $query->br;
         }
 	}
 }
@@ -210,49 +250,65 @@ sub next_page {
     unless ($user&&$pass) {
 	print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
 # print out the html tail template
-	my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+	my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 	print $template_tail->output;
 	exit();
     }
-    my @numbered=qw(TF TFDB interact class family modifications);
-    my @db;
-    foreach my $dbkey (grep(/TFDB/,keys %params)) {
-	push @db, $params{$dbkey};
-    }
-    my @tf;
-    foreach my $tfkey (grep(/^TF([0-9]*)$/,keys %params)) {
-	push @tf, $params{$tfkey};
-    }
-
-    my $tfs=&check_TF(\@db,\@tf);
-    my %tfs=%$tfs;
- #Add 0 to the 0 key
-    foreach my $mp(keys %params) {
-	my $key=$mp;
-	if ((grep (/\b$mp\b/,@numbered))&&($mp!~/\d/)) {   
-	    $key .='0' ;
-	    $params{$key}=$params{$mp};
-	    delete $params{$mp};
+    print $query->start_form(-method=>'POST',-target=>'',
+				 -action=>'',-name=>'SEQ');
+    my $tfid;
+    unless ($params{'mytfs'}) {
+	my @numbered=qw(TF TFDB interact class family modifications);
+	my @db;
+	foreach my $dbkey (grep(/TFDB/,keys %params)) {
+	    push @db, $params{$dbkey};
 	}
-	foreach my $trans (keys %tfs) {
-	    if ($params{$key} eq $trans) {
-		my $ens_key='ENS_'.$key;
-		$params{$ens_key}=$tfs{$trans};
+	my @tf;
+	foreach my $tfkey (grep(/^TF([0-9]*)$/,keys %params)) {
+	    push @tf, $params{$tfkey};
+	}
+
+	my $tfs=&check_TF(\@db,\@tf);
+	my %tfs=%$tfs;
+	#Add 0 to the 0 key
+	foreach my $mp(keys %params) {
+	    my $key=$mp;
+	    if ((grep (/\b$mp\b/,@numbered))&&($mp!~/\d/)) {   
+		$key .='0' ;
+		$params{$key}=$params{$mp};
+		delete $params{$mp};
+	    }
+	    foreach my $trans (keys %tfs) {
+		if ($params{$key} eq $trans) {
+		    my $ens_key='ENS_'.$key;
+		    $params{$ens_key}=$tfs{$trans};
+		}
 	    }
 	}
+	$tfid=store_TFs($user,$pass,$params{'project'},\%params);
+	unless ($tfid > 0) {
+	    print $query->h2("*** TF data NOT accepted - $params{'TFcomplex'} might already exist within your project with different subunits than the one you defined! ***");
+	    print $query->endform;
+# print out the html tail template
+	    my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+	    print $template_tail->output;
+	    exit();
+	} else {
+	    print $query->h2("*** TF data accepted - Annotating TF $params{'TFcomplex'} ***");
+	    foreach my $trans (keys %tfs) {
+		print "The provided TF $trans has been successfully converted to the Ensembl transcript ID $tfs{$trans}.<br><br>";
+	    }
+	}
+    } else {
+	print $query->h2("*** Annotating TF $params{'mytfs'} ***")."<br>";
+	$tfid=get_TF_id($user,$pass,$params{'project'},$params{'mytfs'});
     }
-
-    print $query->start_form(-method=>'POST',-target=>'',
-			     -action=>'',-name=>'SEQ');
+    print $query->hidden(-name=>'tfid',-value=>$tfid);
     &forward_args($query,\%params);
-    print $query->h2('TF data accepted:');
-    foreach my $trans (keys %tfs) {
-	print "The provided TF $trans has been successfully converted to the Ensembl transcript ID $tfs{$trans}.<br>";
-    }
-    print $query->h2('Please add CRE data now');
-    print $query->h2('We suggest you should not make more than 1 submission simultanuously');
-    print $query->h3('Do not close this window if you want to make more than one CRE submissions');
-    print $query->h3('Just click the appropriate button again once you have completed a submission');
+    print $query->h3('Please add CRE data now');
+    print $query->h3('We suggest you should not make more than 1 submission simultanuously');
+    print 'Do not close this window if you want to make more than one CRE submissions<br>';
+    print 'Just click the appropriate button again once you have completed a submission<br><br>';
     print $query->submit(-name=>'submit',
 			 -value=>'Add CRE to which the TF/TF complex binds',
                          -onClick=>"setCount(0)");
@@ -262,7 +318,7 @@ sub next_page {
                          -onClick=>"setCount(0)");
     print $query->endform;
 # print out the html tail template
-    my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+    my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
     print $template_tail->output;
     exit();
 }
@@ -312,4 +368,51 @@ sub check_TF {
 	$factors{$accn}=$trans[0];
     }
     return \%factors;
+}
+
+sub store_TFs {
+    my ($user,$pass,$proj,$params)=@_;
+    %params=%{$params};
+
+    my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+    
+    my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
+
+    my $tf;
+    my @lookup=qw(TF TFDB ENS_TF family class modifications); #Valid properties of a subunit
+    $tf->{function}->{modifications}=$params{modifications};
+    my $tf=new pazar::tf::tfcomplex(name=>$params{TFcomplex},pmed=>$params{pubmed});
+    my ($tfdat);
+    foreach my $key (keys %params) {
+	if ($key=~/inttype/i) {
+	    next;
+	}
+	next unless ($key=~/\d/);
+	my $ind=$key;
+	$ind=~s/\D//g; #Index only
+	my $nkey=$key;
+	$nkey=~s/\d//; #Tag only
+	next unless (grep(/\b$nkey\b/,@lookup));
+	$tfdat->[$ind]->{$nkey}=$params{$key}; #Object created, pass it to regdb, should put here the TF_complex general data too!
+    }
+    foreach my $udef (@$tfdat) {
+	my $tid=$udef->{ENS_TF};
+	my $gid=$ensdb->ens_transcr_to_gene($tid);
+	my $build=$ensdb->current_release;
+	my $sunit=new pazar::tf::subunit(tid=>$tid,tdb=>'EnsEMBL',class=>$udef->{class},family=>$udef->{family},gdb=>'ensembl',id=>$gid,
+					 tdb_build=>$build,gdb_build=>$build,mod=>$udef->{modifications});
+
+	$tf->add_subunit($sunit);
+    }
+
+    return $pazar->store_TF_complex($tf);
+}
+
+sub get_TF_id {
+    my ($user,$pass,$proj,$tfname)=@_;
+    
+    my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
+
+    my @tfnames = split(/ \(/,$tfname);
+    return $pazar->get_complex_id_by_name($tfnames[0]);
 }

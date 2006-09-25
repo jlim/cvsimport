@@ -32,12 +32,24 @@ function MM_validateForm() { //v4.0
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
 }
+
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
+}
+
 //-->
   </script></head>
-<body>
+<body onLoad="resetMenu();">
 <h1>TF complex components</h1>
+ <hr color="black" style="width: 100%; height: 2px;">
+ <form action="http://serverpath/TFcomplex.cgi" method="post" name="MYTF">
+<h3>Select from my TFs:  </h3>
+</form><br><hr color="black" style="width: 100%; height: 2px;">
+<p><h3>Enter a new TF:</h3></p>
  <form action="http://serverpath/TFcomplex.cgi" method="post" name="MUT"> 
- <hr style="width: 100%; height: 2px;">
   <p>TF complex name 
     <input name="TFcomplex" type="text" id="TFcomplex"></p>
   <p>Pubmed (if published) 
@@ -58,16 +70,18 @@ ID</option>
       <option value="swissprot"> Swissprot ID</option>
   </select>
   <p>class
-    <input type="text" name="class">
+    <input type="text" name="class" size="true">
   </p>
   <p>family 
-    <input type="text" name="family">
+    <input type="text" name="family" size="true">
   </p>
   <p>modifications (Optional) 
     <input type="text" name="modifications">
   </p>
+<hr>
+<p>
   <input name="add" type="submit" id="add" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Add more TFs to this complex">
-  <br>
+  </p>
   <hr>
   <h3>Interaction type between the TF complex (factor) and this sequence </h3>
   <table width="200">
@@ -103,29 +117,32 @@ ID</option>
       <option value="NA">NA</option>
     </select>
   </p>
-  <p>Method (select from list or add the name and the description in the box if not available): </p><p> 
-    <input name="newmethod" type="text" id="newmethod"></p>
-  <p>
-  Method Description (Only if new method name added)</p>
-  <p> 
-    <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
+  <hr><p>Method Name 
+</p><p><b> OR Enter a New Method: </b></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+  <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <p>Cell Type 
+  <hr>
+  <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
+  <p>Cell Name 
     <input name="cell" type="text" id="cell">
-    Cell Status 
+    <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
-    </select>
+    </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue"></p>
-    <p>Reference (PubMed ID) 
+    <input name="tissue" type="text" id="tissue">
+    <br><br>Organism (e.g. Homo sapiens)
+    <input name="cellspecies" type="text" id="cellspecies">
+</p><hr>
+    <p>Reference (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">
   </p>
   <hr>
    <p> 
     <input name="submit" id="submit" value="Submit Data" type="submit" onclick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue;">
   <input name="submit" id="cancel" value="Cancel" type="submit" onclick="window.close();">
-  </p>
-  <hr></form>
+  </p><br>
+</form>
 </body></html>

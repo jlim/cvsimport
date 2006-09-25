@@ -9,7 +9,7 @@ use Data::Dumper;
 use pazar;
 use pazar::talk;
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 =Description
 Get all transcripts and check the sequence and match the correct position

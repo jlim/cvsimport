@@ -9,7 +9,7 @@ use pazar::tf;
 use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
@@ -17,7 +17,7 @@ my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
 
 my $selfpage="$docroot/TF_complex.htm";
 
-my @voc=qw(TF TFDB  family class modifications);
+my @voc=qw(TF TFDB family class modifications);
 my $query=new CGI;
 my %params = %{$query->Vars};
 
@@ -29,6 +29,19 @@ my $analysis=$params{'aname'};
 my $an_desc=$params{'analysis_desc'};
 my $auxDB=$params{'auxDB'};
 my $proj=$params{'project'};
+
+if ($params{'myclass'} eq 'Select from existing classes') {
+    delete $params{'myclass'};
+} elsif ($params{'myclass'}) {
+    $params{'class'} = $params{'myclass'};
+    delete $params{'myclass'};
+}
+if ($params{'myfamily'} eq 'Select from existing families') {
+    delete $params{'myfamily'};
+} elsif ($params{'myfamily'}) {
+    $params{'family'} = $params{'myfamily'};
+    delete $params{'myfamily'};
+}
 
 print $query->header;
 
@@ -43,8 +56,33 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 SUBMIT: {
 if ($input =~/cancel/i) {  exit();}
 if ($params{'add'}) { last SUBMIT;} #Do what you normally do (add and write)
-if ($input=~/submit/i) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
+if ($input=~/submit/i||$params{'mycomplex'}) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
 }
+
+my @mytfs;
+unless ($params{'add'}) {
+    my @funct_tfs = $pazar->get_all_complex_ids($pazar->get_projectid);
+    foreach my $funct_tf (@funct_tfs) {
+	my $funct_name = $pazar->get_complex_name_by_id($funct_tf);
+	my $tf = $pazar->create_tf;
+	my $tfcomplex = $tf->get_tfcomplex_by_id($funct_tf,'notargets');
+	my $su;
+	while (my $subunit=$tfcomplex->next_subunit) {
+	    if ($su) {
+		$su = $su."-".$subunit->get_transcript_accession($pazar);
+	    } else {
+		$su = $subunit->get_transcript_accession($pazar);
+	    }
+	}
+	push @mytfs, $funct_name." (".$su.")";
+    }
+}
+
+my @classes= $pazar->get_all_classes();
+my @families= $pazar->get_all_families();
+my @cell_names=$pazar->get_all_cell_names;
+my @tissue_names=$pazar->get_all_tissue_names;
+
 
 #TODO: checks recognizing the genes
 open (SELF,$selfpage)||die "Cannot open $selfpage";
@@ -60,17 +98,22 @@ foreach my $key (keys %params) {
             next if ($key eq 'add')||($key eq 'aname')||($key=~/TFcomplex/)||($key eq 'project')||($key eq 'analysis_desc');
             #print $key,"__";
             if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tf{$id}=$params{$key};}
-            if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tfdb{$id}=$params{$key}; }
-            if ($key=~/class/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $class{$id}=$params{$key}; }
-            if ($key=~/family/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $family{$id}=$params{$key}; }
-            if ($key=~/interact/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $interact{$id}=$params{$key}; }
+            if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $tfdb{$id}=$params{$key}; }
+            if ($key=~/class/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $class{$id}=$params{$key}; }
+            if ($key=~/family/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $family{$id}=$params{$key}; }
+            if ($key=~/interact/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $interact{$id}=$params{$key}; }
             if ($key=~/modific/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $modif{$id}=$params{$key};  }
             
-            print "\<input name=\"$key\" type=\"hidden\" value=\"$params{$key}\"\>"; 
+#            print "\<input name=\"$key\" type=\"hidden\" value=\"$params{$key}\"\>"; 
 }
 my $started=1;
 while (my $buf=<SELF>) {
     $buf=~s/serverpath/$cgiroot/;
+    if ($params{'add'}) {
+	if ($buf=~/<hr color/i || $buf=~/mytf/i || $buf=~/my tf/i || $buf=~/new/i) {
+	    next;
+	}
+    } 
     if ($buf=~/validateForm/) {
         print $buf;
         next;
@@ -88,6 +131,28 @@ while (my $buf=<SELF>) {
         $buf=~s/name/value=\"$params{TFcomplex}\" name/;
     }
     print $buf;
+    unless ($params{'add'}) {
+	if ($buf=~/<h3>Select from my TFs:/i) {
+	    if (@mytfs) {
+		print $query->scrolling_list('mytfs',\@mytfs,1,'true');
+		print "<br><br><input name=\"mycomplex\" type=\"submit\" id=\"mycomplex\" value=\"Proceed to CRE section\">";
+	    } else {
+		print "<p style=\"color:red\"><b>You don't have any TFs in this project yet!</b></p>";
+	    }
+	}
+    }
+    if ($buf=~/<input type=\"text\" name=\"class\"/i && @classes) {
+	my @sorted_classes = sort @classes;
+	unshift @sorted_classes, 'Select from existing classes';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('myclass',\@sorted_classes,1,'true');
+    }
+    if ($buf=~/<input type=\"text\" name=\"family\"/i && @families) {
+	my @sorted_families = sort @families;
+	unshift @sorted_families, 'Select from existing families';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('myfamily',\@sorted_families,1,'true');
+    }
     if ($buf=~/body/i) {$seen{body}++;}
     if ($buf=~/\<form/i) {$seen{form}++;} 
     if ($buf=~/pubmed/i) {$seen{modif}++;} 
@@ -98,10 +163,9 @@ while (my $buf=<SELF>) {
 #            my $k1='TF' . $j;
 #	        my $k2='TFDB' . $j;
 #	        my $sel=uc($params{$k2});
-        print $query->br;
         
         foreach my $k (1..$i) {
-            print "Added complex member $k",$query->br;
+            print "<b>Added complex member $k</b>",$query->br,$query->br;
             foreach my $key (@voc) {
                 my $addon;
                 $addon=$k-1 if ($i>0);
@@ -120,13 +184,27 @@ while (my $buf=<SELF>) {
 	      }
                 print $lkey,' ',$query->textfield (-label=>$lkey,-name=>$lkey,-size=>16, -value=>$val), $query->br; 
             }
-            print $query->hr;
+            print $query->br,$query->hr;
         }
+	print $query->br;
     }
-    if ($buf=~m/Method \(select from list/) {
-	my @methods;
-	push @methods,('',$pazar->get_method_names);
-	print $query->scrolling_list('methodname',\@methods,1,'true');
+    if ($buf=~/<p>Method Name/) {
+	my @methods=$pazar->get_method_names;
+	my @sorted_methods = sort @methods;
+	unshift @sorted_methods, 'Select from existing methods';
+	print $query->scrolling_list('methodname',\@sorted_methods,1,'true');
+    }
+    if ($buf=~/<input name=\"cell\" type=\"text\" id=\"cell\"/i && @cell_names) {
+	my @sorted_cells = sort @cell_names;
+	unshift @sorted_cells, 'Select from existing cell names';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('mycell',\@sorted_cells,1,'true');
+    }
+    if ($buf=~/<input name=\"tissue\" type=\"text\" id=\"tissue\"/i && @tissue_names) {
+	my @sorted_tissues = sort @tissue_names;
+	unshift @sorted_tissues, 'Select from existing tissue names';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('mytissue',\@sorted_tissues,1,'true');
     }
 }
 exit();
@@ -174,6 +252,20 @@ sub next_page {
 	    }
 	}
     }
+
+    if ($params{'mycell'} eq 'Select from existing cell names') {
+	delete $params{'mycell'};
+    } elsif ($params{'mycell'}) {
+	$params{'cell'} = $params{'mycell'};
+	delete $params{'mycell'};
+    }
+    if ($params{'mytissue'} eq 'Select from existing tissue names') {
+	delete $params{'mytissue'};
+    } elsif ($params{'mytissue'}) {
+	$params{'tissue'} = $params{'mytissue'};
+	delete $params{'mytissue'};
+    }
+
     my ($regid,$type,$tfid,$aid);
     eval {
     if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
@@ -192,8 +284,11 @@ sub next_page {
 	my $meth=$params{methodname}||'NA';
 	$methid=$pazar->get_method_id_by_name($meth);
     }
+    my $cellspecies=$params{cellspecies}||'NA';
     if (($params{cell})&&($params{cell}=~/[\w\d]/)) {
-	$cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$params{organism});
+	$cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$cellspecies);
+    } elsif ($params{tissue}&&($params{tissue}=~/[\w\d]/)) {
+	$cellid=$pazar->table_insert('cell','na',$params{tissue},'na','na',$cellspecies);
     }
     if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
 	$refid=$pazar->table_insert('ref',$params{reference});
@@ -224,10 +319,12 @@ sub next_page {
 	print $query->h2("You can add Mutation information or close this window now");
 	print $query->start_form(-method=>'POST',
 				 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
-	&forward_args($query,\%params);
+#	&forward_args($query,\%params);
 	print $query->hidden(-name=>'tfid',-value=>$tfid);
 	print $query->hidden(-name=>'aid',-value=>$aid);
 	print $query->hidden(-name=>'regid',-value=>$regid);
+	print $query->hidden(-name=>'project',-value=>$params{'project'});
+	print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
 	print $query->hidden(-name=>'modeAdd',-value=>'Add');
 	print $query->hidden(-name=>'effect',-value=>'interaction');
 	print $query->submit(-name=>'submit',

@@ -5,7 +5,7 @@ use CGI qw( :all);
 
 use pazar;
 
- require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 our $query=new CGI;
 my %params = %{$query->Vars};
@@ -42,10 +42,11 @@ if ($params{modeAdd})  {
 	if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
 	    &forward_args($query,\%params);        
 	}
-        if ($buf=~m/Method used to make the mutation/) {
-	        my @methods;
-    	    push @methods,('',$pazar->get_method_names);
-	        print $query->scrolling_list('mutmethodname',\@methods,1,'true');
+        if ($buf=~/<p>Method Name/) {
+	    my @methods=$pazar->get_method_names;
+    	    my @sorted_methods = sort @methods;
+	    unshift @sorted_methods, 'Select from existing methods';
+	    print $query->scrolling_list('mutmethodname',\@sorted_methods,1,'true');
         }
     }
     exit();
@@ -54,7 +55,7 @@ if ($params{modeAdd})  {
 	eval {
 	    &store_mut_inter($pazar,$query,\%params);
 	    
-	    $pazar->add_input('funct_tf',$params{tfid});
+	    $pazar->add_input('funct_tf',$params{'tfid'});
 	    $pazar->store_analysis($params{aid});
 	    $pazar->reset_inputs;
 	    $pazar->reset_outputs;
@@ -243,7 +244,7 @@ sub store_mut_expr() {
     }
 
     my ($quant,$qual,$qscale);
-    if ($params{muteffecttype} eq 'mutquan' && $params{muteffect0} && $params{effect0} ne ''){$quant=$params{muteffect0}; $qscale=$params{muteffectscale}; $qual='NA';}
+    if ($params{muteffecttype} eq 'mutquan' && $params{muteffect0} && $params{muteffect0} ne ''){$quant=$params{muteffect0}; $qscale=$params{muteffectscale}; $qual='NA';}
     else { $qual=$params{mutqual}||'NA'; }
     my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,'');
     $pazar->add_output('expression',$expression);

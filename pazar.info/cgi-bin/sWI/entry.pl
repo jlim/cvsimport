@@ -5,10 +5,10 @@ use CGI qw( :all);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 use pazar;
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => '../header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
 $template->param(TITLE => 'Submission entry form');
@@ -35,6 +35,13 @@ function MM_validateForm() { //v4.0
     } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
+}
+
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
 }
 
 function verifyProjectCreate() {
@@ -204,5 +211,5 @@ Page_Done
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;

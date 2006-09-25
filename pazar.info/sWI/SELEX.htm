@@ -8,6 +8,13 @@
 
   <script language="javascript">
 <!--
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
 function MM_validateForm() { //v4.0
   var i,p,q,nm,test,num,min,max,errors='',args=MM_validateForm.arguments;
   for (i=0; i<(args.length-2); i+=3) { test=args[i+2]; val=MM_findObj(args[i]);
@@ -23,6 +30,14 @@ function MM_validateForm() { //v4.0
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
 }
+
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
+}
+
 //-->
 </script>
 </head>
@@ -64,22 +79,25 @@ function MM_validateForm() { //v4.0
       <option value="NA">NA</option>
     </select>
   </p>
-  <p>Method (select from list or add the name and the description in the box if not available): </p><p> 
-    <input name="newmethod" type="text" id="newmethod"></p>
-  <p>
-  Method Description (Only if new method name added) </p>
-  <p> 
-    <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
+  <hr><p>Method Name 
+</p><p><b> OR Enter a New Method: </b></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+  <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <p>Cell Type 
+  <hr>
+  <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
+  <p>Cell Name 
     <input name="cell" type="text" id="cell">
-    Cell Status 
+    <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
-    </select>
+    </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue"></p>
+    <input name="tissue" type="text" id="tissue">
+    <br><br>Organism (e.g. Homo sapiens)
+    <input name="cellspecies" type="text" id="cellspecies"> 
+</p><hr>
     <p>Reference (PubMed ID) 
     <input name="reference" type="text" id="reference">
   </p>

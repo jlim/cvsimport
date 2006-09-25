@@ -6,7 +6,7 @@ use pazar::talk;
 use pazar;
 use pazar::reg_seq;
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';

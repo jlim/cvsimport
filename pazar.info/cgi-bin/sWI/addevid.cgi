@@ -6,7 +6,7 @@ use pazar::talk;
 use pazar;
 use pazar::reg_seq;
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
@@ -36,6 +36,18 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
+if ($params{'mycell'} eq 'Select from existing cell names') {
+    delete $params{'mycell'};
+} elsif ($params{'mycell'}) {
+    $params{'cell'} = $params{'mycell'};
+    delete $params{'mycell'};
+}
+if ($params{'mytissue'} eq 'Select from existing tissue names') {
+    delete $params{'mytissue'};
+} elsif ($params{'mytissue'}) {
+    $params{'tissue'} = $params{'mytissue'};
+    delete $params{'mytissue'};
+}
 
 my ($regid,$type,$aid);
 my @conds;
@@ -56,8 +68,11 @@ else {
     my $meth=$params{methodname}||'NA';
     $methid=$pazar->get_method_id_by_name($meth);
 }
+my $cellspecies=$params{cellspecies}||'NA';
 if (($params{cell})&&($params{cell}=~/[\w\d]/)) {
-    $cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$params{organism});
+    $cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$cellspecies);
+} elsif ($params{tissue}&&($params{tissue}=~/[\w\d]/)) {
+    $cellid=$pazar->table_insert('cell','na',$params{tissue},'na','na',$cellspecies);
 }
 if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
     $refid=$pazar->table_insert('ref',$params{reference});
@@ -113,7 +128,9 @@ if ($type eq 'reg_seq') {
     print $query->h2("You can add Mutation information or close this window now");
     print $query->start_form(-method=>'POST',
 			     -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
-    &forward_args($query,\%params);
+#    &forward_args($query,\%params);
+    print $query->hidden(-name=>'project',-value=>$params{'project'});
+    print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
     print $query->hidden(-name=>'aid',-value=>$aid);
     print $query->hidden(-name=>'regid',-value=>$regid);
     my $conds;

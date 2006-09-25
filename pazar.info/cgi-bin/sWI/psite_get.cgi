@@ -4,15 +4,15 @@ use HTML::Template;
 use Exporter;
 use CGI qw(  :all);
 use pazar;
-#use CGI::Debug;
+#use CGI::Debug(report => everything, on => anything);
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => '../header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'CRE analysis');
+$template->param(TITLE => 'PAZAR submission interface');
 $template->param(JAVASCRIPT_FUNCTION => q{
 function MM_findObj(n, d) { //v4.01
   var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
@@ -36,6 +36,13 @@ function MM_validateForm() { //v4.0
     } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
+}
+
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
 }
 
 function ActivateCheckBox ()
@@ -135,12 +142,12 @@ function MM_popupMsg(msg) { //v1.0
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'../logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'../login.pl\'>Log In</a>');
+    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
 }
 
 # send the obligatory Content-Type and print the template output
@@ -183,14 +190,30 @@ unless ($pazar->get_projectid) {
     exit;
 }
 
-#create a unique analysis name from the analysis id
-my $sth = $pazar->prepare("select max(analysis_id) from analysis");
-$sth->execute||die;
-my $prevaid = $sth->fetchrow_array;
-my $newid = $prevaid+1;
-my $aid = 'analysis_'.$newid;
+#create a unique analysis name by adding random number with current time as seed
+srand(time() ^ ($$ + ($$ << 15) ) );
+my $randnum = substr(rand() * 100,3);
+my $aid = 'analysis_'.$randnum;
 
 if ($params{TFcentric}) {
+    my @mytfs;
+    my @funct_tfs = $pazar->get_all_complex_ids($pazar->get_projectid);
+    foreach my $funct_tf (@funct_tfs) {
+	my $funct_name = $pazar->get_complex_name_by_id($funct_tf);
+	my $tf = $pazar->create_tf;
+	my $tfcomplex = $tf->get_tfcomplex_by_id($funct_tf,'notargets');
+	my $su;
+	while (my $subunit=$tfcomplex->next_subunit) {
+	    if ($su) {
+		$su = $su."-".$subunit->get_transcript_accession($pazar);
+	    } else {
+		$su = $subunit->get_transcript_accession($pazar);
+	    }
+	}
+	push @mytfs, $funct_name." (".$su.")";
+    }
+    my @classes= $pazar->get_all_classes();
+    my @families= $pazar->get_all_families();
 
 open (TFC,$alterpage)||die;
 while (my $buf=<TFC>) {
@@ -203,10 +226,50 @@ while (my $buf=<TFC>) {
 	    print $query->hidden('aname', $aid);
 	    print $query->hidden('analysis_desc', '');
 	}
+	if ($buf=~/<h3>Select from my TFs:/i) {
+	    if (@mytfs) {
+		print $query->scrolling_list('mytfs',\@mytfs,1,'true');
+		print "<br><br><input name=\"mycomplex\" type=\"submit\" id=\"mycomplex\" value=\"Proceed to CRE section\">";
+	    } else {
+		print "<p class=\"warning\">You don't have any TFs in this project yet!</p>";
+	    }
+	}
+	if ($buf=~/<input type=\"text\" name=\"class\"/i && @classes) {
+	    my @sorted_classes = sort @classes;
+	    unshift @sorted_classes, 'Select from existing classes';
+	    my $hidclass;
+	    foreach my $class (@sorted_classes) {
+		if ($hidclass) {
+		    $hidclass=$hidclass."::".$class;
+		} else {
+		    $hidclass=$class;
+		}
+	    }
+	    print "<b>  OR  </b>";
+	    print $query->scrolling_list('myclass',\@sorted_classes,1,'true');
+	    print $query->hidden('hidcla', $hidclass);
+	}
+	if ($buf=~/<input type=\"text\" name=\"family\"/i && @families) {
+	    my @sorted_families = sort @families;
+	    unshift @sorted_families, 'Select from existing families';
+	    my $hidfam;
+	    foreach my $fam (@sorted_families) {
+		if ($hidfam) {
+		    $hidfam=$hidfam."::".$fam;
+		} else {
+		    $hidfam=$fam;
+		}
+	    }
+
+	    print "<b>  OR  </b>";
+	    print $query->scrolling_list('myfamily',\@sorted_families,1,'true');
+	    print $query->hidden('hidfam', $hidfam);
+	}
+
 }
 close TFC;
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;
 exit();
 }
@@ -226,7 +289,7 @@ while (my $buf=<NEXT>) {
 close NEXT;
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;
 exit();
 

@@ -26,32 +26,40 @@ function MM_validateForm() { //v4.0
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
 }
+
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
+}
+
 //-->
 </script>
 </head>
-<body>
+<body onLoad="resetMenu();">
 <form style="height: 546px;" action="http://serverpath/addevid.cgi" method="post" name="COND">
   <h2>Experimental Evidence for a role in regulating Gene Expression</h2>
-  <h3>Method description</h3>
-  <h4>Explain what method was
-applied to this particular element/subelement</h4>
-  <p>Method (select from list or add the name and the description in the box if not available)</p><p>
- <input name="newmethod" type="text" id="newmethod"></p>
-  <p> 
-    Method Description (Only if new method name added)</p>
-  <p>
-    <textarea name="newmethoddesc" cols="120" rows="2" id="newmethoddesc"></textarea>
+  <hr><p>Method Name 
+</p><p><b> OR Enter a New Method: </b></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+  <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <p>Cell Type 
+  <hr>
+  <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
+  <p>Cell Name 
     <input name="cell" type="text" id="cell">
-    Cell Status 
+    <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
-    </select>
+    </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue"></p>
-    <p>Reference (PubMed ID) 
+    <input name="tissue" type="text" id="tissue">
+    <br><br>Organism (e.g. Homo sapiens)
+    <input name="cellspecies" type="text" id="cellspecies">
+</p><hr>
+    <p>Reference (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">
   </p>
   <hr>

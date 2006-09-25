@@ -8,7 +8,7 @@ use pazar::talk;
 use pazar::reg_seq;
 use pazar;
 
-require '../getsession.pl';
+require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 
 our $query=new CGI;
 my %params = %{$query->Vars};
@@ -38,6 +38,9 @@ if ($params{reg_type} eq 'reg_seq') {
     %params=%{$new_params};
 }
 
+my @cell_names=$pazar->get_all_cell_names;
+my @tissue_names=$pazar->get_all_tissue_names;
+
 my $selfpage="$docroot/condition1.htm";
 open (SELF, $selfpage) ||die;
 while (my $buf=<SELF>) {
@@ -50,10 +53,23 @@ while (my $buf=<SELF>) {
 	}
 
     }
-    if ($buf=~m/Method \(select from list/) {
-	my @methods;
-	push @methods,('',$pazar->get_method_names);
-	print $query->scrolling_list('methodname',\@methods,1,'true');
+    if ($buf=~/<p>Method Name/) {
+	my @methods=$pazar->get_method_names;
+	my @sorted_methods = sort @methods;
+	unshift @sorted_methods, 'Select from existing methods';
+	print $query->scrolling_list('methodname',\@sorted_methods,1,'true');
+    }
+    if ($buf=~/<input name=\"cell\" type=\"text\" id=\"cell\"/i && @cell_names) {
+	my @sorted_cells = sort @cell_names;
+	unshift @sorted_cells, 'Select from existing cell names';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('mycell',\@sorted_cells,1,'true');
+    }
+    if ($buf=~/<input name=\"tissue\" type=\"text\" id=\"tissue\"/i && @tissue_names) {
+	my @sorted_tissues = sort @tissue_names;
+	unshift @sorted_tissues, 'Select from existing tissue names';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('mytissue',\@sorted_tissues,1,'true');
     }
 }
 
@@ -74,7 +90,7 @@ print $query->h2($message);
 #print a({href=>"http://watson.lsd.ornl.gov/genekeydb/psite/entryform1.htm"},"Go Back");
 #print $query->redirect('http://somewhere.else/in/movie/land');
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '../tail.tmpl');
+my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;
 exit(0);
 }

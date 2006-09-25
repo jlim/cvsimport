@@ -40,6 +40,13 @@ document.form.pubmedid.disabled = true;
 }
 }
 
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
+}
+
 function MM_openBrWindow(theURL,winName,features) { //v2.0
   window.open(theURL,winName,features);
 }
@@ -136,22 +143,26 @@ function MM_popupMsg(msg) { //v1.0
       <option value="NA">NA</option>
     </select>
   </p>
-  <p>Method (select from list or add the name and the description in the box if not available)</p><p>
- <input name="newmethod" type="text" id="newmethod"></p>
-  <p> 
-    Method Description (Only if new method name added)
-    <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
+  <hr><p>Method Name 
+</p><p><b> OR Enter a New Method: </b></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+  <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <p>Cell Type 
+  <hr>
+  <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
+  <p>Cell Name 
     <input name="cell" type="text" id="cell">
-    Cell Status 
+    <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
-    </select>
+    </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue"></p>
-    <p>Reference (PubMed ID) 
+    <input name="tissue" type="text" id="tissue">
+    <br><br>Organism (e.g. Homo sapiens)
+    <input name="cellspecies" type="text" id="cellspecies"> 
+</p><hr>
+    <p>Reference (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">
   </p>
   <hr>

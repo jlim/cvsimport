@@ -2,8 +2,18 @@
 <html><head>
   <title>Mutation Information</title>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <script language="javascript">
+<!--
+resetMenu = function() {
+   var ddm=document.getElementsByTagName("select");
+   for (var n=0; n<ddm.length; n++) {
+      ddm[n].selectedIndex=0;
+   }
+}
+//-->
+</script>
 </head>
-<body>
+<body onLoad="resetMenu();">
 <h1>Describe your Mutation</h1>
 
 <form style="height: 546px;" action="http://serverpath/addmutation.cgi" method="post" name="MUT">
@@ -13,13 +23,14 @@
 (the format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use 'N' where the original nucleotides were.)</p>
   <p>Name (optional)
     <input name="mutseqname" type="text" id="mutseqname"></p>
-<p>Method used to make the mutation (select from list or add the name and the description in the box if not available)</p><p>
- <input name="mutnewmethod" type="text" id="mutnewmethod"></p>
-  <p> 
-    Method Description (Only if new method name added)
-    <textarea name="mutnewmethoddesc" cols="100" rows="2" id="mutnewmethoddesc"></textarea>
+<hr><h3>Method used to make the mutation</h3>
+<p>Method Name 
+</p><p><b> OR Enter a New Method: </b></p>
+ <p>New Method Name <input name="mutnewmethod" type="text" id="mutnewmethod"></p>
+  <p>New Method Description <textarea name="mutnewmethoddesc" cols="100" rows="2" id="mutnewmethoddesc"></textarea>
   </p>
-<p>Reference (PubMed ID) if any
+  <hr>
+ <p>Reference (PubMed ID) describing this mutant
     <input name="mutref" type="text" id="mutref">
   </p>
 <hr>
