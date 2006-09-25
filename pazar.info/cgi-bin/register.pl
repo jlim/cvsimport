@@ -204,6 +204,7 @@ print<<Error_Page_2;
 
 Error_Page_2
 	}
+$dbh->disconnect;
 }
 else {      
 print<<Page_Done;
@@ -228,7 +229,6 @@ Page_Done
 #log in to edit user details or manage projects
     }
 
-$dbh->disconnect;
 }
 
 # print out the html tail template
