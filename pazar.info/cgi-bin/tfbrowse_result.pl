@@ -4,7 +4,7 @@ use DBI;
 
 use CGI qw(:standard);
 use CGI;
-use CGI::Carp qw(fatalsToBrowser);
+#use CGI::Carp qw(fatalsToBrowser);
 use pazar;
 use pazar::talk;
 use pazar::tf;
@@ -102,7 +102,7 @@ Page_Done
     my @classes = ();
     my @families = ();
     my @transcript_accessions = ();
-
+    my $tf=$pazar->create_tf();
     foreach my $complex_id (@complex_ids)
     {
 	my $tfcomplex = $tf->get_tfcomplex_by_id($complex_id,'notargets');
