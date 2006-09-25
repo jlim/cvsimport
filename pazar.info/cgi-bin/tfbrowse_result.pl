@@ -107,8 +107,8 @@ Page_Done
     {
 	my $tfcomplex = $tf->get_tfcomplex_by_id($complex_id,'notargets');
 	while (my $subunit=$tfcomplex->next_subunit) {
-		push(@classes,$subunit->{class});
-		push(@families,$subunit->{family});
+		push(@classes,$subunit->get_class);
+		push(@families,$subunit->get_fam);
 		push(@transcript_accessions, $subunit->get_transcript_accession($pazar));
             }
     }
