@@ -8,7 +8,7 @@ use pazar::talk;
 use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
 use CGI qw(:standard);
-use CGI::Carp qw(fatalsToBrowser);
+#use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;

@@ -78,7 +78,8 @@ if (!$accn) {
 	if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
     }
     my $sym;
-    unless (($gene)&&($ens)) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+#    unless (($gene)&&($ens)) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+    unless ($ens) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
     else {
 	$sym= $gkdb->llid_to_sym($gene);
 	print "Gene symbol: ". $sym,$query->br;}
