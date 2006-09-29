@@ -10,19 +10,40 @@ resetMenu = function() {
       ddm[n].selectedIndex=0;
    }
 }
+function setCount(target){
+if(target == 0) 
+{
+document.MUT.action="http://serverpath/check_mutant.cgi";
+document.MUT.target="WindowB";
+window.open('about:blank','WindowB', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=500');
+}
+if(target == 1) 
+{
+document.MUT.target="_self";
+document.MUT.action="http://serverpath/addmutation.cgi";
+}
+}
 //-->
 </script>
 </head>
 <body onLoad="resetMenu();">
 <h1>Describe your Mutation</h1>
 
-<form style="height: 546px;" action="http://serverpath/addmutation.cgi" method="post" name="MUT">
+<form action="" method="post" name="MUT" enctype="multipart/form-data" target="">
+<h3>Original Sequence</h3>
+<hr color="black">
 <h3>Mutation Information</h3>
-  <p>Sequence
-    <textarea name="mutseq" id="mutseq" cols="100" rows="2"></textarea><br>
-(the format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use 'N' where the original nucleotides were.)</p>
-  <p>Name (optional)
+  <p><b>Mutant Name</b> (optional)
     <input name="mutseqname" type="text" id="mutseqname"></p>
+<p><b>Deletion</b><br>
+Enter the coordinates of the region(s) deleted from the original sequence:<br>
+<input name="mutdel" id="mutdel" type="text">(use nucleotide numbering scheme displayed above:&nbsp;&nbsp;e.g. 130-500;1000-1500)</p>
+<p><b>Point Mutation</b><br>
+Enter the coordinate(s) of the mutated nucleotide(s), relative to the original sequence, followed by the mutant nucleotide:<br>
+<input name="pointmutation" id="pointmutation" type="text">(use nucleotide numbering scheme displayed above:&nbsp;&nbsp;e.g. 54A;55T;58G)</p>
+<p><b>Comments (if any) </b><input type=text name="mutcomment" id="mutcomment" maxlength=250></p>
+<p><b>Check the resulting Mutant Sequence     </b><input name="check" type="submit" id="check" value="Check" onClick="setCount(0)">
+</p>
 <hr><h3>Method used to make the mutation</h3>
 <p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
@@ -70,7 +91,7 @@ resetMenu = function() {
   </p>
 <hr>
     <input name="modeDone" type="hidden" value="Done">
-    <input name="submit" type="submit" id="submit" value="Submit Data">
+    <input name="submit" type="submit" id="submit" value="Submit Data" onClick="setCount(1)">
     <input name="cancel" id="cancel" value="Cancel" type="reset">
   </p><br>
   </form>

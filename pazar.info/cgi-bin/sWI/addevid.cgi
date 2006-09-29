@@ -333,6 +333,12 @@ sub check_aname {
 	    $dh->execute($aname)||die;
 	    my $exist=$dh->fetchrow_array;
 	    if ($exist) {
+		if ($i>1) {
+		    my $last;
+		    while ($last ne '_') {
+			$last=chop($aname);
+		    }
+		}
 		$aname=$aname.'_'.$i;
 		$i++;
 	    } else {

@@ -13,7 +13,7 @@ use constant DB_HOST => $ENV{PAZAR_host};
 require 'getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => 'http://www.pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Mall');
@@ -21,7 +21,7 @@ $template->param(TITLE => 'PAZAR Mall');
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
 }
 else
 {

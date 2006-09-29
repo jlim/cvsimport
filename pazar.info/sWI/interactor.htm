@@ -42,46 +42,42 @@ resetMenu = function() {
 //-->
   </script></head>
 <body onLoad="resetMenu();">
-<h1>TF complex components</h1>
- <hr color="black" style="width: 100%; height: 2px;">
+  <h3>If the exact TF is unknown, you can describe a biological sample used (e.g. nuclear extract)</h3>
  <form action="http://serverpath/TFcomplex.cgi" method="post" name="MUT"> 
-<h3><input name="tftype" type="radio" value="mytftype" checked="checked" onClick="MUT.mytfs.disabled=false;MUT.TFcomplex.disabled=true;MUT.pubmed.disabled=true;MUT.TF.disabled=true;MUT.TFDB.disabled=true;MUT.classe.disabled=true;MUT.family.disabled=true;MUT.myclass.disabled=true;MUT.myfamily.disabled=true;MUT.modifications.disabled=true;MUT.add.disabled=true;MUT.mytfs.focus();">Select from my TFs:  </h3>
-<br><hr color="black" style="width: 100%; height: 2px;">
-<p><h3><input name="tftype" type="radio" value="newtftype" onClick="MUT.mytfs.disabled=true;MUT.TFcomplex.disabled=false;MUT.pubmed.disabled=false;MUT.TF.disabled=false;MUT.TFDB.disabled=false;MUT.classe.disabled=false;MUT.family.disabled=false;MUT.myclass.disabled=false;MUT.myfamily.disabled=false;MUT.modifications.disabled=false;MUT.add.disabled=false;MUT.TFcomplex.focus();">Enter a new TF:</h3></p>
-  <p>TF complex name 
-    <input name="TFcomplex" type="text" id="TFcomplex" disabled=true></p>
-  <p>Pubmed (if published) 
-    <input name="pubmed" type="text" id="pubmed" disabled=true>
+  <p>Sample Type
+    <input type="text" name="sampletype" size="true">
   </p>
-  <hr>
-  TF 
-  <input name="TF" maxlength="25" type="text" id="TF" disabled=true>
-  TF Database 
-  <select name="TFDB" id="TFDB" disabled=true>
-    <option selected="selected" value="EnsEMBL_gene">EnsEMBL
-gene ID</option>
-      <option value="EnsEMBL_transcript"> EnsEMBL
-transcript
-ID</option>
-      <option value="EntrezGene"> Entrezgene ID</option>
-       <option value="refseq"> RefSeq ID</option>
-      <option value="swissprot"> Swissprot ID</option>
-  </select>
-  <p>class
-    <input type="text" name="classe" id="classe" disabled=true>
+  <p>Sample Cell Name 
+    <input name="samplecell" type="text" id="samplecell">
+    <br><br>Sample Cell Status 
+    <select name="samplecellstat">
+      <option value="primary">primary</option>
+      <option value="cell line">cell line</option>
+    </select><br><br>
+    Sample Tissue 
+    <input name="sampletissue" type="text" id="sampletissue">
+    <br><br>Sample Organism (e.g. Homo sapiens)
+    <input name="samplecellspecies" type="text" id="samplecellspecies">
+</p>
+  <p><b>Sample Development Time/Timepoint</b></p>
+  <p>Exactly <input name="sampletime" value="0" size="5" maxlength="5"
+ type="text">   OR    Range-start 
+  <input name="samplerange_start" id="samplerange_start" value="0" size="5" maxlength="5"
+ type="text">
+Range-end 
+  <input name="samplerange_end" id="samplerange_end" value="0" size="5" maxlength="5"
+ type="text"></p>
+  <p>Scale <select name="samplescale" size="1">
+  <option value="min">minutes</option>
+  <option value="hr" selected="selected">hours</option>
+  <option value="days">days</option>
+  <option value="years">years</option>
+  <option value="other">other</option>
+  </select><br>
   </p>
-  <p>family 
-    <input type="text" name="family" id="family" disabled=true>
-  </p>
-  <p>modifications (Optional) 
-    <input type="text" name="modifications" id="modifications" disabled=true>
-  </p>
+<p>Sample Time Description <textarea name="sampledesc" cols="120" rows="2"> </textarea></p>
 <hr>
-<p>
-  <input name="add" type="submit" id="add" onClick="MM_validateForm('TF','','R','TFcomplex','','R');return document.MM_returnValue" value="Add more TFs to this complex" disabled=true>
-  </p>
-<hr>
-  <h3>Interaction type between the TF complex (factor) and this sequence </h3>
+  <h3>Interaction type between the sample and this sequence </h3>
   <table width="200">
     <tr>
       <td><label>
@@ -141,7 +137,7 @@ ID</option>
   </p>
   <hr>
    <p> 
-    <input name="submit" id="submit" value="Submit Data" type="submit" onclick="MM_validateForm('TF','','R','TFcomplex','','R','interact0','','NisNum');return document.MM_returnValue;">
+    <input name="submit" id="submit" value="Submit Data" type="submit" onclick="MM_validateForm('sampletype','','R','interact0','','NisNum','samplerange_start','','NisNum','samplerange_end','','NisNum');return document.MM_returnValue;">
   <input name="submit" id="cancel" value="Cancel" type="submit" onclick="window.close();">
   </p><br>
 </form>

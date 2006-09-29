@@ -15,11 +15,16 @@ require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
 my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
 my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
 
-my $selfpage="$docroot/TF_complex.htm";
-
-my @voc=qw(TF TFDB family class modifications);
+my @voc=qw(TF TFDB family classe modifications);
 my $query=new CGI;
 my %params = %{$query->Vars};
+
+my $selfpage;
+unless ($params{'Interactadd'}) {
+    $selfpage="$docroot/TF_complex.htm";
+} else {
+    $selfpage="$docroot/interactor.htm";
+}
 
 my (%tf,%tfdb,%class,%family,%modif,%seen,%interact);
 my $input = $params{'submit'};
@@ -33,7 +38,7 @@ my $proj=$params{'project'};
 if ($params{'myclass'} eq 'Select from existing classes') {
     delete $params{'myclass'};
 } elsif ($params{'myclass'}) {
-    $params{'class'} = $params{'myclass'};
+    $params{'classe'} = $params{'myclass'};
     delete $params{'myclass'};
 }
 if ($params{'myfamily'} eq 'Select from existing families') {
@@ -56,11 +61,11 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 SUBMIT: {
 if ($input =~/cancel/i) {  exit();}
 if ($params{'add'}) { last SUBMIT;} #Do what you normally do (add and write)
-if ($input=~/submit/i||$params{'mycomplex'}) { &next_page($user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
+if ($input=~/submit/i||$params{'mycomplex'}) { &next_page($pazar,$ensdb,$gkdb,$user,$pass,\%params,$query); exit();}#JUst in case we decide we need more stuff to add
 }
 
 my @mytfs;
-unless ($params{'add'}) {
+unless ($params{'add'}||$params{'Interactadd'}) {
     my @funct_tfs = $pazar->get_all_complex_ids($pazar->get_projectid);
     foreach my $funct_tf (@funct_tfs) {
 	my $funct_name = $pazar->get_complex_name_by_id($funct_tf);
@@ -99,7 +104,7 @@ foreach my $key (keys %params) {
             #print $key,"__";
             if ((($key=~/TF\d/i)||($key=~/TF$/i))&&($key!~/AddTF/)) { my $id=$key; $id=~s/\D//g; $id=$id=~/d/?$id:$next; $tf{$id}=$params{$key};}
             if ($key=~/TFDB/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $tfdb{$id}=$params{$key}; }
-            if ($key=~/class/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $class{$id}=$params{$key}; }
+            if ($key=~/classe/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $class{$id}=$params{$key}; }
             if ($key=~/family/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $family{$id}=$params{$key}; }
             if ($key=~/interact/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $interact{$id}=$params{$key}; }
             if ($key=~/modific/i) { my $id=$key; $id=~s/\D//g; $id=$id=~/\d/?$id:$next; $modif{$id}=$params{$key};  }
@@ -110,7 +115,8 @@ my $started=1;
 while (my $buf=<SELF>) {
     $buf=~s/serverpath/$cgiroot/;
     if ($params{'add'}) {
-	if ($buf=~/<hr color/i || $buf=~/mytf/i || $buf=~/my tf/i || $buf=~/new/i) {
+	$buf=~s/disabled=true//;
+	if ($buf=~/<hr color/i || $buf=~/mytf/i || $buf=~/my tf/i) {
 	    next;
 	}
     } 
@@ -131,27 +137,46 @@ while (my $buf=<SELF>) {
         $buf=~s/name/value=\"$params{TFcomplex}\" name/;
     }
     print $buf;
-    unless ($params{'add'}) {
-	if ($buf=~/<h3>Select from my TFs:/i) {
+    unless ($params{'add'}||$params{'Interactadd'}) {
+	if ($buf=~/Select from my TFs:/i) {
 	    if (@mytfs) {
-		print $query->scrolling_list('mytfs',\@mytfs,1,'true');
-		print "<br><br><input name=\"mycomplex\" type=\"submit\" id=\"mycomplex\" value=\"Proceed to CRE section\">";
+		my @sorted_tfs = sort @mytfs;
+		unshift @sorted_tfs, 'Select from existing TFs';
+		print $query->scrolling_list('mytfs',\@sorted_tfs,1,'true');
 	    } else {
 		print "<p style=\"color:red\"><b>You don't have any TFs in this project yet!</b></p>";
 	    }
 	}
     }
-    if ($buf=~/<input type=\"text\" name=\"class\"/i && @classes) {
+    if ($buf=~/<input type=\"text\" name=\"classe\"/i && @classes) {
 	my @sorted_classes = sort @classes;
 	unshift @sorted_classes, 'Select from existing classes';
 	print "<b>  OR  </b>";
-	print $query->scrolling_list('myclass',\@sorted_classes,1,'true');
+	if ($params{'add'}) {
+	    print $query->scrolling_list(-name=>'myclass',
+					 -values=>\@sorted_classes,
+					 -size=>1);
+	} else {
+	    print $query->scrolling_list(-name=>'myclass',
+					 -values=>\@sorted_classes,
+					 -size=>1,
+					 -disabled=>true);
+	}
     }
     if ($buf=~/<input type=\"text\" name=\"family\"/i && @families) {
 	my @sorted_families = sort @families;
 	unshift @sorted_families, 'Select from existing families';
 	print "<b>  OR  </b>";
-	print $query->scrolling_list('myfamily',\@sorted_families,1,'true');
+	if ($params{'add'}) {
+	    print $query->scrolling_list(-name=>'myfamily',
+					 -values=>\@sorted_families,
+					 -size=>1);
+	} else {
+	    print $query->scrolling_list(-name=>'myfamily',
+					 -values=>\@sorted_families,
+					 -size=>1,
+					 -disabled=>true);
+	}
     }
     if ($buf=~/body/i) {$seen{body}++;}
     if ($buf=~/\<form/i) {$seen{form}++;} 
@@ -177,7 +202,7 @@ while (my $buf=<SELF>) {
 	      VAL: {
 		  if ($key eq 'TF') {$val=$tf{$k}; last VAL;}
 		  if ($key eq 'TFDB') {$val=$tfdb{$k}; last VAL;}
-		  if ($key eq 'class') {$val=$class{$k}; last VAL;}
+		  if ($key eq 'classe') {$val=$class{$k}; last VAL;}
 		  if ($key eq 'family') {$val=$family{$k}; last VAL;}
 		  if ($key eq 'interact') {$val=$interact{$k}; last VAL;}
 		  if ($key eq 'modifications') {$val=$modif{$k}; next VAL;}
@@ -206,11 +231,23 @@ while (my $buf=<SELF>) {
 	print "<b>  OR  </b>";
 	print $query->scrolling_list('mytissue',\@sorted_tissues,1,'true');
     }
+    if ($buf=~/<input name=\"samplecell\" type=\"text\" id=\"samplecell\"/i && @cell_names) {
+	my @sorted_cells = sort @cell_names;
+	unshift @sorted_cells, 'Select from existing cell names';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('mysamplecell',\@sorted_cells,1,'true');
+    }
+    if ($buf=~/<input name=\"sampletissue\" type=\"text\" id=\"sampletissue\"/i && @tissue_names) {
+	my @sorted_tissues = sort @tissue_names;
+	unshift @sorted_tissues, 'Select from existing tissue names';
+	print "<b>  OR  </b>";
+	print $query->scrolling_list('mysampletissue',\@sorted_tissues,1,'true');
+    }
 }
 exit();
 
 sub forward_args {
-my @voc=qw(add TF TFDB family class modifications TFcomplex cell cellstat interact0 interactscale inttype methodname newmethod newmethoddesc pubmed reference tissue);
+my @voc=qw(add TF TFDB family classe modifications TFcomplex cell cellstat interact0 interactscale inttype methodname newmethod newmethoddesc pubmed reference tissue);
 foreach my $key (keys %params) {
     unless (grep(/^$key$/,@voc)) {
 	print $query->hidden($key,$params{$key});
@@ -219,38 +256,81 @@ foreach my $key (keys %params) {
 }
 
 sub next_page {
-    my ($user,$pass,$params,$query)=@_;
+    my ($pazar,$ensdb,$gkdb,$user,$pass,$params,$query)=@_;
     my %params=%{$params};
     unless ($user&&$pass) {
 	print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
 	exit();
     }
-    my @numbered=qw(TF TFDB interact class family modifications);
-    my @db;
-    foreach my $dbkey (grep(/TFDB/,keys %params)) {
-	push @db, $params{$dbkey};
-    }
-    my @tf;
-    foreach my $tfkey (grep(/^TF([0-9]*)$/,keys %params)) {
-	push @tf, $params{$tfkey};
-    }
-
-    my $tfs=&check_TF(\@db,\@tf);
-    my %tfs=%$tfs;
- #Add 0 to the 0 key
-    foreach my $mp(keys %params) {
-	my $key=$mp;
-	if ((grep (/\b$mp\b/,@numbered))&&($mp!~/\d/)) {   
-	    $key .='0' ;
-	    $params{$key}=$params{$mp};
-	    delete $params{$mp};
+    my $tfid;
+    if ($params{'mytfs'} eq 'Select from existing TFs') {
+	print $query->h3("An error occurred- You have to select a TF in the list!");
+	exit();
+    } elsif ($params{'mytfs'}) {
+	$tfid=get_TF_id($pazar,$params{'mytfs'});
+    } elsif ($params{'TFcomplex'}) {
+	my @numbered=qw(TF TFDB interact classe family modifications);
+	my @db;
+	foreach my $dbkey (grep(/TFDB/,keys %params)) {
+	    push @db, $params{$dbkey};
 	}
-	foreach my $trans (keys %tfs) {
-	    if ($params{$key} eq $trans) {
-		my $ens_key='ENS_'.$key;
-		$params{$ens_key}=$tfs{$trans};
+	my @tf;
+	foreach my $tfkey (grep(/^TF([0-9]*)$/,keys %params)) {
+	    push @tf, $params{$tfkey};
+	}
+
+	my $tfs=&check_TF($ensdb,$gkdb,\@db,\@tf);
+	my %tfs=%$tfs;
+	#Add 0 to the 0 key
+	foreach my $mp(keys %params) {
+	    my $key=$mp;
+	    if ((grep (/\b$mp\b/,@numbered))&&($mp!~/\d/)) {   
+		$key .='0' ;
+		$params{$key}=$params{$mp};
+		delete $params{$mp};
+	    }
+	    foreach my $trans (keys %tfs) {
+		if ($params{$key} eq $trans) {
+		    my $ens_key='ENS_'.$key;
+		    $params{$ens_key}=$tfs{$trans};
+		}
 	    }
 	}
+	$tfid=store_TFs($pazar,$ensdb,\%params);
+	unless ($tfid > 0) {
+	    print $query->h2("*** TF data NOT accepted - $params{'TFcomplex'} might already exist within your project with different subunits than the one you defined! ***");
+	    exit();
+	}
+    } elsif ($params{'sampletype'}) {
+	if (($params{'mysamplecell'} eq 'Select from existing cell names')&&($params{'mysampletissue'} eq 'Select from existing tissue names')) {
+	    print $query->h2("*** You must select either a cell or a tissue name for your biological sample! ***");
+	    exit();
+	}
+	if ($params{'mysamplecell'} eq 'Select from existing cell names') {
+	    delete $params{'mysamplecell'};
+	} elsif ($params{'mysamplecell'}) {
+	    $params{'samplecell'} = $params{'mysamplecell'};
+	    delete $params{'mysamplecell'};
+	}
+	if ($params{'mysampletissue'} eq 'Select from existing tissue names') {
+	    delete $params{'mysampletissue'};
+	} elsif ($params{'mysampletissue'}) {
+	    $params{'sampletissue'} = $params{'mysampletissue'};
+	    delete $params{'mysampletissue'};
+	}
+	my $samplecellspecies=$params{samplecellspecies}||'NA';
+	my $samplecellid;
+	if (($params{samplecell})&&($params{samplecell}=~/[\w\d]/)) {
+	    $samplecellid=$pazar->table_insert('cell',$params{samplecell},$params{sampletissue},$params{samplecellstat},'na',$samplecellspecies);
+	} elsif ($params{sampletissue}&&($params{sampletissue}=~/[\w\d]/)) {
+	    $samplecellid=$pazar->table_insert('cell','na',$params{sampletissue},'na','na',$samplecellspecies);
+	}
+	my $sampletimeid;
+	if ($params{sampletime}!=0 || $params{samplerange_start}!=0 || $params{samplerange_end}!=0) {
+	    $sampletimeid=$pazar->table_insert('time',$params{sampletime},$params{sampledesc},$params{samplescale},$params{samplerange_start},$params{samplerange_end});
+	}
+	$sampletimeid||=0;
+	$tfid=$pazar->table_insert('sample',$params{'sampletype'},$samplecellid,$sampletimeid);
     }
 
     if ($params{'mycell'} eq 'Select from existing cell names') {
@@ -266,7 +346,7 @@ sub next_page {
 	delete $params{'mytissue'};
     }
 
-    my ($regid,$type,$tfid,$aid);
+    my ($regid,$type,$aid);
     eval {
     if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
 	$regid=store_artifical($pazar,$query,\%params);
@@ -302,8 +382,15 @@ sub next_page {
     $evidid||=0;
     $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
 
-    $tfid=store_TFs($pazar,$ensdb,\%params); 
-    $pazar->add_input('funct_tf',$tfid);
+    my ($quant,$qual,$qscale);
+    if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale}; $qual='NA';}
+    else { $qual=$params{qual}||'NA'; }
+    $pazar->store_interaction($qual,$quant,$qscale);
+    unless ($params{'sampletype'}) {
+	$pazar->add_input('funct_tf',$tfid);
+    } else {
+	$pazar->add_input('sample',$tfid);
+    }
     $pazar->store_analysis($aid);
     $pazar->reset_inputs;
     $pazar->reset_outputs;
@@ -320,6 +407,9 @@ sub next_page {
 	print $query->start_form(-method=>'POST',
 				 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
 #	&forward_args($query,\%params);
+	if ($params{'sampletype'}) {
+	    print $query->hidden(-name=>'sample',-value=>'yes');
+	}
 	print $query->hidden(-name=>'tfid',-value=>$tfid);
 	print $query->hidden(-name=>'aid',-value=>$aid);
 	print $query->hidden(-name=>'regid',-value=>$regid);
@@ -343,11 +433,7 @@ sub next_page {
 }
 
 sub check_TF {
-    my ($db,$tf)=@_;
-
-    my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-    my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
+    my ($ensdb,$gkdb,$db,$tf)=@_;
 
     my %factors;
     for (my $i=0;$i<@$db;$i++) {
@@ -387,16 +473,12 @@ my ($pazar,$ensdb,$params)=@_;
 #print Dumper($params);
 %params=%{$params};
 my $tf;
-my @lookup=qw(TF TFDB ENS_TF family class modifications); #Valid properties of a subunit
+my @lookup=qw(TF TFDB ENS_TF family classe modifications); #Valid properties of a subunit
 $tf->{function}->{modifications}=$params{modifications};
 my $tf=new pazar::tf::tfcomplex(name=>$params{TFcomplex},pmed=>$params{pubmed});
 my ($tfdat);
 foreach my $key (keys %params) {
-    my ($quant,$qual,$qscale);
     if ($key=~/inttype/i) {
-	if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale}; $qual='NA';}
-	else { $qual=$params{qual}||'NA'; }
-	$pazar->store_interaction($qual,$quant,$qscale);
 	next;
     }
     next unless ($key=~/\d/);
@@ -411,7 +493,7 @@ foreach my $udef (@$tfdat) {
     my $tid=$udef->{ENS_TF};
     my $gid=$ensdb->ens_transcr_to_gene($tid);
     my $build=$ensdb->current_release;
-    my $sunit=new pazar::tf::subunit(tid=>$tid,tdb=>'EnsEMBL',class=>$udef->{class},family=>$udef->{family},gdb=>'ensembl',id=>$gid,
+    my $sunit=new pazar::tf::subunit(tid=>$tid,tdb=>'EnsEMBL',class=>$udef->{classe},family=>$udef->{family},gdb=>'ensembl',id=>$gid,
                                 tdb_build=>$build,gdb_build=>$build,mod=>$udef->{modifications});
 
     $tf->add_subunit($sunit);
@@ -594,11 +676,16 @@ sub check_aname {
 	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,0,$refid,$desc);
 	if ($aid) {
 	    return $aid;
-	    exit();
 	} else {
 	    $dh->execute($aname)||die;
 	    my $exist=$dh->fetchrow_array;
 	    if ($exist) {
+		if ($i>1) {
+		    my $last;
+		    while ($last ne '_') {
+			$last=chop($aname);
+		    }
+		}
 		$aname=$aname.'_'.$i;
 		$i++;
 	    } else {
@@ -608,4 +695,11 @@ sub check_aname {
     }
     $aid=$pazar->table_insert('analysis',$userid,$evidid,$aname,$methid,$cellid,'',$refid,$desc);
     return $aid;
+}
+
+sub get_TF_id {
+    my ($pazar,$tfname)=@_;
+
+    my @tfnames = split(/ \(/,$tfname);
+    return $pazar->get_complex_id_by_name($tfnames[0]);
 }

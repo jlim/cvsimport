@@ -345,11 +345,16 @@ sub check_aname {
 	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,0,$refid,$desc);
 	if ($aid) {
 	    return $aid;
-	    exit();
 	} else {
 	    $dh->execute($aname)||die;
 	    my $exist=$dh->fetchrow_array;
 	    if ($exist) {
+		if ($i>1) {
+		    my $last;
+		    while ($last ne '_') {
+			$last=chop($aname);
+		    }
+		}
 		$aname=$aname.'_'.$i;
 		$i++;
 	    } else {
