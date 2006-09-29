@@ -13,7 +13,7 @@ use constant DB_HOST => $ENV{PAZAR_host};
 require 'getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'http://www.pazar.info/cgi-bin/header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Mall');
@@ -267,7 +267,7 @@ page2
 
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;
 
 sub select {
