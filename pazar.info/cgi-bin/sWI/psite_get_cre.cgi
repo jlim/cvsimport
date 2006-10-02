@@ -111,114 +111,112 @@ return $slice->seq;
 }
 
 sub check_seq {
-my ($ensdb,$gkdb,$query,$params)=@_;
-my %params=%{$params};
+    my ($ensdb,$gkdb,$query,$params)=@_;
+    my %params=%{$params};
 
-my $accn = $params{'gid'};
-my $dbaccn = $params{'genedb'};
-my $taccn = $params{'tid'};
-my $dbtrans = $params{'transdb'};
+    my $accn = $params{'gid'};
+    my $dbaccn = $params{'genedb'};
+    my $taccn = $params{'tid'};
+    my $dbtrans = $params{'transdb'};
 
-my ($ens,$err);
-if ($dbaccn eq 'EnsEMBL_gene') {
-    unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;} else {
-	$ens=$accn;
-    }
-} elsif ($dbaccn eq 'EnsEMBL_transcript') {
-    my @gene = $ensdb->ens_transcr_to_gene($accn);
-    $ens=$gene[0];
-    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
-} elsif ($dbaccn eq 'EntrezGene') {
-    my @gene=$gkdb->llid_to_ens($accn);
-    $ens=$gene[0];
-    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
-} else {
-    ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
-    if (!$ens) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
-}
-unless ($ens) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}#Error message her - gene not in DB
-my $gene=$ens;
-
-if ($taccn && $taccn ne '') {
-    if ($dbtrans=~/ensembl/i) {
-	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
-    } elsif ($dbtrans=~/refseq/i) {
-	my ($trans)=$ensdb->nm_to_enst($taccn);
-	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<p class=\"warning\">An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</p>"; exit;}
-	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
-    } elsif ($dbtrans=~/swissprot/i) {
-	my ($trans)=$ensdb->swissprot_to_enst($taccn);
-	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<p class=\"warning\">An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</p>"; exit;}
-	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
-    }
-    $gene=$taccn;
-}
-
-my ($chr,$build,$begin,$end,$orient)=$ensdb->get_ens_chr($gene);
-unless ($chr) {
-
-my $tss;
-if ($orient==1) {
-    $tss=$begin;
-} elsif ($orient==-1) {
-    $tss=$end;
-}
-if (uc($params{chromosome}) ne uc($chr)) {
-print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
-exit;
-}
-my $org=$ensdb->current_org();
-if (uc($params{organism}) ne uc($org)) {
-print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
-exit;
-}
-my $seq=&getseq($chr,$params{start},$params{end});
-my $strand;
-if ($params{sequence} && $params{sequence} ne '') {
-    my $element=$params{sequence};
-    $element=~s/\s*//g;
-    if ($element=~/[^agctnAGCTN]/) {
-	print "Unknown character used in the sequence<br>$element<br>";
-	exit();
-    }
-    if (uc($seq) ne uc($element)) {
-#reverse complement the seq
-	my $rcseq = reverse ($seq);
-	$rcseq =~ tr/ACTGactg/TGACtgac/;
-	$seq=$rcseq;
-	if (uc($seq) ne uc($element)) {
-	    print $query->h3("The provided sequence $element doesn't fit with the provided coordinates!<br>Please use the Get Chromosome Coordinates button to fetch the correct coordinates!");
-	    exit;
-	} else {
-	    $strand='-';
+    my ($ens,$err);
+    if ($dbaccn eq 'EnsEMBL_gene') {
+	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;} else {
+	    $ens=$accn;
 	}
+    } elsif ($dbaccn eq 'EnsEMBL_transcript') {
+	my @gene = $ensdb->ens_transcr_to_gene($accn);
+	$ens=$gene[0];
+	unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
+    } elsif ($dbaccn eq 'EntrezGene') {
+	my @gene=$gkdb->llid_to_ens($accn);
+	$ens=$gene[0];
+	unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
     } else {
-	$strand='+';
+	($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+	if (!$ens) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
     }
-    if (uc($params{str}) && uc($params{str}) ne uc($strand)) {
-	print $query->h3("The provided strand $params{str} doesn't seem to be correct!<br>Please use the Get Chromosome Coordinates button to fetch the correct coordinates!");
+    unless ($ens) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;} #Error message her - gene not in DB
+    my $gene=$ens;
+
+    if ($taccn && $taccn ne '') {
+	if ($dbtrans=~/ensembl/i) {
+	    my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
+	    unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
+	} elsif ($dbtrans=~/refseq/i) {
+	    my ($trans)=$ensdb->nm_to_enst($taccn);
+	    if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<p class=\"warning\">An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</p>"; exit;}
+	    my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
+	    unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
+	} elsif ($dbtrans=~/swissprot/i) {
+	    my ($trans)=$ensdb->swissprot_to_enst($taccn);
+	    if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<p class=\"warning\">An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</p>"; exit;}
+	    my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
+	    unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
+	}
+	$gene=$taccn;
+    }
+
+    my ($chr,$build,$begin,$end,$orient)=$ensdb->get_ens_chr($gene);
+    my $tss;
+    if ($orient==1) {
+	$tss=$begin;
+    } elsif ($orient==-1) {
+	$tss=$end;
+    }
+    if (uc($params{chromosome}) ne uc($chr)) {
+	print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
 	exit;
     }
-} else {
-    if ($params{str} eq '-') {
-	my $rcseq = reverse ($seq);
-	$rcseq =~ tr/ACTGactg/TGACtgac/;
-	$seq=$rcseq;
-	$strand='-';
-    } else {
-	$strand='+';
+    my $org=$ensdb->current_org();
+    if (uc($params{organism}) ne uc($org)) {
+	print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
+	exit;
     }
-}
+    my $seq=&getseq($chr,$params{start},$params{end});
+    my $strand;
+    if ($params{sequence} && $params{sequence} ne '') {
+	my $element=$params{sequence};
+	$element=~s/\s*//g;
+	if ($element=~/[^agctnAGCTN]/) {
+	    print "Unknown character used in the sequence<br>$element<br>";
+	    exit();
+	}
+	if (uc($seq) ne uc($element)) {
+#reverse complement the seq
+	    my $rcseq = reverse ($seq);
+	    $rcseq =~ tr/ACTGactg/TGACtgac/;
+	    $seq=$rcseq;
+	    if (uc($seq) ne uc($element)) {
+		print $query->h3("The provided sequence $element doesn't fit with the provided coordinates!<br>Please use the Get Chromosome Coordinates button to fetch the correct coordinates!");
+		exit;
+	    } else {
+		$strand='-';
+	    }
+	} else {
+	    $strand='+';
+	}
+	if (uc($params{str}) && uc($params{str}) ne uc($strand)) {
+	    print $query->h3("The provided strand $params{str} doesn't seem to be correct!<br>Please use the Get Chromosome Coordinates button to fetch the correct coordinates!");
+	    exit;
+	}
+    } else {
+	if ($params{str} eq '-') {
+	    my $rcseq = reverse ($seq);
+	    $rcseq =~ tr/ACTGactg/TGACtgac/;
+	    $seq=$rcseq;
+	    $strand='-';
+	} else {
+	    $strand='+';
+	}
+    }
 
-$params{sequence}=$seq;
-$params{str}=$strand;
-$params{gid}=$ens;
-$params{build}=$build;
-$params{tid}=$taccn;
-$params{tss}=$tss;
+    $params{sequence}=$seq;
+    $params{str}=$strand;
+    $params{gid}=$ens;
+    $params{build}=$build;
+    $params{tid}=$taccn;
+    $params{tss}=$tss;
 
-return \%params;
+    return \%params;
 }
