@@ -18,7 +18,7 @@ my %params = %{$query->Vars};
 my $user=$info{user};
 my $pass=$info{pass};
 my $analysis=$params{'aname'};
-my $an_desc=$params{'analysis_desc'};
+#my $an_desc=$params{'analysis_desc'};
 my $auxDB=$params{'auxDB'};
 my $proj=$params{'project'};
 

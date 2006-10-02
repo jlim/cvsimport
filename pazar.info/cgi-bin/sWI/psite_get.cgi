@@ -224,7 +224,6 @@ while (my $buf=<TFC>) {
 	if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
 	    print $query->hidden('project', $proj);
 	    print $query->hidden('aname', $aid);
-	    print $query->hidden('analysis_desc', '');
 	}
 	if ($buf=~/<h3>Select from my TFs:/i) {
 	    if (@mytfs) {
@@ -282,7 +281,6 @@ while (my $buf=<NEXT>) {
     if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
 	print $query->hidden('project', $proj);
 	print $query->hidden('aname', $aid);
-	print $query->hidden('analysis_desc', '');
 	next;
     }
 }

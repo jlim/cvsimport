@@ -90,7 +90,7 @@ $cellid||=0;
 $refid||=0;
 $evidid||=0;
 $timeid||=0;
-$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$params{analysis_desc});
+$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$an_desc);
 
 if ($params{env_comp} && $params{env_comp} ne '') {
     my $conc=$params{env_conc}||'na';
