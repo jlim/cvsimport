@@ -121,43 +121,45 @@ my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
 if ($dbaccn eq 'EnsEMBL_gene') {
-    unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {
+    unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;} else {
 	$ens=$accn;
     }
 } elsif ($dbaccn eq 'EnsEMBL_transcript') {
     my @gene = $ensdb->ens_transcr_to_gene($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
     my @gene=$gkdb->llid_to_ens($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
 } else {
     ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
-    if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    if (!$ens) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}
 }
-unless ($ens) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+unless ($ens) {print "<p class=\"warning\">An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</p>"; exit;}#Error message her - gene not in DB
 my $gene=$ens;
 
 if ($taccn && $taccn ne '') {
     if ($dbtrans=~/ensembl/i) {
 	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	die "your transcript ID doesn't match your gene ID!" unless ($gene_chk eq $ens);
+	unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
     } elsif ($dbtrans=~/refseq/i) {
 	my ($trans)=$ensdb->nm_to_enst($taccn);
-	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {die "Conversion failed for $taccn";}
+	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<p class=\"warning\">An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</p>"; exit;}
 	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	die "your transcript ID doesn't match your gene ID!" unless ($gene_chk eq $ens);
+	unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
     } elsif ($dbtrans=~/swissprot/i) {
 	my ($trans)=$ensdb->swissprot_to_enst($taccn);
-	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {die "Conversion failed for $taccn";}
+	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<p class=\"warning\">An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</p>"; exit;}
 	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	die "your transcript ID doesn't match your gene ID!" unless ($gene_chk eq $ens);
+	unless ($gene_chk eq $ens) { print "<p class=\"warning\">An error occured! Check that the provided transcript ID matches the gene ID!</p>"; exit;}
     }
     $gene=$taccn;
 }
 
 my ($chr,$build,$begin,$end,$orient)=$ensdb->get_ens_chr($gene);
+unless ($chr) {
+
 my $tss;
 if ($orient==1) {
     $tss=$begin;
