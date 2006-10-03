@@ -54,9 +54,10 @@ foreach my $project (@desc) {
     if ($genes) {
 	$node++;
 	while (my $gene=$genes->fetchrow_hashref) {
+	    my $found=0;
 	    my $tsrs = &select($dbh, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
 	    if ($tsrs) {
-		while (my $tsr=$tsrs->fetchrow_hashref) {
+		while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
 		    my $reg_seqs = &select($dbh, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
 		    if ($reg_seqs) {
 			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
@@ -66,6 +67,7 @@ foreach my $project (@desc) {
 			    accn => $gene->{db_accn},
 			    desc => $gene->{description},
 			    ens_desc => $desc[0]});
+			$found++;
 		    }
 		}
 	    }
