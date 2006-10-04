@@ -210,9 +210,17 @@ foreach my $transcript (@$enstr) {
 	    } else {
 		$strand='-';
 	    }
-	    my $uid=join(':',$chr,$strand,$beg,$en,$org,$build,$element,$ens,$tr,$tss,$tss,$sym);#For now no fuzzy bussiness
-		push @sites,$uid;
+	    my $uid=join(':',$chr,$strand,$beg,$en,$org,$build,$element,$ens,$tr,$tss,$tss,$sym); #For now no fuzzy bussiness
+	    push @sites,$uid;
 	    $labels{$uid}=$label;
+
+	    my $gene_uid=join(':',$chr,$strand,$beg,$en,$org,$build,$element,$ens,'','','',$sym);
+	    unless (grep(/^$gene_uid$/,@sites)) {
+		my $gene_label=$ens.' '.$rel.'('.$key.') '.$element;
+		push @sites,$gene_uid;
+		$labels{$gene_uid}=$gene_label;
+	    }
+
 	    #print ("Found at Abs $key, rel $rel, transcript $tr" . $html->br);#Just to debug
 	}
     }
