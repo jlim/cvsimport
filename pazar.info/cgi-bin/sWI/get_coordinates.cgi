@@ -25,7 +25,7 @@ my %params=%{$query->Vars};
 my $selfpage="$docroot/chrcoordinates.htm";
 print $query->header;
 
-open (SELF, $selfpage) ||die;
+open (SELF, $selfpage);
 
 # my $auxdb=$params{auxDB};
 # if ($auxdb) {
@@ -54,10 +54,11 @@ my $dbaccn = $params{'genedb'};
 my ($gene,$ens,$err);
 
 if (!$accn) {
-    print "<p class=\"warning\">An error occurred!<br>Maybe you haven't selected a combination in the list.</p>\n";
+    print_self($query,"Maybe you haven't selected a combination in the list",1);
+    exit;
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
-	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {
+	unless ($accn=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;} else {
 	    $ens=$accn;
 	    my @ll=$gkdb->ens_to_llid($ens);
 	    $gene=$ll[0];
@@ -65,21 +66,21 @@ if (!$accn) {
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$ens=$gene[0];
-        unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+        unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	my @ll=$gkdb->ens_to_llid($ens);
 	$gene=$ll[0];
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
 	$ens=$gene[0];
-	unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	$gene=$accn;
     } else {
 	($gene,$ens,$err) =convert_id($gkdb,$dbaccn,$accn);
-	if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	if (!$ens) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
     }
     my $sym;
 #    unless (($gene)&&($ens)) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
-    unless ($ens) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+    unless ($ens) {print_self($query,"Gene $accn not found $err. You will have the best results using an EnsEMBL gene ID!",1); exit; } #Error message her - gene not in DB
     else {
 	$sym= $gkdb->llid_to_sym($gene);
 	print "Gene symbol: ". $sym,$query->br;}
@@ -141,7 +142,7 @@ sub next_page {
     my $element=$params{sequence};
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
-	print "Unknown character used in the sequence<br>$element<br>";
+	print $html->h3("Unknown character used in the sequence<br>$element<br>");
 	exit();
     }
     my $length=length($element);
@@ -157,7 +158,7 @@ sub next_page {
     #$org=$pazar->getorg($gene);
     my ($chr,$build,$begin,$end,$orient)=$ensdb->get_ens_chr($ens);
     my $org=$ensdb->current_org();
-    unless ($chr) {print $query->h1("This gene is not mapped in the genome or was not found in the current ensembl release"); exit();}
+    unless ($chr) {print $html->h1("This gene is not mapped in the genome or was not found in the current ensembl release"); exit();}
     #We need now an ensembl adaptor to get the sequence
     my $sadapt=$ensdb->get_ens_adaptor;
     my $adapt=$sadapt->get_SliceAdaptor();

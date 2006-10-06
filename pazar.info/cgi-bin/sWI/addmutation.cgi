@@ -34,7 +34,7 @@ pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 if ($params{modeAdd})  {
-    open (SELF,$selfpage)||print "Cannot Open Page $selfpage";
+    open (SELF,$selfpage)||print $query->h3("Cannot Open Page $selfpage");
 
     while (my $buf=<SELF>) {
 	$buf=~s/serverpath/$cgiroot/;
@@ -77,7 +77,7 @@ if ($params{modeAdd})  {
     }
 
 if ($@) {
-    print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+    print $query->h3("An error occured! Please contact us to report the bug with the following error message:<br>$@");
     exit();
 }
 
@@ -129,7 +129,7 @@ sub store_mut_inter() {
     my $element=$params{sequence};
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
-	print "Unknown character used in the sequence<br>$element<br>";
+	print $query->h3("Unknown character used in the sequence<br>$element<br>");
 	exit();
     }
     my $mutelement=&get_mutseq(\%params);
@@ -188,7 +188,7 @@ sub store_mut_expr() {
     my $element=$params{sequence};
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
-	print "Unknown character used in the sequence<br>$element<br>";
+	print "<h3>Unknown character used in the sequence<br>$element<br></h3>";
 	exit();
     }
     my $mutelement=&get_mutseq(\%params);
@@ -335,13 +335,13 @@ sub get_mutseq {
 }
 
 sub print_deletion_error {
-    print "The format of your deletion description is not correct.\n";
-    print "It should be [start nt]-[end nt] separated by semi-colons if there are more than one (e.g. 100-200;300-400). You also have to use the numbering scheme provided on the webpage besides the original sequence.\n";
+    print "<h3>The format of your deletion description is not correct.</h3>";
+    print "<h3>It should be [start nt]-[end nt] separated by semi-colons if there are more than one (e.g. 100-200;300-400). You also have to use the numbering scheme provided on the webpage besides the original sequence.</h3>";
     exit();
 }
 
 sub print_pointmutation_error {
-    print "The format of your point mutation description is not correct.\n";
-    print "It should be [position][mutant nt] separated by semi-colons if there are more than one (e.g. 5A;7T). You also have to use the numbering scheme provided on the webpage besides the original sequence.\n";
+    print "<h3>The format of your point mutation description is not correct.</h3>";
+    print "<h3>It should be [position][mutant nt] separated by semi-colons if there are more than one (e.g. 5A;7T). You also have to use the numbering scheme provided on the webpage besides the original sequence.</h3>";
     exit();
 }

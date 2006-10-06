@@ -119,7 +119,7 @@ $pazar->reset_outputs;
 };
 
 if ($@) {
-    print "<span class=\"warning\">An error occured! Please contact us to report the bug with the following error message:<br>$@";
+    print "<h3>An error occured! Please contact us to report the bug with the following error message:<br>$@</h3>";
     exit();
 }
 
@@ -173,38 +173,38 @@ my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
 if ($dbaccn eq 'EnsEMBL_gene') {
-    unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {
+    unless ($accn=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
 	$ens=$accn;
     }
 } elsif ($dbaccn eq 'EnsEMBL_transcript') {
     my @gene = $ensdb->ens_transcr_to_gene($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
     my @gene=$gkdb->llid_to_ens($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
     ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
-    if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+    if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 }
-unless ($ens) {print_self($query,"Gene $accn not found $err",1); exit(0); } #Error message her - gene not in DB
+unless ($ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit; } #Error message her - gene not in DB
 my $gene=$ens;
 
 if ($taccn && $taccn ne '') {
     if ($dbtrans=~/ensembl/i) {
 	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	die "your transcript ID doesn't match your gene ID!" unless ($gene_chk eq $ens);
+	unless ($gene_chk eq $ens) { print "<h3>An error occured! Check that the provided transcript ID matches the gene ID!</h3>You will have the best results using EnsEMBL IDs!"; exit;}
     } elsif ($dbtrans=~/refseq/i) {
 	my ($trans)=$ensdb->nm_to_enst($taccn);
-	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {die "Conversion failed for $taccn";}
+	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<h3>An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</h3>You will have the best results using an EnsEMBL ID!"; exit;}
 	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	die "your transcript ID doesn't match your gene ID!" unless ($gene_chk eq $ens);
+	unless ($gene_chk eq $ens) { print "<h3>An error occured! Check that the provided transcript ID matches the gene ID!</h3>You will have the best results using EnsEMBL IDs!"; exit;}
     } elsif ($dbtrans=~/swissprot/i) {
 	my ($trans)=$ensdb->swissprot_to_enst($taccn);
-	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {die "Conversion failed for $taccn";}
+	if ($trans=~/\w{2,}/) { $taccn=$trans; } else {print "<h3>An error occured! Check that the provided ID ($taccn) is a $dbtrans ID!</h3>You will have the best results using an EnsEMBL ID!"; exit;}
 	my ($gene_chk)=$ensdb->ens_transcr_to_gene($taccn);
-	die "your transcript ID doesn't match your gene ID!" unless ($gene_chk eq $ens);
+	unless ($gene_chk eq $ens) { print "<h3>An error occured! Check that the provided transcript ID matches the gene ID!</h3>You will have the best results using EnsEMBL IDs!"; exit;}
     }
     $gene=$taccn;
 }
@@ -231,7 +231,7 @@ if ($params{sequence} && $params{sequence} ne '') {
     my $element=$params{sequence};
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
-	print "Unknown character used in the sequence<br>$element<br>";
+	print $query->h3("Unknown character used in the sequence<br>$element<br>");
 	exit();
     }
     if (uc($seq) ne uc($element)) {
@@ -263,7 +263,10 @@ if ($params{sequence} && $params{sequence} ne '') {
     }
 }
 
-die "Could not connect to pazar" unless ($pazar);
+unless ($pazar) {
+    print $query->h3("Could not connect to pazar");
+    exit;
+}
 
 my $regseq=pazar::reg_seq->new(
                           -seq=>$seq,
@@ -296,7 +299,7 @@ sub store_artifical {
     my $element=$params{csequence};
     $element=~s/\s*//g;
     if ($element=~/[^agctnAGCTN]/) {
-	print "Unknown character used in the sequence<br>$element<br>";
+	print $query->h3("Unknown character used in the sequence<br>$element<br>");
 	exit();
     }
     return $pazar->table_insert('construct',$params{constructname},$params{artificialcomment},$element);
@@ -337,7 +340,7 @@ sub check_aname {
     my ($pazar,$aname,$proj,$userid,$evidid,$methid,$cellid,$refid,$desc)=@_;
     $aname=uc($aname);
     my $projid=$pazar->get_projectid;
-    my $dh=$pazar->prepare("select count(*) from analysis where project_id='$projid' and name=?")||die;
+    my $dh=$pazar->prepare("select count(*) from analysis where project_id='$projid' and name=?");
     my $unique=0;
     my $i=1;
     my $aid;
@@ -346,7 +349,7 @@ sub check_aname {
 	if ($aid) {
 	    return $aid;
 	} else {
-	    $dh->execute($aname)||die;
+	    $dh->execute($aname);
 	    my $exist=$dh->fetchrow_array;
 	    if ($exist) {
 		if ($i>1) {

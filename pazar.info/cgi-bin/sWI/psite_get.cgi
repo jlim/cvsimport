@@ -215,7 +215,7 @@ if ($params{TFcentric}) {
     my @classes= $pazar->get_all_classes();
     my @families= $pazar->get_all_families();
 
-open (TFC,$alterpage)||die;
+open (TFC,$alterpage);
 while (my $buf=<TFC>) {
 	if ($buf=~/action/i) {
 		$buf=~s/serverpath/$cgiroot/i;
@@ -273,7 +273,7 @@ print $template_tail->output;
 exit();
 }
 
-open (NEXT, $nextpage) ||die;
+open (NEXT, $nextpage);
 while (my $buf=<NEXT>) {
     $buf=~s/htpath/$docpath/;
     $buf=~s/serverpath/$cgiroot/i;

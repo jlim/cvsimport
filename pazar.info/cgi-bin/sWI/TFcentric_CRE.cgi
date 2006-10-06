@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use HTML::Template;
+
 use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
 use pazar;
@@ -18,7 +18,12 @@ my $user=$info{user};
 my $pass=$info{pass};
 my $proj=$params{project};
 
-die 'Not logged in' unless (($user)&&($pass));
+print $query->header;
+
+unless (($user)&&($pass)) {
+    print $query->h3('Not logged in');
+    exit;
+}
 
 my $auxdb=$params{auxDB};
 
@@ -29,7 +34,7 @@ my @voc=qw(TF TFDB  family class modifications);
 
 my (%tf,%tfdb,%class,%family,%modif,%seen,%interact);
 my $input = $params{'submit'};
-    print $query->header;
+
 my $analysis=$params{'aname'};
 unless ($info{userid}) {
 
@@ -42,7 +47,7 @@ my @cell_names=$pazar->get_all_cell_names;
 my @tissue_names=$pazar->get_all_tissue_names;
 
 my $alterpage=$input=~/CRE/?"$docroot/TFcentric_CRE.htm":"$docroot/SELEX.htm";
-open (TFC,$alterpage)||die "Page $alterpage removed?";
+open (TFC,$alterpage)||print $query->h3("Page $alterpage removed?");
 
 while (my $buf=<TFC>) {
     $buf=~s/serverpath/$cgiroot/;

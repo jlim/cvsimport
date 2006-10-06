@@ -71,14 +71,14 @@ sub get_mutseq {
 }
 
 sub print_deletion_error {
-    print "The format of your deletion description is not correct.\n";
-    print "It should be [start nt]-[end nt] separated by semi-colons if there are more than one (e.g. 100-200;300-400). You also have to use the numbering scheme provided on the webpage besides the original sequence.\n";
+    print "<h3>The format of your deletion description is not correct.</h3>";
+    print "<h3>It should be [start nt]-[end nt] separated by semi-colons if there are more than one (e.g. 100-200;300-400). You also have to use the numbering scheme provided on the webpage besides the original sequence.</h3>";
     exit();
 }
 
 sub print_pointmutation_error {
-    print "The format of your point mutation description is not correct.\n";
-    print "It should be [position][mutant nt] separated by semi-colons if there are more than one (e.g. 5A;7T). You also have to use the numbering scheme provided on the webpage besides the original sequence.\n";
+    print "<h3>The format of your point mutation description is not correct.</h3>";
+    print "<h3>It should be [position][mutant nt] separated by semi-colons if there are more than one (e.g. 5A;7T). You also have to use the numbering scheme provided on the webpage besides the original sequence.</h3>";
     exit();
 }
 
