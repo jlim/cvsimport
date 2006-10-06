@@ -49,7 +49,7 @@ resetMenu = function() {
 <br><hr color="black" style="width: 100%; height: 2px;">
 <p><h3><input name="tftype" type="radio" value="newtftype" onClick="MUT.mytfs.disabled=true;MUT.TFcomplex.disabled=false;MUT.pubmed.disabled=false;MUT.TF.disabled=false;MUT.TFDB.disabled=false;MUT.classe.disabled=false;MUT.family.disabled=false;MUT.myclass.disabled=false;MUT.myfamily.disabled=false;MUT.modifications.disabled=false;MUT.add.disabled=false;MUT.TFcomplex.focus();">Enter a new TF:</h3></p>
   <p>TF complex name 
-    <input name="TFcomplex" type="text" id="TFcomplex" disabled=true></p>
+    <input name="TFcomplex" type="text" id="TFcomplex" maxlength=255 disabled=true></p>
   <p>Pubmed (if published) 
     <input name="pubmed" type="text" id="pubmed" disabled=true>
   </p>
@@ -68,13 +68,13 @@ ID</option>
       <option value="swissprot"> Swissprot ID</option>
   </select>
   <p>class
-    <input type="text" name="classe" id="classe" disabled=true>
+    <input type="text" name="classe" maxlength=100 id="classe" disabled=true>
   </p>
   <p>family 
-    <input type="text" name="family" id="family" disabled=true>
+    <input type="text" name="family" maxlength=100 id="family" disabled=true>
   </p>
   <p>modifications (Optional) 
-    <input type="text" name="modifications" id="modifications" disabled=true>
+    <input type="text" name="modifications" maxlength=45 id="modifications" disabled=true>
   </p>
 <hr>
 <p>
@@ -117,22 +117,22 @@ ID</option>
   </p>
   <hr><p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
- <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod" maxlength=255></p>
   <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
   <hr>
   <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
   <p>Cell Name 
-    <input name="cell" type="text" id="cell">
+    <input name="cell" type="text" id="cell" maxlength=45>
     <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue">
+    <input name="tissue" type="text" id="tissue" maxlength=255>
     <br><br>Organism (e.g. Homo sapiens)
-    <input name="cellspecies" type="text" id="cellspecies">
+    <input name="cellspecies" type="text" id="cellspecies" maxlength=45>
 </p><hr>
     <p><b>Reference</b> (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">

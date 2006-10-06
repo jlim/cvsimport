@@ -6,7 +6,7 @@
 <p><h3>Enter a new TF:</h3></p>
  <form action="http://serverpath/TFcentric.cgi" method="post" name="MUT"> 
   <p>TF complex name 
-    <input name="TFcomplex" type="text" id="TFcomplex"></p>
+    <input name="TFcomplex" type="text" id="TFcomplex" maxlength=255></p>
   <p>Pubmed (if published) 
     <input name="pubmed" type="text" id="pubmed">
   </p>
@@ -25,13 +25,13 @@ ID</option>
       <option value="swissprot"> Swissprot ID</option>
   </select>
   <p>class
-    <input type="text" name="class" size="true">
+    <input type="text" name="class" maxlength=100>
   </p>
   <p>family 
-    <input type="text" name="family" size="true">
+    <input type="text" name="family" maxlength=100>
   </p>
   <p>modifications (Optional) 
-    <input type="text" name="modifications">
+    <input type="text" name="modifications" maxlength=45>
   </p><br>
  <hr>
 <p>

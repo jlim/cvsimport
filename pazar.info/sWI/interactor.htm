@@ -45,29 +45,26 @@ resetMenu = function() {
   <h3>If the exact TF is unknown, you can describe a biological sample used (e.g. nuclear extract)</h3>
  <form action="http://serverpath/TFcomplex.cgi" method="post" name="MUT"> 
   <p>Sample Type
-    <input type="text" name="sampletype" size="true">
+    <input type="text" name="sampletype" maxlength=255>
   </p>
   <p>Sample Cell Name 
-    <input name="samplecell" type="text" id="samplecell">
+    <input name="samplecell" type="text" id="samplecell" maxlength=45>
     <br><br>Sample Cell Status 
     <select name="samplecellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select><br><br>
     Sample Tissue 
-    <input name="sampletissue" type="text" id="sampletissue">
+    <input name="sampletissue" type="text" id="sampletissue" maxlength=255>
     <br><br>Sample Organism (e.g. Homo sapiens)
-    <input name="samplecellspecies" type="text" id="samplecellspecies">
+    <input name="samplecellspecies" type="text" id="samplecellspecies" maxlength=45>
 </p>
   <p><b>Sample Development Time/Timepoint</b></p>
-  <p>Exactly <input name="sampletime" value="0" size="5" maxlength="5"
- type="text">   OR    Range-start 
-  <input name="samplerange_start" id="samplerange_start" value="0" size="5" maxlength="5"
- type="text">
+  <p>Exactly <input name="sampletime" value="0" size="5" type="text" maxlength=45>   OR    Range-start 
+  <input name="samplerange_start" id="samplerange_start" value="0" type="text">
 Range-end 
-  <input name="samplerange_end" id="samplerange_end" value="0" size="5" maxlength="5"
- type="text"></p>
-  <p>Scale <select name="samplescale" size="1">
+  <input name="samplerange_end" id="samplerange_end" value="0" type="text"></p>
+  <p>Scale <select name="samplescale">
   <option value="min">minutes</option>
   <option value="hr" selected="selected">hours</option>
   <option value="days">days</option>
@@ -75,7 +72,7 @@ Range-end
   <option value="other">other</option>
   </select><br>
   </p>
-<p>Sample Time Description <textarea name="sampledesc" cols="120" rows="2"> </textarea></p>
+<p>Sample Time Description (max 255 characters)<textarea name="sampledesc" cols="120" rows="2"> </textarea></p>
 <hr>
   <h3>Interaction type between the sample and this sequence </h3>
   <table width="200">
@@ -113,22 +110,22 @@ Range-end
   </p>
   <hr><p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
- <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod" maxlength=255></p>
   <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
   <hr>
   <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
   <p>Cell Name 
-    <input name="cell" type="text" id="cell">
+    <input name="cell" type="text" id="cell" maxlength=45>
     <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue">
+    <input name="tissue" type="text" id="tissue" maxlength=255>
     <br><br>Organism (e.g. Homo sapiens)
-    <input name="cellspecies" type="text" id="cellspecies">
+    <input name="cellspecies" type="text" id="cellspecies" maxlength=45>
 </p><hr>
     <p><b>Reference</b> (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">

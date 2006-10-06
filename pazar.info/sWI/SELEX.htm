@@ -81,22 +81,22 @@ resetMenu = function() {
   </p>
   <hr><p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
- <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod" maxlength=255></p>
   <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
   <hr>
   <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
   <p>Cell Name 
-    <input name="cell" type="text" id="cell">
+    <input name="cell" type="text" id="cell" maxlength=45>
     <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue">
+    <input name="tissue" type="text" id="tissue" maxlength=255>
     <br><br>Organism (e.g. Homo sapiens)
-    <input name="cellspecies" type="text" id="cellspecies"> 
+    <input name="cellspecies" type="text" id="cellspecies" maxlength=45> 
 </p><hr>
     <p><b>Reference</b> (PubMed ID) 
     <input name="reference" type="text" id="reference">
@@ -108,7 +108,7 @@ resetMenu = function() {
   <p>sequence 
     <textarea name="csequence" id="csequence" cols="100" rows="2"></textarea></p>
     <p>construct name 
-    <input name="constructname" type="text" id="constructname">
+    <input name="constructname" type="text" id="constructname" maxlength=45>
   </p>
   <p>comment 
     <textarea name="artificialcomment" cols="100" rows="2" id="artificialcomment"></textarea>

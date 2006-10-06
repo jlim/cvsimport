@@ -42,22 +42,22 @@ resetMenu = function() {
   <h2>Experimental Evidence for a role in regulating Gene Expression</h2>
   <hr><p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
- <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod" maxlength=255></p>
   <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
   <hr>
   <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
   <p>Cell Name 
-    <input name="cell" type="text" id="cell">
+    <input name="cell" type="text" id="cell" maxlength=45>
     <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue">
+    <input name="tissue" type="text" id="tissue" maxlength=255>
     <br><br>Organism (e.g. Homo sapiens)
-    <input name="cellspecies" type="text" id="cellspecies">
+    <input name="cellspecies" type="text" id="cellspecies" maxlength=45>
 </p><hr>
     <p><b>Reference</b> (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">
@@ -69,14 +69,12 @@ resetMenu = function() {
 (if any). Please do not fill anything if not applicable.</h3>
   <h4>Development Time/Timepoint</h4>
   <p> 
-  Exactly <input name="time_dev" value="0" size="5" maxlength="5"
+  Exactly <input name="time_dev" value="0" maxlength="45"
  type="text">   OR    Range-start 
-  <input name="range_start" id="range_start" value="0" size="5" maxlength="5"
- type="text">
+  <input name="range_start" id="range_start" value="0" type="text">
 Range-end 
-  <input name="range_end" id="range_end" value="0" size="5" maxlength="5"
- type="text"></p>
-  <p>Scale <select name="dev_tscale" size="1" id="select">
+  <input name="range_end" id="range_end" value="0" type="text"></p>
+  <p>Scale <select name="dev_tscale" id="select">
   <option value="min">minutes</option>
   <option value="hr" selected="selected">hours</option>
   <option value="days">days</option>
@@ -84,19 +82,17 @@ Range-end
   <option value="other">other</option>
   </select><br>
   </p>
-<p>Description <textarea name="dev_desc" cols="120" rows="2"> </textarea></p>
+<p>Description (max 255 characters)<textarea name="dev_desc" cols="120" rows="2"> </textarea></p>
   <h4>Physiological conditions</h4>
-  <p>Condition <input name="phys_cond" maxlength="25" type="text">
-Concentration/Quantity/Stage <input name="phys_quant" size="5"
+  <p>Condition <input name="phys_cond" maxlength="20" type="text">
+Concentration/Quantity/Stage <input name="phys_quant" maxlength="20"
  type="text">
-Scale<input name="phys_scale" size="5"
- type="text"></p>
+Scale<input name="phys_scale" type="text" maxlength="20"></p>
    <h4>Environmental Conditions</h4>
-  <p>Chemical compound <input name="env_comp" maxlength="25"
+  <p>Chemical compound <input name="env_comp" maxlength="20"
  type="text">
-Concentration/Quantity <input name="env_conc" size="5" type="text">
- Scale<input name="env_scale" size="5"
- type="text"></p>
+Concentration/Quantity <input name="env_conc" type="text" maxlength="20">
+ Scale<input name="env_scale" type="text" maxlength="20"></p>
   <hr>
   <h3>Effect description</h3>
   <table width="200">

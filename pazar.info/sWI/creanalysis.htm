@@ -13,8 +13,8 @@ Element</h2>
 The best way to set those is through the 'Get chromosome coordinates' button.</p>
   <p>sequence
     <textarea name="sequence" id="sequence" cols="120" rows="2"></textarea></p>
-    <p>name (optional)
-    <input name="seqname" type="text" id="seqname">
+    <p>sequence name (optional)
+    <input name="seqname" type="text" id="seqname" maxlength=20>
     quality 
     <select name="quality" id="quality">
       <option selected="selected" value="NA">NA</option>
@@ -24,18 +24,18 @@ The best way to set those is through the 'Get chromosome coordinates' button.</p
     </select>
   </p>
   <p> start 
-    <input name="start" type="text" id="start">
+    <input name="start" type="text" id="start" maxlength=10>
     end 
-    <input name="end" type="text" id="end">
+    <input name="end" type="text" id="end" maxlength=10>
   </p>
   <p>chromosome 
-    <input type="text" name="chromosome" id="chromosome">
-    strand 
+    <input type="text" name="chromosome" id="chromosome" maxlength=5>
+    strand (+ or -)
     <input name="str" type="text" id="str">
-    <input name="build" type="hidden" id="build">
+    <input name="build" type="hidden" id="build" maxlength=45>
  </p>
   <p>organism 
-    <input name="organism" type="text" id="organism">
+    <input name="organism" type="text" id="organism" maxlength=45>
    </p>
   <p> Gene ID 
     <input id="gid" name="gid" maxlength="25" type="text">
@@ -52,7 +52,7 @@ ID</option>
     </select>
   </p>
   <p>Gene Description (optional) 
-    <input name="giddesc" type="text" id="giddesc">
+    <input name="giddesc" type="text" id="giddesc" maxlength=255>
   </p>
   <p>Representative Transcript (optional) 
     <input name="tid" type="text" id="tid">
@@ -66,9 +66,9 @@ ID</option>
     </select>
   </p>
   <p>Transcription Start Region Start (optional) 
-    <input name="fstart" type="text" id="fstart">
+    <input name="fstart" type="text" id="fstart" maxlength=10>
     Transcription Start Region End (optional) 
-    <input name="fend" type="text" id="fend">
+    <input name="fend" type="text" id="fend" maxlength=10>
   </p>
   <p>
     <input name="chrcoord" type="button" id="chrcoord" value="Get Chromosome Coordinates" tooltiptext="Press to get the coordinates from the current Ensembl release" onMouseOver="return escape('test')" onclick="PopUp('http://htpath/chrcoordinates.htm')" >
@@ -78,7 +78,7 @@ ID</option>
   <p>sequence 
     <textarea name="csequence" id="csequence" cols="120" rows="2" disabled="true"></textarea></p>
     <p>construct name 
-    <input name="constructname" type="text" id="constructname" disabled="true">
+    <input name="constructname" type="text" id="constructname" maxlength=45 disabled="true">
   </p>
   <p>comment 
     <textarea name="artificialcomment" cols="120" rows="2" id="artificialcomment" disabled="true"></textarea>

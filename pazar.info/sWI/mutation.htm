@@ -34,20 +34,20 @@ document.MUT.action="http://serverpath/addmutation.cgi";
 <hr color="black">
 <h3>Mutation Information</h3>
   <p><b>Mutant Name</b> (optional)
-    <input name="mutseqname" type="text" id="mutseqname"></p>
+    <input name="mutseqname" type="text" id="mutseqname" maxlength=45></p>
 <p><b>Deletion</b><br>
 Enter the coordinates of the region(s) deleted from the original sequence:<br>
 <input name="mutdel" id="mutdel" type="text">(use nucleotide numbering scheme displayed above:&nbsp;&nbsp;e.g. 130-500;1000-1500)</p>
 <p><b>Point Mutation</b><br>
 Enter the coordinate(s) of the mutated nucleotide(s), relative to the original sequence, followed by the mutant nucleotide:<br>
 <input name="pointmutation" id="pointmutation" type="text">(use nucleotide numbering scheme displayed above:&nbsp;&nbsp;e.g. 54A;55T;58G)</p>
-<p><b>Comments (if any) </b><input type=text name="mutcomment" id="mutcomment" maxlength=250></p>
+<p><b>Comments (if any) </b><textarea name="mutcomment" cols="100" rows="2" id="mutcomment"></textarea></p>
 <p><b>Check the resulting Mutant Sequence     </b><input name="check" type="submit" id="check" value="Check" onClick="setCount(0)">
 </p>
 <hr><h3>Method used to make the mutation</h3>
 <p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
- <p>New Method Name <input name="mutnewmethod" type="text" id="mutnewmethod"></p>
+ <p>New Method Name <input name="mutnewmethod" type="text" id="mutnewmethod" maxlength=255></p>
   <p>New Method Description <textarea name="mutnewmethoddesc" cols="100" rows="2" id="mutnewmethoddesc"></textarea>
   </p>
   <hr>

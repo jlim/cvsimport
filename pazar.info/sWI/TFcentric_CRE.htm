@@ -145,22 +145,22 @@ function MM_popupMsg(msg) { //v1.0
   </p>
   <hr><p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
- <p>New Method Name <input name="newmethod" type="text" id="newmethod"></p>
+ <p>New Method Name <input name="newmethod" type="text" id="newmethod" maxlength=255></p>
   <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
   <hr>
   <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
   <p>Cell Name 
-    <input name="cell" type="text" id="cell">
+    <input name="cell" type="text" id="cell" maxlength=45>
     <br><br>Cell Status 
     <select name="cellstat">
       <option value="primary">primary</option>
       <option value="cell line">cell line</option>
     </select><br><br>
     Tissue 
-    <input name="tissue" type="text" id="tissue">
+    <input name="tissue" type="text" id="tissue" maxlength=255>
     <br><br>Organism (e.g. Homo sapiens)
-    <input name="cellspecies" type="text" id="cellspecies"> 
+    <input name="cellspecies" type="text" id="cellspecies" maxlength=45> 
 </p><hr>
     <p><b>Reference</b> (PubMed ID) describing this specific experiment
     <input name="reference" type="text" id="reference">
@@ -174,8 +174,8 @@ function MM_popupMsg(msg) { //v1.0
 The best way to set those is through the 'Get chromosome coordinates' button.</p>
   <p>sequence
     <textarea name="sequence" id="sequence" cols="100" rows="2"></textarea></p>
-    <p>name (optional)
-    <input name="seqname" type="text" id="seqname">
+    <p>sequence name (optional)
+    <input name="seqname" type="text" id="seqname" maxlength=20>
     quality 
     <select name="quality">
       <option selected="selected" value="NA">NA</option>
@@ -185,18 +185,18 @@ The best way to set those is through the 'Get chromosome coordinates' button.</p
     </select>
   </p>
   <p> start 
-    <input name="start" type="text" id="start">
+    <input name="start" type="text" id="start" maxlength=10>
     end 
-    <input name="end" type="text" id="end">
+    <input name="end" type="text" id="end" maxlength=10>
   </p>
   <p>chromosome 
-    <input type="text" name="chromosome" id="chromosome">
-    strand 
+    <input type="text" name="chromosome" id="chromosome" maxlength=5>
+    strand (+ or -) 
     <input name="str" type="text" id="str">
-    <input name="build" type="hidden" id="build">
+    <input name="build" type="hidden" id="build" maxlength=45>
  </p>
   <p>organism 
-    <input name="organism" type="text" id="organism">
+    <input name="organism" type="text" id="organism" maxlength=45>
    </p>
   <p> Gene ID 
     <input id="gid" name="gid" maxlength="25" type="text">
@@ -213,7 +213,7 @@ ID</option>
     </select>
   </p>
   <p>Gene Description (optional) 
-    <input name="giddesc" type="text" id="giddesc">
+    <input name="giddesc" type="text" id="giddesc" maxlength=255>
   </p>
   <p>Representative Transcript (optional) 
     <input name="tid" type="text" id="tid">
@@ -227,9 +227,9 @@ ID</option>
     </select>
   </p>
   <p>Transcription Start Region Start (optional) 
-    <input name="fstart" type="text" id="fstart">
+    <input name="fstart" type="text" id="fstart" maxlength=10>
     Transcription Start Region End (optional) 
-    <input name="fend" type="text" id="fend">
+    <input name="fend" type="text" id="fend" maxlength=10>
   </p>
   <p>
     <input name="chrcoord" type="button" id="chrcoord" onclick="PopUp('http://htpath/chrcoordinates.htm')" value="Get Chromosome Coordinates">
