@@ -14,18 +14,18 @@ function setCount(target){
 
 if(target == 0) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
+document.gene_search.action="http://www.pazar.info/cgi-bin/testing/gene_list.cgi";
 document.gene_search.target="Window1";
 window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=400');
 }
 if(target == 1) 
 {
 document.gene_search.target="_self";
-document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
+document.gene_search.action="http://www.pazar.info/cgi-bin/testing/gene_search.cgi";
 }
 if(target == 2) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
+document.gene_search.action="http://www.pazar.info/cgi-bin/testing/genebrowse_alpha.pl";
 document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
@@ -68,7 +68,7 @@ function intCheckBox()
 	document.gene_search.tf_analysis.checked=false;
 	document.gene_search.tf_reference.checked=false;
 	document.gene_search.tf_interaction.checked=false;
-	document.gene_search.tf_evidence.checked=false;
+	document.gene_search.tf_mutants.checked=false;
 	intState=0;
     }
     else
@@ -77,7 +77,7 @@ function intCheckBox()
 	document.gene_search.tf_analysis.checked=true;
 	document.gene_search.tf_reference.checked=true;
 	document.gene_search.tf_interaction.checked=true;
-	document.gene_search.tf_evidence.checked=true;
+	document.gene_search.tf_mutants.checked=true;
 	intState=1;
     }
 }
@@ -89,7 +89,7 @@ function othCheckBox()
 	document.gene_search.other_analysis.checked=false;
 	document.gene_search.other_reference.checked=false;
 	document.gene_search.other_effect.checked=false;
-	document.gene_search.other_evidence.checked=false;
+	document.gene_search.other_mutants.checked=false;
 	othState=0;
     }
     else
@@ -97,7 +97,7 @@ function othCheckBox()
 	document.gene_search.other_analysis.checked=true;
 	document.gene_search.other_reference.checked=true;
 	document.gene_search.other_effect.checked=true;
-	document.gene_search.other_evidence.checked=true;
+	document.gene_search.other_mutants.checked=true;
 	othState=1;
     }
 }
@@ -219,7 +219,7 @@ the Attributes to Display</p><br></td>
     </tr>
     <tr>
       <td width="50%" valign="top" align="left">
-      <p ><input name="tf_evidence" type="checkbox"> Evidence </p>
+      <p ><input name="tf_mutants" type="checkbox"> Mutants </p>
       </td>
     </tr>
     <tr>
@@ -246,7 +246,7 @@ the Attributes to Display</p><br></td>
       <p ><input name="other_effect" type="checkbox"> Effect Description </p>
       </td>
       <td width="50%" valign="top" align="left">
-      <p ><input name="other_evidence" type="checkbox"> Evidence </p>
+      <p ><input name="other_mutants" type="checkbox"> Mutants </p>
       </td>
     </tr>
     <tr>

@@ -10,7 +10,7 @@ use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-#use CGI::Debug( report => 'everything', on => 'anything' );
+use CGI::Debug( report => 'everything', on => 'anything' );
 
 use Data::Dumper;
 
@@ -266,7 +266,7 @@ COLNAMES
 		my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
 ########################
 #make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
-		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on'))) 
+		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on'))) 
 {
 		print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
 }
@@ -275,7 +275,7 @@ COLNAMES
 		$bg_color = 0;
 		my $count=1;
 		
-		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on') {
 		    
 #    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 
@@ -304,9 +304,9 @@ COLNAMES
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
 			}
-			if ($params{tf_evidence} eq 'on' || $params{other_evidence} eq 'on')
+			if ($params{tf_mutants} eq 'on' || $params{other_mutants} eq 'on')
 			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Mutants</span></td>";
 			}
 			print "</tr>";
 		    }
@@ -314,46 +314,60 @@ COLNAMES
 		
 
 		foreach my $inter (@interactors) {
-		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on') {
 			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 			if ($params{tf} eq 'on') {
-			    my $tf = $dbh->create_tf;
-			    my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
-			    print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\"><b>".$complex->name."</b><br>";
-			    while (my $subunit=$complex->next_subunit) {
-				my $db = $subunit->get_tdb;
-				my $tid = $subunit->get_transcript_accession($dbh);
-				my $cl = $subunit->get_class; 
-				my $fam = $subunit->get_fam;
-				if (!$cl || $cl eq '0' || $cl eq 'unknown') {
-				print $tid."<br>";
-				} elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
-				    print $tid."&nbsp;(".$cl.")<br>";
-				} else {
-				print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
+			    if ($inter->{tftype} eq 'funct_tf') {
+				my $tf = $dbh->create_tf;
+				my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
+				print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\"><b>".$complex->name."</b><br>";
+				while (my $subunit=$complex->next_subunit) {
+				    my $db = $subunit->get_tdb;
+				    my $tid = $subunit->get_transcript_accession($dbh);
+				    my $cl = $subunit->get_class; 
+				    my $fam = $subunit->get_fam;
+				    if (!$cl || $cl eq '0' || $cl eq 'unknown') {
+					print $tid."<br>";
+				    } elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
+					print $tid."&nbsp;(".$cl.")<br>";
+				    } else {
+					print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
+				    }
+				}
+				print "</td>";
 			    }
+			    if ($inter->{tftype} eq 'sample') {
+				my @sample=$dbh->get_data_by_primary_key('sample',$inter->{tfcomplex});
+				my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
+				print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\">".$sample[0]."&nbsp;".$samplecell[0]."</td>";
 			    }
-			    print "</td>";
 			}
 			my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
 			if ($params{tf_analysis} eq 'on') {
-#			    my $aname=$an[2];
-			    my @anal;
-#			    push @anal,$aname;
+			    my $anal;
 			    if ($an[3]) {
 				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-				push @anal,$met[0];
+#				if ($met[0]) {
+				    $anal.="<b>Method:</b> $met[0]<br>";
+#				}
 			    }
-			    if ($an[4]) {
+#			    if ($an[4]) {
 				my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-				push @anal,$cell[0];
-			    }
-			    if ($an[5]) {
+#				if ($cell[0]) {
+				    $anal.="<b>Cell Type:</b> $cell[0]<br>";
+#				}
+#			    }
+#			    if ($an[5]) {
 				my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-				push @anal,$time[0];
-			    }
+#				if ($time[0]) {
+				    $anal.="<b>Time:</b> $time[0]<br>";
+#				}
+#			    }
+#			    if ($an[7]) {
+				$anal.="<b>Comments:</b> $an[7]<br>";
+#			    }
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-			    print join(':',@anal)."</td>";
+			    print $anal."</td>";
 			}
 			if ($params{tf_reference} eq 'on' && $an[6]) {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
@@ -376,17 +390,36 @@ COLNAMES
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
 			}
-
-			if ($params{tf_evidence} eq 'on' && $an[1]) {
-			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
+			if ($params{tf_mutants} eq 'on') {
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
+			    my @mutants=$dbh->get_mutants_by_analysis_id($inter->{aid});
+			    unless ($mutants[0]) {
+				print "None";
+			    }
+			    foreach my $mutant (@mutants) {
+				my @mut=$dbh->get_data_by_primary_key('mutation_set',$mutant->{mutid});
+				print "<b>Name:</b> $mut[1]<br>";
+				my ($table,$pazarid,@dat)=$dbh->links_to_data($mutant->{olink},'output');
+				if ($table eq 'interaction') {
+				    my @data;
+				    for (my $i=0;$i<(@dat-3);$i++) {
+					if ($dat[$i] && $dat[$i] ne '0') {
+					    push @data,$dat[$i];
+					}
+				    }
+				    print "<b>Effect:</b> ";
+				    print join(":",@data)."<br>";
+				}
+			    }
+#			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+			    print "</td>";
 			}
 			$count++;
 			print "</tr>";
               $bg_color = 1 - $bg_color;
 		    }}
 
-		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_evidence} eq 'on') {
+		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on') {
 		    
 #end table that was created if there were results
 		    if(scalar(@interactors)>0)
@@ -401,7 +434,7 @@ COLNAMES
 
 		
 		
-		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on') {
 		    
 		    		    
 #print table only if results exist
@@ -428,9 +461,9 @@ COLNAMES
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
 			}
-			if ($params{other_evidence} eq 'on' || $params{tf_evidence} eq 'on')
+			if ($params{other_mutants} eq 'on' || $params{tf_mutants} eq 'on')
 			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Evidence</span></td>";
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Mutants</span></td>";
 			}
 			
 			print "</tr>";
@@ -439,7 +472,7 @@ COLNAMES
 
 
 		foreach my $exp (@expressors) {
-		    if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		    if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on') {
 			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
 
 # 			if ($params{tf} eq 'on') {
@@ -448,23 +481,30 @@ COLNAMES
 
 			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
 			if ($params{other_analysis} eq 'on') {
-#			    my $aname=$an[2];
-			    my @anal;
-#			    push @anal,$aname;
+			    my $anal;
 			    if ($an[3]) {
 				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-				push @anal,$met[0];
+#				if ($met[0]) {
+				    $anal.="<b>Method:</b> $met[0]<br>";
+#				}
 			    }
-			    if ($an[4]) {
+#			    if ($an[4]) {
 				my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-				push @anal,$cell[0];
-			    }
-			    if ($an[5]) {
+#				if ($cell[0]) {
+				    $anal.="<b>Cell Type:</b> $cell[0]<br>";
+#				}
+#			    }
+#			    if ($an[5]) {
 				my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-				push @anal,$time[0];
-			    }
+#				if ($time[0]) {
+				    $anal.="<b>Time:</b> $time[0]<br>";
+#				}
+#			    }
+#			    if ($an[7]) {
+				$anal.="<b>Comments:</b> $an[7]<br>";
+#			    }
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-			    print join(':',@anal)."</td>";
+			    print $anal."</td>";
 			}
 			if ($params{other_reference} eq 'on' && $an[6]) {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
@@ -485,16 +525,33 @@ COLNAMES
 			    }
 			    print join(":",@data)."</td>";
 			}
-			if ($params{other_evidence} eq 'on' && $an[1]) {
-			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
+			if ($params{other_mutants} eq 'on') {
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
+			    my @mutants=$dbh->get_mutants_by_analysis_id($exp->{aid});
+			    foreach my $mutant (@mutants) {
+				my @mut=$dbh->get_data_by_primary_key('mutation_set',$mutant->{mutid});
+				print "<b>Name:</b> $mut[1]<br>";
+				my ($table,$pazarid,@dat)=$dbh->links_to_data($mutant->{olink},'output');
+				if ($table eq 'expression') {
+				    my @data;
+				    for (my $i=0;$i<(@dat-3);$i++) {
+					if ($dat[$i] && $dat[$i] ne '0') {
+					    push @data,$dat[$i];
+					}
+				    }
+				    print "<b>Effect:</b> ";
+				    print join(":",@data)."<br>";
+				}
+			    }
+#			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+			    print "</td>";
 			}
 			$count++;
 			print "</tr>";
 			$bg_color = 1 - $bg_color;
 		    }}
 
-		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_evidence} eq 'on') {
+		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on') {
 
 #end table only if results exist
 		    if(scalar(@expressors)>0)
