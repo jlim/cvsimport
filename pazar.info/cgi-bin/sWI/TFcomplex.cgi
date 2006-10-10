@@ -702,7 +702,7 @@ sub check_aname {
 
 sub get_TF_id {
     my ($pazar,$tfname)=@_;
-
     my @tfnames = split(/ \(/,$tfname);
-    return $pazar->get_complex_id_by_name($tfnames[0]);
+    my @ids=$pazar->get_complex_id_by_name($tfnames[0]);
+    return $ids[0];
 }
