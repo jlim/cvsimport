@@ -14,18 +14,18 @@ function setCount(target){
 
 if(target == 0) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/testing/gene_list.cgi";
+document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
 document.gene_search.target="Window1";
 window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=400');
 }
 if(target == 1) 
 {
 document.gene_search.target="_self";
-document.gene_search.action="http://www.pazar.info/cgi-bin/testing/gene_search.cgi";
+document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
 }
 if(target == 2) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/testing/genebrowse_alpha.pl";
+document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
 document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
