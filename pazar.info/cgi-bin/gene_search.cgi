@@ -248,9 +248,8 @@ COLNAMES
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
 		print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
 
-		    my $rsid = $regseq->accession_number;
-		    my $rsid7d = sprintf "%07d",$rsid;
-		    my $id="RS".$rsid7d;
+		my $id=write_pazarid($regseq->accession_number,'RS');
+
 		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$id."&nbsp;</td>";
 		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
 
@@ -299,10 +298,6 @@ COLNAMES
 			if ($params{tf_interaction} eq 'on')
 			{
 			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
-			}
-			if ($params{other_effect} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
 			}
 			if ($params{tf_mutants} eq 'on' || $params{other_mutants} eq 'on')
 			{
@@ -386,10 +381,6 @@ COLNAMES
 				print join(":",@data)."</td>";
 			    }
 			}
-			if ($params{other_effect} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-			}
 			if ($params{tf_mutants} eq 'on') {
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
 			    my @mutants=$dbh->get_mutants_by_analysis_id($inter->{aid});
@@ -460,6 +451,7 @@ COLNAMES
 			if ($params{other_effect} eq 'on')
 			{
 			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
+			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Conditions</span></td>";
 			}
 			if ($params{other_mutants} eq 'on' || $params{tf_mutants} eq 'on')
 			{
@@ -514,6 +506,8 @@ COLNAMES
 # 			{
 # 			    print "<td width='100' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
 # 			}
+			my @conds=@{$exp->{iotype}};
+			my @condids=@{$exp->{ioid}};
 			if ($params{other_effect} eq 'on') {
 			    my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
@@ -524,11 +518,45 @@ COLNAMES
 				}
 			    }
 			    print join(":",@data)."</td>";
+			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
+			    for (my $i=0;$i<@conds;$i++) {
+				my @dat=$dbh->get_data_by_primary_key($exp->{iotype},$exp->{ioid});
+				$printcond.=join(":",@dat)."<br>";
+				if ($dat[0] eq 'co-expression') {
+				    my $tf = $dbh->create_tf;
+				    my $complex = $tf->get_tfcomplex_by_id($dat[2], 'notargets');
+				    print "<b>$complex->name</b><br>";
+				    while (my $subunit=$complex->next_subunit) {
+					my $db = $subunit->get_tdb;
+					my $tid = $subunit->get_transcript_accession($dbh);
+					my $cl = $subunit->get_class; 
+					my $fam = $subunit->get_fam;
+					if (!$cl || $cl eq '0' || $cl eq 'unknown') {
+					    print $tid."<br>";
+					} elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
+					    print $tid."&nbsp;(".$cl.")<br>";
+					} else {
+					    print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
+					}
+				    }
+				}
+			    }
+			    print "</td>";
 			}
 			if ($params{other_mutants} eq 'on') {
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
 			    my @mutants=$dbh->get_mutants_by_analysis_id($exp->{aid});
 			    foreach my $mutant (@mutants) {
+				my @mut_condids=@{$exp->{ioid}};
+				my $nomatch=0;
+				if (@mut_condids==@condids) {
+				    for (my $j=0;$j<@mut_condids;$j++) {
+					unless (grep(/^$mut_condids[$j]$/,@condids)) {
+					    $nomatch=1;
+					}
+				    }
+				}
+				next if ($nomatch==1);
 				my @mut=$dbh->get_data_by_primary_key('mutation_set',$mutant->{mutid});
 				print "<b>Name:</b> $mut[1]<br>";
 				my ($table,$pazarid,@dat)=$dbh->links_to_data($mutant->{olink},'output');
@@ -619,4 +647,12 @@ sub convert_id {
 	@ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
     }
     return $ensembl[0];
+}
+
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
 }
