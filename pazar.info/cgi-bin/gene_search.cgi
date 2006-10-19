@@ -521,7 +521,8 @@ COLNAMES
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
 			    for (my $i=0;$i<@conds;$i++) {
 				my @dat=$dbh->get_data_by_primary_key($conds[$i],$condids[$i]);
-				$printcond.=join(":",@dat)."<br>";
+				pop @dat;
+				print join(":",@dat)."<br>";
 				if ($dat[0] eq 'co-expression') {
 				    my $tf = $dbh->create_tf;
 				    my $complex = $tf->get_tfcomplex_by_id($dat[2], 'notargets');
