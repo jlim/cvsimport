@@ -520,7 +520,7 @@ COLNAMES
 			    print join(":",@data)."</td>";
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
 			    for (my $i=0;$i<@conds;$i++) {
-				my @dat=$dbh->get_data_by_primary_key($exp->{iotype},$exp->{ioid});
+				my @dat=$dbh->get_data_by_primary_key($conds[$i],$condids[$i]);
 				$printcond.=join(":",@dat)."<br>";
 				if ($dat[0] eq 'co-expression') {
 				    my $tf = $dbh->create_tf;
