@@ -527,10 +527,10 @@ COLNAMES
 				pop @dat;
 				pop @dat;
 				print join(":",@dat)."<br>";
-				if ($dat[0] eq 'co-expression') {
+				if (lc($dat[0]) eq 'co-expression') {
 				    my $tf = $dbh->create_tf;
 				    my $complex = $tf->get_tfcomplex_by_id($dat[2], 'notargets');
-				    print "<b>$complex->name</b><br>";
+				    print "<b>".$complex->name."</b><br>";
 				    while (my $subunit=$complex->next_subunit) {
 					my $db = $subunit->get_tdb;
 					my $tid = $subunit->get_transcript_accession($dbh);
@@ -556,9 +556,12 @@ COLNAMES
 			    my @mutants=$dbh->get_mutants_by_analysis_id($exp->{aid});
 			    my $nomut=0;
 			    foreach my $mutant (@mutants) {
-				my @mut_condids=@{$exp->{ioid}};
+				my @mut_condids=@{$mutant->{ioid}};
 				my $nomatch=0;
-				if (@mut_condids==@condids) {
+				if (@mut_condids!=@condids) {
+				    $nomatch=1;
+				}
+				if (@mut_condids==@condids && @mut_condids!=0) {
 				    for (my $j=0;$j<@mut_condids;$j++) {
 					unless (grep(/^$mut_condids[$j]$/,@condids)) {
 					    $nomatch=1;

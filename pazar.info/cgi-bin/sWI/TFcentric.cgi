@@ -414,5 +414,6 @@ sub get_TF_id {
     my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
 
     my @tfnames = split(/ \(/,$tfname);
-    return $pazar->get_complex_id_by_name($tfnames[0]);
+    my @ids=$pazar->get_complex_id_by_name($tfnames[0]);
+    return $ids[0];
 }
