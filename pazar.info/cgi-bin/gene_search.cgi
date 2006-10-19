@@ -364,7 +364,7 @@ COLNAMES
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 			    print $anal."</td>";
 			}
-			if ($params{tf_reference} eq 'on' && $an[6]) {
+			if ($params{tf_reference} eq 'on') {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
 			}
@@ -498,7 +498,7 @@ COLNAMES
 			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
 			    print $anal."</td>";
 			}
-			if ($params{other_reference} eq 'on' && $an[6]) {
+			if ($params{other_reference} eq 'on') {
 			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
 			}
@@ -523,6 +523,7 @@ COLNAMES
 			    for (my $i=0;$i<@conds;$i++) {
 				$nocond=1;
 				my @dat=$dbh->get_data_by_primary_key($conds[$i],$condids[$i]);
+				pop @dat;
 				pop @dat;
 				pop @dat;
 				print join(":",@dat)."<br>";
