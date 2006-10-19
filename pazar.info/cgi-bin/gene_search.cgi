@@ -519,8 +519,11 @@ COLNAMES
 			    }
 			    print join(":",@data)."</td>";
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
+			    my $nocond=0;
 			    for (my $i=0;$i<@conds;$i++) {
+				$nocond=1;
 				my @dat=$dbh->get_data_by_primary_key($conds[$i],$condids[$i]);
+				pop @dat;
 				pop @dat;
 				print join(":",@dat)."<br>";
 				if ($dat[0] eq 'co-expression') {
@@ -542,11 +545,15 @@ COLNAMES
 				    }
 				}
 			    }
+			    if ($nocond==0) {
+				print "None";
+			    }
 			    print "</td>";
 			}
 			if ($params{other_mutants} eq 'on') {
 			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
 			    my @mutants=$dbh->get_mutants_by_analysis_id($exp->{aid});
+			    my $nomut=0;
 			    foreach my $mutant (@mutants) {
 				my @mut_condids=@{$exp->{ioid}};
 				my $nomatch=0;
@@ -559,6 +566,7 @@ COLNAMES
 				}
 				next if ($nomatch==1);
 				my @mut=$dbh->get_data_by_primary_key('mutation_set',$mutant->{mutid});
+				$nomut=1;
 				print "<b>Name:</b> $mut[1]<br>";
 				my ($table,$pazarid,@dat)=$dbh->links_to_data($mutant->{olink},'output');
 				if ($table eq 'expression') {
@@ -573,6 +581,9 @@ COLNAMES
 				}
 			    }
 #			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
+			    if ($nomut==0) {
+				print "None";
+			    }
 			    print "</td>";
 			}
 			$count++;
