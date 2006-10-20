@@ -213,13 +213,26 @@ foreach my $transcript (@$enstr) {
 	    }
 	    my $uid=join(':',$chr,$strand,$beg,$en,$org,$build,$element,$ens,$tr,$tss,$tss,$sym); #For now no fuzzy bussiness
 	    my $gene_uid=join(':',$chr,$strand,$beg,$en,$org,$build,$element,$ens,'','','',$sym);
-	    unless (grep(/^$gene_uid$/,@sites)) {
-		my $gene_label=$ens.' '.$rel.'('.$key.') '.$element;
+
+	    my $exist=0;
+	    my $trexist=0;
+	    foreach my $entry (@sites) {
+		if ($gene_uid eq $entry) {
+		    $exist=1;
+		}
+		if ($uid eq $entry) {
+		    $trexist=1;
+		}
+	    }
+	    unless ($exist==1) {
+		my $gene_label=$ens.' ('.$key.') '.$element;
 		push @sites,$gene_uid;
 		$labels{$gene_uid}=$gene_label;
 	    }
-	    push @sites,$uid;
-	    $labels{$uid}=$label;
+	    unless ($trexist==1) {
+		push @sites,$uid;
+		$labels{$uid}=$label;
+	    }
 
 	    #print ("Found at Abs $key, rel $rel, transcript $tr" . $html->br);#Just to debug
 	}
