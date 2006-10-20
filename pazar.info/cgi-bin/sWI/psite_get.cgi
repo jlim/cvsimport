@@ -107,27 +107,40 @@ placementx=(ScreenWidth/2)-((580)/500);
 placementy=(ScreenHeight/2)-((380+10)/6);
 WinPop=window.open(PopUpUrl,"","width=580,height=380,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1,left="+placementx+",top="+placementy+",screenX="+placementx+",screenY="+placementy+",");
 }
-
+var ChildWin=null;
 function setCount(target){
     if (document.MM_returnValue) {
+	if (!ChildWin || ChildWin.closed ) {
 if(target == 0) 
 {
 document.CRE.action="http://www.pazar.info/cgi-bin/sWI/TFcomplex.cgi";
-document.CRE.target="Window1";
-window.open('about:blank','Window1','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+document.CRE.target="ChildWin";
+ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 }
 if(target == 1) 
 {
 document.CRE.action="http://www.pazar.info/cgi-bin/sWI/psite_get_cre.cgi";
-document.CRE.target="Window2";
-window.open('about:blank','Window2','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+document.CRE.target="ChildWin";
+ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 }
 if(target == 2) 
 {
 document.CRE.action="http://www.pazar.info/cgi-bin/sWI/accept_cre.cgi";
 document.CRE.target="_self";
 }
+} else{
+	alert('A child window is open. Please finish your annotation before entering a new Experiment!');
+ChildWin.focus();
+	return correctSubmitHandler();
+    }
 }
+}
+
+function correctSubmitHandler(e)
+{
+	if (e && e.preventDefault)
+		e.preventDefault();
+	return false;
 }
 
 function MM_callJS(jsStr) { //v2.0

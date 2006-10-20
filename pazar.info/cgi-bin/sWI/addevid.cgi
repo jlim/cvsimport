@@ -48,9 +48,11 @@ if ($params{'mytissue'} eq 'Select from existing tissue names') {
     $params{'tissue'} = $params{'mytissue'};
     delete $params{'mytissue'};
 }
+if ($params{methodname} eq 'Select from existing methods') {
+    delete $params{methodname};
+}
 
 my ($regid,$type,$aid);
-my @conds;
 eval {
 if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
     $regid=store_artifical($pazar,$query,\%params);
@@ -92,21 +94,6 @@ $evidid||=0;
 $timeid||=0;
 $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$an_desc);
 
-if ($params{env_comp} && $params{env_comp} ne '') {
-    my $conc=$params{env_conc}||'na';
-    my $molecule=$params{env_comp}||'na';
-    my $scale=$params{env_scale}||'na';
-    $condid=$pazar->table_insert('bio_condition','environmental',$molecule,'na',$conc,$scale);
-    $pazar->add_input('bio_condition',$condid);
-    push @conds,$condid;
-}
-if ($params{phys_cond} && $params{phys_cond} ne '') {
-    my $conc=$params{phys_quant}||'na';
-    my $scale=$params{phys_scale}||'na';
-    my $physid=$pazar->table_insert('bio_condition','physical','na',$params{phys_cond},$conc,$scale);
-    $pazar->add_input('bio_condition',$physid);
-    push @conds,$condid;
-}
 my ($quant,$qual,$qscale);
 if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale}; $qual='NA'}
 else { $qual=$params{effectqual}||'NA'; }
@@ -122,36 +109,85 @@ if ($@) {
     print "<h3>An error occured! Please contact us to report the bug with the following error message:<br>$@</h3>";
     exit();
 }
+my $pazaraid=write_pazarid($aid,'AN');
 
-print $query->h1("Submission successful!");
+my $JSCRIPT=<<END;
+// Add a javascript
+var MyChildWin=null;
+function setCount(target){
+    if (!MyChildWin || MyChildWin.closed ) {
+	if(target == 0) {
+	    document.mut.action="http://$cgiroot/addmutation.cgi";
+	    document.mut.target="MyChildWin";
+	    MyChildWin=window.open('about:blank','MyChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+	}
+	if(target == 1) {
+	    document.perturbation.action="http://$cgiroot/addcond.cgi";
+	    document.perturbation.target="MyChildWin";
+	    MyChildWin=window.open('about:blank','MyChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+	}
+    } else{
+	alert('A child window is already open. Please finish your annotation before entering a new Mutation or Perturbation!');
+	MyChildWin.focus();
+	return correctSubmitHandler();
+    }
+}
+function correctSubmitHandler(e)
+{
+	if (e && e.preventDefault)
+		e.preventDefault();
+	return false;
+}
+
+END
+
+print $query->start_html(-title=>"Annotating experiment $pazaraid",
+                         -script=>$JSCRIPT);
+print $query->h1("Submission successful for experiment $pazaraid!");
 if ($type eq 'reg_seq') {
-    print $query->h2("You can add Mutation information or close this window now");
+    print $query->h3("You can add Mutation information for this experiment");
     print $query->start_form(-method=>'POST',
-			     -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+                             -name=>'mut',
+                             -action=>'');
 #    &forward_args($query,\%params);
     print $query->hidden(-name=>'project',-value=>$params{'project'});
     print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
     print $query->hidden(-name=>'aid',-value=>$aid);
     print $query->hidden(-name=>'regid',-value=>$regid);
-    my $conds;
-    if (@conds) {
-	$conds=join(":",@conds);
-	print $query->hidden(-name=>'conds',-value=>$conds);
-    }
     print $query->hidden(-name=>'modeAdd',-value=>'Add');
     print $query->hidden(-name=>'effect',-value=>'expression');
     print $query->submit(-name=>'submit',
-			 -value=>'Add Mutation Information',);
+			 -value=>'Add Mutation Information',
+                         -onClick=>'return setCount(0);');
+    print $query->end_form;
     print $query->br;
-    print $query->br;
-} else {
-    print $query->h2("Please close this window now");
 }
+print $query->h3("You can add perturbation(s) to this experiment and their effect on the expression level. Please indicate below the type of conditions your perturbation involves");
+print $query->start_form(-method=>'POST',
+                         -name=>'perturbation',
+                         -action=>'');
+
+print "<table><tr><td>Co-expression of a TF</td><td><input type=\"text\" name=\"condTF\" value=\"0\" size=\"1\"></td></tr><tr><td>Physiological condition (e.g. temperature change)</td><td><input type=\"text\" name=\"condPHYS\" value=\"0\" size=\"1\"></td></tr><tr><td>Environmental condition (e.g. addition of a chemical compound)</td><td><input type=\"text\" name=\"condENV\" value=\"0\" size=\"1\"></td></tr></table><br>";
+print $query->hidden(-name=>'project',-value=>$params{'project'});
+print $query->hidden(-name=>'aid',-value=>$aid);
+print $query->hidden(-name=>'regid',-value=>$regid);
+print $query->hidden(-name=>'reg_type',-value=>$params{reg_type});
+print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
+print $query->hidden(-name=>'modeCond',-value=>'cond');
+print $query->submit(-name=>'submit',
+		     -value=>'Add Perturbation',
+                     -onClick=>'return setCount(1);');
+print $query->br;
+print $query->br;
+
+print $query->h3("Make sure that you are finished with this experiment before closing this window!");
+
 print $query->button(-name=>'close',
 		     -value=>'Close window',
-		     -onClick=>"window.close()");
-print $query->br;
+		     -onClick=>"window.close();");
 print $query->end_form;
+print $query->br;
+print $query->end_html;
 exit;
 
 
@@ -360,4 +396,12 @@ foreach my $key (keys %params) {
     print $query->hidden($key,$params{$key});
 }
 
+}
+
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
 }

@@ -81,21 +81,21 @@ if ($@) {
     exit();
 }
 
-print $query->h1("Submission successful!");
-print $query->h2("You can add Mutation information or close this window now");
-print $query->start_form(-method=>'POST',
-			 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
-&forward_some_args($query,\%params);
-    print $query->hidden(-name=>'modeAdd',-value=>'Add');
-print $query->submit(-name=>'Add Mutation Information',
-		     -value=>'Add Mutation Information',);
-print $query->br;
+print $query->h1("Mutation Submission successful!");
+print $query->h2("You can close this window now");
+# print $query->start_form(-method=>'POST',
+# 			 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+# &forward_some_args($query,\%params);
+#     print $query->hidden(-name=>'modeAdd',-value=>'Add');
+# print $query->submit(-name=>'Add Mutation Information',
+# 		     -value=>'Add Mutation Information',);
+# print $query->br;
 print $query->br;
 print $query->button(-name=>'close',
 		     -value=>'Close window',
 		     -onClick=>"window.close()");
 print $query->br;
-print $query->end_form;
+# print $query->end_form;
     exit();
 }
 

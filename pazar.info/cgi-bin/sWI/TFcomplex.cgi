@@ -114,6 +114,11 @@ foreach my $key (keys %params) {
 my $started=1;
 while (my $buf=<SELF>) {
     $buf=~s/serverpath/$cgiroot/;
+    unless (@mytfs) {
+	$buf=~s/MUT\.mytfs\.disabled\=true\;//;
+	$buf=~s/MUT\.mytfs\.disabled\=false\;//;
+	$buf=~s/MUT\.mytfs\.focus()\;//;
+    }
     if ($params{'add'}) {
 	$buf=~s/disabled=true//;
 	if ($buf=~/<hr color/i || $buf=~/mytf/i || $buf=~/my tf/i) {
@@ -246,6 +251,37 @@ while (my $buf=<SELF>) {
 }
 exit();
 
+# sub forward_args {
+#     my $params=shift;
+#     my %params = %{$params};
+#     my @voc=qw(add TF TFDB family classe modifications TFcomplex cell cellstat interact0 interactscale inttype qual methodname newmethod newmethoddesc pubmed reference tissue cellspecies analysis_desc);
+# foreach my $key (keys %params) {
+#     unless (grep(/^$key$/,@voc)) {
+# 	print $query->hidden($key,$params{$key});
+#     }
+# }
+# }
+
+# sub recopy_args {
+#     my $params=shift;
+#     my $buf=shift;
+#     my %params = %{$params};
+#     my @voc=qw(TFcomplex cell interact0 newmethod newmethoddesc pubmed reference tissue cellspecies analysis_desc);
+#     my @list=qw(cellstat methodname qual interactscale);
+
+#     foreach my $key (@evoc) {
+# 	if (($buf=~/name=\"$key\"/i)&&($params{$key})) {
+# 	    $buf=~s/name/value=\"$params{$key}\" name/;
+# 	}
+#     }
+#     my @options;
+# foreach my $key (@list) {
+#     if (($buf=~/name=\"$key\"/i)&&($params{$key})) {
+#         $buf=~s/option value=\"$params{$key}\"/option value=\"$params{$key}\";
+#     }
+# }
+
+# }
 sub forward_args {
 my @voc=qw(add TF TFDB family classe modifications TFcomplex cell cellstat interact0 interactscale inttype methodname newmethod newmethoddesc pubmed reference tissue);
 foreach my $key (keys %params) {
@@ -258,6 +294,7 @@ foreach my $key (keys %params) {
 sub next_page {
     my ($pazar,$ensdb,$gkdb,$user,$pass,$params,$query)=@_;
     my %params=%{$params};
+
     unless ($user&&$pass) {
 	print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
 	exit();
@@ -395,17 +432,46 @@ sub next_page {
     $pazar->reset_inputs;
     $pazar->reset_outputs;
 };
+    my $pazaraid=write_pazarid($aid,'AN');
+
+my $JSCRIPT=<<END;
+// Add a javascript
+var MyChildWin=null;
+function setCount(target){
+    if (!MyChildWin || MyChildWin.closed ) {
+	if(target == 0) {
+	    document.mut.action="http://$cgiroot/addmutation.cgi";
+	    document.mut.target="MyChildWin";
+	    MyChildWin=window.open('about:blank','MyChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+	}
+    } else{
+	alert('A child window is already open. Please finish your annotation before entering a new Mutation!');
+	MyChildWin.focus();
+	return correctSubmitHandler();
+    }
+}
+function correctSubmitHandler(e)
+{
+	if (e && e.preventDefault)
+		e.preventDefault();
+	return false;
+}
+END
+
+print $query->start_html(-title=>"Annotating experiment $pazaraid",
+                         -script=>$JSCRIPT);
 
     if ($@) {
 	print "<h3>An error occured! Please contact us to report the bug with the following error message:<br>$@</h3>";
 	exit();
     }
 
-    print $query->h1("Submission successful!");
+    print $query->h1("Submission successful for experiment $pazaraid!");
     if ($type eq 'reg_seq') {
 	print $query->h2("You can add Mutation information or close this window now");
 	print $query->start_form(-method=>'POST',
-				 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+				 -action=>'',
+                                 -name=>'mut');
 #	&forward_args($query,\%params);
 	if ($params{'sampletype'}) {
 	    print $query->hidden(-name=>'sample',-value=>'yes');
@@ -418,7 +484,8 @@ sub next_page {
 	print $query->hidden(-name=>'modeAdd',-value=>'Add');
 	print $query->hidden(-name=>'effect',-value=>'interaction');
 	print $query->submit(-name=>'submit',
-			     -value=>'Add Mutation Information',);
+			     -value=>'Add Mutation Information',
+                             -onClick=>'return setCount(0);');
 	print $query->br;
 	print $query->br;
     } else {
@@ -474,7 +541,7 @@ my ($pazar,$ensdb,$params)=@_;
 %params=%{$params};
 my $tf;
 my @lookup=qw(TF TFDB ENS_TF family classe modifications); #Valid properties of a subunit
-$tf->{function}->{modifications}=$params{modifications};
+#$tf->{function}->{modifications}=$params{modifications};
 my $tf=new pazar::tf::tfcomplex(name=>$params{TFcomplex},pmed=>$params{pubmed});
 my ($tfdat);
 foreach my $key (keys %params) {
@@ -702,7 +769,16 @@ sub check_aname {
 
 sub get_TF_id {
     my ($pazar,$tfname)=@_;
+
     my @tfnames = split(/ \(/,$tfname);
     my @ids=$pazar->get_complex_id_by_name($tfnames[0]);
     return $ids[0];
+}
+
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
 }

@@ -42,7 +42,7 @@ my @cell_names=$pazar->get_all_cell_names;
 my @tissue_names=$pazar->get_all_tissue_names;
 
 my $selfpage="$docroot/condition1.htm";
-open (SELF, $selfpage) ||die;
+open (SELF, $selfpage) || print $query->h3("Cannot open $selfpage");
 while (my $buf=<SELF>) {
     $buf=~s/serverpath/$cgiroot/i;
     print $buf;
@@ -93,13 +93,6 @@ print $query->h2($message);
 my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;
 exit(0);
-}
-
-
-sub forward_args {
-foreach my $key (keys %params) {
-    print $query->hidden($key,$params{$key});
-}
 }
 
 sub getseq {
