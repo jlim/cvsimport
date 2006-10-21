@@ -38,14 +38,14 @@ resetMenu = function() {
 </script>
 </head>
 <body onLoad="resetMenu();">
-<form style="height: 546px;" action="http://serverpath/addevid.cgi" method="post" name="COND">
+<form style="height: 546px;" action="http://serverpath/addevid.cgi" method="post" name="COND1">
   <h2>Experimental Evidence for a role in regulating Gene Expression</h2>
-  <hr><p>Method Name 
+  <hr color="black" style="width: 100%; height: 2px;"><p>Method Name 
 </p><p><b> OR Enter a New Method: </b></p>
  <p>New Method Name <input name="newmethod" type="text" id="newmethod" maxlength=255></p>
   <p>New Method Description <textarea name="newmethoddesc" cols="100" rows="2" id="newmethoddesc"></textarea>
   </p>
-  <hr>
+  <hr color="black" style="width: 100%; height: 2px;">
   <h3>If the experiment is not <i>in vitro</i>, enter the cell/tissue information below.</h3>
   <p>Cell Name 
     <input name="cell" type="text" id="cell" maxlength=45>
@@ -58,16 +58,8 @@ resetMenu = function() {
     <input name="tissue" type="text" id="tissue" maxlength=255>
     <br><br>Organism (e.g. Homo sapiens)
     <input name="cellspecies" type="text" id="cellspecies" maxlength=45>
-</p><hr>
-    <p><b>Reference</b> (PubMed ID) describing this specific experiment
-    <input name="reference" type="text" id="reference">
-  </p>
-  <p><b>Comments</b> concerning this specific experiment<textarea name="analysis_desc" cols="100" rows="2" id="analysis_desc"></textarea>
-  </p>
-  <hr>
-  <h3>Explain specific conditions
-(if any). Please do not fill anything if not applicable.</h3>
-  <h4>Development Time/Timepoint</h4>
+</p>
+<h4>Development Time/Timepoint</h4>
   <p> 
   Exactly <input name="time_dev" value="0" maxlength="45"
  type="text">   OR    Range-start 
@@ -76,36 +68,32 @@ Range-end
   <input name="range_end" id="range_end" value="0" type="text"></p>
   <p>Scale <select name="dev_tscale" id="select">
   <option value="min">minutes</option>
-  <option value="hr" selected="selected">hours</option>
+  <option value="hr">hours</option>
   <option value="days">days</option>
   <option value="years">years</option>
   <option value="other">other</option>
   </select><br>
   </p>
 <p>Description (max 255 characters)<textarea name="dev_desc" cols="120" rows="2"> </textarea></p>
-  <h4>Physiological conditions</h4>
-  <p>Condition <input name="phys_cond" maxlength="20" type="text">
-Concentration/Quantity/Stage <input name="phys_quant" maxlength="20"
- type="text">
-Scale<input name="phys_scale" type="text" maxlength="20"></p>
-   <h4>Environmental Conditions</h4>
-  <p>Chemical compound <input name="env_comp" maxlength="20"
- type="text">
-Concentration/Quantity <input name="env_conc" type="text" maxlength="20">
- Scale<input name="env_scale" type="text" maxlength="20"></p>
-  <hr>
+<hr color="black" style="width: 100%; height: 2px;">
+    <p><b>Reference</b> (PubMed ID) describing this specific experiment
+    <input name="reference" type="text" id="reference">
+  </p>
+  <p><b>Comments</b> concerning this specific experiment<textarea name="analysis_desc" cols="100" rows="2" id="analysis_desc"></textarea>
+  </p>
+  <hr color="black" style="width: 100%; height: 2px;">
   <h3>Effect description</h3>
   <table width="200">
     <tr> 
       <td><label> 
-        <input name="effect_grp" type="radio" value="qual" onClick="COND.effect0.disabled=true;COND.effectscale.disabled=true;COND.effectqual.disabled=false;
-		COND.effectqual.focus();">
+        <input name="effect_grp" type="radio" value="qual" onClick="COND1.effect0.disabled=true;COND1.effectscale.disabled=true;COND1.effectqual.disabled=false;
+		COND1.effectqual.focus();">
         qualitative</label></td>
     </tr>
     <tr> 
       <td><label> 
-        <input name="effect_grp" type="radio" onClick="COND.effect0.disabled=false;COND.effectscale.disabled=false;COND.effectqual.disabled=true;
-		COND.effectqual.focus();" value="quan" checked>
+        <input name="effect_grp" type="radio" onClick="COND1.effect0.disabled=false;COND1.effectscale.disabled=false;COND1.effectqual.disabled=true;
+		COND1.effectqual.focus();" value="quan" checked>
         quantitative</label></td>
     </tr>
   </table>
@@ -114,7 +102,7 @@ Concentration/Quantity <input name="env_conc" type="text" maxlength="20">
   </p>
   <p>scale 
     <select name="effectscale" id="effectscale">
-      <option value="percent" selected>percent</option>
+      <option value="percent">percent</option>
       <option value="absolute">absolute</option>
       <option value="relative">relative</option>
       <option value="fold">fold</option>
@@ -127,10 +115,10 @@ Concentration/Quantity <input name="env_conc" type="text" maxlength="20">
       <option value="no change">no change</option>
       <option value="repressed">repressed</option>
       <option value="strongly repressed">strongly repressed</option>
-      <option value="NA" selected>NA</option>
+      <option value="NA">NA</option>
     </select>
   </p>
-  <hr>
+  <hr color="black" style="width: 100%; height: 2px;">
   <p><input name="submit" value="Submit Data" type="submit" onClick="MM_validateForm('effect0','','NisNum','range_start','','NisNum','range_end','','NisNum');return document.MM_returnValue">
      <input name="cancel" value="cancel" type="reset"><br> </p><br>
 </form>
