@@ -422,7 +422,7 @@ sub next_page {
     my ($quant,$qual,$qscale);
     if ($params{inttype} eq 'quan' && $params{interact0} && $params{interact0} ne ''){$quant=$params{interact0}; $qscale=$params{interactscale}; $qual='NA';}
     else { $qual=$params{qual}||'NA'; }
-    $pazar->store_interaction($qual,$quant,$qscale);
+    $pazar->store_interaction($qual,$quant,$qscale,$params{intercomment});
     unless ($params{'sampletype'}) {
 	$pazar->add_input('funct_tf',$tfid);
     } else {

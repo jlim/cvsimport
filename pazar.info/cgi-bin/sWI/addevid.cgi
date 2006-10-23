@@ -97,7 +97,7 @@ $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$
 my ($quant,$qual,$qscale);
 if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale}; $qual='NA'}
 else { $qual=$params{effectqual}||'NA'; }
-my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,'');
+my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,$params{effectcomment});
 $pazar->add_output('expression',$expression);
 
 $pazar->store_analysis($aid);

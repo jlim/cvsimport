@@ -229,6 +229,7 @@ ENVCOND
       <option value="NA">NA</option>
     </select>
   </p>
+<p><b>Comments on the expression level (if any) </b><textarea name="effectcomment" cols="100" rows="2" id="effectcomment"></textarea></p>
   <hr color="black" style="width: 100%; height: 2px;">
 <input type="hidden" name="reg_type" value="$params{reg_type}">
 <input type="hidden" name="aid" value="$params{aid}">
@@ -309,7 +310,7 @@ eval {
     my ($quant,$qual,$qscale);
     if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale}; $qual='NA'}
     else { $qual=$params{effectqual}||'NA'; }
-    my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,'');
+    my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,$params{effectcomment});
 
     $pazar->add_input($params{reg_type},$params{regid});
     $pazar->add_output('expression',$expression);
