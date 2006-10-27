@@ -75,3 +75,12 @@ font-family: monospace;
 .justify {
 text-align:justify;
 }
+
+.submitLink {
+   color: #00f;
+   background-color: transparent;
+   text-decoration: underline;
+   border: none;
+   cursor: pointer;
+   cursor: hand;
+  }
