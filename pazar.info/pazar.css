@@ -64,6 +64,12 @@ font-weight: bold;
 color: rgb(255, 0, 0);
 }
 
+.smallredbold {
+font-size: 10px;
+color: rgb(255, 0, 0);
+font-weight: bold;
+}
+
 .margin2 {
 padding-left:25px;
 }
