@@ -400,3 +400,11 @@ sub check_aname {
     $aid=$pazar->table_insert('analysis',$userid,$evidid,$aname,$methid,$cellid,'',$refid,$desc);
     return $aid;
 }
+
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
+}
