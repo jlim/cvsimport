@@ -90,3 +90,41 @@ text-align:justify;
    cursor: pointer;
    cursor: hand;
   }
+
+.seqtabletitle {
+padding-left: 5px;
+width: 250px;
+align: left;
+vertical-align: top;
+background-color: #ff9a40;
+border: 1px solid black;
+}
+
+.seqtable {
+padding-left: 5px;
+align: left;
+vertical-align: top;
+border: 1px solid black;
+}
+
+.genetabletitle {
+padding-left: 5px;
+width: 250px;
+align: left;
+vertical-align: top;
+background-color: #39aecb;
+border: 1px solid black;
+}
+
+.genetable {
+padding-left: 5px;
+align: left;
+vertical-align: top;
+border: 1px solid black;
+}
+
+.searchtable {
+border: 2px solid black;
+width: 1150px;
+border-collapse: collapse;
+}
