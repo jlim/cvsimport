@@ -36,7 +36,7 @@ sub get_mutseq {
 	my @dels=split(/-/,$del);
         if ($dels[0]=~/[^\d]/) {&print_deletion_error;}
         if ($dels[1]=~/[^\d]/) {&print_deletion_error;}
-        unless ($dels[1]>$dels[0]) {&print_deletion_error;}
+        unless ($dels[1]>=$dels[0]) {&print_deletion_error;}
 	push @delstart,$dels[0];
 	push @delend,$dels[1];
     }
