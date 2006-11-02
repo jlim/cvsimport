@@ -116,6 +116,12 @@ else
     my $file = '/usr/local/apache/pazar.info/mapping/'.$filename;
     open (GFF,">$file")||die;
 
+    my $chr = $params{chr};
+    $chr=~s/\s//g;
+    my $start = $params{start};
+    $start=~s/\s//g;
+    my $end = $params{end};
+    $end=~s/\s//g;
 
 #print "resource: ".$resource;
 
@@ -123,18 +129,18 @@ else
 #print the header
     if($resource eq 'ucsc')
     {
-	$header = "browser position chr".$params{chr}.":".($params{start}-$flanking_bp)."-".($params{end}+$flanking_bp)."\n";
+	$header = "browser position chr".$chr.":".($start-$flanking_bp)."-".($end+$flanking_bp)."\n";
 	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"http://www.pazar.info/mapping/\"";
     }
     elsif($resource eq 'ensembl')
     {
-	$header = "browser position chr".$params{chr}.":".($params{start}-$flanking_bp)."-".($params{end}+$flanking_bp)."\n";
+	$header = "browser position chr".$chr.":".($start-$flanking_bp)."-".($end+$flanking_bp)."\n";
 	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"http://www.pazar.info/mapping/\"";
     }
 
 #browser position chr5:142638872-142638896
 #track name=ORegAnno description='ORegAnno-curated regulatory elements' color=160,1,1 url="http://www.bcgsc.ca:8080/oregano/recordview.action?recid=$$"
-	print GFF $header."\n";
+    print GFF $header."\n";
 
     foreach my $project (@projects) {
 	my $proj=$project->{name};
@@ -147,33 +153,40 @@ else
 	    }
 	    my @rest;
 =pod
-	    push @rest,'sequence'.'="'.$regseq->seq.'"';
+		push @rest,'sequence'.'="'.$regseq->seq.'"';
 
 	    push @rest,'db_seqinfo'.'="'.$regseq->seq_dbname.":".$regseq->seq_dbassembly.'"';
 	    if ($regseq->gene_description) {
-		push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description.'"';
-	    } else {
-		push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.'"';
-	    }
+	    push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description.'"';
+	} else {
+	    push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.'"';
+	}
 	    push @rest,'species'.'="'.$regseq->binomial_species.'"';
-=cut
+	    =cut
 
-=pod
-	    push @rest,'sequence'.'='.$regseq->seq;
+		=pod
+		push @rest,'sequence'.'='.$regseq->seq;
 
 	    push @rest,'db_seqinfo'.'='.$regseq->seq_dbname.":".$regseq->seq_dbassembly;
 	    if ($regseq->gene_description) {
-		push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description;
-	    } else {
-		push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession;
-	    }
+	    push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description;
+	} else {
+	    push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession;
+	}
 	    push @rest,'species'.'='.$regseq->binomial_species;
 =cut
 
 #	    my $rest=join(';',@rest);
-	    my $rsid7d = sprintf "%07d",$rsid;
+            my $rsid7d = sprintf "%07d",$rsid;
 	    my $id="RS".$rsid7d;
-	    my $gff='chr'. $regseq->chromosome."\t". join("\t",$proj,$id,$regseq->start,$regseq->end,'.',$regseq->strand,'.',$proj."_".$id);
+	    my $rschr = $regseq->chromosome;
+	    $rschr=~s/\s//g;
+	    my $rsstart = $regseq->start;
+	    $rsstart=~s/\s//g;
+	    my $rsend = $regseq->end;
+	    $rsend=~s/\s//g;
+
+	    my $gff='chr'.$rschr."\t".join("\t",$proj,$id,$rsstart,$rsend,'.',$regseq->strand,'.',$proj."_".$id);
 	    print GFF $gff."\n";
 	}
     }
