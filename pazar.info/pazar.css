@@ -83,7 +83,7 @@ text-align:justify;
 }
 
 .submitLink {
-width: 70px;
+width: 71px;
 text-align: left;
 color: #0066CC;
 background-color: transparent;
@@ -172,6 +172,12 @@ border-collapse: collapse;
 }
 
 .evidencetable {
-width: 1150px;
+width: 1050px;
+border-collapse: collapse;
+}
+
+.evidencetableborder {
+border: 2px solid black;
+width: 1050px;
 border-collapse: collapse;
 }
