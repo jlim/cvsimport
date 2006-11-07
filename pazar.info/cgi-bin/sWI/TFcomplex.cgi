@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use CGI qw( :all);
-#use CGI::Debug(report => everything, on => anything);
+use CGI::Debug(report => everything, on => anything);
 use pazar::talk;
 use pazar;
 use pazar::reg_seq;
@@ -282,8 +282,9 @@ exit();
 # }
 
 # }
+
 sub forward_args {
-my @voc=qw(add TF TFDB family classe modifications TFcomplex cell cellstat interact0 interactscale intercomment inttype methodname newmethod newmethoddesc pubmed reference tissue);
+my @voc=qw(add TF TFDB family classe myclass myfamily modifications TFcomplex cell cellstat mycell mytissue cellspecies interact0 interactscale intercomment inttype methodname newmethod newmethoddesc pubmed reference tissue);
 foreach my $key (keys %params) {
     unless (grep(/^$key$/,@voc)) {
 	print $query->hidden($key,$params{$key});
