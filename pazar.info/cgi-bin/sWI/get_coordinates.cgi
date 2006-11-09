@@ -192,7 +192,7 @@ foreach my $transcript (@$enstr) {
     my $tr=$transcript->stable_id;
     #print $tr,$html->br;
     my ($tss,$seq,$inverted)=getseq($transcript,$adapt,$chr,$begin,$end,$orient,$region,$length);
-    #print $tss,$seq,$html->br;
+#print $tss,$seq,$html->br;
     #print join(':',$seq,$element,$region,$tss),$html->br;
     my ($nf,$site,$precise)=suggest_pos($seq,$inverted,$element,$region,$tss);
     #print 'SITES',Dumper($site),$html->br;
@@ -272,9 +272,9 @@ my ($id, $adapt, $chr,$begin,$end, $orient, $region,$length)=@_;
 my ($l,$st,$en,$tss);
 #Let's see how much we want
 if ($region<0) {
-	$l=1000-$region+$length;
+	$l=10000-$region+$length;
 } else {
-	$l=$region+1000+$length;
+	$l=$region+10000+$length;
 }
 #my $upstream =  Bio::EnsEMBL::Upstream->new(-transcript=>$id,-length=>$l);
 if ($orient==1) {
