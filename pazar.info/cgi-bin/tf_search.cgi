@@ -491,8 +491,12 @@ if ($count<2) {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
-					-additional_params => '-revcomp -mod oops');
+					-additional_params => '-revcomp');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
+
+	if (!$pfm) {
+	    print "<p class=\"warning\">No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</p>\n";
+	} else {
 #print a human readable format of the matrix
 	my $prettystring = $pfm->prettyprint();
 	my @matrixlines = split /\n/, $prettystring;
@@ -506,6 +510,7 @@ if ($count<2) {
 	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
 	print "</table><br>\n";
 ########### end of HTML table
+}
 }
 }
 ####hidden form inputs

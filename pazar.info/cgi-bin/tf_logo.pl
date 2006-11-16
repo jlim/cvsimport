@@ -71,12 +71,19 @@ while (@keys)
     close (TMP);
 
 ###################################
-    unless ($count==0) {
+if ($count<2) {
+    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
+    exit;
+} else {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
-					-additional_params => '-revcomp -mod oops');
+					-additional_params => '-revcomp');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
+
+	if (!$pfm) {
+	    print "<p class=\"warning\">No motif could be found!</p>\n";
+	} else {
 #print a human readable format of the matrix
 	my $prettystring = $pfm->prettyprint();
 	my @matrixlines = split /\n/, $prettystring;
@@ -88,6 +95,7 @@ while (@keys)
 	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
 	print "<br><p style=\"font-size: 14pt;\"><b>Logo:</b><br><img src=\"http://www.pazar.info/tmp/$logo\"></p>";
 	print "<p style=\"font-size: 10pt;\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";
+    }
     }
 
 # print out the html end
