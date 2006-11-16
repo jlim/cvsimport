@@ -1055,9 +1055,10 @@ sub print_tf_attr {
     my %colors = (0 => "#fffff0",
 		  1 => "#9ad3e2"
 		  );
-	my $count=0;
-	my $file="/space/usr/local/apache/pazar.info/tmp/".$tfname.".fa";
-	open (TMP, ">$file");
+    my $count=0;
+    $tfname=~s/\//-/g;
+    my $file="/space/usr/local/apache/pazar.info/tmp/".$tfname.".fa";
+    open (TMP, ">$file");
 
 	print "<input type='hidden' name='accn' value='$tfname'>\n";
 	

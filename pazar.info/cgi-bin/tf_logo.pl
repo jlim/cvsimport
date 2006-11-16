@@ -63,8 +63,7 @@ while (@keys)
     if($key =~ /seq/)
     {	
 		$count++;
-		my $construct_name=$accn."_site".$count;
-		print TMP ">".$construct_name."\n";
+		print TMP ">".$key."\n";
 		print TMP $param{$key}."\n";
 	    }
 }
@@ -89,6 +88,7 @@ if ($count<2) {
 	my @matrixlines = split /\n/, $prettystring;
 	$prettystring = join "<BR>\n", @matrixlines;
 	$prettystring =~ s/ /\&nbsp\;/g;
+	print $get->h3("Custom Profile for TF $accn");
 	print "<span style=\"font-size: 14pt;\"><b>Position Frequency Matrix:</b></span><br><br><SPAN style=\"font-size: 11pt;font-family: monospace;\">$prettystring</SPAN><br>";
 #draw the logo
 	my $logo = $newaccn.".png";
