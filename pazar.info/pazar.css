@@ -97,7 +97,7 @@ cursor: hand;
 .seqtabletitle {
 padding-left: 5px;
 padding-right: 5px;
-width: 250px;
+width: 200px;
 align: left;
 vertical-align: top;
 background-color: #ff9a40;
@@ -127,7 +127,7 @@ border: 1px solid black;
 .genetabletitle {
 padding-left: 5px;
 padding-right: 5px;
-width: 250px;
+width: 200px;
 text-align: left;
 vertical-align: top;
 background-color: #39aecb;
@@ -162,7 +162,7 @@ background-color: #ff9a40;
 
 .searchtable {
 border: 2px solid black;
-width: 1150px;
+width: 950px;
 border-collapse: collapse;
 }
 

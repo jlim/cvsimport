@@ -16,7 +16,7 @@ if(target == 0)
 {
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
 document.gene_search.target="Window1";
-window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=400');
+window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
 }
 if(target == 1) 
 {
