@@ -139,7 +139,7 @@ padding-left: 5px;
 padding-right: 5px;
 text-align: center;
 vertical-align: top;
-background-color: #61b9cf;
+background-color: #39aecb;
 border: 1px solid black;
 }
 
@@ -181,3 +181,14 @@ border: 2px solid black;
 width: 1050px;
 border-collapse: collapse;
 }
+
+.analysistabletitle {
+padding-left: 5px;
+padding-right: 5px;
+width: 200px;
+align: left;
+vertical-align: top;
+background-color: #00B548;
+border: 1px solid black;
+}
+
