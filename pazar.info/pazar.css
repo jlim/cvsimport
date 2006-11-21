@@ -98,7 +98,7 @@ cursor: hand;
 padding-left: 5px;
 padding-right: 5px;
 width: 200px;
-align: left;
+text-align: left;
 vertical-align: top;
 background-color: #ff9a40;
 border: 1px solid black;
@@ -182,13 +182,51 @@ width: 1050px;
 border-collapse: collapse;
 }
 
+.evidencedetailstableborder {
+border: 2px solid black;
+width: 1200px;
+border-collapse: collapse;
+}
+
 .analysistabletitle {
 padding-left: 5px;
 padding-right: 5px;
 width: 200px;
-align: left;
+text-align: left;
 vertical-align: top;
 background-color: #00B548;
 border: 1px solid black;
 }
 
+.analysisdetailstabletitle {
+padding-left: 5px;
+padding-right: 5px;
+text-align: center;
+vertical-align: top;
+background-color: #00B548;
+border: 1px solid black;
+}
+
+.overflow {
+height: 100px;
+overflow:auto;
+}
+
+.tftabletitle {
+padding-left: 5px;
+padding-right: 5px;
+width: 200px;
+text-align: left;
+vertical-align: top;
+background-color: #e65656;
+border: 1px solid black;
+}
+
+.tfdetailstabletitle {
+padding-left: 5px;
+padding-right: 5px;
+text-align: center;
+vertical-align: top;
+background-color: #e65656;
+border: 1px solid black;
+}
