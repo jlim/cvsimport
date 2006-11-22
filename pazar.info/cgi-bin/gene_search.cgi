@@ -17,24 +17,82 @@ use Data::Dumper;
 require 'getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR Gene Search');
+$template->param(TITLE => 'PAZAR Gene View');
+$template->param(JAVASCRIPT_FUNCTION => q{
+function setCount(target){
+
+if(target == 0) 
+{
+document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
+document.gene_search.target="Window1";
+window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
+}
+if(target == 1) 
+{
+document.gene_search.target="_self";
+document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
+}
+if(target == 2) 
+{
+document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
+document.gene_search.target="Window2";
+window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
+}
+}
+});
 
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
 }
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
+
+print<<page;
+          <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody><tr>
+              <td colspan="2">
+      <p class="title1">PAZAR - Search by Gene</p>
+      </td>
+    </tr>
+<form name="gene_search" method="post" action="" enctype="multipart/form-data" target="">
+    <tr align="left">
+      <td colspan="2">
+<p > Please enter a &nbsp;
+      <select name="ID_list">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+      <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+      </select>
+&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
+      </td>
+    </tr>
+    <tr align="left">
+      <td colspan="2"><p > Or browse the current list of annotated genes
+&nbsp;
+      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      </td>
+    </tr>
+   </form>
+  </tbody>
+</table>
+<hr color='black'>
+page
 
 #connect to the database
 my $dbh = pazar->new( 
@@ -51,111 +109,141 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
-#	      1 => "#9ad3e2"
-	      1 => "#ffbd83"
+	      1 => "#BDE0DC"
 	      );
 
 my $get = new CGI;
 my %params = %{$get->Vars};
 my $accn = $params{geneID};
-my $dbaccn = $params{ID_list};
+my $dbaccn = $params{ID_list}||'EnsEMBL_gene';
 my $gene;
 
-if (!$accn) {
-    print "<p class=\"warning\">Please provide a gene ID!</p>\n";
-} else {
+if ($accn) {
     if ($dbaccn eq 'EnsEMBL_gene') {
-	unless ($accn=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {$gene=$accn;}
+	unless ($accn=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$accn;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$gene=$gene[0];
-        unless ($gene=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+        unless ($gene=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
 	$gene=$gene[0];
-	unless ($gene=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	unless ($gene=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } else {
 	my ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
-	if (!$ens) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;} else {$gene=$ens;}
+	if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$ens;}
     }
 
 #get open or published projects
+    my %projects;
+    my @pubprojects = $dbh->public_projects;
+    foreach my $project (@pubprojects) {
+	my $projname = $dbh->get_project_name_by_ID($project);
+	$projects{$project}=$projname;
+    }
 
-    my $projectsth=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
-    my @projects;
-    while (my $project=$projectsth->fetchrow_hashref) {
-	push @projects, [$project->{project_name},$project->{project_id}];
-	
+#get user's restricted projects if logged in
+    if ($loggedin eq 'true') {
+	foreach my $proj (@projids) {
+	    my $projname = $dbh->get_project_name_by_ID($proj);
+	    $projects{$proj}=$projname;
+	}
     }
 
     my $empty=0;
-
 
 #get the gene name
     my $pazarsth = $dbh->prepare("select * from gene_source where db_accn='$gene'");
     $pazarsth->execute();
 		
-#pazar load tfs from results for each result
-    my $res = $pazarsth->fetchrow_hashref;
+#get the gene descriptions
+    my @geneName;
+    my @pazargeneid;
+    my @geneproj;
+    while (my $res = $pazarsth->fetchrow_hashref) {
+	my $pid=$res->{project_id};
+	if (grep(/^$pid$/,(keys %projects))) {
+	    my $geneName = $res->{description}||'-';
+	    push @geneName,$geneName;
+	    my $pazargeneid = write_pazarid($res->{gene_source_id},'GS');
+	    push @pazargeneid,$pazargeneid;
+	    my $proj = $projects{$pid};
+	    push @geneproj,$proj;
+	}
+    }
+    my $geneName;
+    my $pazargeneid;
+    my $geneproj;
+    if (!@geneName) {
+	$geneName='<td class="basictd">-</td>';
+	$pazargeneid='<td class="basictd">-</td>';
+	$geneproj='<td class="basictd">-</td>';
+    } elsif (@geneName==1) {
+	$geneName="<td class=\"basictd\">$geneName[0]</td>";
+	$pazargeneid="<td class=\"basictd\"><form name=\"genelink$pazargeneid[0]\" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$gene\"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid[0]\">&nbsp;</form></td>";
+	$geneproj="<td class=\"basictd\">$geneproj[0]</td>";
+    } else {
+	$geneName='<td><table style="border-collapse:collapse;"><tr>';
+	$pazargeneid='<td><table style="border-collapse:collapse;"><tr>';
+	$geneproj='<td><table style="border-collapse:collapse;"><tr>';
+	for (my $i=0;$i<@geneName;$i++) {
+	    $geneName.="<td class='basictd' width=100>$geneName[$i]</td>";
+	    $pazargeneid.="<td class='basictd' width=100><form name=\"genelink$pazargeneid[$i]\" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$gene\"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid[$i]\">&nbsp;</form></td>";
+	    $geneproj.="<td class='basictd' width=100>$geneproj[$i]</td>";
+	}
+	$geneName.='</tr></table></td>';
+	$pazargeneid.='</tr></table></td>';
+	$geneproj.='</tr></table></td>';
+    }
 
-    my $geneName = $res->{description};
-    
     my @ens_coords = $ensdb->get_ens_chr($gene);
-    my @des = split('\(',$ens_coords[5]);
-    my @desc = split('\[',$des[0]);    
-    my $geneDescription = $desc[0];
+    $ens_coords[5]=~s/\[.*\]//g;
+    $ens_coords[5]=~s/\(.*\)//g;
+    $ens_coords[5]=~s/\.//g;
+    my $geneDescription = $ens_coords[5]||'-';
 
 #get species
 
     my $species = $ensdb->current_org();
+    $species = ucfirst($species)||'-';
 
 #print header
 
 print<<HEADER_TABLE;
-
-<table width='1150' border=1 cellspacing=0>
-<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Gene Name</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneName</td></tr>
-<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Accession</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$gene</td></tr>
-<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Description</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$geneDescription</td></tr>
-<tr><td align="center" valign="top" bgcolor="#39aecb"><span class="title4">Species</span></td><td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;$species</td></tr>
-</table>
+<h1>PAZAR Gene View</h1>
+<table class="summarytable">
+<tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td>$pazargeneid</tr>
+<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td>$geneName</tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene</td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
+<tr><td class="genetabletitle"><span class="title4">Project</span></td>$geneproj</tr>
+</table><br><br>
 HEADER_TABLE
 
 
 
 ########### start of HTML table
-#get user's restricted projects if logged in
+print<<COLNAMES;	    
+		<table class="searchtable"><tr>
+		    <td width="100" class="genedetailstabletitle"><span class="title4">Project</span></td>
+		    
+COLNAMES
+    print "<td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
+    print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
+    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
+    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates</span></td>";
+    print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display</span></td>";
+    print "</tr>";
 
-
-	if ($loggedin eq 'true') {
-	    foreach my $proj (@projids) {
-		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
-		my @restr_proj=$restricted->fetchrow_array();
-		if (@restr_proj) {
-		    push @projects, [$restr_proj[0],$proj];
-#		    push @projects, ["some project",$proj];
-=pod
-		    my $pname = "";
-		    foreach my $p (@projids)
-		    {
-			$pname = $pname.",".$p;
-		    }
-
-		    push @projects, [$pname,$proj];
-=cut
-		}
-	    }
-	}
-
-
-    foreach my $arrayref (@projects) {
-	my $projname = $arrayref->[0];
+    foreach my $projid (keys %projects) {
+	my $projname = $projects{$projid};
 	
 #use different connection if it's one of user's restricted projects
 	my $restrictedproj = 0;
 	foreach $pid (@projids)
 	{	    
-	    if("$pid" eq "$arrayref->[1]")
+	    if("$pid" eq "$projid")
 	    {
 		$restrictedproj = 1;
 	    }
@@ -201,419 +289,33 @@ HEADER_TABLE
 
 		$regseq_counter = $regseq_counter + 1;
 
-#reset row color
-		$bg_color = 0;
-
-#start table
-print<<COLNAMES;	    
-		<table width='1150' border=1 cellspacing=0><tr><td>
-		    <table width='100%' border="1" cellspacing="0" cellpadding="3">
-		    <tr>
-		    <td width="100" align="center" valign="top" bgcolor="#61b9cf"><span class="title4">Project</span></td>
-		    
-COLNAMES
-
-		print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcript ID</span></td>";
-
-		if ($params{tss} eq 'on')
-		{
-		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Transcription Start Site</span></td>";
-		}
-		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence Name</span></td>";
-		    print "<td align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
-		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>";
-		    print "<td width='150' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
-
-		if ($params{quality} eq 'on') {
-		    print "<td width='100' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
-		}
-		    print "<td width='80' align='center' valign='top' bgcolor='#61b9cf'><span class=\"title4\">Display</span></td>";
-
-		print "</tr>";
-		
 #print out default information
-		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 		print "<tr>";
-		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">$projname</td>";
+		print "<form name='details$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$projname</div></td>";
 		
-		my $transcript=$regseq->transcript_accession || 'Not Specified';
-		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$transcript."</td>";
-
-		if ($params{tss} eq 'on') {
-		    if ($regseq->transcript_fuzzy_start == $regseq->transcript_fuzzy_end) { print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."</td>";} else {
-			print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->transcript_fuzzy_start."-".$regseq->transcript_fuzzy_end."</td>";
-		    }
-		}
-
-		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->id."&nbsp;</td>";	       
-		print "<td align='left' bgcolor=\"$colors{$bg_color}\">".chopstr($regseq->seq,40)."&nbsp;</td>";
-
 		my $id=write_pazarid($regseq->accession_number,'RS');
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
 
-		print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$id."&nbsp;</td>";
-		print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->chromosome." (".$regseq->strand.") ".$regseq->start."-".$regseq->end."</td>";
+		my $seqname=$regseq->id||'-';
+		print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$seqname."&nbsp;</div></td>";	       
 
-		if ($params{quality} eq 'on') {
-		    print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">".$regseq->quality."&nbsp;</td>";
-		}
-		print "<td width='80' align='center' bgcolor=\"$colors{$bg_color}\"><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></td>";
-		print "</tr></form></table>";
-		print "<p></td></tr>";
+		my $seqstr=chopstr($regseq->seq,40);
+		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-####################### get data objects for retrieving lines of evidence
-		my @interactors=$dbh->get_interacting_factor_by_regseq_id($regseq->accession_number);
-		my @expressors=$dbh->get_expression_by_regseq_id($regseq->accession_number);
-########################
-#make sure that if there is at least one interactor or expressor and that there is at least 1 field being displayed 	 if(scalar(@interactors)>0 || scalar(@expressors)>0)
-		if((scalar(@interactors)>0 && ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on')) || (scalar(@expressors)>0 && ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on'))) 
-{
-		print "<tr><td align='center' bgcolor='#ff9a40'><center><span class=\"title4\">Lines of Evidence</span></center></td></tr><tr><td>";
-}
-################### BEGIN INTERACTING EVIDENCE SECTION #####################
-#reset row color
-		$bg_color = 0;
-		my $count=1;
-		
-		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on') {
-		    
-#    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
+		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (strand ".$regseq->strand.")</div></td>";
 
-#only print table if there is at least one result
+		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
-		    if(scalar(@interactors)>0)
-		    {
-			print "<table width='100%' cellspacing=0 border=1><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
-			
-			if ($params{tf} eq 'on') {
-			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
-			}
-			if ($params{tf_analysis} eq 'on' || $params{other_analysis} eq 'on')
-			{
-			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-			}
-			if ($params{tf_reference} eq 'on' || $params{other_reference} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
-			}
-			if ($params{tf_interaction} eq 'on')
-			{
-			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
-			}
-			if ($params{tf_mutants} eq 'on' || $params{other_mutants} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Mutants</span></td>";
-			}
-			print "</tr>";
-		    }
-		}
-		
-
-		foreach my $inter (@interactors) {
-		    if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on') {
-			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
-			if ($params{tf} eq 'on') {
-			    if ($inter->{tftype} eq 'funct_tf') {
-				my $tf = $dbh->create_tf;
-				my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
-				print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\"><b>".$complex->name."</b><br>";
-				while (my $subunit=$complex->next_subunit) {
-				    my $db = $subunit->get_tdb;
-				    my $tid = $subunit->get_transcript_accession($dbh);
-				    my $cl = $subunit->get_class; 
-				    my $fam = $subunit->get_fam;
-				    if (!$cl || $cl eq '0' || $cl eq 'unknown') {
-					print $tid."<br>";
-				    } elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
-					print $tid."&nbsp;(".$cl.")<br>";
-				    } else {
-					print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
-				    }
-				}
-				print "</td>";
-			    }
-			    if ($inter->{tftype} eq 'sample') {
-				my @sample=$dbh->get_data_by_primary_key('sample',$inter->{tfcomplex});
-				my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
-				print "<td width='200' align='center' bgcolor=\"$colors{$bg_color}\">".$sample[0]."&nbsp;".$samplecell[0]."</td>";
-			    }
-			}
-			my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
-			if ($params{tf_analysis} eq 'on') {
-			    my $anal;
-			    if ($an[3]) {
-				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-#				if ($met[0]) {
-				    $anal.="<b>Method:</b> $met[0]<br>";
-#				}
-			    }
-#			    if ($an[4]) {
-				my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-#				if ($cell[0]) {
-				    $anal.="<b>Cell Type:</b> $cell[0]<br>";
-#				}
-#			    }
-#			    if ($an[5]) {
-				my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-#				if ($time[0]) {
-				    $anal.="<b>Time:</b> $time[0]<br>";
-#				}
-#			    }
-#			    if ($an[7]) {
-				$anal.="<b>Comments:</b> $an[7]<br>";
-#			    }
-			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-			    print $anal."</td>";
-			}
-			if ($params{tf_reference} eq 'on') {
-			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
-			}
-			if ($params{tf_interaction} eq 'on') {
-			    my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
-			    if ($table eq 'interaction') {
-				print "<td width='100' align='center' bgcolor=\"$colors{$bg_color}\">";
-				my @data;
-				for (my $i=0;$i<(@dat-3);$i++) {
-				    if ($dat[$i] && $dat[$i] ne '0') {
-					push @data,$dat[$i];
-				    }
-				}
-				print join(":",@data)."</td>";
-			    }
-			}
-			if ($params{tf_mutants} eq 'on') {
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
-			    my @mutants=$dbh->get_mutants_by_analysis_id($inter->{aid});
-			    unless ($mutants[0]) {
-				print "None";
-			    }
-			    foreach my $mutant (@mutants) {
-				my @mut=$dbh->get_data_by_primary_key('mutation_set',$mutant->{mutid});
-				print "<b>Name:</b> $mut[1]<br>";
-				my ($table,$pazarid,@dat)=$dbh->links_to_data($mutant->{olink},'output');
-				if ($table eq 'interaction') {
-				    my @data;
-				    for (my $i=0;$i<(@dat-3);$i++) {
-					if ($dat[$i] && $dat[$i] ne '0') {
-					    push @data,$dat[$i];
-					}
-				    }
-				    print "<b>Effect:</b> ";
-				    print join(":",@data)."<br>";
-				}
-			    }
-#			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-			    print "</td>";
-			}
-			$count++;
-			print "</tr>";
-              $bg_color = 1 - $bg_color;
-		    }}
-
-		if ($params{tf} eq 'on' || $params{tf_analysis} eq 'on' || $params{tf_reference} eq 'on' || $params{tf_interaction} eq 'on' || $params{tf_mutants} eq 'on') {
-		    
-#end table that was created if there were results
-		    if(scalar(@interactors)>0)
-		    {
-			print "</table>";
-		    }		    
-		}
-
-################### BEGIN OTHER EVIDENCE SECTION #####################
-#reset row color
-		$bg_color = 0;
-
-		
-		
-		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on') {
-		    
-		    		    
-#print table only if results exist
-		    if (scalar(@expressors) > 0)
-		    {
-			print "<table width='100%' border=1 cellspacing=0><tr><td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">&nbsp;</span></td>";
-
-# 			if ($params{tf} eq 'on') {
-# 			    print "<td width='200' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Transcription Factor</span></td>";
-# 			}
-			if ($params{other_analysis} eq 'on' || $params{tf_analysis} eq 'on')
-			{
-			    print "<td align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Analysis Details</span></td>";
-			}
-			if ($params{other_reference} eq 'on' || $params{tf_reference} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Reference (PMID)</span></td>";
-			}
-# 			if ($params{tf_interaction} eq 'on')
-# 			{
-# 			    print "<td width='100' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Interaction Description</span></td>";
-# 			}
-			if ($params{other_effect} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Effects</span></td>";
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Conditions</span></td>";
-			}
-			if ($params{other_mutants} eq 'on' || $params{tf_mutants} eq 'on')
-			{
-			    print "<td width='150' align='center' valign='top' bgcolor='#ff9a40'><span class=\"title4\">Mutants</span></td>";
-			}
-			
-			print "</tr>";
-		    }
-		}
-
-
-		foreach my $exp (@expressors) {
-		    if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on') {
-			print "<tr><td width='150' align='center' bgcolor=\"$colors{$bg_color}\">Line of evidence $count</td>";
-
-# 			if ($params{tf} eq 'on') {
-# 			    print "<td width='200' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-# 			}
-
-			my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
-			if ($params{other_analysis} eq 'on') {
-			    my $anal;
-			    if ($an[3]) {
-				my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-#				if ($met[0]) {
-				    $anal.="<b>Method:</b> $met[0]<br>";
-#				}
-			    }
-#			    if ($an[4]) {
-				my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-#				if ($cell[0]) {
-				    $anal.="<b>Cell Type:</b> $cell[0]<br>";
-#				}
-#			    }
-#			    if ($an[5]) {
-				my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-#				if ($time[0]) {
-				    $anal.="<b>Time:</b> $time[0]<br>";
-#				}
-#			    }
-#			    if ($an[7]) {
-				$anal.="<b>Comments:</b> $an[7]<br>";
-#			    }
-			    print "<td align='center' bgcolor=\"$colors{$bg_color}\">";
-			    print $anal."</td>";
-			}
-			if ($params{other_reference} eq 'on') {
-			    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">".$ref[0]."</td>";
-			}
-# 			if ($params{tf_interaction} eq 'on')
-# 			{
-# 			    print "<td width='100' align='center' valign='top' bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-# 			}
-			my @conds=@{$exp->{iotype}};
-			my @condids=@{$exp->{ioid}};
-			if ($params{other_effect} eq 'on') {
-			    my ($table,$tableid,@dat)=$dbh->links_to_data($exp->{olink},'output');
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
-			    my @data;
-			    for (my $i=0;$i<(@dat-3);$i++) {
-				if ($dat[$i] && $dat[$i] ne '0') {
-				    push @data,$dat[$i];
-				}
-			    }
-			    print join(":",@data)."</td>";
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
-			    my $nocond=0;
-			    for (my $i=0;$i<@conds;$i++) {
-				$nocond=1;
-				my @dat=$dbh->get_data_by_primary_key($conds[$i],$condids[$i]);
-				pop @dat;
-				pop @dat;
-				pop @dat;
-				print join(":",@dat)."<br>";
-				if (lc($dat[0]) eq 'co-expression') {
-				    my $tf = $dbh->create_tf;
-				    my $complex = $tf->get_tfcomplex_by_id($dat[2], 'notargets');
-				    print "<b>".$complex->name."</b><br>";
-				    while (my $subunit=$complex->next_subunit) {
-					my $db = $subunit->get_tdb;
-					my $tid = $subunit->get_transcript_accession($dbh);
-					my $cl = $subunit->get_class; 
-					my $fam = $subunit->get_fam;
-					if (!$cl || $cl eq '0' || $cl eq 'unknown') {
-					    print $tid."<br>";
-					} elsif  (!$fam || $fam eq '0' || $fam eq 'unknown') {
-					    print $tid."&nbsp;(".$cl.")<br>";
-					} else {
-					    print $tid."&nbsp;(".$cl.", ".$fam.")<br>";
-					}
-				    }
-				}
-			    }
-			    if ($nocond==0) {
-				print "None";
-			    }
-			    print "</td>";
-			}
-			if ($params{other_mutants} eq 'on') {
-			    print "<td width='150' align='center' bgcolor=\"$colors{$bg_color}\">";
-			    my @mutants=$dbh->get_mutants_by_analysis_id($exp->{aid});
-			    my $nomut=0;
-			    foreach my $mutant (@mutants) {
-				my @mut_condids=@{$mutant->{ioid}};
-				my $nomatch=0;
-				if (@mut_condids!=@condids) {
-				    $nomatch=1;
-				}
-				if (@mut_condids==@condids && @mut_condids!=0) {
-				    for (my $j=0;$j<@mut_condids;$j++) {
-					unless (grep(/^$mut_condids[$j]$/,@condids)) {
-					    $nomatch=1;
-					}
-				    }
-				}
-				next if ($nomatch==1);
-				my @mut=$dbh->get_data_by_primary_key('mutation_set',$mutant->{mutid});
-				$nomut=1;
-				print "<b>Name:</b> $mut[1]<br>";
-				my ($table,$pazarid,@dat)=$dbh->links_to_data($mutant->{olink},'output');
-				if ($table eq 'expression') {
-				    my @data;
-				    for (my $i=0;$i<(@dat-3);$i++) {
-					if ($dat[$i] && $dat[$i] ne '0') {
-					    push @data,$dat[$i];
-					}
-				    }
-				    print "<b>Effect:</b> ";
-				    print join(":",@data)."<br>";
-				}
-			    }
-#			    my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-			    if ($nomut==0) {
-				print "None";
-			    }
-			    print "</td>";
-			}
-			$count++;
-			print "</tr>";
-			$bg_color = 1 - $bg_color;
-		    }}
-
-		if ($params{other_analysis} eq 'on' || $params{other_reference} eq 'on' || $params{other_effect} eq 'on' || $params{other_mutants} eq 'on') {
-
-#end table only if results exist
-		    if(scalar(@expressors)>0)
-		    {
-			print "</table>";
-		    }
-		}
-
-#end table around evidence
-		print "</td></tr></table><br>";
-
-	    } #end of regseq loop
-	}    
-}
-
-
-    if (scalar(@projects)==$empty) {
-	print "<p class=\"warning\">No regulatory sequence was found for gene $gene! Is it really an Ensembl Gene ID?</p>\n";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+		print "</tr>";
+		$bg_color =  1 - $bg_color;
+	    }
+	}
+    }
+    print "</table>";
+    if (scalar(keys %projects)==$empty) {
+	print "<h3>There is currently no available annotation for gene $gene in PAZAR!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</h3>";
     }
 }
 
@@ -621,7 +323,7 @@ COLNAMES
 
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
 print $template_tail->output;
 
 #split long lines into several smaller ones by inserting a line break at a specified character interval

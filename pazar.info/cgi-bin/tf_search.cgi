@@ -18,12 +18,33 @@ use Data::Dumper;
 require 'getsession.pl';
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR TF Results');
+$template->param(TITLE => 'PAZAR TF View');
 
-$template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {            
+$template->param(JAVASCRIPT_FUNCTION => q{
+function setCount(target){
+
+if(target == 0) 
+{
+document.tf_search.action="http://www.pazar.info/cgi-bin/tf_list.cgi";
+document.tf_search.target="Window1";
+window.open('about:blank','Window1', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
+}
+if(target == 1) 
+{
+document.tf_search.action="http://www.pazar.info/cgi-bin/tf_search.cgi";
+document.tf_search.target="_self";
+}
+if(target == 2) 
+{
+document.tf_search.action="http://www.pazar.info/cgi-bin/tfbrowse_alpha.pl";
+document.tf_search.target="Window2";
+window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
+}
+}
+function verifyCheckedBoxes() {            
     var numChecked = 0;
     var counter;
     
@@ -52,16 +73,53 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyCheckedBoxes() {
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
 }
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
+
+print<<page;
+          <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody><tr>
+              <td colspan="2">
+      <p class="title1">PAZAR - Search by TF</p>
+      </td>
+    </tr>
+<form name="tf_search" method="post" action="" enctype="multipart/form-data" target="">
+    <tr align="left">
+      <td colspan="2">
+<p > Please enter a &nbsp;
+      <select name="ID_list">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
+gene ID</option>
+      <option value="EnsEMBL_transcript"> EnsEMBL
+transcript
+ID</option>
+      <option value="EntrezGene"> Entrezgene ID</option>
+       <option value="nm"> RefSeq ID</option>
+      <option value="swissprot"> Swissprot ID</option>
+           <option value="tf_name"> functional name</option>
+</select>
+&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
+      </td>
+    </tr>
+    <tr align="left">
+      <td colspan="2"><p > Or browse the current list of reported TFs
+&nbsp;
+      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      </td>
+    </tr>
+   </form>
+  </tbody>
+</table>
+<hr color='black'> 
+page
 
 #connect to the database
 my $dbh = pazar->new( 
@@ -81,45 +139,48 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 my $get = new CGI;
 my %param = %{$get->Vars};
 my $accn = $param{geneID};
-my $dbaccn = $param{ID_list};
+my $dbaccn = $param{ID_list}||'tf_name';
 my @trans;
 my $tfname;
-if (!$accn) {
-    print "<p class=\"warning\">Please provide a TF ID!</p>\n";
-    exit;
-} else {
+if ($accn) {
     if ($dbaccn eq 'EnsEMBL_gene') {
 	@trans = $gkdb->ens_transcripts_by_gene($accn);
-        unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+        unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	push @trans,$accn;
-        unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+        unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
-	unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	@trans = $gkdb->ens_transcripts_by_gene($gene[0]);
     } elsif ($dbaccn eq 'nm') {
 	@trans=$gkdb->nm_to_enst($accn);
-	unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'swissprot') {
 	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
 	$sp->execute($accn)||die;
 	my $species=$sp->fetchrow_array();
-	if (!$species) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	$ensdb->change_mart_organism($species);
 	@trans =$ensdb->swissprot_to_enst($accn);
-	unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<p class=\"warning\">Conversion failed for $accn! Maybe it is not a $dbaccn ID!</p>"; exit;}
+	unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'tf_name') {
 	@trans = ('none');
 	$tfname = $accn;
     }
     my $count=0;
     my $tfcount=0;
-    my $file="/space/usr/local/apache/pazar.info/tmp/".$accn.".fa";
+    my $cor_accn=$accn;
+    $cor_accn=~s/\//-/g;
+    my $file="/space/usr/local/apache/pazar.info/tmp/".$cor_accn.".fa";
     open (TMP, ">$file");
 ####start of form
     print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl')'>";
     print "<input type='hidden' name='accn' value='$accn'";
+
+print<<HEADER_TABLE;
+<h1>PAZAR TF View</h1>
+HEADER_TABLE
 
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
@@ -162,338 +223,135 @@ if (!$accn) {
 	    }
 	}
 	foreach my $complex (@tfcomplexes) {
-my $bg_color = 0;
-my %colors = (0 => "#fffff0",
-	      1 => "#9ad3e2"
-	      );
+	    my $bg_color = 0;
+	    my %colors = (0 => "#fffff0",
+			  1 => "#FFB5AF"
+			  );
 	    
 ########### start of HTML table
 	    $tfcount++;
-	    print "<p><table width='600' bordercolor='white' bgcolor='white' border=1 cellspacing=0>\n";
-	print<<COLNAMES;
-<tr>
-      <td width="100" align="center" valign="top" bgcolor="#e65656"><span class="title4">Project</span></td>
- <td align="center" width="187" valign="top" bgcolor="#e65656"><span class="title4">Name</span></td>
-<td align="center" bgcolor="#e65656"><span class="title4">Transcript Accession</span>
-      </td> 
-      <td align="center" bgcolor="#e65656"><span class="title4">Class</span>
-      </td> 
-<td align="center" bgcolor="#e65656"><span class="title4">Family</span>
-      </td> 
-  </tr>
+	    my $tfproj=$dbh->get_project_name('funct_tf',$complex->dbid);
+	    my $tf_name=$complex->name;
+	    my $pazartfid=write_pazarid($complex->dbid,'TF');
+
+	    my @classes = ();
+	    my @families = ();
+	    my @transcript_accessions = ();
+
+	    while (my $subunit=$complex->next_subunit) {
+		my $class=!$subunit->get_class?'-':$subunit->get_class;
+		my $fam=!$subunit->get_fam?'-':$subunit->get_fam;
+		push(@classes,$class);
+		push(@families,$fam);
+		push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
+	    }
+	    my $traccns=join('<br>',@transcript_accessions);
+	    my $trclasses=join('<br>',@classes);
+	    my $trfams=join('<br>',@families);
+
+print<<COLNAMES;
+<table class="summarytable">
+<tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
+<tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="http://www.pazar.info/cgi-bin/tf_search.cgi?geneID=$tf_name">$pazartfid</a></td></tr>
+<tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
+<tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
+<tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
+<tr><td class="tftabletitle"><span class="title4">Project</span></td><td class="basictd">$tfproj</td></tr>
+</table><br><br>
 COLNAMES
 
-	    print "<tr><td bgcolor=\"#fffff0\">".$dbh->get_project_name('funct_tf',$complex->dbid)."</td><td bgcolor=\"#fffff0\">".$complex->name."</td>";
-
-    my @classes = ();
-    my @families = ();
-    my @transcript_accessions = ();
-
-    while (my $subunit=$complex->next_subunit) {
-	push(@classes,$subunit->get_class);
-	push(@families,$subunit->get_fam);
-	push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
-    }
-    #print subunit information
-    print "<td bgcolor=\"#fffff0\">";
-    #transcript accession
-    print join('<br>',@transcript_accessions);
-    print  "&nbsp;</td>";
-    print "<td bgcolor=\"#fffff0\">";
-    #class
-    print join('<br>',@classes);
-    print "&nbsp;</td>";
-    print "<td bgcolor=\"#fffff0\">";
-    #family
-    print join('<br>',@families);
-    print "&nbsp;</td>";
-    print  "</tr></table>";
-
-#separate tables for artificial and genomic targets
-    print "<p><table bordercolor='white' bgcolor='white' border=1 cellspacing=0><tr>";
-if ($param{reg_seq} eq 'on' || $param{construct} eq 'on')
-{
-	    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Target type</span></td><td align='center' bgcolor='#61b9cf'><span class=\"title4\">Sequence</span></td>";
-	    if ($param{reg_seq} eq 'on')
-	    {
-		print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">RegSeq ID</span></td>"
-	    }
-}
-
-
-if ($param{reg_seq_name} eq 'on' || $param{construct_name} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Name</span></td>"
-}
-
- if ($param{gene} eq 'on') 
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Gene</span></td>";
-}
- if ($param{species} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Species</span></td>";
-}
-
-if ($param{coordinates} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Coordinates</span></td>";
-}
-
-if ($param{quality} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Quality</span></td>";
-}
-
-if ($param{description} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Description</span></td>";
-}
-
-if ($param{analysis} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Analysis</span></td>";
-}
-
-if ($param{reference} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Reference</span></td>";
-}
-
-if ($param{interaction} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Interaction</span></td>";
-}
-if ($param{evidence} eq 'on') 
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Evidence</span></td>";
-}
-
-
-#print heading for ucsc/ensembl links column if reg_seq is on
-if($param{reg_seq} eq 'on')
-{
-    print "<td align='center' bgcolor='#61b9cf'><span class=\"title4\">Display</td>";
-}
-
-    print "</tr>\n";
-
+########### start of HTML table
+print<<COLNAMES2;	    
+		<table class="evidencetableborder"><tr>
+		    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
+		    
+COLNAMES2
+    print "<td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>";
+    print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span></td>";
+    print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
+    print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
+    print "<td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display</span></td>";
+    print "</tr>";
 
 	    if (!$complex->{targets}) {
 		print "<p class=\"warning\">No target could be found for this TF!</p>\n";
 		next;
 	    }
 	    my $seqcounter = 0;
+	    my @rsids;
+	    my @coids;
 	    while (my $site=$complex->next_target) {
 		$seqcounter++;
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
 
-		if ($type eq 'reg_seq' && $param{reg_seq} eq 'on') {
+		if ($type eq 'reg_seq') {
+		    my $rsid=$site->get_dbid;
+		    if (grep/^$rsid$/,@rsids) {next;}
+		    push @rsids, $rsid;
+		    my $id=write_pazarid($rsid,'RS');
+		    my $seqname=!$site->get_name?'':$site->get_name;
+		    my $reg_seq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+		    my $pazargeneid = write_pazarid($reg_seq->PAZAR_gene_ID,'GS');
+		    my $gene_accession=$reg_seq->gene_accession;
+		    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
+		    $ens_coords[5]=~s/\[.*\]//g;
+		    $ens_coords[5]=~s/\(.*\)//g;
+		    $ens_coords[5]=~s/\.//g;
+		    my $species = $ensdb->current_org();
+		    $species = ucfirst($species)||'-';
 
-		    my $rsid = $site->get_dbid;
-		    my $rsid7d = sprintf "%07d",$rsid;
-		    my $id="RS".$rsid7d;
+		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
 
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic Target (reg_seq): </td><td bgcolor=\"$colors{$bg_color}\">".chopstr($site->get_seq,40)."</td><td bgcolor=\"$colors{$bg_color}\">".$id."</td>";
-		
-		    my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
-
-#		    print Dumper(@regseq);
-#		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
-		    if ($param{reg_seq_name} eq 'on' || $param{construct_name} eq 'on') {
-			if($site->get_name)
-			{
-			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
-			}
-			else
-			{
-			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-			}
-		    }
-		    if ($param{gene} eq 'on') {
-			my $transcript=$regseq[0]->transcript_accession || 'Transcript Not Specified';
-			#print "<td>".$regseq[0]->gene_accession."</td><td>".$transcript."</td>";
-			my @ens_coords = $ensdb->get_ens_chr($regseq[0]->gene_accession);
-			my @des = split('\(',$ens_coords[5]);
-			my @desc = split('\[',$des[0]);
-			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->gene_accession."<br>".$transcript."<br>".$desc[0]."</td>";
-		    }
-		    if ($param{species} eq 'on') {
-			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->binomial_species."</td>";
-		    }
-		    if ($param{coordinates} eq 'on') {
-			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->chromosome." (".$regseq[0]->strand.") ".$regseq[0]->start."-".$regseq[0]->end."</td>";
-		    }
-		    if ($param{quality} eq 'on') {
-			print "<td bgcolor=\"$colors{$bg_color}\">".$regseq[0]->quality."</td>";
-		    }
-
-		    if ($param{description} eq 'on') {
-			if($site->get_desc)
-			{
-			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_desc."</td>";			   
-		        }
-			else
-			{
-			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-			}
-		    }
-
-		}	    
-		if ($type eq 'construct' && $param{construct} eq 'on') {
-		    print "<tr><td bgcolor=\"$colors{$bg_color}\"><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Artificial Target (construct): </td><td bgcolor=\"$colors{$bg_color}\">".chopstr($site->get_seq,40)."</td>";
-
-#if regseq is on, there will be a regseq id column. This needs to be a blank cel
-		    if($param{reg_seq} eq 'on')
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
-#		    print "<ul style=\"margin: 0pt; padding: 0pt; list-style-type: none;\">";
-		    if ($param{construct_name} eq 'on' || $param{reg_seq_name} eq 'on') {
-			print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_name."</td>";
-		    }
-
-#fill in blank cells
-		    if ($param{gene} eq 'on') 
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
-		    if ($param{species} eq 'on')
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
-		    
-		    if ($param{coordinates} eq 'on')
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
-		    
-		    if ($param{quality} eq 'on')
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
-###
-		    if ($param{description} eq 'on') {
-			if($site->get_desc)
-			{
-			    print "<td bgcolor=\"$colors{$bg_color}\">".$site->get_desc."</td>";			   
-		        }
-			else
-			{
-			    print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-			}
-		    }
-                }
-
-
-
-## do the following regardless of target type, but only if corresponding checkbox is on
-if(($type eq 'reg_seq' && $param{reg_seq} eq 'on') || ($type eq 'construct' && $param{construct} eq 'on'))
-{
-		my @an=$dbh->get_data_by_primary_key('analysis',$site->get_analysis);
-		if ($param{analysis} eq 'on') {
-#		    my $aname=$an[2];
-		    my @anal;
-#		    push @anal,$aname;
-		    if ($an[3]) {
-			my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-			push @anal,$met[0];
-		    }
-		    if ($an[4]) {
-			my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
-			push @anal,$cell[0];
-		    }
-		    if ($an[5]) {
-			my @time=$dbh->get_data_by_primary_key('time',$an[5]);
-			push @anal,$time[0];
-		    }
-		    print "<td bgcolor=\"$colors{$bg_color}\">";
-		    print join(':',@anal)."&nbsp;</td>";
+		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
+		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
+		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gene_search.cgi?geneID=$gene_accession\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
+		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
+		    print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
+			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br><br>";
+			print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
+			print "</div></td>";
 		}
-		if ($param{reference} eq 'on') {
-                   if ($an[6])
-                   {
-		       my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-		       print "<td bgcolor=\"$colors{$bg_color}\">".$ref[0]."&nbsp;</td>";
-                   }
-                   else
-                   {
-		       print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>"
-                   }
+		if ($type eq 'construct') {
+		    my $coid=$site->get_dbid;
+		    if (grep/^$coid$/,@coids) {next;}
+		    push @coids, $coid;
+		    my $id=write_pazarid($coid,'CO');
+		    my $seqname=$site->get_name==0?'':$site->get_name;
+		    my $desc=$site->get_desc||'-';
+		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
+		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>".$id."</b><br>$seqname</div></td>";
+		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
+		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
+			print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Description:</b><br>".$desc."</div></td>";
+		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
 		}
-		if ($param{interaction} eq 'on') {
-                    print "<td bgcolor=\"$colors{$bg_color}\">";
-		    my ($table,$pazarid,@dat)=$dbh->links_to_data($site->get_olink,'output');
-		    if ($table eq 'interaction') {
-
-			my @data;
-			for (my $i=0;$i<(@dat-3);$i++) {
-			    if ($dat[$i] && $dat[$i] ne '0') {
-				push @data,$dat[$i];
-			    }
-			}
-			print join(":",@data);
-		    }
-                    print "&nbsp;</td>";
-		}
-		if ($param{evidence} eq 'on') {
-                    if ($an[1])
-                    {
-			my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-			print "<td bgcolor=\"$colors{$bg_color}\">".$ev[0]."_".$ev[1]."</td>";
-                    }
-                    else
-                    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-                    }
-		}
-}
-#print ucsc and ensembl links at the end of the row if target is a refseq
-#get the corresponding regseq object
-		if($param{reg_seq} eq 'on')
-		{
-		    if ($type eq 'reg_seq') {
-			my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
-			my $target_regseq = $regseq[0];			
-			print "<td bgcolor=\"$colors{$bg_color}\">";			
-			print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br>";
-			print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$target_regseq->chromosome."&start=".$target_regseq->start."&end=".$target_regseq->end."&species=".$target_regseq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
-			print "</td>";
-		    }
-		    else
-		    {
-			print "<td bgcolor=\"$colors{$bg_color}\">&nbsp;</td>";
-		    }
-		}
-
                 print "</tr>";
 		$count++;
-		my $construct_name=$accn."_site".$count;
+		my $construct_name=$cor_accn."_site".$count;
 		print TMP ">".$construct_name."\n";
 		print TMP $site->get_seq."\n";
                 $bg_color = 1 - $bg_color;
             }
 	    print "</table><br>";
-}
-}
+	}
+    }
     close (TMP);
 
-if ($tfcount==0) {
-		print "<p class=\"warning\">No TF with the ID $accn could be found in the database!</p>\n";
-		exit;
-	    }
-if ($param{profile} eq 'on') {
-if ($count<2) {
-    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
-    exit;
-} else {
+    if ($tfcount==0) {
+	print "<h3>There is currently no available annotation for the Transcription Factor $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this TF or any other TF!</h3>";
+	exit;
+    }
+
+    if ($count<2) {
+	print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
+	exit;
+    } else {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
 					-additional_params => '-revcomp');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
-
 	if (!$pfm) {
 	    print "<p class=\"warning\">No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</p>\n";
 	} else {
@@ -510,16 +368,15 @@ if ($count<2) {
 	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
 	print "</table><br>\n";
 ########### end of HTML table
-}
-}
-}
-####hidden form inputs
-print "<br><table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
-print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
-<tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
-print "</form>";
-####end of form
     }
+    }
+####hidden form inputs
+    print "<br><table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
+    print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
+<tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
+    print "</form>";
+####end of form
+}
 
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
@@ -553,3 +410,10 @@ sub select {
     return $sth;
 }
 
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
+}
