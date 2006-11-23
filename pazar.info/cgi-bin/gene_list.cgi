@@ -52,11 +52,9 @@ if ($loggedin eq 'true') {
 }
 
 my %gene_project;
-my $node=0;
 foreach my $project (@desc) {
     my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id='$project->{project_id}'");
     if ($genes) {
-	$node++;
 	while (my $gene=$genes->fetchrow_hashref) {
 	    my $found=0;
 	    my $tsrs = &select($dbh, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
@@ -139,15 +137,16 @@ cursor: hand;
     <body style=\"background-color: rgb(255, 255, 255);\" onblur=\"self.focus();\">
     <b><span class=\"title1\">Gene List sorted by project name:</span></b><br>
    You can change the sorting options by clicking on the column headers.<br>
-<table width='750'>";
+<table width='750'><ul>";
 
-foreach my $proj_name (keys %gene_project) {
+my @proj_names=sort(keys %gene_project);
+foreach my $proj_name (@proj_names) {
 my $div_id=$proj_name;
 $div_id=~s/ /_/g;
 my $style='display:none';
 if ($param{opentable} eq $proj_name) {$style='display:block';}
 
-print " <tr><td width='750'><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></td></tr><tr><td width='750'>
+print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></li></td></tr><tr><td width='750'>
 <div id=\"$div_id\" style=\"$style\"><table width='750' class='summarytable'><tr>";
     print "<td class='genetabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
     print "<td class='genetabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";
@@ -158,15 +157,15 @@ print " <tr><td width='750'><a href=\"#$div_id\" onclick = \"showHide('$div_id')
 
     my @sorted;
     if ($param{BROWSE} eq 'species') {
-	@sorted=sort {$a->{species} cmp $b->{species} or $a->{desc} cmp $b->{desc}} @{$gene_project{$proj_name}};
+	@sorted=sort {lc($a->{species}) cmp lc($b->{species}) or lc($a->{desc}) cmp lc($b->{desc})} @{$gene_project{$proj_name}};
     } elsif ($param{BROWSE} eq 'ID') {
 	@sorted=sort {$a->{ID} cmp $b->{ID}} @{$gene_project{$proj_name}};
     } elsif ($param{BROWSE} eq 'ens_desc') {
-	@sorted=sort {$a->{ens_desc} cmp $b->{ens_desc} or $a->{species} cmp $b->{species}} @{$gene_project{$proj_name}};
+	@sorted=sort {lc($a->{ens_desc}) cmp lc($b->{ens_desc}) or lc($a->{species}) cmp lc($b->{species})} @{$gene_project{$proj_name}};
     } elsif ($param{BROWSE} eq 'accn') {
 	@sorted=sort {$a->{accn} cmp $b->{accn}} @{$gene_project{$proj_name}};
     } else {
-	@sorted=sort {$a->{desc} cmp $b->{desc} or $a->{species} cmp $b->{species}} @{$gene_project{$proj_name}};
+	@sorted=sort {lc($a->{desc}) cmp lc($b->{desc}) or lc($a->{species}) cmp lc($b->{species})} @{$gene_project{$proj_name}};
     }
 
 foreach my $gene_data (@sorted) {
@@ -182,7 +181,7 @@ $bg_color =  1 - $bg_color;
 }
 print "</table><br></div></td></tr>";
 }
-print "</table></body></html>";
+print "</ul></table></body></html>";
 
 
 
