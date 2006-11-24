@@ -21,6 +21,32 @@ my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi
 
 # fill in template parameters
 $template->param(TITLE => "PAZAR - Project Search Results");
+$template->param(JAVASCRIPT_FUNCTION => q{
+function verifyCheckedBoxes() {            
+    var numChecked = 0;
+    var counter;
+    
+    // iterate through sequenceform elements
+
+
+    for(counter=0;counter<document.sequenceform.length;counter++)
+    {
+	if (document.sequenceform.elements[counter].checked)
+	{
+	    numChecked++;
+	}
+    }
+    if (numChecked < 2)
+    {
+	alert('You must select at least 2 sequences\nNumber of sequences selected: ' + numChecked);
+    }
+    else
+    {
+	window.open('about:blank','logowin', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
+	document.sequenceform.submit();
+    }
+
+        }});
 
 if($loggedin eq 'true')
 {
