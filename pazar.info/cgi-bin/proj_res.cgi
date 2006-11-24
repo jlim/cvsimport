@@ -731,7 +731,7 @@ COLNAMES
     } else{
 	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR TF View</h1>";
 ####start of form
-	print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl' onsubmit='window.open('','foo','resizable=1,scrollbars=1,width=400,height=300')'>\n";
+	print "<form name='sequenceform' method='post' target='logowin' action='http://www.pazar.info/cgi-bin/tf_logo.pl'>";
 	foreach my $tf (keys %inters) {
 	    &print_tf_attr($dbh,$tf,$projid,\@{$inters{$tf}},%param);
 	}

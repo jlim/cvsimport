@@ -175,7 +175,7 @@ if ($accn) {
     my $file="/space/usr/local/apache/pazar.info/tmp/".$cor_accn.".fa";
     open (TMP, ">$file");
 ####start of form
-    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl')'>";
+    print "<form name='sequenceform' method='post' target='logowin' action='tf_logo.pl'>";
     print "<input type='hidden' name='accn' value='$accn'";
 
 print<<HEADER_TABLE;
