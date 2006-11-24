@@ -77,7 +77,7 @@ if ($count<2) {
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
-					-additional_params => '-revcomp');
+					-additional_params => '-revcomp -mod oops');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
 
 	if (!$pfm) {

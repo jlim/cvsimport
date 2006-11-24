@@ -14,10 +14,10 @@ use CGI::Carp qw(fatalsToBrowser);
 require 'getsession.pl';
  
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => "PAZAR - Project Search Engine");
+$template->param(TITLE => "PAZAR - Project View");
 $template->param(JAVASCRIPT_FUNCTION => q{
 var state=0;
 function CheckBox(){
@@ -36,12 +36,12 @@ if (state == 0)
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
 }
 
 # send the obligatory Content-Type and print the template output
@@ -93,7 +93,7 @@ my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_
 
 my $projid = $dbh->get_projectid();
 
-print "<p class=\"title1\">PAZAR - $proj</p>";
+print "<h1>PAZAR Project View: \'$proj\'</h1>";
 print "<p><span class=\"title4\">Description</span><br>";
 print $descrip."<br>";
 print "</p>";
@@ -109,13 +109,16 @@ my $tnb=&select($dbh, "SELECT count(funct_tf_id) FROM funct_tf WHERE project_id=
 my $tfnb=$tnb->fetchrow_array||'0';
 my $mnb=&select($dbh, "SELECT count(matrix_id) FROM matrix WHERE project_id='$projid'");
 my $matrixnb=$mnb->fetchrow_array||'0';
+my $refnb=&select($dbh, "SELECT count(ref_id) FROM ref WHERE project_id='$projid'");
+my $refsnb=$refnb->fetchrow_array||'0';
 
 print "Regulated Genes: ".$genenb."<br>";
 print "Regulatory sequence (genomic): ".$regseqnb."<br>";
 print "Regulatory sequence (artificial): ".$constrnb."<br>";
 print "Transcription Factors: ".$tfnb."<br>";
-print "Transcription Factor Profiles: ".$matrixnb."<br></p>";
-
+print "Transcription Factor Profiles: ".$matrixnb."<br>";
+print "Annotated Publications: ".$refsnb."<br>";
+print "</p><br>";
 if ($genenb==0&&$regseqnb==0&&$constrnb==0&&$tfnb==0&&$matrixnb!=0) {
     print "<p class=\"warning\"> This project only holds pre-computed profiles.<br>Please use the TF PROFILES search engine to look at those profiles.</p>";
 } else {
@@ -124,7 +127,7 @@ print "<span class=\"title4\">Search Engine</span><br>";
 print<<page1;
 <table>
 <tbody>
-<form name="filters" METHOD="post" ACTION="http://www.pazar.info/cgi-bin/proj_gene_att.cgi" enctype="multipart/form-data" target="_self">
+<form name="filters" METHOD="post" ACTION="http://www.pazar.info/cgi-bin/proj_res.cgi" enctype="multipart/form-data" target="_self">
     <tr>
       <td colspan="2">
 <span class="title3">Filters: </span><br>
@@ -162,17 +165,18 @@ if (@species) {
 
 print<<page1b;
     <tr>
-      <td align="left" valign="top" width="50%">
-        <input type="checkbox" name="species_filter"><b> Restrict to one or more species: </b>
-      </td>
-      <td align="left" valign="top" width="50%">
-        <select name="species" size="3" multiple="multiple">
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="species_filter"></td>
+<td class='basictdnoborder'><b> Restrict to one or more species: </b></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
+<select name="species" size="3" multiple="multiple">
 page1b
 
     foreach (@sortedsp) {
 	print "<option value=\"$_\"> $_ </option>";
     }
-print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
+print "</select><br><br></td></tr>";
 }
 
 my $chr = &select($dbh, "SELECT chr FROM location WHERE project_id=$projid");
@@ -180,10 +184,11 @@ if ($chr) {
 
 print<<page2;
     <tr>
-      <td align="left" valign="top" width="50%">
-      <input type="checkbox" name="region_filter" onclick="javascript:CheckBox()"><b> Restrict to a specific region: </b>
-      </td>
-      <td style="text-align:left;" width="50%">
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="region_filter" onclick="javascript:CheckBox()"></td>
+<td class='basictdnoborder'><b> Restrict to a specific region: </b></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
 	<input type="checkbox" name="chr_filter">chromosome:&nbsp;
         <select name="chromosome">
 page2
@@ -202,12 +207,8 @@ page2
 print<<page2b;
         </select><br>
 	<input type="checkbox" name="bp_filter">base pair: start 
-	<input name="bp_start" value="" type="text"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end
-	<input name="bp_end" value="" type="text">
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
+	<input name="bp_start" value="" type="text"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end
+	<input name="bp_end" value="" type="text"><br><br>
       </td>
     </tr>
 page2b
@@ -229,9 +230,10 @@ if ($genes) {
 	}
 	if ($seq==1) {
 	    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-	    my @des = split('\(',$coords[5]);
-	    my @desc = split('\[',$des[0]);
-	    $gene{$gene->{db_accn}}=$desc[0];
+	    $coords[5]=~s/\[.*\]//g;
+	    $coords[5]=~s/\(.*\)//g;
+	    $coords[5]=~s/\.//g;
+	    $gene{$gene->{db_accn}}=$coords[5]||'-';
 	}
     }
 }
@@ -239,35 +241,32 @@ if (%gene) {
 
 print<<page3;
     <tr>
-      <td align="left" valign="top" width="50%">
-      <input type="checkbox" name="gene_filter"><b> Restrict to one or more Regulated Gene: </b>
-      </td>
-      <td align="left" valign="top" width="50%">
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="gene_filter"></td>
+<td class='basictdnoborder'><b> Restrict to one or more Regulated Gene: </b></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
         <select name="gene" size="3" multiple="multiple">
 page3
 
-my @accns = keys %gene;
-my @sortedaccn=sort(@accns);
+my @sortedaccn=sort {lc($gene{$a}) cmp lc($gene{$b})} (keys %gene);
 foreach my $accn (@sortedaccn) {
 	print "<option value=\"$accn\"> $gene{$accn} ($accn) </option>";
     }
-print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
+print "</select><br><br></td></tr>";
 }
 
 print<<page4;
     <tr>
-      <td colspan="2">
-      <input type="checkbox" name="length_filter"><b> Restrict to sequences </b>
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="length_filter"></td>
+<td class='basictdnoborder'><b> Restrict to sequences </b>
         <select name="shorter_larger">
         <option value="greater_than" selected> Greater than </option>
         <option value="less_than" > Less than </option>
         <option value="equal_to" > Equal to </option>
         </select>
-	<input type="text" name="length"><b> bases </b>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2"> <br>
+	<input type="text" name="length"><b> bases </b><br><br>
       </td>
     </tr>
 page4
@@ -288,10 +287,11 @@ if ($ftf==1) {
 
 print<<page4b;
     <tr>
-      <td align="left" valign="top" width="50%">
-      <input type="checkbox" name="tf_filter"><b> Restrict to one or more Regulating Factor: </b>
-      </td>
-      <td align="left" valign="top" width="50%">
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="tf_filter"></td>
+<td class='basictdnoborder'><b> Restrict to one or more Regulating Factor: </b></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
         <select name="tf" size="3" multiple="multiple">
 page4b
 
@@ -304,7 +304,7 @@ my @sortedtfname=sort(@tfnames);
 	}
 	print ")</option>";
     }
-print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
+print "</select><br><br></td></tr>";
 }
 
 my $classes = &select($dbh, "SELECT class, family FROM tf WHERE project_id=$projid");
@@ -312,22 +312,19 @@ if ($classes) {
 
 print<<page5;
     <tr>
-      <td align="left" valign="top" width="50%">
-      <div><input type="checkbox" name="class_filter"><b> Restrict to a specific class/family: </b></div>
-      </td>
-      <td align="left" valign="top" width="50%">
+      <td class='basictdnoborder'>
+      <div><input type="checkbox" name="class_filter"></td>
+<td class='basictdnoborder'><b> Restrict to a specific class/family: </b></div></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
         <select name="classes">
 page5
 
-    my $cf;
     my @classes;
     while (my ($class,$fam)=$classes->fetchrow_array) {
-	if ($class && $fam) {
-	    $cf=$class."/".$fam;
-	} elsif ($class && !$fam) {
-	    $cf=$class;
-	}
-	if (!grep(/$cf/i,@classes)) {
+	    my $fam2=!$fam?'':'/'.$fam;
+	    my $cf=!$class?'':$class.$fam2;
+	unless (grep(/$cf/i,@classes)||!$cf) {
 	    push @classes,$cf;
 	}
     }
@@ -335,13 +332,14 @@ page5
     foreach (@sortedcf) {
 	print "<option value=\"$_\"> $_ </option>";
     }
-print "</select></td></tr><tr><td colspan=\"2\"><br></td></tr>";
+print "</select><br><br></td></tr>";
 }
 
 print<<page6;
     <tr>
-      <td colspan="2">
-      <input type="checkbox" name="interaction_filter"><b> Restrict to sequences when interaction is </b>
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="interaction_filter"></td>
+<td class='basictdnoborder'><b> Restrict to sequences when interaction is </b>
         <select name="interaction">
         <option value="not_null" selected> Not NULL </option>
         <option value="none" > NULL </option>
@@ -349,16 +347,13 @@ print<<page6;
         <option value="marginal" > marginal </option>
         <option value="good" > good </option>
         <option value="saturation" > saturation </option>
-        </select>
+        </select><br><br>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2">
-      <input type="checkbox" name="expression_filter"><b> Restrict to sequences when expression is </b>
+      <td class='basictdnoborder'>
+      <input type="checkbox" name="expression_filter"></td>
+<td class='basictdnoborder'><b> Restrict to sequences when expression is </b>
         <select name="expression">
         <option value="change" selected> changed </option>
         <option value="no change" > not changed </option>
@@ -366,36 +361,30 @@ print<<page6;
         <option value="induced" > induced </option>
         <option value="repressed" > repressed </option>
         <option value="strongly repressed" > strongly repressed </option>
-        </select>
+        </select><br><br>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td align="left" valign="top" width="50%">
-      <div><input type="checkbox" name="evidence_filter"><b> Restrict to
-one or more evidence type(s): </b></div>
-      </td>
-      <td width="50%">
+      <td class='basictdnoborder'>
+      <div><input type="checkbox" name="evidence_filter"></td>
+<td class='basictdnoborder'><b> Restrict to
+one or more evidence type(s): </b></div></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
         <select name="evidence" size="3" multiple="multiple">
         <option value="ADMC"> ADMC </option>
         <option value="curated"> curated </option>
         <option value="predicted"> predicted </option>
-        </select>
+        </select><br><br>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <br>
-      </td>
-    </tr>
-    <tr>
-      <td align="left" valign="top" width="50%">
-      <div><input type="checkbox" name="method_filter"><b>Restrict to
-one or more method(s): </b></div>
-      </td>
-      <td width="50%">
+      <td class='basictdnoborder'>
+      <div><input type="checkbox" name="method_filter"></td>
+<td class='basictdnoborder'><b>Restrict to
+one or more method(s): </b></div></td></tr>
+         <tr><td class='basictdnoborder'> <br> </td>
+<td class='basictdnoborder'>
         <select name="method" size="3" multiple="multiple">
 page6
 
@@ -407,19 +396,15 @@ foreach (@sortedmet) {
 
 
 print<<page7;
-        </select>
+        </select><br><br>
       </td>
     </tr>
     <tr>
-      <td colspan="2"> <br><hr><br>
-      </td>
-    </tr>
-    <tr>
-      <td align="right" valign="top" width="50%">
-        <input type="reset" VALUE="Reset">
-      </td>
-      <td width="50%">
-        <input type="submit" VALUE="Next">
+      <td class='basictdnoborder'><br></td>
+<td class='basictdnoborder'>
+<input type="reset" VALUE="Reset">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="submit" name="submit" VALUE="Submit to Gene View">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="submit" name="submit" VALUE="Submit to TF View">
       </td>
     </tr>
     </form>

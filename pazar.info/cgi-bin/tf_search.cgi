@@ -350,7 +350,7 @@ COLNAMES2
 	my $patterngen =
 	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 					-binary => 'meme',
-					-additional_params => '-revcomp');
+					-additional_params => '-revcomp -mod oops');
 	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
 	if (!$pfm) {
 	    print "<p class=\"warning\">No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</p>\n";
