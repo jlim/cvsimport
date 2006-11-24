@@ -758,8 +758,9 @@ COLNAMES
 	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR TF View</h1>";
 ####start of form
 	print "<form name='sequenceform' method='post' target='logowin' action='http://www.pazar.info/cgi-bin/tf_logo.pl'>";
+	my $seqcounter = 0;
 	foreach my $tf (keys %inters) {
-	    &print_tf_attr($dbh,$tf,$projid,\@{$inters{$tf}},%param);
+	$seqcounter=&print_tf_attr($dbh,$tf,\@{$inters{$tf}},$seqcounter);
 	}
 ####hidden form inputs
 print "<table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
@@ -806,7 +807,7 @@ sub print_gene_attr {
 }
 
 sub print_tf_attr {
-    my ($dbh,$tfname,$projid,$target,%params) = @_;
+    my ($dbh,$tfname,$target,$seqcounter) = @_;
 
     my $tf = $dbh->create_tf;
     my @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
@@ -867,7 +868,6 @@ COLNAMES2
 	    print "<p class=\"warning\">No target could be found for this TF!</p><br>";
 	    next;
 	}
-	my $seqcounter = 0;
 	my @rsids;
 	my @coids;
 	while (my $site=$complex->next_target) {
@@ -942,7 +942,7 @@ COLNAMES2
 
 	if ($count<2) {
 	    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p><br>";
-	    return 1;
+	    next;
 	} else {
 
 	    my $patterngen =
@@ -953,6 +953,7 @@ COLNAMES2
 
 	    if (!$pfm) {
 		print "<p class=\"warning\">No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</p><br>";
+		next;
 	    } else {
 #print a human readable format of the matrix
 		my $prettystring = $pfm->prettyprint();
@@ -971,6 +972,7 @@ COLNAMES2
 	}
 	print "<br><br>";
     }
+    return $seqcounter;
 }
 
 
