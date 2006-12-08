@@ -345,17 +345,17 @@ sub check_TF {
 	my @trans;
 	if ($dbaccn eq 'EnsEMBL_gene') {
 	    @trans = $gkdb->ens_transcripts_by_gene($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	    push @trans,$accn;
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	} elsif ($dbaccn eq 'EntrezGene') {
 	    my @gene=$gkdb->llid_to_ens($accn);
-	    unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
 	} elsif ($dbaccn eq 'refseq') {
 	    @trans=$gkdb->nm_to_enst($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	} elsif ($dbaccn eq 'swissprot') {
 	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?");
 	    $sp->execute($accn);
@@ -363,7 +363,7 @@ sub check_TF {
 	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	    $ensdb->change_mart_organism($species);
 	    @trans =$ensdb->swissprot_to_enst($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	}
 	$factors{$accn}=$trans[0];
     }
