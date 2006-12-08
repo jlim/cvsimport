@@ -89,15 +89,12 @@ foreach my $project (@desc) {
     print "<head>
 <title>PAZAR - Gene List</title>
 <script type=\"text/javascript\">
-<!--
 function showHide(inputID) {
 	theObj = document.getElementById(inputID)
 	theDisp = theObj.style.display == \"none\" ? \"block\" : \"none\"
 	theObj.style.display = theDisp
 }
-
--->
-    </script>
+</script>
 <STYLE type=\"text/css\">
 .title1 {
 font-weight: bold;
@@ -107,11 +104,9 @@ font-size: 18px;
 border: 2px solid black;
 border-collapse: collapse;
 }
-.genetabletitle {
+.genedetailstabletitle {
 padding-left: 5px;
 padding-right: 5px;
-width: 250px;
-height: 10px;
 text-align: center;
 vertical-align: top;
 background-color: #39aecb;
@@ -148,11 +143,11 @@ if ($param{opentable} eq $proj_name) {$style='display:block';}
 
 print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></li></td></tr><tr><td width='750'>
 <div id=\"$div_id\" style=\"$style\"><table width='750' class='summarytable'><tr>";
-    print "<td class='genetabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
-    print "<td class='genetabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";
-    print "<td class='genetabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Gene name\"><small>(user defined)</small></form></td>";
-    print "<td class='genetabletitle' width='80'><form name=\"accn_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene ID\"></form></td>";
-    print "<td class='genetabletitle' width='120'><form name=\"ens_desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ens_desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene Description\"></form></td>";
+    print "<td class='genedetailstabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
+    print "<td class='genedetailstabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";
+    print "<td class='genedetailstabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Gene name\"><small>(user defined)</small></form></td>";
+    print "<td class='genedetailstabletitle' width='80'><form name=\"accn_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene ID\"></form></td>";
+    print "<td class='genedetailstabletitle' width='120'><form name=\"ens_desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ens_desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene Description\"></form></td>";
     print "</tr>";
 
     my @sorted;
