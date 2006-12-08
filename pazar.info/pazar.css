@@ -94,8 +94,11 @@ color: #0066CC;
 background-color: transparent;
 text-decoration: underline;
 border: none;
-cursor: pointer;
-cursor: hand;
+padding: 0px;
+spacing: 0px;
+margin: 0%;	
+cursor: pointer; /* hand-shaped cursor */
+cursor: hand; /* for IE 5.x */
   }
 
 .submitLink2 {
@@ -104,8 +107,11 @@ background-color: transparent;
 text-decoration: underline;
 font-size: 14px;
 border: none;
-cursor: pointer;
-cursor: hand;
+padding: 0px;
+spacing: 0px;
+margin: 0%;	
+cursor: pointer; /* hand-shaped cursor */
+cursor: hand; /* for IE 5.x */
   }
 
 .seqtabletitle {
@@ -129,6 +135,8 @@ border: 1px solid black;
 .basictdnoborder {
 text-align: left;
 vertical-align: top;
+padding-left: 5px;
+padding-right: 5px;
 }
 .basictdcenter {
 padding-left: 5px;
@@ -155,6 +163,14 @@ text-align: center;
 vertical-align: top;
 background-color: #39aecb;
 border: 1px solid black;
+}
+
+.genelisttabletitle {
+padding-left: 5px;
+padding-right: 5px;
+text-align: left;
+vertical-align: top;
+background-color: #39aecb;
 }
 
 .evidencetabletitle {
