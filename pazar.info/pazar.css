@@ -173,6 +173,14 @@ vertical-align: top;
 background-color: #39aecb;
 }
 
+.seqlisttabletitle {
+padding-left: 5px;
+padding-right: 5px;
+text-align: left;
+vertical-align: top;
+background-color: #ff9a40;
+}
+
 .evidencetabletitle {
 padding-left: 5px;
 padding-right: 5px;
