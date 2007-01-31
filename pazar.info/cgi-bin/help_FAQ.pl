@@ -13,7 +13,7 @@ print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
           <p class="title1">PAZAR - FAQ</p>
-<p class="title2">FAQ TOPICS</p>
+<p class="title3">FAQ TOPICS</p>
 
 <ul type=disc>
  <li><span style='font-family:
@@ -35,8 +35,7 @@ print<<page;
      Verdana'><a href="#PAZARUSERINTERFACE">PAZAR USER INTERFACE</a></span></li>
 </ul>
 
-<p class="title2">CONSTRUCTING A SEQUENCE-SPECIFIC PAZAR RECORD</p>
-
+<p class="title3">CONSTRUCTING A SEQUENCE-SPECIFIC PAZAR RECORD</p>
 <ul type=disc>
  <li><span style='font-family:
      Verdana'>Review all of the relevant papers that are available for a given
@@ -52,17 +51,25 @@ print<<page;
      it (ie. EMSA in which the probe is just the putative binding site of
      interest)</span></li>
 </ul>
+<p class="title3">PAZAR User Interface Screenshots </p>
 
-<p class="title3"><a name='SEQUENCERETRIEVAL'></a>SEQUENCE
+<p>&nbsp;<a
+href="http://www.pazar.info/images/PAZAR_Screenshots_100406.pdf">PAZAR
+Screenshots (10-04-06)</a></p>
+
+<hr>
+<p class="title3">FAQ TOPICS</p>
+
+<p class="bold"><a name='SEQUENCERETRIEVAL'></a>SEQUENCE
 RETRIEVAL</p>
 
 <table class='summarytable'>
  <tr>
   <td class='basictd'>
-  <p><span style='font-family:Verdana'>Question</span></p>
+  <p><span style='font-family:Verdana'><b>Question</b></span></p>
   </td>
   <td class='basictd'>
-  <p><span style='font-family:Verdana'>Response</span></p>
+  <p><span style='font-family:Verdana'><b>Response</b></span></p>
   </td>
  </tr>
  <tr>
@@ -93,15 +100,15 @@ RETRIEVAL</p>
  </tr>
 </table>
 
-<p class="title3"><a name=SEQUENCEENTRY></a><SEQUENCE ENTRY </p>
+<p class="bold"><a name=SEQUENCEENTRY></a><SEQUENCE ENTRY </p>
 
 <table class='summarytable'>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Question  </span></p>
+   <p><span style='font-family:Verdana'><b>Question</b>  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Response  </span></p>
+   <p><span style='font-family:Verdana'><b>Response</b>  </span></p>
   </td>
  </tr>
   <tr>
@@ -117,8 +124,8 @@ RETRIEVAL</p>
   <tr>
    <td class='basictd'>
    <p><span style='font-family:Verdana'>Given this example
-  (using the same promoter sequence): <img border=0 width=32 height=32
-  src="http://pazar.info/images/FAQ-example1.PNG" align=absmiddle> </span></p>
+  (using the same promoter sequence): <img border=0 width=250
+  src="http://pazar.info/images/FAQ-example1.PNG"> </span></p>
   </td>
    <td class='basictd'>
    <p><span style='font-family:Verdana'>Create a separate
@@ -231,16 +238,16 @@ RETRIEVAL</p>
  </tr>
 </table>
 
-<p class="title3"><a name=EXPERIMENTALNOMENCLATURE></a>EXPERIMENTAL
+<p class="bold"><a name=EXPERIMENTALNOMENCLATURE></a>EXPERIMENTAL
 NOMENCLATURE </p>
 
 <table class='summarytable'>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Question  </span></p>
+   <p><span style='font-family:Verdana'><b>Question</b>  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Response  </span></p>
+   <p><span style='font-family:Verdana'><b>Response</b>  </span></p>
   </td>
  </tr>
   <tr>
@@ -466,15 +473,15 @@ NOMENCLATURE </p>
  </tr>
 </table>
 
-<p class="title3"><a name=PAZARUSERINTERFACE></a>PAZAR USER INTERFACE </p>
+<p class="bold"><a name=PAZARUSERINTERFACE></a>PAZAR USER INTERFACE </p>
 
 <table class='summarytable'>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Question  </span></p>
+   <p><span style='font-family:Verdana'><b>Question</b>  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Response  </span></p>
+   <p><span style='font-family:Verdana'><b>Response</b>  </span></p>
   </td>
  </tr>
   <tr>
@@ -583,11 +590,6 @@ NOMENCLATURE </p>
  </tr>
 </table>
 
-<p class="title2">PAZAR User Interface Screenshots </p>
-
-<p>&nbsp;<a
-href="http://www.pazar.info/images/PAZAR_Screenshots_100406.pdf>PAZAR
-Screenshots (10-04-06</a></p>
 
 page
 
