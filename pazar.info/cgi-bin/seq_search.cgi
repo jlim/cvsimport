@@ -167,7 +167,7 @@ if ($reg_seq->transcript_fuzzy_start == $reg_seq->transcript_fuzzy_end) {
 } else {
     $tss=$reg_seq->transcript_fuzzy_start."-".$reg_seq->transcript_fuzzy_end||'-';
 }
-my $regid=$reg_seq->accession_number;
+#my $regid=$reg_seq->accession_number;
 my $id=write_pazarid($regid,'RS');
 
 my $seqstr=chopstr($reg_seq->seq,115)||'-';

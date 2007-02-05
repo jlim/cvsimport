@@ -25,7 +25,7 @@ If you want to contact us more directly, please use the e-mail below.<br><br><hr
           Stefan Kirov, Postdoctoral fellow<br>
           Elodie Portales-Casamar, Postdoctoral fellow<br>
           Jonathan Lim, Software developer</p>
-          <p class="title2">Team e-mail: &nbsp;&nbsp;<a href="mailto:pazar@cmmt.ubc.ca"><img style="border: 0px solid ; height: 12px;" src="http://www.pazar.info/images/email.gif"></a></p>
+          <p class="title2">Team e-mail: &nbsp;&nbsp;<a href="mailto:pazar\@cmmt.ubc.ca"><img style="border: 0px solid ; height: 12px;" src="http://www.pazar.info/images/email.gif"></a></p>
 
 page
 
