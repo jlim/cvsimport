@@ -74,27 +74,26 @@ RETRIEVAL</p>
  </tr>
  <tr>
   <td class='basictd'>
-  <p><span style='font-family:Verdana'>If there are two
-  transcripts with the same sequence, but one is missing one base at the very
-  end, does it matter which one we choose?  </span></p>
+  <p><span style='font-family:Verdana'>If two transcripts varying by only 1 or
+  2 bases could potentially be used for a given PAZAR record, does it matter
+  which is chosen?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>NO  </span></p>
+   <p><span style='font-family:Verdana'>Either can be used for the PAZAR record
+  with the inclusion of a comment if necessary.</span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Can restriction fragment
-  data be used to obtain a DNA sequence referenced in a paper, in the presence
-  of only minimal identifying sequence information (ie. the identity of one
-  basepair)?  <br>
+   <p><span style='font-family:Verdana'>How can restriction fragment data be
+  used to isolate a DNA sequence referenced in a paper?  <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes. Download a portion
-  of the genomic sequence which encompasses the restriction sites described in
-  the paper. Then, conduct a restriction fragment analysis of the sequence, and
-  see if the restriction map matches the description given in the paper. <br>
+   <p><span style='font-family:Verdana'>Download a portion of the genomic
+  sequence which encompasses the restriction sites described in the paper.
+  Then, conduct a restriction fragment analysis of the sequence, and see if the
+  restriction map matches the description given in the paper. <br>
    </span></p>
   </td>
  </tr>
@@ -113,126 +112,98 @@ RETRIEVAL</p>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>If the same sequence is
-  found in 2 or more species, do we make a separate entry for each?  </span></p>
+   <p><span style='font-family:Verdana'>If the same sequence is found in 2 or more
+  species, should each be given a separate entry in PAZAR?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes, create a separate
-  entry for each.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Given this example
-  (using the same promoter sequence): <img border=0 width=250
-  src="http://pazar.info/images/FAQ-example1.PNG"> </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Create a separate
-  sequence entry for each long sequence from the 2 papers, because cannot
-  compare experiment from paper 2 to paper 1 due to use of different cells and
-  reporters (there is no way to compare activity of mutants 2 &amp; 3 to wt
-  sequence)  </span></p>
+   <p><span style='font-family:Verdana'>Yes, Create a separate record for each
+  species.  </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>How should main page
-  data be saved for a sequence for which there is no experimental evidence?  </span></p>
+   <p><span style='font-family:Verdana'>If an identical genomic sequence is used
+  in "identical" transient transfection expression assays in 2 or more papers, can mutants of that sequence from both
+  papers be submitted to PAZAR as a part of a single experimental assay? <img border=0 width=350
+  src="http://pazar.info/images/FAQ-Figure.gif"> </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>In the case in which
-  there is no experimental evidence for a sequence, clicking the
-  &quot;Done&quot; button at the bottom of the main page will save all data
-  entered to the database. This would otherwise occur automatically upon the
-  opening of the &quot;experimental evidence&quot;.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>How do I enter TFs from
-  different species?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Add the species in the
-  front of the TF name eg) Mouse_Phox2a, Human_Phox2a  </span></p>
+   <p><span style='font-family:Verdana'>Definitely not. One cannot compare and
+  combine experimental data from separate papers in a single assay. Even if the
+  design of the experiment is the same between papers, it was performed using
+  different cells, reporters, conditions, etc. As a result, there is no way
+  that the expression level of mutants from separate papers can be compared to
+  that of the wild-type sequence in a single experimental assay. Instead, create
+  a separate experimental assay for each of the papers, associated with the
+  shared wild-type sequence.  </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Does case matter when
-  entering a sequence in PAZAR?  </span></p>
+   <p><span style='font-family:Verdana'>How can main page data be saved for a
+  genomic sequence with no experimental evidence?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes. If a sequence is
-  entered in both upper and lower case, it will not be found. It should be
-  entered either in all upper or lower case.  </span></p>
+   <p><span style='font-family:Verdana'>By clicking the "Done" button
+  at the bottom of the main page, all data entered will be saved to PAZAR. This
+  would otherwise occur automatically upon opening an "Experimental
+  Evidence" window. </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Should a regulatory
-  sequence be entered into PAZAR if it is transfected into cells upstream of
-  the complete gene sequence?  <br>
+   <p><span style='font-family:Verdana'>What nomenclature should be used when
+  entering TFs from different species?  </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Enter the TF name as follows: Species_TFName (ie. Mouse_Phox2a, Human_Phox2a)  </span></p>
+  </td>
+ </tr>
+ <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Should elements within the 3' UTR of a
+  gene be entered into PAZAR?  <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes. This can be entered
-  under the category &quot;transient transfection gene expression assay&quot;. <br>
-   </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Should 3' regulatory
-  element data (ie. elements within the 3' UTR of the gene) be entered into
-  PAZAR?  <br>
-   </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes. We are interested
-  in any regulatory elements whether they are upstream or downstream of a gene.
+   <p><span style='font-family:Verdana'>Definitely. We are interested in any
+  regulatory elements whether they are upstream or downstream of a gene.
    <br>
    </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>PAZAR is having
-  difficulties with the name of a sequence. <br>
+   <p><span style='font-family:Verdana'>What could be the problem if PAZAR does
+  not permit a certain sequence name to be used? <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>There are certain
-  characters that are not recognized by PAZAR, such as the single quote ('). Choose
-  another name without this character for now. <br>
-   </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>How do we name
-  complexes?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>ie. HUMAN_RXR/RAR unless
-  the complex has a specific name, separate components by slash <br>
+   <p><span style='font-family:Verdana'>There are certain characters that are
+  not recognized by PAZAR, such as the single quote ('). By selecting a name
+  without such characters, problems will be averted. <br>
    </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Refer to PMID 9099914:
-  This construct contains a single 8 bp Xho linker in the place of the deleted
-  internal 4 bp in the CRE 5'-TG<em><span style='font-family:Verdana'>ACGT</span></em>CA-3'.
-  How to enter this as a mutation in Pazar?  </span></p>
+   <p><span style='font-family:Verdana'>How are complexes named within PAZAR?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>In this case, since the
-  length of the inserted sequence is greater than the length of the deleted
-  sequence, you can't enter this as a mutation. So, the best thing to do is to
-  delete the 4 bases as a mutation, and enter the insertion of the RE site in
-  the comments.  <br>
+   <p><span style='font-family:Verdana'>Enter complex names as follows:
+  Species_Protein1/Protein 2/etc.(ie. HUMAN_RXR/RAR). If a complex is given a specific name other than the simple combination
+  of its components, use Species_specificcomplexname.<br>
+   </span></p>
+  </td>
+ </tr>
+  <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Can insertion mutations be documented in
+  PAZAR?  </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Not yet. This is a feature that will be
+  incorporated into the PAZAR submission interface in the near future.   <br>
    </span></p>
   </td>
  </tr>
@@ -252,223 +223,199 @@ NOMENCLATURE </p>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>How should the
-  expression level of sequence mutants be expressed?  </span></p>
+   <p><span style='font-family:Verdana'>What should be used as the point of
+  reference when describing the expression level of sequence mutants?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Changes in expression
-  associated with sequence mutants should be expressed relative to the
-  expression of the wild-type sequence.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Should drug treatments
-  be documented in PAZAR and if so, where?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Drug treatments can be
-  inserted into the conditions field as a part of a PAZAR record.  </span></p>
+   <p><span style='font-family:Verdana'>Changes in expression associated with
+  sequence mutants should be expressed relative to the expression of the
+  wild-type sequence.  </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>What does the comment
-  &quot;NA&quot; mean in the effects column of the gene summary?  </span></p>
+   <p><span style='font-family:Verdana'>Can drug treatments be documented in
+  PAZAR?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>It means that the
-  qualitative effect of the experimental evidence in not attributed and that
-  only the quantitative effect was added.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>What if there are
-  multiple cell lines for the same experiment?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>If the results are the
-  same for each cell line, you can include only a neuronal one. You can enter
-  some of the others in the comments section. If results are different, you
-  should include all the cell lines that contain important information.  </span></p>
+   <p><span style='font-family:Verdana'>For expression assays in which a
+  wild-type sequence is tested for levels of expression in the presence or
+  absence of a chemical compound, transcription factor, etc. the drug should be
+  included in the record as a perturbation. In contrast, for all DNA-binding
+  assays drug treatments or transcription factor co-expression should be
+  described in the comment field.  </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>For entering a nuclear
-  extract experiment, what do we put under the section &quot;If the experiment
-  is not in vitro, enter the cell/tissue information below&quot; since there is
-  already cell line information fields at the top of the page?  </span></p>
+   <p><span style='font-family:Verdana'>What is signified by the presence of "NA" in the 
+effects column of the gene summary? </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>just ignore the &quot;If
-  the experiment is not in vitro, enter the cell/tissue information below&quot;
-  field for now, and enter your cell line info at the top. We need to ask
-  Elodie about this.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>What do we put under
-  &quot;Sample Type&quot;, first field of nuclear extract page?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>nuclear extract, or
-  whatever the sample is. Another example would be cellular extract.  </span></p>
+   <p><span style='font-family:Verdana'>The presence of "NA" in the
+  effects column of the gene summary suggests that the qualitative effect of
+  the experimental evidence was not defined in the supporting publication. This
+  option is often used when submitting transgenic mouse data to PAZAR. In such
+  a case, the primary outcome examined is whether a given construct has been
+  able to reconstitute wild-type patterns of expression. Nothing however can be
+  said regarding the levels of expression present in the mice, making it
+  necessary to use "NA".  </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>If wild-type and mutant
-  transcripts are tested in various cell lines, should separate experiments be
-  made for each?  </span></p>
+   <p><span style='font-family:Verdana'>If there are multiple cell lines/cell types 
+used for the same experiment, which should be submitted to PAZAR?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>NO. Create an
-  experimental record for one cell line, and then include a message for all
-  other cell lines in the comment box on either the experimental record page,
-  or each of the mutant pages if there are significant differences between
-  mutants.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>There is a supershift
-  experiment with a nuclear extract. Should the factor to which to antibody is
-  attached be recorded as a &quot;TF/complex binding to this CRE&quot; or as a
-  &quot;Interaction with Unknown Factor (ie. nuclear extract)&quot;? (because
-  the experiment doesn't show that the TF is binding the DNA directly).  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Put it as a
-  &quot;TF/complex binding to this CRE&quot; because we want the sequence to be
-  linked to this TF in the database. Then in the comments of the experiment,
-  make sure to mention that its from a nuclear extract.  </span></p>
+   <p><span style='font-family:Verdana'>If the results are the same for each
+  cell line, only the most relevant cell line (ie. neuronal cell lines) should be 
+  explicitly selected for the PAZAR submission.Any other cell lines that are deemed 
+  relevant can be included in the comments section. If results differ between cell lines, 
+  separate experimental assays should be submitted to PAZAR for each cell line associated 
+  with informative data.  </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>What should be entered
-  for the transcription factor name if in a Supershift assay, a paper states
-  that antibody recognized a protein family, and not just a single protein? <br>
+   <p><span style='font-family:Verdana'>For entering a DNA-binding experiment in
+  which nuclear extract was used, what should be entered in the section
+  "If the experiment is not in vitro, enter the cell/tissue information
+  below" since there is already cell line information fields at the top of
+  the page?  </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Currently, within PAZAR there is a
+  duplication of the cell type submission interface. All cell type information
+  should be entered into only the first copy of the cell type submission
+  interface found near the top of the window. </span></p>
+  </td>
+ </tr>
+  <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>What are potential choices for the
+  "Sample Type" field on the nuclear extract page?  </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Currently choices for sample type
+  include nuclear extract, cellular extract, or even whole cell extract if
+  applicable.  </span></p>
+  </td>
+ </tr>
+  <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Given the situation in which there is a supershift
+  experiment performed using a nuclear extract should the factor to which the antibody binds 
+  be recorded as a "TF/complex" or as an "Interaction with Unknown Factor (ie. nuclear extract)?   
+</span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>This type of an experiment does not
+  prove that a TF is interacting directly with a cis-regulatory element (CRE). 
+  It could be interacting with the CRE via any other protein
+  from the nuclear extract. However, in the interest of linking the CRE to this
+  TF within PAZAR, consider it to be a "TF/complex binding to this
+  CRE". However, make sure to also mention that the protein was from a
+  nuclear extract in the comments section of the record.  </span></p>
+  </td>
+ </tr>
+  <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>What should be entered for a
+  transcription factor name if in a Supershift assay,
+  a paper states that an antibody recognized a protein family, and not just a
+  single protein? <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Enter the most common
-  member of the protein family as the transcription factor, but include in the
-  comments that the antibody was not specific to that protein but instead
-  recognized the protein family in general. <br>
-   </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Say there is an
-  experiment (ie. deletion assay) with a perturbation condition (TF or
-  chemical, etc), but it is not comparative (ie. no results are given for the
-  experiment without presence of the perturbation). How to imput this in Pazar?
-   </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Add the experiment, and
-  in the initial page where you specify the experiment type (ie. Luc reporter
-  assay) and the cell type, pubmed id, expression level etc. leave the
-  expression level at NA. Then, you get to the page where you can enter the
-  perturbation - do so, add your mutated sequences and report the expression
-  levels from there.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>If, when a mutant of a
-  given sequence is subjected to a perturbation, there is a change of expression
-  relative to the mutant without the perturbation, what should be the point of
-  reference for describing the change that the perturbation has had on
-  expression for that mutant?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>The change in expression
-  associated with the mutant in the presence of the perturbation should be
-  expressed relative to the expression level of the wild-type in the presence
-  of the perturbation.  <br>
+   <p><span style='font-family:Verdana'>Enter the most common member of the
+  protein family as the transcription factor, but include in the comments that
+  the antibody was not specific to that protein but instead recognized the
+  protein family in general. <br>
    </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>How do we interpret
-  interaction levels for gel shift competition experiments? <br>
+   <p><span style='font-family:Verdana'>How should an experiment with a
+  perturbation (TF or chemical, etc) be submitted to PAZAR if there are no
+  results provided for the experiment in the absence of the perturbation??
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Level of interaction is
-  good if the probe competed. If add a mutant probe, level of interaction is
-  poor if the probe does not compete.  </span></p>
+   <p><span style='font-family:Verdana'>On the main experimental assay page,
+  select "NA" for the wild-type expression level in the absence of
+  perturbation. Then, enter the perturbation with its associated level of
+  expression. Add mutants in a similar fashion.  </span></p>
+  </td>
+ </tr>
+  <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>What should be the point of reference
+  used for describing the level of expression associated with a mutant subject
+  to a perturbation?  </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Describe the expression level of the
+  mutant with perturbation relative to the expression level of the wild-type
+  with perturbation.  <br>
+   </span></p>
+  </td>
+ </tr>
+  <tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>How do we qualitatively interpret the
+  interaction level for gel shift competition experiments? <br>
+   </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>A probe successfully able to eliminate a
+  band shift involving wild-type probe is considered to be a good interactor. If the probe 
+  (wild-type or mutant) is not able to compete away the initial interaction, it is considered 
+  to be a poor interactor.  </span></p>
   </td>
  </tr>
  <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>When entering a mutation
-  that causes no binding, what do you indicate for &quot;Effect of this
-  mutation on the interaction&quot;? <br>
+   <p><span style='font-family:Verdana'>When entering a mutation that leads to a
+  complete elimination of binding, what should be indicated for the
+  "Effect of this mutation on the interaction"? <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>You can chooses
-  &quot;None&quot;. In this case, &quot;None&quot; means no binding, not no
-  effect on the interaction level. <br>
+   <p><span style='font-family:Verdana'>In this situation "None"
+  should be chosen for the level of interaction. Do note that in this context,
+  "None" means no binding, not "no effect on binding". <br>
    </span></p>
   </td>
  </tr>
  <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>If I am annotating a TF
-  that regulates a Pleiades gene, do I add experiments showing its role in
-  transcription transactivation to PAZAR (ie. as a permutation in a
-  transactivation entry)?  </span></p>
+   <p><span style='font-family:Verdana'>In the annotation of a transcription
+  factor that regulates a Pleiades Promoter Project gene, should experiments
+  demonstrating a role in transcriptional regulation (ie. Coexpression of the TF 
+  leads to transactivation) be submitted to PAZAR?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes. Even though this
-  information cannot be viewed currently from the TF summary page, it is
-  important to have this supporting evidence. Elodie will change the summary
-  view in the future to be able to display this data.  </span></p>
-  </td>
- </tr>
- <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Do I also include this
-  information if the role of the TF is repression of transcription from a given
-  sequence?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes.  </span></p>
+   <p><span style='font-family:Verdana'>This data should definitely be included
+  as a perturbation in a PAZAR submission. Even though this information cannot
+  be viewed currently from the TF summary page, it is important to have this
+  supporting evidence. The summary view will be modified in the future in order
+  to include this type of information. Even if coexpression of a TF leads to 
+  repression of gene expression, the data should be submitted to PAZAR. </span></p>
   </td>
  </tr>
  <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>How do we annotate a
-  supershift experiment that causes a disappearance of the band, rather than a
-  supershift? (because the Ab interferes with the DNA-binding ability of the
-  protein).  <br>
+   <p><span style='font-family:Verdana'>How should a "supershift"
+  experiment in which incubation with antibody leads to the disappearance of a
+  band be entered into PAZAR (ie. Interfering with binding instead of retarding mobility)?  <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Just put the method as
-  supershift, and in the comments mention the band disappearance as opposed to
-  shift  </span></p>
-  </td>
- </tr>
- <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>If a transactivation
-  experiment is repeated exactly in another paper, with the exception that a
-  different permutation was added, how do I enter this into PAZAR?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Enter it as a new
-  experiment, since the PMIDs will be different. <br>
-   </span></p>
+   <p><span style='font-family:Verdana'>Put the method in as a supershift,
+  but in the comments also mention that the band did not shift to lower
+  mobility but instead disappeared. </span></p>
   </td>
  </tr>
 </table>
@@ -486,106 +433,35 @@ NOMENCLATURE </p>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>Why do I get the same
-  line of evidence entered twice?  </span></p>
+   <p><span style='font-family:Verdana'>The same line of evidence appears twice
+  for a given sequence submitted to PAZAR? What could have caused this problem?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>You hit submit twice in
-  the evidence page.&nbsp; If you hit the back button on your browser, make
-  sure you use the forward button to carry on and do not hit submit again.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Why are my comments from
-  the evidence page not showing up on the gene summary page?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>The gene summary display
-  needs to be updated, and will display that information in the future.  </span></p>
+   <p><span style='font-family:Verdana'>This is what results from clicking
+  "submit" twice on the evidence submission page. </span></p>
   </td>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>When I enter an
-  experiment with multiple mutations, how come only the base sequence and its
-  induction level show up in the gene summary page?  </span></p>
+   <p><span style='font-family:Verdana'>Where can mutation information submitted within the 
+  "interaction evidence with unknown factor" page?  </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>The gene summary display
-  needs to be updated, and will display that information in the future.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>How come when I search
-  for a gene in a project from the mall, the experimental evidence doesn't show
-  up?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>You have to go to the
-  search page and search by Gene (<a
-  href="http://www.pazar.info/cgi-bin/gsearch.pl"
-  title="Visit page outside Confluence">http://www.pazar.info/cgi-bin/gsearch.pl</a>)
-  because the display features are under construction.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Is there a spot to enter
-  mutation information in the &quot;interaction evidence with unknown
-  factor&quot; page?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Yes, once you've
-  submitted the evidence and hit the submit button, you will be asked if you
-  have any mutants to add.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>is the nuclear extract
-  info supposed to be displaying when you look at the gene's evidence page?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>no. Elodie will fix
-  that. you may want her to check that it is in the database  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Why aren't experimental
-  conditions (ie. presence of chemical) showing up in the display page?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>That hasn't been
-  implemented yet.  </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>&quot;The vanishing
-  window syndrome&quot;: trying to view the gene list when an evidence window
-  is open will result in the gene list opening up in the evidence window. <br>
-   </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Open the gene list in
-  another browser until issue is solved. <br>
-   </span></p>
+   <p><span style='font-family:Verdana'>Once the "interaction evidence with
+  unknown factor" page is filled out and the submit button pressed, an
+  option to add mutants is provided.  </span></p>
   </td>
  </tr>
  <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>When entering a complex
-  with a TF that is already in PAZAR, how do we add this TF to the
-  complex?&nbsp;  <br>
+   <p><span style='font-family:Verdana'>How should a TF complex including a TF
+  already present in PAZAR be submitted?  <br>
    </span></p>
   </td>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>You must re-enter in the
-  information for this TF, as the complex entry will be completely seperate
-  from the individual TF entries.  </span></p>
+   <p><span style='font-family:Verdana'>The information for this TF should be newly
+  entered, even though it is already present in PAZAR. This is due to the fact
+  that complex records exist independently of single TF records within PAZAR.  </span></p>
   </td>
  </tr>
 </table>
