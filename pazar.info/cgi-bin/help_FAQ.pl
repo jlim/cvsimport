@@ -99,7 +99,7 @@ RETRIEVAL</p>
  </tr>
 </table>
 
-<p class="bold"><a name=SEQUENCEENTRY></a><SEQUENCE ENTRY </p>
+<p class="bold"><a name=SEQUENCEENTRY></a>SEQUENCE ENTRY </p>
 
 <table class='summarytable'>
   <tr>
