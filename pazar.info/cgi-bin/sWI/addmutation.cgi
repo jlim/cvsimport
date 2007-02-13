@@ -33,6 +33,12 @@ my $pazar=new
 pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
+unless ($params{sequence}) {
+    my $regseq=$pazar->get_reg_seq_by_regseq_id($params{regid});
+    $params{sequence}=$regseq->seq;
+    $params{sequence}=~s/\s*//g;
+}
+
 if ($params{modeAdd})  {
     open (SELF,$selfpage)||print $query->h3("Cannot Open Page $selfpage");
 
@@ -102,11 +108,12 @@ print $query->br;
 sub forward_args {
     my ($query,$params)=@_;
     my %params=%{$params};
-foreach my $key (keys %params) {
-    unless ($key=~/mode/i) {
-    print $query->hidden($key,$params{$key});
-}
-}
+    foreach my $key (keys %params) {
+	unless ($key=~/mode/i) {
+#	    print $query->hidden($key,$params{$key});
+	    print "<input type=hidden name=$key value=$params{$key}>";
+	}
+    }
 }
 
 sub forward_some_args {
