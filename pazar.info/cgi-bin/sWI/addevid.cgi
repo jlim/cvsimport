@@ -54,55 +54,58 @@ if ($params{methodname} eq 'Select from existing methods') {
 
 my ($regid,$type,$aid);
 eval {
-if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
-    $regid=store_artifical($pazar,$query,\%params);
-    $type='construct';
-} elsif (($params{reg_type})&&($params{reg_type}=~/reg_seq/)) {
-    $regid=store_natural($pazar,$ensdb,$gkdb,$query,\%params);
-    $type='reg_seq';
-}
-$pazar->add_input($type,$regid);
-my ($cellid,$refid,$methid);
-if (($params{newmethod})&&($params{newmethod}=~/[\w\d]/)) {
-    $methid=$pazar->table_insert('method',$params{newmethod},$params{newmethoddesc});
-}
-else {
-    my $meth=$params{methodname}||'NA';
-    $methid=$pazar->get_method_id_by_name($meth);
-}
-my $cellspecies=$params{cellspecies}||'NA';
-if (($params{cell})&&($params{cell}=~/[\w\d]/)) {
-    $cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$cellspecies);
-} elsif ($params{tissue}&&($params{tissue}=~/[\w\d]/)) {
-    $cellid=$pazar->table_insert('cell','na',$params{tissue},'na','na',$cellspecies);
-}
-if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
-    $refid=$pazar->table_insert('ref',$params{reference});
-}
+    if ($params{regid}) {
+	$regid=$params{regid};
+	$type='reg_seq';
+    } elsif (($params{reg_type})&&($params{reg_type}=~/construct/)) {
+	$regid=store_artifical($pazar,$query,\%params);
+	$type='construct';
+    } elsif (($params{reg_type})&&($params{reg_type}=~/reg_seq/)) {
+	$regid=store_natural($pazar,$ensdb,$gkdb,$query,\%params);
+	$type='reg_seq';
+    }
+    $pazar->add_input($type,$regid);
+    my ($cellid,$refid,$methid);
+    if (($params{newmethod})&&($params{newmethod}=~/[\w\d]/)) {
+	$methid=$pazar->table_insert('method',$params{newmethod},$params{newmethoddesc});
+    }
+    else {
+	my $meth=$params{methodname}||'NA';
+	$methid=$pazar->get_method_id_by_name($meth);
+    }
+    my $cellspecies=$params{cellspecies}||'NA';
+    if (($params{cell})&&($params{cell}=~/[\w\d]/)) {
+	$cellid=$pazar->table_insert('cell',$params{cell},$params{tissue},$params{cellstat},'na',$cellspecies);
+    } elsif ($params{tissue}&&($params{tissue}=~/[\w\d]/)) {
+	$cellid=$pazar->table_insert('cell','na',$params{tissue},'na','na',$cellspecies);
+    }
+    if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
+	$refid=$pazar->table_insert('ref',$params{reference});
+    }
 #Let's make sure initial manual submissions are categorized as curated, but provisional 
-my $evidid=$pazar->table_insert('evidence','curated','provisional');
+    my $evidid=$pazar->table_insert('evidence','curated','provisional');
 
-my $timeid;
-if ($params{time_dev}!=0 || $params{range_start}!=0 || $params{range_end}!=0) {
-    $timeid=$pazar->table_insert('time',$params{time_dev},$params{dev_desc},$params{dev_tscale},$params{range_start},$params{range_end});
-}
+    my $timeid;
+    if ($params{time_dev}!=0 || $params{range_start}!=0 || $params{range_end}!=0) {
+	$timeid=$pazar->table_insert('time',$params{time_dev},$params{dev_desc},$params{dev_tscale},$params{range_start},$params{range_end});
+    }
 
-$methid||=0;
-$cellid||=0;
-$refid||=0;
-$evidid||=0;
-$timeid||=0;
-$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$an_desc);
+    $methid||=0;
+    $cellid||=0;
+    $refid||=0;
+    $evidid||=0;
+    $timeid||=0;
+    $aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$an_desc);
 
-my ($quant,$qual,$qscale);
-if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale}; $qual='NA'}
-else { $qual=$params{effectqual}||'NA'; }
-my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,$params{effectcomment});
-$pazar->add_output('expression',$expression);
+    my ($quant,$qual,$qscale);
+    if ($params{effect_grp} eq 'quan' && $params{effect0} && $params{effect0} ne ''){$quant=$params{effect0}; $qscale=$params{effectscale}; $qual='NA'}
+    else { $qual=$params{effectqual}||'NA'; }
+    my $expression=$pazar->table_insert('expression',$qual,$quant,$qscale,$params{effectcomment});
+    $pazar->add_output('expression',$expression);
 
-$pazar->store_analysis($aid);
-$pazar->reset_inputs;
-$pazar->reset_outputs;
+    $pazar->store_analysis($aid);
+    $pazar->reset_inputs;
+    $pazar->reset_outputs;
 };
 
 if ($@) {
@@ -171,7 +174,7 @@ print "<table><tr><td>Co-expression of a TF</td><td><input type=\"text\" name=\"
 print $query->hidden(-name=>'project',-value=>$params{'project'});
 print $query->hidden(-name=>'aid',-value=>$aid);
 print $query->hidden(-name=>'regid',-value=>$regid);
-print $query->hidden(-name=>'reg_type',-value=>$params{reg_type});
+print $query->hidden(-name=>'reg_type',-value=>$type);
 print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
 print $query->hidden(-name=>'modeCond',-value=>'cond');
 print $query->submit(-name=>'submit',
@@ -195,24 +198,24 @@ sub store_natural {
 my ($pazar,$ensdb,$gkdb,$query,$params)=@_;
 my %params=%{$params};
 
-my $accn = $params{'gid'};
+my $accn = $params{'gid'}||$params{'hidgid'};
 my $dbaccn = $params{'genedb'};
 my $taccn = $params{'tid'};
 my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
 if ($dbaccn eq 'EnsEMBL_gene') {
-    unless ($accn=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
+    unless ($accn=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
 	$ens=$accn;
     }
 } elsif ($dbaccn eq 'EnsEMBL_transcript') {
     my @gene = $ensdb->ens_transcr_to_gene($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
     my @gene=$gkdb->llid_to_ens($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
     ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
     if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
@@ -246,12 +249,12 @@ if ($orient==1) {
     $tss=$end;
 }
 if (uc($params{chromosome}) ne uc($chr)) {
-print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
+print $query->h3("Your gene $accn is not on the selected chromosome $params{chromosome}!");
 exit;
 }
 my $org=$ensdb->current_org();
 if (uc($params{organism}) ne uc($org)) {
-print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
+print $query->h3("Your gene $accn is not from the selected organism $params{organism}!");
 exit;
 }
 my $seq=&getseq($chr,$params{start},$params{end});
@@ -296,6 +299,7 @@ unless ($pazar) {
     print $query->h3("Could not connect to pazar");
     exit;
 }
+my $giddesc=$params{giddesc}||$params{hidgiddesc};
 
 my $regseq=pazar::reg_seq->new(
                           -seq=>$seq,
@@ -309,7 +313,7 @@ my $regseq=pazar::reg_seq->new(
                           -seq_dbname=>'EnsEMBL',
                           -seq_dbassembly=>$build,
                           -gene_accession=>$ens,
-                          -gene_description=>$params{giddesc},
+                          -gene_description=>$giddesc,
                           -gene_dbname=>'EnsEMBL',
                           -gene_dbassembly=>$build,
                           -transcript_accession=>$taccn,

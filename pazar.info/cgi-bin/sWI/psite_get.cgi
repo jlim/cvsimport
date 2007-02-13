@@ -128,6 +128,11 @@ if(target == 2)
 document.CRE.action="http://www.pazar.info/cgi-bin/sWI/accept_cre.cgi";
 document.CRE.target="_self";
 }
+if(target == 3) 
+{
+document.CRE.action="http://www.pazar.info/cgi-bin/sWI/geneselect.cgi";
+document.CRE.target="_self";
+}
 } else{
 	alert('A child window is open. Please finish your annotation before entering a new Experiment!');
 ChildWin.focus();
@@ -286,18 +291,65 @@ print $template_tail->output;
 exit();
 }
 
-open (NEXT, $nextpage);
-while (my $buf=<NEXT>) {
-    $buf=~s/htpath/$docpath/;
-    $buf=~s/serverpath/$cgiroot/i;
-    print $buf;
-    if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
-	print $query->hidden('project', $proj);
-	print $query->hidden('aname', $aid);
-	next;
+if ($params{mode} eq 'addevid') {
+
+    my $regid=$params{regid};
+    my $id=write_pazarid($regid,'RS');
+    print<<ALTERNATE;
+<h2>Annotate your Cis Regulatory Element: $id</h2>
+<form style="height: 546px;" action="" method="post" name="CRE" target="">
+<input type='hidden' name='project' value='$proj'>
+<input type='hidden' name='aname' value='$aid'>
+<input type='hidden' name='regid' value='$regid'>
+  <hr style="width: 100%; height: 2px;">
+  <h3>Transcription factor/complex binding to this CRE (if known)</h3>
+  <p>
+    <input value="Add TF Interaction Evidence" name="TFcomplexadd" type="submit" onClick="MM_validateForm();return setCount(0);return document.MM_returnValue;">
+  </p>
+  <hr style="width: 100%; height: 2px;">
+  <h3>Interaction Evidence with an unknown factor (e.g. nuclear extract)</h3>
+  <p>
+    <input value="Add Interaction Evidence" name="Interactadd" type="submit" onClick="MM_validateForm();return setCount(0);return document.MM_returnValue;">
+  </p>
+  <hr style="width: 100%; height: 2px;">
+  <h3>Other Experimental Evidence for a Role of this CRE in Regulating Gene Expression</h3>
+  <p>
+    <input value="Add Experimental Evidence" name="Evidadd" type="submit" onClick="MM_validateForm();return setCount(1);return document.MM_returnValue;">
+  </p>
+  <hr>
+  <p> 
+    <input name="done" id="done" value="Done" type="submit" onClick="MM_validateForm();return setCount(3);return document.MM_returnValue;">
+  </p><br>  </form>
+
+ALTERNATE
+
+} else {
+    my $geneID='?&gid='.$params{geneID};
+
+    open (NEXT, $nextpage);
+    while (my $buf=<NEXT>) {
+	$buf=~s/htpath/$docpath/;
+	$buf=~s/serverpath/$cgiroot/i;
+	$buf=~s/genepath/$geneID/i;
+	if ($params{geneID}) {
+	    if ($buf=~/<input id=\"gid\" name=\"gid\" maxlength=\"25\" type=\"text\">/i) {
+		print "<input id='gid' name='gid' value='$params{geneID}' maxlength='25' type='text' disabled><input id='hidgid' name='hidgid' value='$params{geneID}' type='hidden'>";
+		next;
+	    }
+	    if ($buf=~/<input name=\"giddesc\" type=\"text\" id=\"giddesc\" maxlength=255>/i) {
+		print "<input id='giddesc' name='giddesc' value='$params{genedesc}' maxlength='255' type='text' disabled><input id='hidgiddesc' name='hidgiddesc' value='$params{genedesc}' type='hidden'>";
+		next;
+	    }
+	}
+	print $buf;
+	if (($buf=~/form/i)&&($buf=~/method/i)&&($buf=~/post/i)) {
+	    print $query->hidden('project', $proj);
+	    print $query->hidden('aname', $aid);
+	    next;
+	}
     }
+    close NEXT;
 }
-close NEXT;
 
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
@@ -322,3 +374,10 @@ print $query->h2($message);
 exit(0);
 }
 
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
+}

@@ -49,7 +49,7 @@ my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_P
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
-my $accn = $params{'geneid'};
+my $accn = $params{'geneid'}||$params{'hidgeneid'};
 my $dbaccn = $params{'genedb'};
 my ($gene,$ens,$err);
 
@@ -58,7 +58,7 @@ if (!$accn) {
     exit;
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
-	unless ($accn=~/\w{2,}\d{4,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;} else {
+	unless ($accn=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;} else {
 	    $ens=$accn;
 	    my @ll=$gkdb->ens_to_llid($ens);
 	    $gene=$ll[0];
@@ -66,13 +66,13 @@ if (!$accn) {
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$ens=$gene[0];
-        unless ($ens=~/\w{2,}\d{4,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
+        unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	my @ll=$gkdb->ens_to_llid($ens);
 	$gene=$ll[0];
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
 	$ens=$gene[0];
-	unless ($ens=~/\w{2,}\d{4,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
+	unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	$gene=$accn;
     } else {
 	($gene,$ens,$err) =convert_id($gkdb,$dbaccn,$accn);

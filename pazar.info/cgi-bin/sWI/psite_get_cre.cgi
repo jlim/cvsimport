@@ -107,24 +107,24 @@ sub check_seq {
     my ($ensdb,$gkdb,$query,$params)=@_;
     my %params=%{$params};
 
-    my $accn = $params{'gid'};
+    my $accn = $params{'gid'}||$params{'hidgid'};
     my $dbaccn = $params{'genedb'};
     my $taccn = $params{'tid'};
     my $dbtrans = $params{'transdb'};
 
     my ($ens,$err);
     if ($dbaccn eq 'EnsEMBL_gene') {
-	unless ($accn=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
+	unless ($accn=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
 	    $ens=$accn;
 	}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$ens=$gene[0];
-	unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my @gene=$gkdb->llid_to_ens($accn);
 	$ens=$gene[0];
-	unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } else {
 	($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
 	if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
@@ -158,12 +158,12 @@ sub check_seq {
 	$tss=$end;
     }
     if (uc($params{chromosome}) ne uc($chr)) {
-	print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
+	print $query->h3("Your gene $accn is not on the selected chromosome $params{chromosome}!");
 	exit;
     }
     my $org=$ensdb->current_org();
     if (uc($params{organism}) ne uc($org)) {
-	print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
+	print $query->h3("Your gene $accn is not from the selected organism $params{organism}!");
 	exit;
     }
     my $seq=&getseq($chr,$params{start},$params{end});

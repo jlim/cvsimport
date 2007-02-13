@@ -388,7 +388,10 @@ sub next_page {
 
     my ($regid,$type,$aid);
     eval {
-    if (($params{reg_type})&&($params{reg_type}=~/construct/)) {
+    if ($params{regid}) {
+	$regid=$params{regid};
+	$type='reg_seq';
+    } elsif (($params{reg_type})&&($params{reg_type}=~/construct/)) {
 	$regid=store_artifical($pazar,$query,\%params);
 	$type='construct';
     } elsif (($params{reg_type})&&($params{reg_type}=~/reg_seq/)) {
@@ -512,17 +515,17 @@ sub check_TF {
 	my @trans;
 	if ($dbaccn eq 'EnsEMBL_gene') {
 	    @trans = $gkdb->ens_transcripts_by_gene($accn);
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	    push @trans,$accn;
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	} elsif ($dbaccn eq 'EntrezGene') {
 	    my @gene=$gkdb->llid_to_ens($accn);
-	    unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
 	} elsif ($dbaccn eq 'refseq') {
 	    @trans=$gkdb->nm_to_enst($accn);
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	} elsif ($dbaccn eq 'swissprot') {
 	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?");
 	    $sp->execute($accn);
@@ -530,7 +533,7 @@ sub check_TF {
 	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	    $ensdb->change_mart_organism($species);
 	    @trans =$ensdb->swissprot_to_enst($accn);
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	}
 	$factors{$accn}=$trans[0];
     }
@@ -576,24 +579,24 @@ sub store_natural {
 my ($pazar,$ensdb,$gkdb,$query,$params)=@_;
 my %params=%{$params};
 
-my $accn = $params{'gid'};
+my $accn = $params{'gid'}||$params{'hidgid'};
 my $dbaccn = $params{'genedb'};
 my $taccn = $params{'tid'};
 my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
 if ($dbaccn eq 'EnsEMBL_gene') {
-    unless ($accn=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
+    unless ($accn=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
 	$ens=$accn;
     }
 } elsif ($dbaccn eq 'EnsEMBL_transcript') {
     my @gene = $ensdb->ens_transcr_to_gene($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
     my @gene=$gkdb->llid_to_ens($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
     ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
     if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
@@ -627,12 +630,12 @@ if ($orient==1) {
     $tss=$end;
 }
 if (uc($params{chromosome}) ne uc($chr)) {
-print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
+print $query->h3("Your gene $accn is not on the selected chromosome $params{chromosome}!");
 exit;
 }
 my $org=$ensdb->current_org();
 if (uc($params{organism}) ne uc($org)) {
-print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
+print $query->h3("Your gene $accn is not from the selected organism $params{organism}!");
 exit;
 }
 my $seq=&getseq($chr,$params{start},$params{end});
@@ -678,6 +681,8 @@ unless ($pazar) {
     exit;
 }
 
+my $giddesc=$params{giddesc}||$params{hidgiddesc};
+
 my $regseq=pazar::reg_seq->new(
                           -seq=>$seq,
                           -id=>$params{seqname},
@@ -690,7 +695,7 @@ my $regseq=pazar::reg_seq->new(
                           -seq_dbname=>'EnsEMBL',
                           -seq_dbassembly=>$build,
                           -gene_accession=>$ens,
-                          -gene_description=>$params{giddesc},
+                          -gene_description=>$giddesc,
                           -gene_dbname=>'EnsEMBL',
                           -gene_dbassembly=>$build,
                           -transcript_accession=>$taccn,

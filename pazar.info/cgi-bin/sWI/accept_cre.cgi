@@ -44,34 +44,31 @@ if ($@) {
     print "<h3>An error occured! Please contact us to report the bug with the following error message:<br>$@</h3>";
     exit();
 }
-print "
-<script language=\"javascript\">
-window.history.go(-2);
-</SCRIPT>";
+print "<body onload='document.F1.submit();'><form action='http://www.pazar.info/cgi-bin/sWI/geneselect.cgi' method='post' name='F1'><input type='hidden' name='project' value='$proj'></form></body></html>";
 
 
 sub store_natural {
 my ($pazar,$ensdb,$gkdb,$query,$params)=@_;
 my %params=%{$params};
 
-my $accn = $params{'gid'};
+my $accn = $params{'gid'}||$params{'hidgid'};
 my $dbaccn = $params{'genedb'};
 my $taccn = $params{'tid'};
 my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
 if ($dbaccn eq 'EnsEMBL_gene') {
-    unless ($accn=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
+    unless ($accn=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {
 	$ens=$accn;
     }
 } elsif ($dbaccn eq 'EnsEMBL_transcript') {
     my @gene = $ensdb->ens_transcr_to_gene($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
     my @gene=$gkdb->llid_to_ens($accn);
     $ens=$gene[0];
-    unless ($ens=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
     ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
     if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
@@ -105,12 +102,12 @@ if ($orient==1) {
     $tss=$end;
 }
 if (uc($params{chromosome}) ne uc($chr)) {
-print $query->h3("Your gene $params{gid} is not on the selected chromosome $params{chromosome}!");
+print $query->h3("Your gene $accn is not on the selected chromosome $params{chromosome}!");
 exit;
 }
 my $org=$ensdb->current_org();
 if (uc($params{organism}) ne uc($org)) {
-print $query->h3("Your gene $params{gid} is not from the selected organism $params{organism}!");
+print $query->h3("Your gene $accn is not from the selected organism $params{organism}!");
 exit;
 }
 my $seq=&getseq($chr,$params{start},$params{end});
@@ -155,6 +152,7 @@ unless ($pazar) {
     print $query->h3("Could not connect to pazar");
     exit;
 }
+my $giddesc=$params{giddesc}||$params{hidgiddesc};
 
 my $regseq=pazar::reg_seq->new(
                           -seq=>$seq,
@@ -168,7 +166,7 @@ my $regseq=pazar::reg_seq->new(
                           -seq_dbname=>'EnsEMBL',
                           -seq_dbassembly=>$build,
                           -gene_accession=>$ens,
-                          -gene_description=>$params{giddesc},
+                          -gene_description=>$giddesc,
                           -gene_dbname=>'EnsEMBL',
                           -gene_dbassembly=>$build,
                           -transcript_accession=>$taccn,
