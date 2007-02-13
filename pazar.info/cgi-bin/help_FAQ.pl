@@ -278,21 +278,6 @@ used for the same experiment, which should be submitted to PAZAR?  </span></p>
  </tr>
   <tr>
    <td class='basictd'>
-   <p><span style='font-family:Verdana'>For entering a DNA-binding experiment in
-  which nuclear extract was used, what should be entered in the section
-  "If the experiment is not in vitro, enter the cell/tissue information
-  below" since there is already cell line information fields at the top of
-  the page?  </span></p>
-  </td>
-   <td class='basictd'>
-   <p><span style='font-family:Verdana'>Currently, within PAZAR there is a
-  duplication of the cell type submission interface. All cell type information
-  should be entered into only the first copy of the cell type submission
-  interface found near the top of the window. </span></p>
-  </td>
- </tr>
-  <tr>
-   <td class='basictd'>
    <p><span style='font-family:Verdana'>What are potential choices for the
   "Sample Type" field on the nuclear extract page?  </span></p>
   </td>
