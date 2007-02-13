@@ -152,7 +152,7 @@ TFCOND3
 	print<<TFCOND;
   </p>
   <p>modifications (Optional) 
-    <input type="text" name="modifications$i" maxlength=45>
+    <input type="text" name="modifications$i" maxlength="45">
   </p>
 <hr>
 Concentration/Quantity <input name="tf_quant$i" maxlength="20"
@@ -168,7 +168,7 @@ if  ($params{condPHYS}>0) {
     for (my $i=0;$i<$params{condPHYS};$i++) {
 	print<<PHYSCOND;
   <h4>Physiological Perturbation</h4>
-  <p>Condition <input name="phys_cond$i" maxlength="20" type="text"><br>
+  <p>Condition <input name="phys_cond$i" maxlength="45" type="text"><br>
 Concentration/Quantity/Stage <input name="phys_quant$i" maxlength="20"
  type="text"><br>
 Scale<input name="phys_scale$i" type="text" maxlength="20"></p>
@@ -181,7 +181,7 @@ if  ($params{condENV}>0) {
     for (my $i=0;$i<$params{condENV};$i++) {
 	print<<ENVCOND;
    <h4>Environmental Perturbation</h4>
-  <p>Chemical compound <input name="env_comp$i" maxlength="20"
+  <p>Chemical compound <input name="env_comp$i" maxlength="45"
  type="text"><br>
 Concentration/Quantity <input name="env_conc$i" type="text" maxlength="20"><br>
  Scale<input name="env_scale$i" type="text" maxlength="20"></p>
