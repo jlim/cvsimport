@@ -71,7 +71,7 @@ $ens_dbh->disconnect();
 #check whether or not to proceed with gff construction and track display
 # check if resource is ucsc and organism is unavailable
 # ucsc_sync false if database field empty
-if((($resource eq "ucsc") && ($ucsc_sync eq "false")) || (($resource eq "ensembl") && ($ensembl_sync eq "out of sync")))
+if(($resource eq "ucsc") && ($ucsc_sync eq "false"))
 {
 #print error message
     print "The track for this sequence feature could not be displayed";
