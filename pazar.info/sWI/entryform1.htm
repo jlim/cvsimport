@@ -2,12 +2,12 @@
       <p class="title3">Some hints:</p>
 <p>- You can use this interface to enter data to an already existing project or to a new one. For the latter, you just have to create a new project below and it will be added in your list of existing projects.
 <p>- TF centric submissions are based on a specific Transcription Factor from which you want to annotate binding sites.<br>CRE centric submissions are annotations of a Cis Regulatory Element (CRE) from which you have experimental evidence of a role in gene regulation (binding or other).</p>
-<form action="http://serverpath/geneselect.cgi" method="post" name="F1">
+<form action="" method="post" name="F1">
  <hr><br><p><b>Submit to Project:  </b>
 </p><br>
   <p> 
-    <input name="TFcentric" type="submit" id="TFcentric" onClick="MM_validateForm('project','','R');return document.MM_returnValue" value="TF centric submissions">
-    <input name="CREcentric" type="submit" id="CREcentric" value="CRE centric submisssions" onClick="MM_validateForm('project','','R');return document.MM_returnValue">
+    <input name="TFcentric" type="submit" id="TFcentric" onClick="MM_validateForm('project','','R');return setCount(1);return document.MM_returnValue" value="TF centric submissions">
+    <input name="CREcentric" type="submit" id="CREcentric" value="CRE centric submisssions" onClick="MM_validateForm('project','','R');return setCount(0);return document.MM_returnValue">
     <input
  name="cancel" value="cancel" type="reset">
   </p>

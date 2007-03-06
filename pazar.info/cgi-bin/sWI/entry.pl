@@ -43,6 +43,20 @@ resetMenu = function() {
       ddm[n].selectedIndex=0;
    }
 }
+function setCount(target){
+    if (document.MM_returnValue) {
+if(target == 0) 
+{
+document.F1.action="http://www.pazar.info/cgi-bin/sWI/geneselect.cgi";
+document.F1.target="_self";
+}
+if(target == 1) 
+{
+document.F1.action="http://www.pazar.info/cgi-bin/sWI/psite_get.cgi";
+document.F1.target="_self";
+}
+}
+}
 
 function verifyProjectCreate() {
 	var themessage = "You are required to complete the following fields: ";

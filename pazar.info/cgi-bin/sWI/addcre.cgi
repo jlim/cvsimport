@@ -100,11 +100,12 @@ if (($params{reference})&&($params{reference}=~/[\w\d]/)) {
 #Let's make sure initial manual submissions are categorized as curated, but provisional 
 my $evidid=$pazar->table_insert('evidence','curated','provisional');
 
+my $timeid=0;
 $methid||=0;
 $cellid||=0;
 $refid||=0;
 $evidid||=0;
-$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$refid,$params{analysis_desc});
+$aid=&check_aname($pazar,$params{aname},$params{project},$info{userid},$evidid,$methid,$cellid,$timeid,$refid,$params{analysis_desc});
 
 my ($quant,$qual,$qscale);
 if ($params{'inttype'} eq 'quan' && $params{'interact0'} && $params{'interact0'} ne ''){$quant=$params{'interact0'}; $qscale=$params{'interactscale'}; $qual='NA';}
@@ -369,7 +370,7 @@ return $ensembl[0];
 }
 
 sub check_aname {
-    my ($pazar,$aname,$proj,$userid,$evidid,$methid,$cellid,$refid,$desc)=@_;
+    my ($pazar,$aname,$proj,$userid,$evidid,$methid,$cellid,$timeid,$refid,$desc)=@_;
     $aname=uc($aname);
     my $projid=$pazar->get_projectid;
     my $dh=$pazar->prepare("select count(*) from analysis where project_id='$projid' and name=?");
@@ -377,7 +378,7 @@ sub check_aname {
     my $i=1;
     my $aid;
     while ($unique==0) {
-	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,0,$refid,$desc);
+	$aid=$pazar->get_primary_key('analysis',$userid,$evidid,$aname,$methid,$cellid,$timeid,$refid,$desc);
 	if ($aid) {
 	    return $aid;
 	} else {
