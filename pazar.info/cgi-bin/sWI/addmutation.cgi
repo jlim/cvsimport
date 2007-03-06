@@ -111,7 +111,7 @@ sub forward_args {
     foreach my $key (keys %params) {
 	unless ($key=~/mode/i) {
 #	    print $query->hidden($key,$params{$key});
-	    print "<input type=hidden name=$key value=$params{$key}>";
+	    print "<input type=hidden name=$key value='$params{$key}'>";
 	}
     }
 }

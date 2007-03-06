@@ -233,7 +233,8 @@ sub forward_args {
     my %params=%{$params};
     foreach my $key (keys %params) {
 	unless ($key eq 'BROWSE') {
-	    print $query->hidden($key,$params{$key});
+#	    print $query->hidden($key,$params{$key});
+	    print "<input type=hidden name=$key value='$params{$key}'>";
 	}
     }
 }
