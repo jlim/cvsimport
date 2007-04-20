@@ -32,8 +32,15 @@ window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no dir
 }
 if(target == 1) 
 {
+var myTextField = document.getElementById('ID_list');
+
+if(myTextField.value == "PAZAR_seq") {
+document.gene_search.target="_self";
+document.gene_search.action="http://www.pazar.info/cgi-bin/seq_search.cgi";
+} else {
 document.gene_search.target="_self";
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
+}
 }
 if(target == 2) 
 {
@@ -59,25 +66,26 @@ else
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
+<h1>PAZAR Gene View</h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td colspan="2">
-      <p class="title1">PAZAR - Search by Gene</p>
+      <p class="title2">Search by Gene or Sequence</p>
       </td>
     </tr>
 <form name="gene_search" method="post" action="" enctype="multipart/form-data" target="">
     <tr align="left">
       <td colspan="2">
 <p > Please enter a &nbsp;
-      <select name="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
-gene ID</option>
-      <option value="EnsEMBL_transcript"> EnsEMBL
-transcript
-ID</option>
-      <option value="EntrezGene"> Entrezgene ID</option>
-      <option value="nm"> RefSeq ID</option>
-      <option value="swissprot"> Swissprot ID</option>
+      <select name="ID_list" id="ID_list">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
+      <option value="GeneName">User Defined Gene Name</option>
+      <option value="EntrezGene">Entrezgene ID</option>
+      <option value="nm">RefSeq ID</option>
+      <option value="swissprot">Swissprot ID</option>
+      <option value="PAZAR_gene">PAZAR Gene ID</option>
+      <option value="PAZAR_seq">PAZAR Sequence ID</option>
       </select>
 &nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
       </td>
@@ -109,8 +117,7 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
-	      1 => "#BDE0DC"
-	      );
+	      1 => "#BDE0DC");
 
 my $get = new CGI;
 my %params = %{$get->Vars};
@@ -119,7 +126,11 @@ my $dbaccn = $params{ID_list}||'EnsEMBL_gene';
 my $gene;
 
 if ($accn) {
-    if ($dbaccn eq 'EnsEMBL_gene') {
+    if ($dbaccn eq 'GeneName') {
+	$gene='GeneName';
+    } elsif ($dbaccn eq 'PAZAR_gene') {
+	unless ($accn=~/GS\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {$gene='PAZARid';}
+    } elsif ($dbaccn eq 'EnsEMBL_gene') {
 	unless ($accn=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$accn;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
@@ -151,137 +162,118 @@ if ($accn) {
     }
 
     my $empty=0;
-
-#get the gene name
-    my $pazarsth = $dbh->prepare("select * from gene_source where db_accn='$gene'");
+    my $pazarsth;
+#get the gene info
+    if ($gene eq 'PAZARid') {
+	my $PZid=$accn;
+	$PZid=~s/^\D+0*//;
+	$pazarsth = $dbh->prepare("select * from gene_source where gene_source_id='$PZid'");
+    } elsif ($gene eq 'GeneName') {
+	$pazarsth = $dbh->prepare("select * from gene_source where description like '%$accn%'");
+    } else {
+	$pazarsth = $dbh->prepare("select * from gene_source where db_accn='$gene'");
+    }
     $pazarsth->execute();
 		
 #get the gene descriptions
-    my @geneName;
-    my @pazargeneid;
-    my @geneproj;
+    my @gene_info;
     while (my $res = $pazarsth->fetchrow_hashref) {
 	my $pid=$res->{project_id};
 	if (grep(/^$pid$/,(keys %projects))) {
+	    my $geneaccn = $res->{db_accn};
 	    my $geneName = $res->{description}||'-';
-	    push @geneName,$geneName;
+	    my $geneid = $res->{gene_source_id};
 	    my $pazargeneid = write_pazarid($res->{gene_source_id},'GS');
-	    push @pazargeneid,$pazargeneid;
 	    my $proj = $projects{$pid};
-	    push @geneproj,$proj;
+	    my @ens_coords = $ensdb->get_ens_chr($geneaccn);
+	    $ens_coords[5]=~s/\[.*\]//g;
+	    $ens_coords[5]=~s/\(.*\)//g;
+	    $ens_coords[5]=~s/\.//g;
+	    my $geneDescription = $ens_coords[5]||'-';
+	    my $species = $ensdb->current_org();
+	    $species = ucfirst($species)||'-';
+
+	    push @gene_info, { desc => $geneName,
+                               GID => $geneid,
+                               ID => $pazargeneid,
+                               proj => $proj,
+                               ens_desc => $geneDescription,
+                               species => $species,
+                               accn => $geneaccn};
 	}
     }
-    my $geneName;
-    my $pazargeneid;
-    my $geneproj;
-    if (!@geneName) {
-	$geneName='<td class="basictd">-</td>';
-	$pazargeneid='<td class="basictd">-</td>';
-	$geneproj='<td class="basictd">-</td>';
-    } elsif (@geneName==1) {
-	$geneName="<td class=\"basictd\">$geneName[0]</td>";
-	$pazargeneid="<td class=\"basictd\"><form name=\"genelink$pazargeneid[0]\" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$gene\"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid[0]\">&nbsp;</form></td>";
-	$geneproj="<td class=\"basictd\">$geneproj[0]</td>";
-    } else {
-	$geneName='<td><table style="border-collapse:collapse;"><tr>';
-	$pazargeneid='<td><table style="border-collapse:collapse;"><tr>';
-	$geneproj='<td><table style="border-collapse:collapse;"><tr>';
-	for (my $i=0;$i<@geneName;$i++) {
-	    $geneName.="<td class='basictd' width=100>$geneName[$i]</td>";
-	    $pazargeneid.="<td class='basictd' width=100><form name=\"genelink$pazargeneid[$i]\" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$gene\"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid[$i]\">&nbsp;</form></td>";
-	    $geneproj.="<td class='basictd' width=100>$geneproj[$i]</td>";
-	}
-	$geneName.='</tr></table></td>';
-	$pazargeneid.='</tr></table></td>';
-	$geneproj.='</tr></table></td>';
+
+    if (!@gene_info) {
+	print "<h3>There is currently no available annotation for gene $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</h3>";
+
+# print out the html tail template and exit
+	my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+	print $template_tail->output;
+	exit;
     }
 
-    my @ens_coords = $ensdb->get_ens_chr($gene);
-    $ens_coords[5]=~s/\[.*\]//g;
-    $ens_coords[5]=~s/\(.*\)//g;
-    $ens_coords[5]=~s/\.//g;
-    my $geneDescription = $ens_coords[5]||'-';
+print<<SUMMARY_HEADER;
+<a name='top'></a>
+      <p class="title2">Search Result Summary</p>
+<table width='700' class='summarytable'><tr>
+<td class='genedetailstabletitle' width='100'>Species</td>
+<td class='genedetailstabletitle' width='100'>PAZAR Gene ID</td>
+<td class='genedetailstabletitle' width='100'>Gene Name<br><small>(user defined)</small></td>
+<td class='genedetailstabletitle' width='150'>EnsEMBL Gene ID</td>
+<td class='genedetailstabletitle' width='150'>EnsEMBL Gene Description</td>
+<td class='genedetailstabletitle' width='100'>Project</td></tr>
+SUMMARY_HEADER
 
-#get species
+    foreach my $gene_data (@gene_info) {
+	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{species}</td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><a href='#$gene_data->{ID}'>$gene_data->{ID}</a></td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{desc}</td>";
+	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$gene_data->{accn}</td>";
+	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$gene_data->{ens_desc}</td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{proj}</td>";
+	print "</tr>";
 
-    my $species = $ensdb->current_org();
-    $species = ucfirst($species)||'-';
+	$bg_color =  1 - $bg_color;
+    }
+    print "</table><br><hr color='black'><p class=\"title2\">Search Result Details Gene by Gene</p>";
 
-#print header
+    foreach my $gene_data (@gene_info) {
+	$species=$gene_data->{species};
+	$pazargeneid=$gene_data->{ID};
+	$geneName=$gene_data->{desc};
+	$gene=$gene_data->{accn};
+	$geneDescription=$gene_data->{ens_desc};
+	$proj=$gene_data->{proj};
+
+#print details
+	$bg_color = 0;
 
 print<<HEADER_TABLE;
-<h1>PAZAR Gene View</h1>
-<table class="summarytable">
+<a href='#top'>Back to top</a>
+<table class="summarytable"><a name='$pazargeneid'></a>
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td>$pazargeneid</tr>
-<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td>$geneName</tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
+<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class=\"basictd\">$geneName</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
-<tr><td class="genetabletitle"><span class="title4">Project</span></td>$geneproj</tr>
-</table><br><br>
+<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class=\"basictd\">$proj</td></tr>
+</table><br>
 HEADER_TABLE
 
-
-
-########### start of HTML table
-print<<COLNAMES;	    
-		<table class="searchtable"><tr>
-		    <td width="100" class="genedetailstabletitle"><span class="title4">Project</span></td>
-		    
-COLNAMES
-    print "<td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
+########### start of reg_seq table
+    print "<table class=\"searchtable\"><tr><td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
     print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates</span></td>";
     print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display</span></td>";
     print "</tr>";
 
-    foreach my $projid (keys %projects) {
-	my $projname = $projects{$projid};
-	
-#use different connection if it's one of user's restricted projects
-	my $restrictedproj = 0;
-	foreach $pid (@projids)
-	{	    
-	    if("$pid" eq "$projid")
-	    {
-		$restrictedproj = 1;
-	    }
-	}
-
-
-	if($restrictedproj == 1)
-	{
-	    $dbh = pazar->new( 
-                              -globalsearch  =>    'no',		      
-                              -host          =>    $ENV{PAZAR_host},
-			      -user          =>    $ENV{PAZAR_pubuser},
-			      -pass          =>    $ENV{PAZAR_pubpass},
-			      -dbname        =>    $ENV{PAZAR_name},
-			      -pazar_user    =>    $info{user},
-			      -pazar_pass    =>    $info{pass},
-			      -drv           =>    'mysql',
-			      -project       =>    $projname);
-    }
-	else
-	{
-	    $dbh = pazar->new( 
-                              -globalsearch  =>    'no',		      
-                              -host          =>    $ENV{PAZAR_host},
-			      -user          =>    $ENV{PAZAR_pubuser},
-			      -pass          =>    $ENV{PAZAR_pubpass},
-			      -dbname        =>    $ENV{PAZAR_name},
-			      -drv           =>    'mysql',
-			      -project       =>    $projname);
-	}   
-
-#get information for header
 
 #loop through regseqs and print tables
 	my $regseq_counter = 0; # counter for naming forms
-	my @regseqs = $dbh->get_reg_seqs_by_accn($gene); 
+	my @regseqs = $dbh->get_reg_seqs_by_gene_id($gene_data->{GID}); 
 	if (!$regseqs[0]) {
-	    $empty++;
+	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span><br><br><br><br>";
 	    next;
 	} else {
 	    my @ens_coords = $ensdb->get_ens_chr($gene);
@@ -292,7 +284,6 @@ COLNAMES
 #print out default information
 		print "<tr>";
 		print "<form name='details$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$projname</div></td>";
 		
 		my $id=write_pazarid($regseq->accession_number,'RS');
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
@@ -312,10 +303,7 @@ COLNAMES
 		$bg_color =  1 - $bg_color;
 	    }
 	}
-    }
-    print "</table>";
-    if (scalar(keys %projects)==$empty) {
-	print "<h3>There is currently no available annotation for gene $gene in PAZAR!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</h3>";
+	print "</table><br><br><br><br>";
     }
 }
 

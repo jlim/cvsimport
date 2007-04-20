@@ -85,10 +85,11 @@ else
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
+<h1>PAZAR TF View</h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td colspan="2">
-      <p class="title1">PAZAR - Search by TF</p>
+      <p class="title2">Search by TF</p>
       </td>
     </tr>
 <form name="tf_search" method="post" action="" enctype="multipart/form-data" target="">
@@ -96,15 +97,13 @@ print<<page;
       <td colspan="2">
 <p > Please enter a &nbsp;
       <select name="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
-gene ID</option>
-      <option value="EnsEMBL_transcript"> EnsEMBL
-transcript
-ID</option>
-      <option value="EntrezGene"> Entrezgene ID</option>
-       <option value="nm"> RefSeq ID</option>
-      <option value="swissprot"> Swissprot ID</option>
-           <option value="tf_name"> functional name</option>
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
+      <option value="tf_name">User Defined TF name</option>
+      <option value="EntrezGene">Entrezgene ID</option>
+      <option value="nm">RefSeq ID</option>
+      <option value="swissprot">Swissprot ID</option>
+      <option value="PAZAR_TF">PAZAR TF ID</option>
 </select>
 &nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
       </td>
@@ -143,7 +142,9 @@ my $dbaccn = $param{ID_list}||'tf_name';
 my @trans;
 my $tfname;
 if ($accn) {
-    if ($dbaccn eq 'EnsEMBL_gene') {
+    if ($dbaccn eq 'PAZAR_TF') {
+	unless ($accn=~/TF\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {@trans = ('PAZARid');}
+    }if ($dbaccn eq 'EnsEMBL_gene') {
 	@trans = $gkdb->ens_transcripts_by_gene($accn);
         unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
@@ -166,21 +167,13 @@ if ($accn) {
 	unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'tf_name') {
 	@trans = ('none');
-	$tfname = $accn;
+	$tfname = '%'.$accn.'%';
     }
-    my $count=0;
+
     my $tfcount=0;
-    my $cor_accn=$accn;
-    $cor_accn=~s/\//-/g;
-    my $file="/space/usr/local/apache/pazar.info/tmp/".$cor_accn.".fa";
-    open (TMP, ">$file");
+    my $seqcounter=0;
 ####start of form
     print "<form name='sequenceform' method='post' target='logowin' action='http://www.pazar.info/cgi-bin/tf_logo.pl'>";
-    print "<input type='hidden' name='accn' value='$accn'";
-
-print<<HEADER_TABLE;
-<h1>PAZAR TF View</h1>
-HEADER_TABLE
 
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
@@ -189,7 +182,12 @@ HEADER_TABLE
 	if ($trans eq 'none') {
 	    $tf = $dbh->create_tf;
 	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
-	} else {
+	} elsif ($trans eq 'PAZARid') {
+	    my $PZid=$accn;
+	    $PZid=~s/^\D+0*//;
+	    $tf = $dbh->create_tf;
+	    @tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
+        } else {
 	    $tf = $dbh->create_tf;
 	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
 	}
@@ -212,6 +210,11 @@ HEADER_TABLE
 		    if ($trans eq 'none') {
 			$tf = $dbhandle->create_tf;
 			@complexes = $tf->get_tfcomplex_by_name($tfname);
+		    } elsif ($trans eq 'PAZARid') {
+			my $PZid=$accn;
+			$PZid=~s/^\D+0*//;
+			$tf = $dbh->create_tf;
+			@tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
 		    } else {
 			$tf = $dbhandle->create_tf;
 			@complexes = $tf->get_tfcomplex_by_transcript($trans);
@@ -222,14 +225,25 @@ HEADER_TABLE
 		}
 	    }
 	}
+
+print<<SUMMARY_HEADER;
+<a name='top'></a>
+<p class="title2">Search Result Summary</p>
+<table width='700' class='summarytable'><tr>
+<td class='tftabletitle' width='100'>Species</td>
+<td class='tftabletitle' width='100'>PAZAR TF ID</td>
+<td class='tftabletitle' width='100'>TF Name<br><small>(user defined)</small></td>
+<td class='tftabletitle' width='150'>Transcript Accession</td>
+<td class='tftabletitle' width='150'>Class/Family</td>
+<td class='tftabletitle' width='100'>Project</td></tr>
+SUMMARY_HEADER
+
+my $bg_color = 0;
+my %colors = (0 => "#fffff0",
+	      1 => "#FFB5AF");
+
 	foreach my $complex (@tfcomplexes) {
-	    my $bg_color = 0;
-	    my %colors = (0 => "#fffff0",
-			  1 => "#FFB5AF"
-			  );
-	    
-########### start of HTML table
-	    $tfcount++;
+
 	    my $tfproj=$dbh->get_project_name('funct_tf',$complex->dbid);
 	    my $tf_name=$complex->name;
 	    my $pazartfid=write_pazarid($complex->dbid,'TF');
@@ -237,27 +251,90 @@ HEADER_TABLE
 	    my @classes = ();
 	    my @families = ();
 	    my @transcript_accessions = ();
+	    my $species;
+	    while (my $subunit=$complex->next_subunit) {
+		my $fam=!$subunit->get_fam?'':'/'.$subunit->get_fam;
+		my $class=!$subunit->get_class?'':$subunit->get_class.$fam;
+		push(@classes,$class);
+		my $tr_accn=$subunit->get_transcript_accession($dbh);
+		push(@transcript_accessions, $tr_accn);
+		unless ($species) {
+		    my @ens_coords = $ensdb->get_ens_chr($tr_accn);
+		    $ens_coords[5]=~s/\[.*\]//g;
+		    $ens_coords[5]=~s/\(.*\)//g;
+		    $ens_coords[5]=~s/\.//g;
+		    $species = $ensdb->current_org();
+		    $species = ucfirst($species);
+		}
+	    }
+	    unless ($species) { $species='-';}
+	    my $traccns=join('<br>',@transcript_accessions);
+	    my $trclasses=join('<br>',@classes);
 
+	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$species</td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><a href='#$pazartfid'>$pazartfid</a></td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$tf_name</td>";
+	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$traccns</td>";
+	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$trclasses</td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$tfproj</td>";
+	print "</tr>";
+
+	$bg_color =  1 - $bg_color;
+	}
+
+print<<HEADER_TABLE;
+</table><br><hr color='black'><p class="title2">Search Result Details TF by TF</p>
+HEADER_TABLE
+
+	foreach my $complex (@tfcomplexes) {
+	    $bg_color = 0;
+
+	    $tfcount++;
+	    my $tfproj=$dbh->get_project_name('funct_tf',$complex->dbid);
+	    my $tf_name=$complex->name;
+	    my $pazartfid=write_pazarid($complex->dbid,'TF');
+	    my $tfname_s=$tf_name;
+	    $tfname_s=~s/\//-/g;
+	    print "<input type='hidden' name='accn' value='$tfname_s'";
+	    my $file="/space/usr/local/apache/pazar.info/tmp/".$pazartfid.".fa";
+	    open (TMP, ">$file");
+
+	    my @classes = ();
+	    my @families = ();
+	    my @transcript_accessions = ();
+	    my $species;
 	    while (my $subunit=$complex->next_subunit) {
 		my $class=!$subunit->get_class?'-':$subunit->get_class;
 		my $fam=!$subunit->get_fam?'-':$subunit->get_fam;
 		push(@classes,$class);
 		push(@families,$fam);
-		push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
+		my $tr_accn=$subunit->get_transcript_accession($dbh);
+		push(@transcript_accessions, $tr_accn);
+		unless ($species) {
+		    my @ens_coords = $ensdb->get_ens_chr($tr_accn);
+		    $ens_coords[5]=~s/\[.*\]//g;
+		    $ens_coords[5]=~s/\(.*\)//g;
+		    $ens_coords[5]=~s/\.//g;
+		    $species = $ensdb->current_org();
+		    $species = ucfirst($species);
+		}
 	    }
+	    unless ($species) { $species='-';}
 	    my $traccns=join('<br>',@transcript_accessions);
 	    my $trclasses=join('<br>',@classes);
 	    my $trfams=join('<br>',@families);
 
 print<<COLNAMES;
-<table class="summarytable">
+<a href='#top'>Back to top</a>
+<table class="summarytable"><a name='$pazartfid'></a>
+<tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
 <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="http://www.pazar.info/cgi-bin/tf_search.cgi?geneID=$tf_name">$pazartfid</a></td></tr>
 <tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Project</span></td><td class="basictd">$tfproj</td></tr>
-</table><br><br>
+</table><br>
 COLNAMES
 
 ########### start of HTML table
@@ -274,17 +351,15 @@ COLNAMES2
     print "</tr>";
 
 	    if (!$complex->{targets}) {
-		print "<p class=\"warning\">No target could be found for this TF!</p>\n";
+		print "<span class='red'>No target could be found for this TF!</span><br><br><br><br>\n";
 		next;
 	    }
-	    my $seqcounter = 0;
+	    my $count = 0;
 	    my @rsids;
 	    my @coids;
 	    while (my $site=$complex->next_target) {
-		$seqcounter++;
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
-
 		if ($type eq 'reg_seq') {
 		    my $rsid=$site->get_dbid;
 		    if (grep/^$rsid$/,@rsids) {next;}
@@ -300,7 +375,8 @@ COLNAMES2
 		    $ens_coords[5]=~s/\.//g;
 		    my $species = $ensdb->current_org();
 		    $species = ucfirst($species)||'-';
-
+		    $seqcounter++;
+		    $count++;
 		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
 
 		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
@@ -319,6 +395,8 @@ COLNAMES2
 		    my $id=write_pazarid($coid,'CO');
 		    my $seqname=$site->get_name==0?'':$site->get_name;
 		    my $desc=$site->get_desc||'-';
+		    $seqcounter++;
+		    $count++;
 		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
 		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>".$id."</b><br>$seqname</div></td>";
 		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
@@ -327,51 +405,53 @@ COLNAMES2
 		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
 		}
                 print "</tr>";
-		$count++;
+
 		my $construct_name=$cor_accn."_site".$count;
 		print TMP ">".$construct_name."\n";
 		print TMP $site->get_seq."\n";
                 $bg_color = 1 - $bg_color;
             }
 	    print "</table><br>";
+	    close (TMP);
+
+	    if ($count<2) {
+		print "<span class='red'>There are not enough targets to build a binding profile for this TF!</span><br><br><br><br>\n";
+		next;
+	    } else {
+		my $patterngen =
+		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
+						-binary => 'meme',
+						-additional_params => '-revcomp -mod oops');
+		my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
+		if (!$pfm) {
+		    print "<span class='red'>No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</span><br><br><br><br>\n";
+		    next;
+		} else {
+#print a human readable format of the matrix
+		    my $prettystring = $pfm->prettyprint();
+		    my @matrixlines = split /\n/, $prettystring;
+		    $prettystring = join "<BR>\n", @matrixlines;
+		    $prettystring =~ s/ /\&nbsp\;/g;
+		    print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
+#draw the logo
+		    my $logo = $accn.".png";
+		    my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
+		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
+		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
+		    print "</table><br><br><br><br>\n";
+########### end of HTML table
+		}
+	    }
 	}
     }
-    close (TMP);
 
     if ($tfcount==0) {
 	print "<h3>There is currently no available annotation for the Transcription Factor $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this TF or any other TF!</h3>";
 	exit;
     }
 
-    if ($count<2) {
-	print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p>\n";
-	exit;
-    } else {
-	my $patterngen =
-	    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
-					-binary => 'meme',
-					-additional_params => '-revcomp -mod oops');
-	my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
-	if (!$pfm) {
-	    print "<p class=\"warning\">No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</p>\n";
-	} else {
-#print a human readable format of the matrix
-	my $prettystring = $pfm->prettyprint();
-	my @matrixlines = split /\n/, $prettystring;
-	$prettystring = join "<BR>\n", @matrixlines;
-	$prettystring =~ s/ /\&nbsp\;/g;
-	print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
-#draw the logo
-	my $logo = $accn.".png";
-	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
-	print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
-	print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
-	print "</table><br>\n";
-########### end of HTML table
-    }
-    }
 ####hidden form inputs
-    print "<br><table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
+    print "<table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
     print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
 <tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
     print "</form>";
