@@ -48,10 +48,11 @@ else
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
+<h1>PAZAR TF View</h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td colspan="2">
-      <p class="title1">PAZAR - Search by TF</p>
+      <p class="title2">Search by TF</p>
       </td>
     </tr>
 <form name="tf_search" method="post" action="" enctype="multipart/form-data" target="">
@@ -59,18 +60,15 @@ print<<page;
       <td colspan="2">
 <p > Please enter a &nbsp;
       <select name="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
-gene ID</option>
-      <option value="EnsEMBL_transcript"> EnsEMBL
-transcript
-ID</option>
-      <option value="EntrezGene"> Entrezgene ID</option>
-       <option value="nm"> RefSeq ID</option>
-      <option value="swissprot"> Swissprot ID</option>
-           <option value="tf_name"> functional name</option>
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
+      <option value="tf_name">User Defined TF name</option>
+      <option value="EntrezGene">Entrezgene ID</option>
+      <option value="nm">RefSeq ID</option>
+      <option value="swissprot">Swissprot ID</option>
+      <option value="PAZAR_TF">PAZAR TF ID</option>
 </select>
 &nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
-      
       </td>
     </tr>
     <tr align="left">
@@ -82,7 +80,7 @@ ID</option>
    </form>
   </tbody>
 </table>
- <hr color='black'>
+<hr color='black'> 
 page
 
 # print out the html tail template

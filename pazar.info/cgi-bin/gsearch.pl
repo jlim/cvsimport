@@ -20,8 +20,15 @@ window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no dir
 }
 if(target == 1) 
 {
+var myTextField = document.getElementById('ID_list');
+
+if(myTextField.value == "PAZAR_seq") {
+document.gene_search.target="_self";
+document.gene_search.action="http://www.pazar.info/cgi-bin/seq_search.cgi";
+} else {
 document.gene_search.target="_self";
 document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
+}
 }
 if(target == 2) 
 {
@@ -30,8 +37,8 @@ document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
-
 });
+
 
 if($loggedin eq 'true')
 {
@@ -48,28 +55,29 @@ else
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
+<h1>PAZAR Gene View</h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td colspan="2">
-      <p class="title1">PAZAR - Search by Gene</p>
+      <p class="title2">Search by Gene or Sequence</p>
       </td>
     </tr>
 <form name="gene_search" method="post" action="" enctype="multipart/form-data" target="">
     <tr align="left">
       <td colspan="2">
 <p > Please enter a &nbsp;
-      <select name="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL
-gene ID</option>
-      <option value="EnsEMBL_transcript"> EnsEMBL
-transcript
-ID</option>
-      <option value="EntrezGene"> Entrezgene ID</option>
-      <option value="nm"> RefSeq ID</option>
-      <option value="swissprot"> Swissprot ID</option>
+      <select name="ID_list" id="ID_list">
+      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
+      <option value="GeneName">User Defined Gene Name</option>
+      <option value="EntrezGene">Entrezgene ID</option>
+      <option value="nm">RefSeq ID</option>
+      <option value="swissprot">Swissprot ID</option>
+      <option value="PAZAR_gene">PAZAR Gene ID</option>
+      <option value="PAZAR_seq">PAZAR Sequence ID</option>
       </select>
 &nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
-       </td>
+      </td>
     </tr>
     <tr align="left">
       <td colspan="2"><p > Or browse the current list of annotated genes
