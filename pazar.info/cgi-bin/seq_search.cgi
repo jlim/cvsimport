@@ -193,7 +193,7 @@ print<<HEADER_TABLE;
 <table><tr><td>
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value="$gid"><input type='hidden' name='ID_list' value='PAZAR_gene'><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$geneName</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene_accession</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
@@ -267,7 +267,7 @@ foreach my $inter (@interactors) {
 	my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
 	my $tfid=$inter->{tfcomplex};
 	my $pazartfid=write_pazarid($tfid,'TF');
-	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='http://www.pazar.info/cgi-bin/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$tfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
+	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='http://www.pazar.info/cgi-bin/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
     }
     if ($inter->{tftype} eq 'sample') {
 	my @sample=$dbh->get_data_by_primary_key('sample',$inter->{tfcomplex});
@@ -399,7 +399,7 @@ foreach my $exp (@expressors) {
 	    my $tf = $dbh->create_tf;
 	    my $complex = $tf->get_tfcomplex_by_id($tfid, 'notargets');
 	    my $pazartfid=write_pazarid($tfid,'TF');
-	    print "<form name='tflink$pazartfid$count' method='post' action='http://www.pazar.info/cgi-bin/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$tfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
+	    print "<form name='tflink$pazartfid$count' method='post' action='http://www.pazar.info/cgi-bin/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
 	}
     }
     if ($nocond==0) {

@@ -330,7 +330,7 @@ print<<COLNAMES;
 <table class="summarytable"><a name='$pazartfid'></a>
 <tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
-<tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="http://www.pazar.info/cgi-bin/tf_search.cgi?geneID=$tfid">$pazartfid</a></td></tr>
+<tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="http://www.pazar.info/cgi-bin/tf_search.cgi?geneID=$pazartfid">$pazartfid</a></td></tr>
 <tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
@@ -383,7 +383,7 @@ COLNAMES2
 
 		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
 		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
-		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gene_search.cgi?geneID=$gid\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
+		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gene_search.cgi?geneID=$pazargeneid\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
 		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
 		    print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
 			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br><br>";
