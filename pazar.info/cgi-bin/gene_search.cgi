@@ -122,7 +122,7 @@ my %colors = (0 => "#fffff0",
 my $get = new CGI;
 my %params = %{$get->Vars};
 my $accn = $params{geneID};
-my $dbaccn = $params{ID_list}||'EnsEMBL_gene';
+my $dbaccn = $params{ID_list}||'PAZAR_gene';
 my $gene;
 
 if ($accn) {
