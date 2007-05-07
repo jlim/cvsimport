@@ -6,14 +6,38 @@ use HTML::Template;
 my $template = HTML::Template->new(filename => 'header.tmpl');
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR Project Outline');
+$template->param(TITLE => 'PAZAR FAQ');
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
           <p class="title1">PAZAR - FAQ</p>
-<p class="title3">FAQ TOPICS</p>
+
+<p class="title3">What is PAZAR?</p>
+
+ <ul type=disc><li><span style='font-family:
+     Verdana'>A software framework for the construction and maintenance of regulatory sequence data annotations which allows multiple boutique databases to function independently within a larger system (or information mall). For more information, see the <a href='http://www.pazar.info/cgi-bin/overview.pl'>Overview</a> section.</span></li></ul>
+
+<p class="title3">How does one browse PAZAR?</p>
+
+ <ul type=disc><li><span style='font-family:
+     Verdana'>Click on 'Genes', 'TFMART' or 'TF PROFILES' to search for regulated genes, transcription factors or transcription factor binding profiles respectively.</span></li></ul>
+<ul type=disc><li><span style='font-family:
+     Verdana'>Select the features of interest and browse results.</span></li></ul>
+
+<p class="title3">How does one enter data in PAZAR?</p>
+
+<ul type=disc><li><span style='font-family:
+     Verdana'>Register under the <a href='http://www.pazar.info/cgi-bin/register.pl'>Register</a> section.</span></li></ul>
+<ul type=disc><li><span style='font-family:
+     Verdana'>Click on <a href='http://www.pazar.info/cgi-bin/editprojects.pl'>My Projects</a> to see all the projects you belong to and to create new ones.</span></li></ul>
+<ul type=disc><li><span style='font-family:
+     Verdana'>Click on <a href='http://www.pazar.info/cgi-bin/sWI/entry.pl'>Submit</a> to enter new data. For more detailed questions on the submission interface, see the <a href="#FAQTOPICS">FAQ topics</a> section below.</span></li></ul>
+<ul type=disc><li><span style='font-family:
+     Verdana'>If one has a pre-existing dataset, an automated data import can be realized upon contacting the PAZAR development team.</span></li></ul>
+
+<p class="title3"><a name='FAQTOPICS'></a>FAQ TOPICS</p>
 
 <ul type=disc>
  <li><span style='font-family:
@@ -32,30 +56,14 @@ print<<page;
 
 <ul type=disc>
  <li><span style='font-family:
-     Verdana'><a href="#PAZARUSERINTERFACE">PAZAR USER INTERFACE</a></span></li>
+     Verdana'><a href="#PAZARUSERINTERFACE">PAZAR USER INTERFACE</a></span></li
 </ul>
 
-<p class="title3">CONSTRUCTING A SEQUENCE-SPECIFIC PAZAR RECORD</p>
-<ul type=disc>
- <li><span style='font-family:
-     Verdana'>Review all of the relevant papers that are available for a given
-     sequence</span></li>
- <li><span style='font-family:
-     Verdana'>Select the overall DNA sequence which includes all of the regions
-     thought to be involved in gene expression regulation</span></li>
- <li><span style='font-family:
-     Verdana'>Make note of all of the data that pertains to that specific
-     sequence</span></li>
- <li><span style='font-family:
-     Verdana'>Create additional records for subregions, if there is data to support
-     it (ie. EMSA in which the probe is just the putative binding site of
-     interest)</span></li>
-</ul>
-<p class="title3">PAZAR User Interface Screenshots </p>
+<p class="title3">PAZAR User Interface Screenshots</p>
+<a href="http://www.pazar.info/images/PAZAR_Screenshots_100406.pdf">PAZAR
+Screenshots (10-04-06)</a>
 
-<p>&nbsp;<a
-href="http://www.pazar.info/images/PAZAR_Screenshots_100406.pdf">PAZAR
-Screenshots (10-04-06)</a></p>
+
 
 <hr>
 <p class="title3">FAQ TOPICS</p>
@@ -291,7 +299,7 @@ used for the same experiment, which should be submitted to PAZAR?  </span></p>
    <td class='basictd'>
    <p><span style='font-family:Verdana'>Given the situation in which there is a supershift
   experiment performed using a nuclear extract should the factor to which the antibody binds 
-  be recorded as a "TF/complex" or as an "Interaction with Unknown Factor (ie. nuclear extract)?   
+  be recorded as a "TF/complex" or as an "Interaction with Unknown Factor (ie. nuclear extract)"?   
 </span></p>
   </td>
    <td class='basictd'>
@@ -403,6 +411,15 @@ used for the same experiment, which should be submitted to PAZAR?  </span></p>
   mobility but instead disappeared. </span></p>
   </td>
  </tr>
+<tr>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>How should one verify whether a transcription factor (TF) is already present in PAZAR prior to submission?  <br>
+   </span></p>
+  </td>
+   <td class='basictd'>
+   <p><span style='font-family:Verdana'>Prior to submitting a new TF to PAZAR, conduct a search within PAZAR using the ENSEMBL ID for that TF. If the TF is present, it will be linked to that ENSEMBL ID and will be retrieved. Also, by convention use the HUGO gene name for all human TFs, or for other species, the Entrez Gene ID.</span></p>
+  </td>
+ </tr>
 </table>
 
 <p class="bold"><a name=PAZARUSERINTERFACE></a>PAZAR USER INTERFACE </p>
@@ -451,8 +468,9 @@ used for the same experiment, which should be submitted to PAZAR?  </span></p>
  </tr>
 </table>
 
-
 page
+
+
 
 
 # print out the html tail template
