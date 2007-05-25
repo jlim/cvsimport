@@ -50,9 +50,13 @@ my $dbh = pazar->new(
 my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published'");
 my @desc;
 while (my $project=$projects->fetchrow_hashref) {
+    my $flashdesc=$project->{description};
+    $flashdesc=~s/<(.*?)>//gi;
+    $flashdesc=~s/[!@\$\^\*\(\)\+\[\]\\\'=&\{\}\|\"\?]/ /g;
+    my $truncflashdesc=substr($flashdesc,0,300);
     push @desc, {
 	name => $project->{project_name},
-        description => $project->{description}};
+        description => $truncflashdesc};
 }
 
 if ($loggedin eq 'true') {
