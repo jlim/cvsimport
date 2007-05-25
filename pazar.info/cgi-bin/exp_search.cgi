@@ -12,21 +12,27 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 ###use CGI::Debug( report => 'everything', on => 'anything' );
 
-use Data::Dumper;
+#use Data::Dumper;
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 # open the html header template
-my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Analysis View');
-$template->param(JAVASCRIPT_FUNCTION => q{
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(JAVASCRIPT_FUNCTION => qq{
 function setCount(target){
 
 if(target == 0) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
+document.gene_search.action="$pazar_cgi/gene_list.cgi";
 document.gene_search.target="Window1";
 window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
 }
@@ -36,15 +42,15 @@ var myTextField = document.getElementById('ID_list');
 
 if(myTextField.value == "PAZAR_seq") {
 document.gene_search.target="_self";
-document.gene_search.action="http://www.pazar.info/cgi-bin/seq_search.cgi";
+document.gene_search.action="$pazar_cgi/seq_search.cgi";
 } else {
 document.gene_search.target="_self";
-document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
+document.gene_search.action="$pazar_cgi/gene_search.cgi";
 }
 }
 if(target == 2) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
+document.gene_search.action="$pazar_cgi/genebrowse_alpha.pl";
 document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
@@ -54,12 +60,12 @@ window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, to
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
@@ -194,7 +200,7 @@ unless ($user[0]||$user[1]) {
 print<<HEADER_TABLE;
 <p class="title2">Search Result Details</p>
 <table class="summarytable">
-<tr><td class="analysistabletitle"><span class="title4">Analysis ID</span></td><form name='intdetails' method='post' action='http://www.pazar.info/cgi-bin/exp_search.cgi' enctype='multipart/form-data'><input type='hidden' name='aid' value="$params{aid}"><td class="basictd"><input type="submit" class="submitLink" value="$pazaranid"></td></form></tr>
+<tr><td class="analysistabletitle"><span class="title4">Analysis ID</span></td><form name='intdetails' method='post' action="$pazar_cgi/exp_search.cgi" enctype='multipart/form-data'><input type='hidden' name='aid' value="$params{aid}"><td class="basictd"><input type="submit" class="submitLink" value="$pazaranid"></td></form></tr>
 <tr><td class="analysistabletitle"><span class="title4">Analysis Method</span></td><td class="basictd">$met[0]</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Cell Type</span></td><td class="basictd">$cellinfo</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Time</span></td><td class="basictd">$timeinfo</td></tr>
@@ -266,7 +272,7 @@ if ($mode eq 'expression') {
 	    my $regid=$reg_seq->accession_number;
 	    my $pazarregid=write_pazarid($regid,'RS');
 	    my $seqname=$reg_seq->id;
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
+	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
 	    my $gid=$reg_seq->PAZAR_gene_ID;
 	    my $pazargeneid = write_pazarid($gid,'GS');
 	    my $gene_accession=$reg_seq->gene_accession;
@@ -276,7 +282,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
 
 	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -290,7 +296,7 @@ if ($mode eq 'expression') {
 	    my @mut=$dbh->get_data_by_primary_key('mutation_set',$seqid);
 	    my $regid=$mut[0];
 	    my $pazarregid=write_pazarid($regid,'RS');
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Mutant of Sequence<form name='seqlink$count' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"></form></div></td>";
+	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Mutant of Sequence<form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"></form></div></td>";
 
 	    my $pazarmutid=write_pazarid($seqid,'MS');
 	    my $seqname=$mut[1];
@@ -306,7 +312,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
 
 	    my $seqstr=chopstr($mut[4],40)||'-';
 	    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -378,7 +384,7 @@ if ($mode eq 'expression') {
 		my $tfid=$dat[2];
 		my $complex = $tf->get_tfcomplex_by_id($tfid, 'notargets');
 		my $pazartfid=write_pazarid($tfid,'TF');
-		print "<form name='tflink$pazartfid$count' method='post' action='http://www.pazar.info/cgi-bin/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
+		print "<form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
 	    }
 	}
 	if ($nocond==0) {
@@ -413,7 +419,7 @@ if ($mode eq 'expression') {
 	    my $regid=$reg_seq->accession_number;
 	    my $pazarregid=write_pazarid($regid,'RS');
 	    my $seqname=$reg_seq->id;
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
+	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
 	    my $gid=$reg_seq->PAZAR_gene_ID;
 	    my $pazargeneid = write_pazarid($gid,'GS');
 	    my $gene_accession=$reg_seq->gene_accession;
@@ -423,7 +429,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
 
 	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -436,7 +442,7 @@ if ($mode eq 'expression') {
 	    my @mut=$dbh->get_data_by_primary_key('mutation_set',$seqid);
 	    my $regid=$mut[0];
 	    my $pazarregid=write_pazarid($regid,'RS');
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Mutant of Sequence<form name='seqlink$count' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"></form></div></td>";
+	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Mutant of Sequence<form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"></form></div></td>";
 
 	    my $pazarmutid=write_pazarid($seqid,'MS');
 	    my $seqname=$mut[1];
@@ -452,7 +458,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
 
 	    my $seqstr=chopstr($mut[4],40)||'-';
 	    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -502,7 +508,7 @@ if ($mode eq 'expression') {
 	    my $tf = $dbh->create_tf;
 	    my $complex = $tf->get_tfcomplex_by_id($tfid, 'notargets');
 	    my $pazartfid=write_pazarid($tfid,'TF');
-	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='http://www.pazar.info/cgi-bin/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
+	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
 	} elsif ($tftable eq 'sample') {
 	    my @sample=$dbh->get_data_by_primary_key('sample',$tfid);
 	    my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
@@ -514,7 +520,7 @@ if ($mode eq 'expression') {
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 
 #split long lines into several smaller ones by inserting a line break at a specified character interval

@@ -12,21 +12,27 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
-use Data::Dumper;
+#use Data::Dumper;
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 # open the html header template
-my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Gene View');
-$template->param(JAVASCRIPT_FUNCTION => q{
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(JAVASCRIPT_FUNCTION => qq{
 function setCount(target){
 
 if(target == 0) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/gene_list.cgi";
+document.gene_search.action="$pazar_cgi/gene_list.cgi";
 document.gene_search.target="Window1";
 window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
 }
@@ -36,15 +42,15 @@ var myTextField = document.getElementById('ID_list');
 
 if(myTextField.value == "PAZAR_seq") {
 document.gene_search.target="_self";
-document.gene_search.action="http://www.pazar.info/cgi-bin/seq_search.cgi";
+document.gene_search.action="$pazar_cgi/seq_search.cgi";
 } else {
 document.gene_search.target="_self";
-document.gene_search.action="http://www.pazar.info/cgi-bin/gene_search.cgi";
+document.gene_search.action="$pazar_cgi/gene_search.cgi";
 }
 }
 if(target == 2) 
 {
-document.gene_search.action="http://www.pazar.info/cgi-bin/genebrowse_alpha.pl";
+document.gene_search.action="$pazar_cgi/genebrowse_alpha.pl";
 document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
@@ -54,12 +60,12 @@ window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, to
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
@@ -207,7 +213,7 @@ if ($accn) {
 	print "<h3>There is currently no available annotation for gene $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</h3>";
 
 # print out the html tail template and exit
-	my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+	my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 	print $template_tail->output;
 	exit;
     }
@@ -252,7 +258,7 @@ print<<HEADER_TABLE;
 <a href='#top'>Back to top</a>
 <table class="summarytable"><a name='$pazargeneid'></a>
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class=\"basictd\">$geneName</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
@@ -283,7 +289,7 @@ HEADER_TABLE
 
 #print out default information
 		print "<tr>";
-		print "<form name='details$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
+		print "<form name='details$regseq_counter' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
 		
 		my $id=write_pazarid($regseq->accession_number,'RS');
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
@@ -296,9 +302,9 @@ HEADER_TABLE
 
 		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (strand ".$regseq->strand.")</div></td>";
 
-		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
+		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
 		print "</tr>";
 		$bg_color =  1 - $bg_color;
 	    }
@@ -311,7 +317,7 @@ HEADER_TABLE
 
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 
 #split long lines into several smaller ones by inserting a line break at a specified character interval

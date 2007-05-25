@@ -4,8 +4,6 @@ use pazar;
 use pazar::gene;
 use pazar::talk;
 
-use HTML::Template;
-
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
@@ -13,7 +11,7 @@ use CGI::Carp qw(fatalsToBrowser);
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 #connect to the database
 my $dbh = pazar->new( 
@@ -27,6 +25,9 @@ my $dbh = pazar->new(
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
+
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 my $get = new CGI;
 my %param = %{$get->Vars};
@@ -49,7 +50,7 @@ my $randnum = substr(rand() * 100,3);
 
 my $newaccn = $accn.$randnum;
 #print "using randum number for filename: $randnum";
-    my $file="/space/usr/local/apache/pazar.info/tmp/".$newaccn.".fa";
+    my $file="$pazarhtdocspath/tmp/".$newaccn.".fa";
     open (TMP, ">$file");
 
 ##########
@@ -92,8 +93,8 @@ if ($count<2) {
 	print "<span style=\"font-size: 14pt;\"><b>Position Frequency Matrix:</b></span><br><br><SPAN style=\"font-size: 11pt;font-family: monospace;\">$prettystring</SPAN><br>";
 #draw the logo
 	my $logo = $newaccn.".png";
-	my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
-	print "<br><p style=\"font-size: 14pt;\"><b>Logo:</b><br><img src=\"http://www.pazar.info/tmp/$logo\"></p>";
+	my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
+	print "<br><p style=\"font-size: 14pt;\"><b>Logo:</b><br><img src=\"$pazar_html/tmp/$logo\"></p>";
 	print "<p style=\"font-size: 10pt;\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";
     }
     }

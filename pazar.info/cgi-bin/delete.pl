@@ -3,10 +3,12 @@
 use strict;
 use DBI;
 
+my $dbname = $ENV{PAZAR_name};
+my $dbhost = $ENV{PAZAR_host};
 
-my $DBUSER = "pazaradmin";
-my $DBPASS = "32paz10";
-my $DBURL = "DBI:mysql:dbname=pazar;host=napa.cmmt.ubc.ca";
+my $DBUSER = $ENV{PAZAR_adminuser};
+my $DBPASS = $ENV{PAZAR_adminpass};
+my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
 
 my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
     or die "Can't connect to pazar database";

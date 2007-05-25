@@ -2,11 +2,17 @@
 
 use HTML::Template;
 
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Project Outline');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -32,7 +38,7 @@ framework for the construction and maintenance of regulatory sequence
 data annotations; a framework which allows multiple boutique databases
 to function independently within a larger system (or information mall).
 Our goal is to be the <b>public repository for regulatory data</b>.</p>
-          <p ><a href="http://www.pazar.info/PAZARposter.pdf">Download PAZAR's poster</a></p>
+          <p ><a href="$pazar_html/PAZARposter.pdf">Download PAZAR's poster</a></p>
           <p class="title2">PAZAR's principles:</p>
           <p >(1)
 to be OPEN-ACCESS and OPEN-SOURCE, providing a completely transparent
@@ -49,15 +55,15 @@ simple methods for the user to deposit to or query from the database.</p>
           <p class="title2">Overview:</p>
           <p >The
 PAZAR system is currently developed as a mySQL database featuring a
-complex <a href="http://www.pazar.info/images/pazar_schema.png" target="_blank">schema</a> which allows for a high level of flexibility regarding
-the type of information that can be captured. The database <a href="http://www.pazar.info/pazar_dictionary.html" target="_blank">dictionary</a>
-and an explanation of the <a href="http://www.pazar.info/iosys.htm" target="_blank">input/output
+complex <a href="$pazar_html/images/pazar_schema.png" target="_blank">schema</a> which allows for a high level of flexibility regarding
+the type of information that can be captured. The database <a href="$pazar_html/pazar_dictionary.html" target="_blank">dictionary</a>
+and an explanation of the <a href="$pazar_html/iosys.htm" target="_blank">input/output
 system</a> can help you find out
 some of the database constraints and internal structure.</p>
           <p >To
 ease the insertion of data into the database, we are developing two
 curation interfaces, one allowing the curator to capture higher levels
-of details than the other. We have also designed an <a href="http://www.pazar.info/cgi-bin/xml.pl">XML exchange format</a> that can be used to format already existing datasets.</p>
+of details than the other. We have also designed an <a href="$pazar_cgi/xml.pl">XML exchange format</a> that can be used to format already existing datasets.</p>
           <p >As
 an OPEN SYSTEM, each boutique operator within PAZAR is welcome to
 participate in further API development and to create and maintain their
@@ -68,5 +74,5 @@ suggestion (<a href="https://sourceforge.net/forum/forum.php?forum_id=512784" ta
 page
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

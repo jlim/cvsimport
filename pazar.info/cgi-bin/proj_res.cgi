@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use HTML::Template;
-use Data::Dumper;
+#use Data::Dumper;
 use pazar;
 use pazar::reg_seq;
 use pazar::talk;
@@ -13,14 +13,20 @@ use CGI::Carp qw(fatalsToBrowser);
 use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
+require "$pazarcgipath/getsession.pl";
  
 # open the html header template
-my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => "PAZAR - Project Search Results");
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 $template->param(JAVASCRIPT_FUNCTION => q{
 function verifyCheckedBoxes() {            
     var numChecked = 0;
@@ -51,12 +57,12 @@ function verifyCheckedBoxes() {
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
@@ -125,7 +131,7 @@ if ($param{submit}=~/gene/i) {
     undef(my @filters);
 ### species filter
     if ($param{species_filter} eq 'on') {
-	if (!$param{species}) {print "<p class=\"warning\">You need to select one or more species when using the species filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if (!$param{species}) {print "<p class=\"warning\">You need to select one or more species when using the species filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	my @species=split(/;/,$param{species});
 	if (!grep(/species filter/, @filters)) {
 	    my $filter='species filter: '.join(',',@species);
@@ -138,11 +144,11 @@ if ($param{submit}=~/gene/i) {
 		    push @reg_seqs, $regseq;
 		}
 	    }
-            if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for species: ".join(',',@species)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+            if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for species: ".join(',',@species)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	} else {
 
 ### region filter
-	    if (scalar(@species)>1) {print "<p class=\"warning\">You have to choose a unique species when using the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	    if (scalar(@species)>1) {print "<p class=\"warning\">You have to choose a unique species when using the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	    if ($param{chr_filter} eq 'on') {
 		unless ($param{bp_filter} eq 'on') {
 		    @reg_seqs=$dbh->get_reg_seq_by_chromosome($param{chromosome},$param{species});
@@ -150,27 +156,27 @@ if ($param{submit}=~/gene/i) {
 		    my $filter='chromosome filter: '.$param{chromosome};
 		    push @filters, $filter;
 		}
-                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		} else {
-                    if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need to specify the start and end of the region you're interested in when using the base pair filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
-		    if ($param{bp_start}>=$param{bp_end}) {print "<p class=\"warning\">The start coordinate needs to be lower that the end!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+                    if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need to specify the start and end of the region you're interested in when using the base pair filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+		    if ($param{bp_start}>=$param{bp_end}) {print "<p class=\"warning\">The start coordinate needs to be lower that the end!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
 	if (!grep(/region filter/, @filters)) {
 		    my $filter='region filter: '.$param{chromosome}.':'.$param{bp_start}.'-'.$param{bp_end};
 		    push @filters, $filter;
 		}
 		    @reg_seqs=$dbh->get_reg_seq_by_region($param{bp_start},$param{bp_end},$param{chromosome},$param{species});
-                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
 		}
 	    }
 	}
     } else {
-	if ($param{region_filter} eq 'on') {print "<p class=\"warning\">You have to select a species if you want to use the region filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+	if ($param{region_filter} eq 'on') {print "<p class=\"warning\">You have to select a species if you want to use the region filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
     }
 
 ### gene filter
     if ($param{gene_filter} eq 'on') {
-	if ($reg_seqs[0]) {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
-	if (!$param{gene}) {print "<p class=\"warning\">You need to select one or more gene when using the gene filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+	if ($reg_seqs[0]) {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+	if (!$param{gene}) {print "<p class=\"warning\">You need to select one or more gene when using the gene filter!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
 	my @genes=split(/;/,$param{gene});
 	if (!grep(/gene filter/, @filters)) {
 	my $filter='gene filter: '.join(',',@genes);
@@ -182,7 +188,7 @@ if ($param{submit}=~/gene/i) {
 		push @reg_seqs, $regseq;
 	    }
 	}
-	if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for the genes ".join(',',@genes)."!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='http://www.pazar.info/cgi-bin/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
+	if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for the genes ".join(',',@genes)."!<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
 
     }
     if (!$reg_seqs[0]) {
@@ -209,7 +215,7 @@ if ($param{submit}=~/gene/i) {
 
 ### length filter
 	if ($param{length_filter} eq 'on' && $param{length} ne '0') {
-	    if (!$param{length} || $param{length}<=0) {print "<p class=\"warning\">You need to specify a length greater than 0 when using the length filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	    if (!$param{length} || $param{length}<=0) {print "<p class=\"warning\">You need to specify a length greater than 0 when using the length filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	if (!grep(/length filter/, @filters)) {
 		my $filter='length filter: '.$param{shorter_larger}.' '.$param{length}.' bases';
 		push @filters, $filter;
@@ -244,7 +250,7 @@ my $filter =
 
 ### TF filter
 	    if ($param{tf_filter} eq 'on') {
-	        if (!$param{tf}) {print "<p class=\"warning\">You need to select one or more TF when using the TF filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	        if (!$param{tf}) {print "<p class=\"warning\">You need to select one or more TF when using the TF filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		my @tfs=split(/;/,$param{tf});
 	if (!grep(/TF filter/, @filters)) {
 		    my $filter='TF filter: '.join(',',@tfs);
@@ -313,7 +319,7 @@ my $filter =
 
 ### evidence filter
 	    if ($param{evidence_filter} eq 'on') {
-	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		my @evids=split(/;/,$param{evidence});
 		if (!grep(/evidence filter/, @filters)) {
 		    my $filter='evidence filter: '.join(',',@evids);
@@ -327,7 +333,7 @@ my $filter =
 
 ### method filter
 	    if ($param{method_filter} eq 'on') {
-	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		my @mets=split(/;/,$param{method});
 		if (!grep(/method filter/, @filters)) {
 		    my $filter='method filter: '.join(',',@mets);
@@ -378,7 +384,7 @@ my $filter =
 
 ### evidence filter
 	    if ($param{evidence_filter} eq 'on') {
-	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	        if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		my @evids=split(/;/,$param{evidence});
 		if (!grep(/evidence filter/, @filters)) {
 		    my $filter='evidence filter: '.join(',',@evids);
@@ -392,7 +398,7 @@ my $filter =
 
 ### method filter
 	    if ($param{method_filter} eq 'on') {
-	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	        if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		my @mets=split(/;/,$param{method});
 		if (!grep(/method filter/, @filters)) {
 		    my $filter='method filter: '.join(',',@mets);
@@ -408,7 +414,7 @@ my $filter =
 	if (!@filters) {push @filters, 'none';}
 	if ($res==0) {
 	    $res=1;
-	    print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR Gene View</h1>";
+	    print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR Gene View</h1>";
 	}
 	if ($exprs[0] || $inters[0] || $datalinks==2) {
 	    $filt=1;
@@ -430,7 +436,7 @@ my $filter =
 print<<HEADER_TABLE;
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$gene_sp</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class="basictd"><form name="genelink$pazargeneid[0]" method='post' action='http://www.pazar.info/cgi-bin/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value="$gene_accn"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</form></td></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class="basictd"><form name="genelink$pazargeneid[0]" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$gene_accn"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</form></td></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$gene_desc</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene_accn</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
@@ -458,10 +464,10 @@ COLNAMES
     }
     if (!@filters) {push @filters, 'none';}
     if ($res==1 && $filt==0) {
-	print "<p class=\"warning\">No regulatory sequence was found using this set of filters!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
+	print "<p class=\"warning\">No regulatory sequence was found using this set of filters!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
     }
     if ($res==0) {
-	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
+	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
 	print "<p class=\"warning\">No regulatory sequence was found using this set of filters!</p>";
     }
 
@@ -475,7 +481,7 @@ COLNAMES
     my @complexes;
     undef(my @filters);
     if ($param{tf_filter} eq 'on') {
-	if (!$param{tf}) {print "<p class=\"warning\">You need to select one or more TF when using the TF filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if (!$param{tf}) {print "<p class=\"warning\">You need to select one or more TF when using the TF filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	my @tfs=split(/;/,$param{tf});
 	if (!grep(/TF filter/, @filters)) {
 	    my $filter='TF filter: '.join(',',@tfs);
@@ -488,12 +494,12 @@ COLNAMES
 		push @complexes, $tfcomplex;
 	    }
 	}
-        if (!$complexes[0]) {print "<p class=\"warning\">No TF was found with the following names: ".join(',',@tfs)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+        if (!$complexes[0]) {print "<p class=\"warning\">No TF was found with the following names: ".join(',',@tfs)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
     }
 
 ### TF class filter
     if ($param{class_filter} eq 'on') {
-	if ($complexes[0]) {print "<p class=\"warning\">You cannot use the TF filter and TF class filter at the same time!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if ($complexes[0]) {print "<p class=\"warning\">You cannot use the TF filter and TF class filter at the same time!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	my @cf = split(/\//,$param{classes});
 	my $tf = $dbh->create_tf;
 	my @tfcomplex = $tf->get_tfcomplex_by_class($cf[0]);
@@ -504,12 +510,12 @@ COLNAMES
 	    my $filter='TF class filter: '.$param{classes};
 	    push @filters, $filter;
 	}
-        if (!$complexes[0]) {print "<p class=\"warning\">No TF was found within the following class: ".$cf[0]."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+        if (!$complexes[0]) {print "<p class=\"warning\">No TF was found within the following class: ".$cf[0]."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
     }
 
 ### species filter
     if ($param{species_filter} eq 'on') {
-	if (!$param{species}) {print "<p class=\"warning\">You need to select one or more species when using the species filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if (!$param{species}) {print "<p class=\"warning\">You need to select one or more species when using the species filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	my @species=split(/;/,$param{species});
 	if (!grep(/species filter/, @filters)) {
 	    my $filter='species filter: '.join(',',@species);
@@ -542,7 +548,7 @@ COLNAMES
 		    push @complexes, $tfcomplex;
 		}
 	    }
-	    if (!$complexes[0]) {print "<p class=\"warning\">No TF was found from the following species: ".join(',',@species)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	    if (!$complexes[0]) {print "<p class=\"warning\">No TF was found from the following species: ".join(',',@species)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	} else {
 	    my @comp = @complexes;
 	    undef (@complexes);
@@ -553,8 +559,8 @@ COLNAMES
 		}
 	    }
 	    if (!$complexes[0]) {
-		print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
-		print "<p class=\"warning\">No TF was found in this project using this set of filters!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n";
+		print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
+		print "<p class=\"warning\">No TF was found in this project using this set of filters!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n";
 		exit;
 	    }
 	}
@@ -591,7 +597,7 @@ COLNAMES
 	} else {
 
 ### region filter
-	    if (scalar(@species)>1) {print "<p class=\"warning\">You have to choose a unique species when using the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	    if (scalar(@species)>1) {print "<p class=\"warning\">You have to choose a unique species when using the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	    if ($param{chr_filter} eq 'on') {
 		unless ($param{bp_filter} eq 'on') {
 		    my @seqs=$dbh->get_reg_seq_by_chromosome($param{chromosome},$param{species});
@@ -602,10 +608,10 @@ COLNAMES
 			my $filter='chromosome filter: '.$param{chromosome};
 			push @filters, $filter;
 		    }
-                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found on chromosome $param{chromosome} in species $param{species}<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		} else {
-                    if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need to specify the start and end of the region you're interested in when using the base pair filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
-		    if ($param{bp_start}>=$param{bp_end}) {print "<p class=\"warning\">The start coordinate needs to be lower that the end!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+                    if (!$param{bp_start} || !$param{bp_end}) {print "<p class=\"warning\">You need to specify the start and end of the region you're interested in when using the base pair filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+		    if ($param{bp_start}>=$param{bp_end}) {print "<p class=\"warning\">The start coordinate needs to be lower that the end!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		    if (!grep(/region filter/, @filters)) {
 			my $filter='region filter: '.$param{chromosome}.':'.$param{bp_start}.'-'.$param{bp_end};
 			push @filters, $filter;
@@ -615,18 +621,18 @@ COLNAMES
 			push @reg_seqs, $regseq->accession_number;
 		    }
 
-                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+                    if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		}
 	    }
 	}
     } else {
-	if ($param{region_filter} eq 'on') {print "<p class=\"warning\">You have to select a species if you want to use the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if ($param{region_filter} eq 'on') {print "<p class=\"warning\">You have to select a species if you want to use the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
     }
 
 ### gene filter
     if ($param{gene_filter} eq 'on') {
-	if ($param{species_filter} eq 'on') {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
-	if (!$param{gene}) {print "<p class=\"warning\">You need to select one or more gene when using the gene filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if ($param{species_filter} eq 'on') {print "<p class=\"warning\">You cannot use species and region filters when using the gene filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if (!$param{gene}) {print "<p class=\"warning\">You need to select one or more gene when using the gene filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	my @genes=split(/;/,$param{gene});
 	if (!grep(/gene filter/, @filters)) {
 	    my $filter='gene filter: '.join(',',@genes);
@@ -638,7 +644,7 @@ COLNAMES
 		push @reg_seqs, $regseq->accession_number;
 	    }
 	}
-	if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for the genes ".join(',',@genes)."!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+	if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found for the genes ".join(',',@genes)."!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
     }
     my $res=0;
     my %inters;
@@ -657,7 +663,7 @@ COLNAMES
 
 ### length filter
 		if ($param{length_filter} eq 'on' && $param{length} ne '0') {
-		    if (!$param{length} || $param{length}<=0) {print "<p class=\"warning\">You need to specify a length greater than 0 when using the length filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+		    if (!$param{length} || $param{length}<=0) {print "<p class=\"warning\">You need to specify a length greater than 0 when using the length filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		    if (!grep(/length filter/, @filters)) {
 			my $filter='length filter: '.$param{shorter_larger}.' '.$param{length}.' bases';
 			push @filters, $filter;
@@ -716,7 +722,7 @@ COLNAMES
 
 ### evidence filter
 		if ($param{evidence_filter} eq 'on') {
-		    if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+		    if (!$param{evidence}) {print "<p class=\"warning\">You need to select one or more evidence type when using the evidence filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		    my @evids=split(/;/,$param{evidence});
 		    if (!grep(/evidence filter/, @filters)) {
 			my $filter='evidence filter: '.join(',',@evids);
@@ -730,7 +736,7 @@ COLNAMES
 
 ### method filter
 		if ($param{method_filter} eq 'on') {
-		    if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
+		    if (!$param{method}) {print "<p class=\"warning\">You need to select one or more method type when using the method filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 		    my @mets=split(/;/,$param{method});
 		    if (!grep(/method filter/, @filters)) {
 			my $filter='method filter: '.join(',',@mets);
@@ -752,12 +758,12 @@ COLNAMES
     }
     if (!@filters) {push @filters, 'none';}
     if ($res==0) {
-	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
+	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
 	print "<p class=\"warning\">No regulatory sequence and/or TF was found using this set of filters!<br></p>";
     } else{
-	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"http://www.pazar.info/cgi-bin/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR TF View</h1>";
+	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR TF View</h1>";
 ####start of form
-	print "<form name='sequenceform' method='post' target='logowin' action='http://www.pazar.info/cgi-bin/tf_logo.pl'>";
+	print "<form name='sequenceform' method='post' target='logowin' action='$pazar_cgi/tf_logo.pl'>";
 	my $seqcounter = 0;
 	foreach my $tf (keys %inters) {
 	$seqcounter=&print_tf_attr($dbh,$tf,\@{$inters{$tf}},$seqcounter);
@@ -772,7 +778,7 @@ print "</form>";
 }
 
 ###  print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 
 sub select {
@@ -788,7 +794,7 @@ sub print_gene_attr {
 
 #print out default information
 		print "<tr>";
-		print "<form name='details$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
+		print "<form name='details$regseq_counter' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
 		
 		my $id=write_pazarid($regseq->accession_number,'RS');
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
@@ -801,9 +807,9 @@ sub print_gene_attr {
 
 		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (strand ".$regseq->strand.")</div></td>";
 
-		print "<form name='display$regseq_counter' method='post' action='http://www.pazar.info/cgi-bin/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
+		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='http://www.pazar.info/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
 }
 
 sub print_tf_attr {
@@ -818,7 +824,7 @@ sub print_tf_attr {
 		      );
 	my $count=0;
 	$tfname=~s/\//-/g;
-	my $file="/space/usr/local/apache/pazar.info/tmp/".$tfname.".fa";
+	my $file="$pazarhtdocspath/tmp/".$tfname.".fa";
 	open (TMP, ">$file");
 
 	print "<input type='hidden' name='accn' value='$tfname'>\n";
@@ -844,7 +850,7 @@ sub print_tf_attr {
 	print<<COLNAMES;
 	<table class="summarytable">
 	    <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tfname</td></tr>
-	    <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="http://www.pazar.info/cgi-bin/tf_search.cgi?geneID=$tfname">$pazartfid</a></td></tr>
+	    <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$tfname">$pazartfid</a></td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
@@ -901,12 +907,12 @@ COLNAMES2
 		my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
 
 		print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
-		print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gene_search.cgi?geneID=$gene_accession\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
+		print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$gene_accession\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
 		print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
 		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ucsc_logo.png'></a><br><br>";
-		print "<a href=\"http://www.pazar.info/cgi-bin/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='http://www.pazar.info/images/ensembl_logo.gif'></a>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png'></a><br><br>";
+		print "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif'></a>";
 		print "</div></td>";
 	    }
 	    if ($type eq 'construct') {
@@ -963,8 +969,8 @@ COLNAMES2
 		print "<br><table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td ><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
 		my $logo = $tfname.".png";
-		my $gd_image = $pfm->draw_logo(-file=>"/space/usr/local/apache/pazar.info/tmp/".$logo, -xsize=>400);
-		print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"http://www.pazar.info/tmp/$logo\">";
+		my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
+		print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$logo\">";
 		print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>";
 		print "</table><br>";
 ########### end of HTML table

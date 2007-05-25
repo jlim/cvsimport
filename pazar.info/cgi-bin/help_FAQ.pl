@@ -2,11 +2,17 @@
 
 use HTML::Template;
 
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR FAQ');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -16,26 +22,19 @@ print<<page;
 
 <p class="title3">What is PAZAR?</p>
 
- <ul type=disc><li><span style='font-family:
-     Verdana'>A software framework for the construction and maintenance of regulatory sequence data annotations which allows multiple boutique databases to function independently within a larger system (or information mall). For more information, see the <a href='http://www.pazar.info/cgi-bin/overview.pl'>Overview</a> section.</span></li></ul>
+ <ul type=disc><li>A software framework for the construction and maintenance of regulatory sequence data annotations which allows multiple boutique databases to function independently within a larger system (or information mall). For more information, see the <a href="$pazar_cgi/overview.pl">Overview</a> section.</li></ul>
 
 <p class="title3">How does one browse PAZAR?</p>
 
- <ul type=disc><li><span style='font-family:
-     Verdana'>Click on 'Genes', 'TFMART' or 'TF PROFILES' to search for regulated genes, transcription factors or transcription factor binding profiles respectively.</span></li></ul>
-<ul type=disc><li><span style='font-family:
-     Verdana'>Select the features of interest and browse results.</span></li></ul>
+ <ul type=disc><li>Click on 'Genes', 'TFMART' or 'TF PROFILES' to search for regulated genes, transcription factors or transcription factor binding profiles respectively.</li></ul>
+<ul type=disc><li>Select the features of interest and browse results.</li></ul>
 
 <p class="title3">How does one enter data in PAZAR?</p>
 
-<ul type=disc><li><span style='font-family:
-     Verdana'>Register under the <a href='http://www.pazar.info/cgi-bin/register.pl'>Register</a> section.</span></li></ul>
-<ul type=disc><li><span style='font-family:
-     Verdana'>Click on <a href='http://www.pazar.info/cgi-bin/editprojects.pl'>My Projects</a> to see all the projects you belong to and to create new ones.</span></li></ul>
-<ul type=disc><li><span style='font-family:
-     Verdana'>Click on <a href='http://www.pazar.info/cgi-bin/sWI/entry.pl'>Submit</a> to enter new data. For more detailed questions on the submission interface, see the <a href="#FAQTOPICS">FAQ topics</a> section below.</span></li></ul>
-<ul type=disc><li><span style='font-family:
-     Verdana'>If one has a pre-existing dataset, an automated data import can be realized upon contacting the PAZAR development team.</span></li></ul>
+<ul type=disc><li>Register under the <a href="$pazar_cgi/register.pl">Register</a> section.</li></ul>
+<ul type=disc><li>Click on <a href="$pazar_cgi/editprojects.pl">My Projects</a> to see all the projects you belong to and to create new ones.</li></ul>
+<ul type=disc><li>Click on <a href="$pazar_cgi/sWI/entry.pl">Submit</a> to enter new data. For more detailed questions on the submission interface, see the <a href="#FAQTOPICS">FAQ topics</a> section below.</li></ul>
+<ul type=disc><li>If one has a pre-existing dataset, an automated data import can be realized upon contacting the PAZAR development team.</li></ul>
 
 <p class="title3"><a name='FAQTOPICS'></a>FAQ TOPICS</p>
 
@@ -60,7 +59,7 @@ print<<page;
 </ul>
 
 <p class="title3">PAZAR User Interface Screenshots</p>
-<a href="http://www.pazar.info/images/PAZAR_Screenshots_100406.pdf">PAZAR
+<a href="$pazar_html/images/PAZAR_Screenshots_100406.pdf">PAZAR
 Screenshots (10-04-06)</a>
 
 
@@ -133,7 +132,7 @@ RETRIEVAL</p>
    <p><span style='font-family:Verdana'>If an identical genomic sequence is used
   in "identical" transient transfection expression assays in 2 or more papers, can mutants of that sequence from both
   papers be submitted to PAZAR as a part of a single experimental assay? <img border=0 width=350
-  src="http://pazar.info/images/FAQ-Figure.gif"> </span></p>
+  src="$pazar_html/images/FAQ-Figure.gif"> </span></p>
   </td>
    <td class='basictd'>
    <p><span style='font-family:Verdana'>Definitely not. One cannot compare and
@@ -474,5 +473,5 @@ page
 
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

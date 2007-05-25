@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use HTML::Template;
-use Data::Dumper;
+#use Data::Dumper;
 use pazar;
 use pazar::reg_seq;
 use pazar::talk;
@@ -11,13 +11,19 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
  
 # open the html header template
-my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => "PAZAR - Project View");
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 $template->param(JAVASCRIPT_FUNCTION => q{
 var state=0;
 function CheckBox(){
@@ -36,12 +42,12 @@ if (state == 0)
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
@@ -127,7 +133,7 @@ print "<span class=\"title4\">Search Engine</span><br>";
 print<<page1;
 <table>
 <tbody>
-<form name="filters" METHOD="post" ACTION="http://www.pazar.info/cgi-bin/proj_res.cgi" enctype="multipart/form-data" target="_self">
+<form name="filters" METHOD="post" ACTION="$pazar_cgi/proj_res.cgi" enctype="multipart/form-data" target="_self">
     <tr>
       <td colspan="2">
 <span class="title3">Filters: </span><br>
@@ -414,7 +420,7 @@ page7
 }
 
 ###  print out the html tail template
-  my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+  my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
   print $template_tail->output;
 
 sub select {

@@ -12,15 +12,15 @@ else return false;
 }
 <TMPL_VAR NAME=JAVASCRIPT_FUNCTION>
 </script>
-<link type="text/css" rel="stylesheet" href="http://www.pazar.info/pazar.css"><link rel="shortcut icon" href="http://www.pazar.info/favicon.ico"></head>
+<link type="text/css" rel="stylesheet" href="<TMPL_VAR NAME=PAZAR_HTML>/pazar.css"><link rel="shortcut icon" href="<TMPL_VAR NAME=PAZAR_HTML>/favicon.ico"></head>
 <body leftmargin="0" topmargin="0" bgcolor="#ffffff" marginheight="0" marginwidth="0" onLoad="resetMenu();">
   <table align="left" border="0" cellpadding="0" cellspacing="0" height="100%" width="85%">
     <tbody><tr>
       <td valign="top" height="102">
       <table border="0" cellpadding="0" cellspacing="0" width="660" height="102">
         <tbody><tr>
-          <td width="143"><img src="http://www.pazar.info/images/pazar_01.gif" border="0" height="102" width="143"></td>
-          <td width="517"><a href="http://www.pazar.info/cgi-bin/index.pl"><img src="http://www.pazar.info/images/pazar_02.gif" border="0" height="102" width="517"></a></td>
+          <td width="143"><img src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_01.gif" border="0" height="102" width="143"></td>
+          <td width="517"><a href="<TMPL_VAR NAME=PAZAR_CGI>/index.pl"><img src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_02.gif" border="0" height="102" width="517"></a></td>
         </tr>
       </tbody></table></td></tr>
 <tr><td valign="top" class="backgd"><table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -28,47 +28,47 @@ else return false;
           <td align="center" valign="top" width="143"><table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/login.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img1.src='http://www.pazar.info/images/up_03.gif'" onmouseout="img1.src='http://www.pazar.info/images/pazar_03.gif'"><img name="img1" src="http://www.pazar.info/images/pazar_03.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/up_03.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/login.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img1.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_03.gif'" onmouseout="img1.src='<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_03.gif'"><img name="img1" src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_03.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_03.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/register.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img2.src='http://www.pazar.info/images/up_05.gif'" onmouseout="img2.src='http://www.pazar.info/images/pazar_05.gif'"><img name="img2" src="http://www.pazar.info/images/pazar_05.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/up_05.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/register.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img2.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_05.gif'" onmouseout="img2.src='<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_05.gif'"><img name="img2" src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_05.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_05.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/editprojects.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img3.src='http://www.pazar.info/images/up_06.gif'" onmouseout="img3.src='http://www.pazar.info/images/pazar_06.gif'"><img name="img3" src="http://www.pazar.info/images/pazar_06.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/up_06.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/editprojects.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img3.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_06.gif'" onmouseout="img3.src='<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_06.gif'"><img name="img3" src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_06.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_06.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/sWI/entry.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img4.src='http://www.pazar.info/images/up_07.gif'" onmouseout="img4.src='http://www.pazar.info/images/pazar_07.gif'"><img name="img4" src="http://www.pazar.info/images/pazar_07.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/up_07.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/sWI/entry.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img4.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_07.gif'" onmouseout="img4.src='<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_07.gif'"><img name="img4" src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_07.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_07.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/index.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img5.src='http://www.pazar.info/images/up_08.gif'" onmouseout="img5.src='http://www.pazar.info/images/pazar_08.gif'"><img name="img5" src="http://www.pazar.info/images/pazar_08.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/up_08.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/index.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img5.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_08.gif'" onmouseout="img5.src='<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_08.gif'"><img name="img5" src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_08.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_08.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <img src="http://www.pazar.info/images/pazar_09.gif" border="0" height="51" width="143"></td>
+              <img src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_09.gif" border="0" height="51" width="143"></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/overview.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img6.src='http://www.pazar.info/images/overview_f.gif'" onmouseout="img6.src='http://www.pazar.info/images/overview_h.gif'"><img name="img6" src="http://www.pazar.info/images/overview_h.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/overview_f.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/overview.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img6.src='<TMPL_VAR NAME=PAZAR_HTML>/images/overview_f.gif'" onmouseout="img6.src='<TMPL_VAR NAME=PAZAR_HTML>/images/overview_h.gif'"><img name="img6" src="<TMPL_VAR NAME=PAZAR_HTML>/images/overview_h.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/overview_f.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/xml.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img7.src='http://www.pazar.info/images/xml_f.gif'" onmouseout="img7.src='http://www.pazar.info/images/xml_h.gif'"><img name="img7" src="http://www.pazar.info/images/xml_h.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/xml_f.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/xml.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img7.src='<TMPL_VAR NAME=PAZAR_HTML>/images/xml_f.gif'" onmouseout="img7.src='<TMPL_VAR NAME=PAZAR_HTML>/images/xml_h.gif'"><img name="img7" src="<TMPL_VAR NAME=PAZAR_HTML>/images/xml_h.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/xml_f.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/GFF.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img8.src='http://www.pazar.info/images/gff_f.gif'" onmouseout="img8.src='http://www.pazar.info/images/gff_h.gif'"><img name="img8" src="http://www.pazar.info/images/gff_h.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/gff_f.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/GFF.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img8.src='<TMPL_VAR NAME=PAZAR_HTML>/images/gff_f.gif'" onmouseout="img8.src='<TMPL_VAR NAME=PAZAR_HTML>/images/gff_h.gif'"><img name="img8" src="<TMPL_VAR NAME=PAZAR_HTML>/images/gff_h.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/gff_f.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/contacts.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img9.src='http://www.pazar.info/images/contacts_f.gif'" onmouseout="img9.src='http://www.pazar.info/images/contacts_h.gif'"><img name="img9" src="http://www.pazar.info/images/contacts_h.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/contacts_f.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/contacts.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img9.src='<TMPL_VAR NAME=PAZAR_HTML>/images/contacts_f.gif'" onmouseout="img9.src='<TMPL_VAR NAME=PAZAR_HTML>/images/contacts_h.gif'"><img name="img9" src="<TMPL_VAR NAME=PAZAR_HTML>/images/contacts_h.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/contacts_f.gif'" border="0" height="51" width="143"></a></td>
             </tr>
             <tr>
               <td width="100%">
-              <a href="http://www.pazar.info/cgi-bin/help_FAQ.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img10.src='http://www.pazar.info/images/up_14.gif'" onmouseout="img10.src='http://www.pazar.info/images/pazar_14.gif'"><img name="img10" src="http://www.pazar.info/images/pazar_14.gif" onload="tempImg=new Image(0,0); tempImg.src='http://www.pazar.info/images/up_14.gif'" border="0" height="51" width="143"></a></td>
+              <a href="<TMPL_VAR NAME=PAZAR_CGI>/help_FAQ.pl" onmouseover="if (VersionNavigateur(3.0,4.0)) img10.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_14.gif'" onmouseout="img10.src='<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_14.gif'"><img name="img10" src="<TMPL_VAR NAME=PAZAR_HTML>/images/pazar_14.gif" onload="tempImg=new Image(0,0); tempImg.src='<TMPL_VAR NAME=PAZAR_HTML>/images/up_14.gif'" border="0" height="51" width="143"></a></td>
             </tr>
           </tbody></table>
           </td>

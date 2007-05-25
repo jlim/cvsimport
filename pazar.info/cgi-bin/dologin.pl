@@ -10,6 +10,10 @@ use CGI::Session;
 my $query=new CGI;
 my %params = %{$query->Vars};
 
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
 my $dbname = $ENV{PAZAR_name};
 my $dbhost = $ENV{PAZAR_host};
 
@@ -68,10 +72,12 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
 print $query->header(-cookie=>$cookie);
 #store other attributes
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Login');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 
 # send the obligatory Content-Type and print the template output
@@ -82,7 +88,7 @@ print $template->output;
     if ($params{project} eq 'true') {
 #go to editprojects.pl script
 print<<Page;
-	<FORM  name="editprojects" method="POST" action="editprojects.pl">
+	<FORM  name="editprojects" method="POST" action="$pazar_cgi/editprojects.pl">
 	<input type="hidden" name="username">      
 	<input type="hidden" name="password">
 	<input type="hidden" name="mode" value="login">
@@ -95,7 +101,7 @@ Page
     }     elsif ($params{submission} eq 'true') {
 #go to entry.pl script
 print<<Page2;
-	<FORM  name="submission" method="POST" action="http://www.pazar.info/cgi-bin/sWI/entry.pl">
+	<FORM  name="submission" method="POST" action="$pazar_cgi/sWI/entry.pl">
 	<input type="hidden" name="username">      
 	<input type="hidden" name="password">
 	<input type="hidden" name="mode" value="login">
@@ -109,7 +115,7 @@ Page2
 #return to main page 
     print<<refresh;
 <script language='JavaScript'>
-    document.location.href='http://www.pazar.info/cgi-bin/index.pl';
+    document.location.href="$pazar_cgi/index.pl";
 </script>
 
 refresh
@@ -118,10 +124,12 @@ refresh
 else
 {
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Login');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 
 # send the obligatory Content-Type and print the template output
@@ -131,7 +139,7 @@ print "Content-Type: text/html\n\n", $template->output;
  print<<Page_Done;
 
 	<p class="title1">PAZAR Login</p>
-	<FORM  method="POST" action="dologin.pl">
+	<FORM  method="POST" action="$pazar_cgi/dologin.pl">
 	<table>
 	<tr><td >User name</td><td> <input type="text" name="username"></td></tr>      
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
@@ -142,5 +150,5 @@ print "Content-Type: text/html\n\n", $template->output;
 Page_Done
 }
 
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

@@ -2,11 +2,17 @@
 
 use HTML::Template;
 
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR XML writing Step 2');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -16,7 +22,7 @@ print<<page;
           <span class="title2">Step-by-Step Documentation</span><br><br>
           <p class="title3"><a name="Step2_TOP"></a>Step2: Capturing the regulatory sequence and/or TF basic information</p>
       <div style="text-align: justify;">Once the project
-element has been defined (<a href="http://www.pazar.info/cgi-bin/step1.pl">see Step 1</a>), you are ready to enter sequence
+element has been defined (<a href="$pazar_cgi/step1.pl">see Step 1</a>), you are ready to enter sequence
 and transcription factor information. These will be entered within the
 'data' element, which is a child element within the 'pazar' element.
       <br>
@@ -30,7 +36,7 @@ Initialization<br>
       </span>
       <div style="text-align: justify;">The 'data' element
 stores all the annotations separately. They will be linked together
-later in the 'analysis' element (<a href="http://www.pazar.info/cgi-bin/step3.pl">see
+later in the 'analysis' element (<a href="$pazar_cgi/step3.pl">see
 Step 3</a>). <br>
 
 First the 'data' element has to initialized:<br>
@@ -151,7 +157,7 @@ anything as long as they are unique throughout the file.</small><br>
       <br>
 
       <span style="margin-left: 0.5in; text-decoration: underline;"><a name="Regulatory_Sequence_without_gene_info">2.2 -
-Annotating a Regulatory Sequence without any gene information</a></span><small><span style="margin-left: 0.1in;"> <a href="http://www.pazar.info/cgi-bin/step2.pl#Step2_TOP">TOP</a></span></small>
+Annotating a Regulatory Sequence without any gene information</a></span><small><span style="margin-left: 0.1in;"> <a href="$pazar_cgi/step2.pl#Step2_TOP">TOP</a></span></small>
       <div style="text-align: justify;"><span>The
 'reg_seq' element can also be embedded in a 'marker' element if the
 gene regulated by the sequence is not defined yet. The marker can be a
@@ -212,7 +218,7 @@ anything as long as they are unique throughout the file.<br>
       <br>
 
       </small><span style="margin-left: 0.5in; text-decoration: underline;"><a name="Transcription_Factor">2.3 -
-Annotating a Transcription Factor</a></span><small><span style="margin-left: 0.1in;"> <a href="http://www.pazar.info/cgi-bin/step2.pl#Step2_TOP">TOP</a></span></small><br>
+Annotating a Transcription Factor</a></span><small><span style="margin-left: 0.1in;"> <a href="$pazar_cgi/step2.pl#Step2_TOP">TOP</a></span></small><br>
 
       <div style="text-align: justify;"><span>A
 transcription factor is described in
@@ -284,7 +290,7 @@ anything as long as they are unique throughout the file.<br>
       </small><small><br>
 
       </small><span style="margin-left: 0.5in; text-decoration: underline;"><a name="Artificial_sequence">2.4 -
-Annotating an Artificial Sequence</a></span><small><span style="margin-left: 0.1in;"> <a href="http://www.pazar.info/cgi-bin/step2.pl#Step2_TOP">TOP</a></span></small><br>
+Annotating an Artificial Sequence</a></span><small><span style="margin-left: 0.1in;"> <a href="$pazar_cgi/step2.pl#Step2_TOP">TOP</a></span></small><br>
 
       <span></span>
       <div style="text-align: justify;">The
@@ -311,10 +317,10 @@ anything as long as they are unique throughout the file.</small> <br>
 
       <br>
 
-      <a style="text-decoration: none;" href="http://pazar.info/cgi-bin/step1.pl"><input value="&lt;- To Step 1" type="button"></a> <a style="text-decoration: none;" href="http://pazar.info/cgi-bin/step3.pl"><input value="To Step 3 -&gt;" type="button"></a><br><br>
+      <a style="text-decoration: none;" href="$pazar_cgi/step1.pl"><input value="&lt;- To Step 1" type="button"></a> <a style="text-decoration: none;" href="$pazar_cgi/step3.pl"><input value="To Step 3 -&gt;" type="button"></a><br><br>
 
 page
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

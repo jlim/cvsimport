@@ -10,7 +10,12 @@ srand(time() ^ ($$ + ($$ << 15) ) );
 my $randnum = substr(rand() * 100,3);
 my $file = "mycgi-log".$randnum;
 
-open(LOG, ">>/usr/local/apache/pazar.info/cgi-bin/cgi-logs/$file") or
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+open(LOG, ">>$pazarcgipath/cgi-logs/$file") or
     die("Unable to open mycgi-log: $!\n");
 carpout(LOG);
 
@@ -21,10 +26,12 @@ my $get = new CGI;
 my $xml_file = $get->param('xml_file');
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR XML format');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -39,7 +46,7 @@ if (!$xml_file) {
 
 } elsif (-e $xml_file) {
 
-    open(OUTFILE,">/usr/local/apache/pazar.info/tmp/$xml_file");
+    open(OUTFILE,">$pazarhtdocspath/tmp/$xml_file");
     my($bytesread,$buffer);
     binmode(OUTFILE);
     while ($bytesread = read($xml_file, $buffer, 4096)) { 
@@ -57,14 +64,14 @@ if (!$xml_file) {
     if ($overflow eq "true") {
 	print "<p class=\"title2\">Sorry!<br>";
 	print "Your file $xml_file is to big for this tool!<br><br></p>\n";
-	unlink("/usr/local/apache/pazar.info/tmp/$xml_file");  
+	unlink("$pazarhtdocspath/tmp/$xml_file");  
     }
 
     my $xp = new XML::Checker::Parser ( Handlers => { } );
 
     eval {
      local $XML::Checker::FAIL = \&my_fail;
-     $xp->parsefile("/usr/local/apache/pazar.info/tmp/$xml_file");
+     $xp->parsefile("$pazarhtdocspath/tmp/$xml_file");
     };
     close (LOG);
 
@@ -72,27 +79,27 @@ if (!$xml_file) {
     print "<p class=\"title2\">Sorry!<br>";
     print "Your file $xml_file failed validation!<br><br></p>\n";
 
-    open(ERRLOG, "/usr/local/apache/pazar.info/cgi-bin/cgi-logs/$file") or
+    open(ERRLOG, "$pazarcgipath/cgi-logs/$file") or
      die("Unable to open mycgi-log: $!\n");
     while (<ERRLOG>) {
 	print "$_ <br>";
     }
     close (ERRLOG);
-    unlink("/usr/local/apache/pazar.info/cgi-bin/cgi-logs/$file");
+    unlink("$pazarcgipath/cgi-logs/$file");
 
     } else {
 	print "<p class=\"title2\">Congratulations!<br>";
 	print "Your file $xml_file passed validation!<br><br></p>\n";
     }
 
-    unlink("/usr/local/apache/pazar.info/tmp/$xml_file");
+    unlink("$pazarhtdocspath/tmp/$xml_file");
 
 } else {
     print "<p class=\"warning\">Unable to open the file $xml_file</p>\n";
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 
 sub my_fail {

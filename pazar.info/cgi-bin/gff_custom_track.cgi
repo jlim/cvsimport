@@ -1,8 +1,5 @@
 #!/usr/bin/perl -w
 
-use lib '/space/usr/local/src/ensembl-36/ensembl/modules/';
-use lib '/space/usr/local/src/bioperl-live/';
-
 use DBI;
 use pazar;
 use pazar::reg_seq;
@@ -11,7 +8,11 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
-require 'getsession.pl';
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 my $get = new CGI;
 my %params = %{$get->Vars};
@@ -36,7 +37,15 @@ my $dbh= pazar->new(
 		     -dbname        =>    $ENV{PAZAR_name},
 		     -drv           =>    'mysql');
 
-my $ens_dbh = DBI->connect('DBI:mysql:ensembl_databases:napa.cmmt.ubc.ca','ensembl_r');
+my $ens_dbname = 'ensembl_databases';
+my $ens_dbhost = $ENV{ENS_HOST};
+my $ens_DBUSER = $ENV{ENS_USER};
+my $ens_DBPASS = $ENV{ENS_PASS};
+my $ens_DBURL = "DBI:mysql:dbname=$ens_dbname;host=$ens_dbhost";
+
+my $ens_dbh = DBI->connect($ens_DBURL,$ens_DBUSER,$ens_DBPASS)
+    or die "Can't connect to ensembl database";
+
 #use species to check whether ensembl and ucsc links are displayable using db_sync table in ensembl_databases
 #print "species: ".lc($params{species});
 my $ens_sth = $ens_dbh->prepare("select * from db_sync where organism='".lc($params{species})."'");
@@ -113,7 +122,7 @@ else
     srand(time() ^ ($$ + ($$ << 15) ) );
     my $randnum = substr(rand() * 100,3);
     my $filename  = 'pazarchr'.$params{chr}."_".$randnum.'.gff';
-    my $file = '/usr/local/apache/pazar.info/mapping/'.$filename;
+    my $file = $pazarhtdocspath.'/mapping/'.$filename;
     open (GFF,">$file")||die;
 
     my $chr = $params{chr};
@@ -130,12 +139,12 @@ else
     if($resource eq 'ucsc')
     {
 	$header = "browser position chr".$chr.":".($start-$flanking_bp)."-".($end+$flanking_bp)."\n";
-	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"http://www.pazar.info/mapping/\"";
+	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"$pazar_html/mapping/\"";
     }
     elsif($resource eq 'ensembl')
     {
 	$header = "browser position chr".$chr.":".($start-$flanking_bp)."-".($end+$flanking_bp)."\n";
-	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"http://www.pazar.info/mapping/\"";
+	$header = $header . "track name=PAZAR description='PAZAR-curated regulatory elements' color=160,1,1 url=\"$pazar_html/mapping/\"";
     }
 
 #browser position chr5:142638872-142638896
@@ -196,7 +205,7 @@ else
     {
 
 #assemble the ucsc web link
-	print "<script>document.location.href='http://genome.ucsc.edu/cgi-bin/hgTracks?db=$ucscdb&hgt.customText=http://www.pazar.info/mapping/$filename'</script>";
+	print "<script>document.location.href='http://genome.ucsc.edu/cgi-bin/hgTracks?db=$ucscdb&hgt.customText=$pazar_html/mapping/$filename'</script>";
     }
     else
     {
@@ -216,7 +225,7 @@ else
 	$ensemblorg=ucfirst($ensemblorg);
 	$ensemblorg=~s/ /_/;
 
-	print "<script>document.location.href='http://$ensembl_url/$ensemblorg/contigview?data_URL=http://www.pazar.info/mapping/$filename'</script>";
+	print "<script>document.location.href='http://$ensembl_url/$ensemblorg/contigview?data_URL=$pazar_html/mapping/$filename'</script>";
     }
     
 } # else continue with the rest of the file

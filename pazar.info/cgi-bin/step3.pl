@@ -2,11 +2,17 @@
 
 use HTML::Template;
 
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR XML writing Step 3');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
@@ -17,7 +23,7 @@ print<<page;
           <p class="title3"><a name="Step3_TOP"></a>Step3: Capturing the evidence linking a sequence to a TF or to a specific expression</p>
       <div style="text-align: justify;">This step starts inside an existing 'data'
 element. At this point, the 'reg_seq', 'funct_tf' and/or 'construct' elements
-should have been defined in this 'data' element (<a href="http://www.pazar.info/cgi-bin/step2.pl">see Step 2</a>).<br>
+should have been defined in this 'data' element (<a href="$pazar_cgi/step2.pl">see Step 2</a>).<br>
 
       <br>
 
@@ -195,7 +201,7 @@ second sequence.<br>
 
 
 
-Please look at the 3 PAZAR XML examples available on the <a href="http://www.pazar.info/cgi-bin/xml.pl">main page</a> if
+Please look at the 3 PAZAR XML examples available on the <a href="$pazar_cgi/xml.pl">main page</a> if
 you need other examples.<br>
       <br>
 
@@ -315,9 +321,9 @@ and the XML file is finished.<br>
       </span></div>
 
 
-      <a style="text-decoration: none;" href="http://www.pazar.info/cgi-bin/step2.pl"><input value="&lt;- To Step 2" type="button"></a>
+      <a style="text-decoration: none;" href="$pazar_cgi/step2.pl"><input value="&lt;- To Step 2" type="button"></a>
 page
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

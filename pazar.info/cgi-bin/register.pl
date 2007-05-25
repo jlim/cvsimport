@@ -4,7 +4,11 @@ use Crypt::Imail;
 use CGI qw( :all);
 use HTML::Template;
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 my $query=new CGI;
 my %params = %{$query->Vars};
@@ -17,10 +21,12 @@ my $DBPASS = $ENV{PAZAR_adminpass};
 my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR User Registration');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 $template->param(JAVASCRIPT_FUNCTION => q{function verify() {
 	    var themessage = "You are required to complete the following fields: ";
 	    
@@ -86,14 +92,14 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verify() {
 
 if($loggedin eq 'true') {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
     # send the obligatory Content-Type and print the template output
     print "Content-Type: text/html\n\n", $template->output;
     #print logout message if user already logged in
     print "<p class=\"warning\">You are already logged in.<br>Please logout before registering a new user!</p>";
 } else {
     #log in link
-    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
     # send the obligatory Content-Type and print the template output
     print "Content-Type: text/html\n\n", $template->output;
 
@@ -152,7 +158,7 @@ if ($params{mode} eq 'register') {
 
 #print confirmation
 	print "<p >User account successfully created";
-	print "<br>To begin creating projects for this user, click the button below<br><form   method='post' action='dologin.pl'><input type='hidden' name='project' value='true'><input type='hidden' name='mode' value='login'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='submit' name='submit' value='Add Projects'></form></p></body></html>";
+	print "<br>To begin creating projects for this user, click the button below<br><form   method='post' action='$pazar_cgi/dologin.pl'><input type='hidden' name='project' value='true'><input type='hidden' name='mode' value='login'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='submit' name='submit' value='Add Projects'></form></p></body></html>";
 
     }
     else
@@ -170,7 +176,7 @@ if ($params{mode} eq 'register') {
 	}
 
 
-	print "<FORM  name=\"regform\" method=\"POST\" action=\"register.pl\">";
+	print "<FORM  name=\"regform\" method=\"POST\" action=\"$pazar_cgi/register.pl\">";
 	print "<table>";
 	print "<tr><td valign='top'>User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type=\"text\" name=\"username\" maxlength=64";
 
@@ -211,7 +217,7 @@ print<<Page_Done;
 
 	<p class="title1">PAZAR User Registration</p>
 
-	<FORM  name="regform" method="POST" action="register.pl">
+	<FORM  name="regform" method="POST" action="$pazar_cgi/register.pl">
 	<table>
 	<tr><td valign="top">User name <br>(use a valid email address; <br>pazar messages will be sent here)</td><td valign='top'> <input type="text" name="username" maxlength=64></td></tr>
 	<tr><td >Password</td><td> <input type="password" name="password" maxlength=20></td></tr>
@@ -232,5 +238,5 @@ Page_Done
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

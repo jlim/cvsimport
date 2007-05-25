@@ -9,7 +9,10 @@ use pazar;
 use pazar::talk;
 use pazar::tf;
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 print "content-type:text/html\n\n";
 
@@ -83,7 +86,7 @@ print<<Page_Done;
   <title></title>
 </head>
  <body bgcolor="#ffffff">
-<p> <b><a href="genebrowse_alpha.pl">Back</a></b> 
+<p> <b><a href="$pazar_cgi/genebrowse_alpha.pl">Back</a></b> 
 <table width="100%" border="0" cellspacing="1" cellpadding="3">
   <tbody>
     <tr>

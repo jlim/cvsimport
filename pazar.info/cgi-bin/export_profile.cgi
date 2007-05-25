@@ -11,7 +11,12 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 my $get = new CGI;
 my %param = %{$get->Vars};
@@ -23,16 +28,18 @@ if ($param{mode} eq 'list') {
 
 # fill in template parameters
     $template->param(TITLE => 'PAZAR TF Profiles');
+    $template->param(PAZAR_HTML => $pazar_html);
+    $template->param(PAZAR_CGI => $pazar_cgi);
 
     if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
     else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
@@ -107,8 +114,8 @@ COLNAMES
 		srand(time() ^ ($$ + ($$ << 15) ) );
 		my $randnum = substr(rand() * 100,3);
 		my $logo = $acc.$randnum;
-		my $gd_image = $pfm->draw_logo(-file=>'/space/usr/local/apache/pazar.info/tmp/precomputed/'.$logo.'.png', -xsize=>130);
-		my $gd_image2 = $pfm->draw_logo(-file=>'/space/usr/local/apache/pazar.info/tmp/precomputed/'.$logo.'_400.png', -xsize=>400);
+		my $gd_image = $pfm->draw_logo(-file=>$pazarhtdocspath.'/tmp/precomputed/'.$logo.'.png', -xsize=>130);
+		my $gd_image2 = $pfm->draw_logo(-file=>$pazarhtdocspath.'/tmp/precomputed/'.$logo.'_400.png', -xsize=>400);
 
 		my $proj_name=$dbh->get_project_name('matrix',$mid);
 
@@ -197,8 +204,8 @@ print<<ROWS;
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{desc}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{species}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{class}</td>
-    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><img src="http://www.pazar.info/tmp/precomputed/$logo"></td>
-    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><form name='$sorted[$i]->{logo}' method='post' action ='http://www.pazar.info/cgi-bin/export_profile.cgi' enctype="multipart/form-data" target='Detail_win'><input type="hidden" name="mode" value="details"><input type="hidden" name="project" value="$sorted[$i]->{project}"><input type="hidden" name="dbid" value="$sorted[$i]->{dbid}"><input type="hidden" name="name" value="$sorted[$i]->{name}"><input type="hidden" name="class" value="$sorted[$i]->{class}"><input type="hidden" name="species" value="$sorted[$i]->{species}"><input type="hidden" name="pmid" value="$sorted[$i]->{pmid}"><input type="hidden" name="method" value="$sorted[$i]->{method}"><input type="hidden" name="transcript" value="$sorted[$i]->{transcript}"><input type="hidden" name="pazar_id" value="$sorted[$i]->{pazar_id}"><input type="hidden" name="pfm" value="$sorted[$i]->{pfm}"><input type="hidden" name="logo" value="$sorted[$i]->{logo}"><input value="More" name="submit" type="submit" onClick="window.open('about:blank','Detail_win', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=450')"></form></td>
+    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><img src="$pazar_html/tmp/precomputed/$logo"></td>
+    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><form name='$sorted[$i]->{logo}' method='post' action ="$pazar_cgi/export_profile.cgi" enctype="multipart/form-data" target='Detail_win'><input type="hidden" name="mode" value="details"><input type="hidden" name="project" value="$sorted[$i]->{project}"><input type="hidden" name="dbid" value="$sorted[$i]->{dbid}"><input type="hidden" name="name" value="$sorted[$i]->{name}"><input type="hidden" name="class" value="$sorted[$i]->{class}"><input type="hidden" name="species" value="$sorted[$i]->{species}"><input type="hidden" name="pmid" value="$sorted[$i]->{pmid}"><input type="hidden" name="method" value="$sorted[$i]->{method}"><input type="hidden" name="transcript" value="$sorted[$i]->{transcript}"><input type="hidden" name="pazar_id" value="$sorted[$i]->{pazar_id}"><input type="hidden" name="pfm" value="$sorted[$i]->{pfm}"><input type="hidden" name="logo" value="$sorted[$i]->{logo}"><input value="More" name="submit" type="submit" onClick="window.open('about:blank','Detail_win', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=450')"></form></td>
     </tr>
 ROWS
 
@@ -206,7 +213,7 @@ $bg_color=1-$bg_color;
     }
 
 ###  print out the html tail template
-  my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+  my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
   print $template_tail->output;
 
 } elsif ($param{mode} eq 'details') {
@@ -220,7 +227,7 @@ $bg_color=1-$bg_color;
 print<<DETAILS;
 <head><title>PAZAR - TF Profiles</title></head>
 <body><table width='400' bordercolor='white' bgcolor='white' border=0 cellspacing=0>
-<tr><td width="400" align="center" valign="center"><img src="http://www.pazar.info/tmp/precomputed/$logo"></td></tr>
+<tr><td width="400" align="center" valign="center"><img src="$pazar_html/tmp/precomputed/$logo"></td></tr>
 <tr><td width="400" align="center" valign="center"><span style="font-family: monospace;">$prettystring<br><br></span></td></tr>
 <tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Matrix Info</span></td></tr>
 <tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
@@ -305,7 +312,7 @@ print "</table></body></html>";
 }
 
 ###  print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 
 

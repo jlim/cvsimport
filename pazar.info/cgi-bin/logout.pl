@@ -27,10 +27,16 @@ if($session)
 #  2. Create the HTTP header and print the doctype statement.  #
 #--------------------------------------------------------------#
 
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
 print $query->header(-cookie=>$pazarCookie);
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Logout');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 
 print $template->output;
 print $query->h3('You are now logged out');
@@ -38,5 +44,5 @@ print $query->h3('You are now logged out');
 #-------------------------#
 #  5. End the HTML page.  #
 #-------------------------#
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

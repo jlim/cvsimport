@@ -13,7 +13,11 @@ use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
 use constant DB_HOST => $ENV{PAZAR_host};
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 my $get = new CGI;
 my %param = %{$get->Vars};
@@ -143,11 +147,11 @@ if ($param{opentable} eq $proj_name) {$style='display:block';}
     
     print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></li></td></tr><tr><td width='750'>
 <div id=\"$div_id\" style=\"$style\"><table width='750' class='summarytable'><tr>";
-    print "<td class='tftabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
-    print "<td class='tftabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR TF ID\"></form></td>";
-    print "<td class='tftabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"TF name\"><small>(user defined)</small></form></td>";
-    print "<td class='tftabletitle' width='80'><form name=\"accn_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Transcript ID\"></form></td>";
-    print "<td class='tftabletitle' width='120'><form name=\"ens_desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='class'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"TF Class/Family\"></form></td>";
+    print "<td class='tftabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"$pazar_cgi/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
+    print "<td class='tftabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"$pazar_cgi/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR TF ID\"></form></td>";
+    print "<td class='tftabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"$pazar_cgi/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"TF name\"><small>(user defined)</small></form></td>";
+    print "<td class='tftabletitle' width='80'><form name=\"accn_browse\" method=\"post\" action=\"$pazar_cgi/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Transcript ID\"></form></td>";
+    print "<td class='tftabletitle' width='120'><form name=\"ens_desc_browse\" method=\"post\" action=\"$pazar_cgi/tf_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='class'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"TF Class/Family\"></form></td>";
     print "</tr>";
 
     my @sorted;
