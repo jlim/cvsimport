@@ -5,7 +5,11 @@ use CGI qw( :all);
 use CGI::Session;
 use HTML::Template;
 
-require 'getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 my $query=new CGI;
 my %params = %{$query->Vars};
@@ -24,16 +28,16 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
 my $statusmsg = "";
 
 # open the html header template
-my $template = HTML::Template->new(filename => 'header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR Project Manager');
-
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 	    var themessage = "You are required to complete the following fields: ";
 	    var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";	    
 	    // might want to be less strict with the description later
-	    var iChars_desc = "!@$^*()+[]\\\'=&{}|\"<>";
 	    var pnameSpecialChar = 0;
 
 
@@ -75,27 +79,16 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 		themessage = themessage + "\\nThe entered project name contains special characters. \nThese are not allowed. Please choose a different project name\n";
 	    }
 
-	    var pdescSpecialChar = 0;
-	    for (var i = 0; i < document.createprojectform.projdesc.value.length; i++) {
-		if (iChars_desc.indexOf(document.createprojectform.projdesc.value.charAt(i)) != -1) {
-		    pdescSpecialChar = 1;
-		}
-	    }
-	    if (pdescSpecialChar == 1)
-	    {
-		themessage = themessage +  "\nThe entered project description contains special characters. \nThese are not allowed. Please choose a different project description\n";	 
-	    }  
-
 	    //alert if fields are empty and cancel form submit
 		if (themessage == "") {
 		    var descLength = document.createprojectform.projdesc.value.length;
-		    if(descLength < 301)
+		    if(descLength < 2001)
 		    {
 			document.createprojectform.submit();
 		    }
 		    else
 		    {
-			alert("Please ensure that description is no more than 300 characters (Currently "+descLength+" characters)");
+			alert("Please ensure that description is no more than 2000 characters (Currently "+descLength+" characters)");
 		    }
 		}
 	    else
@@ -108,7 +101,7 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verifyProjectCreate() {
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 
     $params{username}=$info{user};
     $params{password}=$info{pass};
@@ -116,7 +109,7 @@ if($loggedin eq 'true')
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
@@ -151,13 +144,13 @@ function doUpdateDesc(pid)
     var descLength = eval("document.updatedescform"+pid+".projdesc.value.length");
     if (decision == true)
     {	
-	if(descLength <301)
+	if(descLength <2001)
 	{
 	    eval("document.updatedescform"+pid+".submit();");
 	}
 	else
 	{
-	    alert("Please ensure that description is no more than 300 characters (Currently "+descLength+" characters)");
+	    alert("Please ensure that description is no more than 2000 characters (Currently "+descLength+" characters)");
 	}
     }
 }
@@ -421,7 +414,7 @@ if ($params{mode} eq 'login' || $loggedin eq 'true')
     if ($params{submission} eq 'true') {
 #go to entry.pl script
 print<<Page2;
-	<FORM  name="submission" method="POST" action="http://www.pazar.info/cgi-bin/sWI/entry.pl">
+	<FORM  name="submission" method="POST" action="$pazar_cgi/sWI/entry.pl">
 	<input type="hidden" name="username">      
 	<input type="hidden" name="password">
 	<input type="hidden" name="statusmsg" value="$statusmsg">
@@ -466,13 +459,13 @@ Page2
 	    print "<tr><td>$proj_id</td><td>$projdetails[1]</td>";
 
 #project description
-	    print "<form name=\"updatedescform$proj_id\" id=\"updatedescform$proj_id\" method='post' action='editprojects.pl'><td><textarea name='projdesc' cols=40 rows=6>$projdetails[4]</textarea>";
+	    print "<form name=\"updatedescform$proj_id\" id=\"updatedescform$proj_id\" method='post' action='$pazar_cgi/editprojects.pl'><td><textarea name='projdesc' cols=40 rows=6>$projdetails[4]</textarea>";
 print "<input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='updatedesc'>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUpdateDesc($proj_id);' value='Update Project Description'></form>";
 print "</td>";
 
 #project status update form
 
-	    print "<td><form method='post' action='editprojects.pl'>";
+	    print "<td><form method='post' action='$pazar_cgi/editprojects.pl'>";
 
 	    print "<select name='projstatus'>";
 	    print "<option ";
@@ -513,20 +506,20 @@ print "</td>";
 	    $userstring = substr($userstring,2);
 	    print $userstring;
 #form: add user to this project
-	    print "</td><td><form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'>Registered Username: <br><input type='text' name='usertoadd' size=25><br>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
+	    print "</td><td><form name=\"useraddform$proj_id\" id=\"useraddform$proj_id\" method='post' action='$pazar_cgi/editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='mode' value='adduser'>Registered Username: <br><input type='text' name='usertoadd' size=25><br>Project Password: <br><input type='password' name='projpass'><input type='button' onClick='doUserAdd($proj_id);' value='Add User To This Project'></form></td>";
 
 
 #delete project form
-	    print "<td><form name=\"deleteform$proj_id\" id=\"deleteform$proj_id\" method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'>Project Password: <br><input type='password' name='projpass'><br><input type='button' onClick='doDelete($proj_id);' value='Delete This Project' ></form><hr>";
+	    print "<td><form name=\"deleteform$proj_id\" id=\"deleteform$proj_id\" method='post' action='$pazar_cgi/editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='delete'><input type='hidden' name='pid' value='$proj_id'>Project Password: <br><input type='password' name='projpass'><br><input type='button' onClick='doDelete($proj_id);' value='Delete This Project' ></form><hr>";
 
 #remove myself from this project
-print "<form method='post' action='editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='useremove'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='uid' value='$userid'><input type='submit' value='Remove Myself \nFrom This Project'></form></td>";
+print "<form method='post' action='$pazar_cgi/editprojects.pl'><input type='hidden' name='username' value='$params{username}'><input type='hidden' name='password' value='$params{password}'><input type='hidden' name='mode' value='useremove'><input type='hidden' name='pid' value='$proj_id'><input type='hidden' name='uid' value='$userid'><input type='submit' value='Remove Myself \nFrom This Project'></form></td>";
 	}
 
 	print "</tr></table>\n";
 print<<AddFormHead;
 	<p>
-	    <form name='createprojectform' method='post' action='editprojects.pl'>
+	    <form name='createprojectform' method='post' action='$pazar_cgi/editprojects.pl'>
 	    <input type='hidden' name='mode' value='add'>
 	    <input type='hidden' name='uid' value='$userid'>
 AddFormHead
@@ -556,7 +549,7 @@ print<<Error_Page_1;
 Error_Page_1
 
 	    print "<p class=\"warning\">Could not log you in. Please check user name and password and try again</p>";
-	print "<FORM method=\"POST\" action=\"editprojects.pl\">";
+	print "<FORM method=\"POST\" action=\"$pazar_cgi/editprojects.pl\">";
 	print "<table>";
 	print "<tr><td>User name</td><td> <input type=\"text\" name=\"username\"></td></tr>";
 	print "<tr><td>Password</td><td><input type=\"password\" name=\"password\"></td></tr>";
@@ -580,7 +573,7 @@ print<<Page_Done;
 	<p class="title1">PAZAR Project Manager</p>
 
 
-	<FORM  method="POST" action="dologin.pl">
+	<FORM  method="POST" action="$pazar_cgi/dologin.pl">
 	<table>
 	<tr><td >User name</td><td> <input type="text" name="username"></td></tr>      
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
@@ -594,5 +587,5 @@ Page_Done
     }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
