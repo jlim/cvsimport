@@ -6,13 +6,19 @@ use CGI qw(  :all);
 use pazar;
 #use CGI::Debug(report => everything, on => anything);
 
-require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 # open the html header template
-my $template = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/header.tmpl');
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
 $template->param(TITLE => 'PAZAR submission interface');
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
 $template->param(JAVASCRIPT_FUNCTION => q{
 function showHide(inputID) {
 	theObj = document.getElementById(inputID)
