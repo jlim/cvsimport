@@ -242,7 +242,8 @@ SUMMARY_HEADER
 	$bg_color =  1 - $bg_color;
     }
     print "</table><br><hr color='black'><p class=\"title2\">Search Result Details Gene by Gene</p>";
-
+    
+    my $regseq_counter = 0; # counter for naming forms
     foreach my $gene_data (@gene_info) {
 	$species=$gene_data->{species};
 	$pazargeneid=$gene_data->{ID};
@@ -276,7 +277,6 @@ HEADER_TABLE
 
 
 #loop through regseqs and print tables
-	my $regseq_counter = 0; # counter for naming forms
 	my @regseqs = $dbh->get_reg_seqs_by_gene_id($gene_data->{GID}); 
 	if (!$regseqs[0]) {
 	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span><br><br><br><br>";
