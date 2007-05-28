@@ -442,7 +442,9 @@ COLNAMES2
 		    $prettystring =~ s/ /\&nbsp\;/g;
 		    print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
-		    my $logo = $accn.".png";
+		    my $accn_s=$accn;
+		    $accn_s=~s/\//-/g;
+		    my $logo = $accn_s.".png";
 		    my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
 		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$logo\">";
 		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
