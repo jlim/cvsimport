@@ -4,7 +4,7 @@ use HTML::Template;
 
 use pazar;
 
-use constant DB_DRV  => 'mysql';
+use constant DB_DRV  => $ENV{PAZAR_drv};
 use constant DB_NAME => $ENV{PAZAR_name};
 use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};

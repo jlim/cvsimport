@@ -65,7 +65,7 @@ my $dbh0= pazar->new(
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
 		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -globalsearch  =>    'yes');
 
 
@@ -80,7 +80,7 @@ $dbh= pazar->new(
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
 		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -project       =>    $proj);
 } elsif ($status=~/restricted/i) {
 ### user specific database connection
@@ -91,7 +91,7 @@ $dbh= pazar->new(
 		       -pazar_user    =>    $info{user},
 		       -pazar_pass    =>    $info{pass},
 		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -project       =>    $proj);
 }
 

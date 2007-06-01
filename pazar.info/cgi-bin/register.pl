@@ -18,7 +18,8 @@ my $dbhost = $ENV{PAZAR_host};
 
 my $DBUSER = $ENV{PAZAR_adminuser};
 my $DBPASS = $ENV{PAZAR_adminpass};
-my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
+my $DBDRV  = $ENV{PAZAR_drv};
+my $DBURL = "DBI:$DBDRV:dbname=$dbname;host=$dbhost";
 
 # open the html header template
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");

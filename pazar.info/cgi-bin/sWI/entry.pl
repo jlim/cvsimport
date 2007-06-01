@@ -8,6 +8,7 @@ use pazar;
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 require "$pazarcgipath/getsession.pl";
 
@@ -48,21 +49,21 @@ resetMenu = function() {
    for (var n=0; n<ddm.length; n++) {
       ddm[n].selectedIndex=0;
    }
-}
+}}.qq{
 function setCount(target){
     if (document.MM_returnValue) {
 if(target == 0) 
 {
-document.F1.action="http://www.pazar.info/cgi-bin/sWI/geneselect.cgi";
+document.F1.action="$pazar_cgi/sWI/geneselect.cgi";
 document.F1.target="_self";
 }
 if(target == 1) 
 {
-document.F1.action="http://www.pazar.info/cgi-bin/sWI/psite_get.cgi";
+document.F1.action="$pazar_cgi/sWI/psite_get.cgi";
 document.F1.target="_self";
 }
 }
-}
+}}.q{
 
 function verifyProjectCreate() {
 	var themessage = "You are required to complete the following fields: ";
@@ -144,19 +145,19 @@ function verifyProjectCreate() {
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
-my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
 
 my $query= new CGI;
 my %params = %{$query->Vars};
@@ -168,7 +169,7 @@ if($loggedin eq 'true') {
 			    -user          =>    $ENV{PAZAR_pubuser},
 			    -pass          =>    $ENV{PAZAR_pubpass},
 			    -dbname        =>    $ENV{PAZAR_name},
-			    -drv           =>    'mysql');
+			    -drv           =>    $ENV{PAZAR_drv});
     my @projnames;
     foreach my $pid (@projids) {
 	my $sth=$pazar->prepare("select project_name from project where project_id=?");
@@ -189,7 +190,7 @@ if($loggedin eq 'true') {
     }
 	print "<font color='red'>$params{statusmsg}</font>";
 print<<AddFormHead;
-	    <form name='createprojectform' method='post' action='http://www.pazar.info/cgi-bin/editprojects.pl'>
+	    <form name='createprojectform' method='post' action="$pazar_cgi/editprojects.pl">
 	    <input type='hidden' name='mode' value='add'>
 	    <input type='hidden' name='uid' value='$info{userid}'>
 AddFormHead
@@ -216,7 +217,7 @@ print<<Page_Done;
 	<p class="title1">PAZAR Submission Interface</p>
         <p class="warning">You need to login in order to submit data!</p>
 
-	<FORM  method="POST" action="http://www.pazar.info/cgi-bin/dologin.pl">
+	<FORM  method="POST" action="$pazar_cgi/dologin.pl">
 	<table>
 	<tr><td >User name</td><td> <input type="text" name="username"></td></tr>      
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
@@ -231,5 +232,5 @@ Page_Done
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;

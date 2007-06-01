@@ -44,7 +44,7 @@ resetMenu = function() {
 <body onLoad="resetMenu();">
 <h1>TF complex components</h1>
  <hr color="black" style="width: 100%; height: 2px;">
- <form action="http://serverpath/TFcomplex.cgi" method="post" name="MUT"> 
+ <form action="serverpath/TFcomplex.cgi" method="post" name="MUT"> 
 <h3><input name="tftype" type="radio" value="mytftype" checked="checked" onClick="MUT.mytfs.disabled=false;MUT.TFcomplex.disabled=true;MUT.pubmed.disabled=true;MUT.TF.disabled=true;MUT.TFDB.disabled=true;MUT.classe.disabled=true;MUT.family.disabled=true;MUT.myclass.disabled=true;MUT.myfamily.disabled=true;MUT.modifications.disabled=true;MUT.add.disabled=true;MUT.mytfs.focus();">Select from my TFs:  </h3>
 <br><hr color="black" style="width: 100%; height: 2px;">
 <p><h3><input name="tftype" type="radio" value="newtftype" onClick="MUT.mytfs.disabled=true;MUT.TFcomplex.disabled=false;MUT.pubmed.disabled=false;MUT.TF.disabled=false;MUT.TFDB.disabled=false;MUT.classe.disabled=false;MUT.family.disabled=false;MUT.myclass.disabled=false;MUT.myfamily.disabled=false;MUT.modifications.disabled=false;MUT.add.disabled=false;MUT.TFcomplex.focus();">Enter a new TF:</h3></p>

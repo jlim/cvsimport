@@ -5,13 +5,18 @@ use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
 use pazar;
 
-require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 my $query=new CGI;
 
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
-my $docpath=$ENV{SERVER_NAME}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
+my $docpath=$pazar_html.'/sWI';
 
 my %params = %{$query->Vars};
 my $user=$info{user};
@@ -27,7 +32,7 @@ unless (($user)&&($pass)) {
 
 my $auxdb=$params{auxDB};
 
-my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser}, -pazar_user=>$user, -pazar_pass=>$pass,
+my $pazar=new pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser}, -pazar_user=>$user, -pazar_pass=>$pass,
                         -pass=>$ENV{PAZAR_pubpass}, -host=>$ENV{PAZAR_host}, -project=>$proj);
 
 my @voc=qw(TF TFDB  family class modifications);

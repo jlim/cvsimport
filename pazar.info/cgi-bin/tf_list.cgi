@@ -7,7 +7,7 @@ use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
-use constant DB_DRV  => 'mysql';
+use constant DB_DRV  => $ENV{PAZAR_drv};
 use constant DB_NAME => $ENV{PAZAR_name};
 use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};

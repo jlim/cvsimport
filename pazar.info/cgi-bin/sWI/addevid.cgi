@@ -6,11 +6,15 @@ use pazar::talk;
 use pazar;
 use pazar::reg_seq;
 
-require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
 
 my $sitepage="$docroot/creanalysis.htm";
 my $evidpage="$docroot/condition1.htm";
@@ -29,7 +33,7 @@ my $proj=$params{'project'};
 print $query->header;
 
 my $pazar=new 
-pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
+pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
@@ -120,12 +124,12 @@ var MyChildWin=null;
 function setCount(target){
     if (!MyChildWin || MyChildWin.closed ) {
 	if(target == 0) {
-	    document.mut.action="http://$cgiroot/addmutation.cgi";
+	    document.mut.action="$cgiroot/addmutation.cgi";
 	    document.mut.target="MyChildWin";
 	    MyChildWin=window.open('about:blank','MyChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 	}
 	if(target == 1) {
-	    document.perturbation.action="http://$cgiroot/addcond.cgi";
+	    document.perturbation.action="$cgiroot/addcond.cgi";
 	    document.perturbation.target="MyChildWin";
 	    MyChildWin=window.open('about:blank','MyChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 	}
@@ -199,8 +203,10 @@ my ($pazar,$ensdb,$gkdb,$query,$params)=@_;
 my %params=%{$params};
 
 my $accn = $params{'gid'}||$params{'hidgid'};
+$accn=~s/\s//g;
 my $dbaccn = $params{'genedb'};
 my $taccn = $params{'tid'};
+$taccn=~s/\s//g;
 my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
@@ -213,11 +219,14 @@ if ($dbaccn eq 'EnsEMBL_gene') {
     $ens=$gene[0];
     unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
-    my @gene=$gkdb->llid_to_ens($accn);
+    my $species=$gkdb->llid_to_org($accn);
+    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    $ensdb->change_mart_organism($species);
+    my @gene=$ensdb->llid_to_ens($accn);
     $ens=$gene[0];
     unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
-    ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+    $ens = convert_id($ensdb,$gkdb,$dbaccn,$accn);
     if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 }
 unless ($ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit; } #Error message her - gene not in DB
@@ -347,17 +356,20 @@ return $slice->seq;
 }
 
 sub convert_id {
- my ($auxdb,$genedb,$geneid,$ens)=@_;
+ my ($ensdb,$gkdb,$genedb,$geneid)=@_;
 undef my @id;
  my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
- @id=$auxdb->$add($geneid);
+ @id=$gkdb->$add($geneid);
  my $ll=$id[0];
- my @ensembl;
-if ($ll) { 
-  @ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
-}
-return $ensembl[0];
+ my @gene;
+ if ($ll) {
+   my $species=$gkdb->llid_to_org($ll);
+   if (!$species) {print "<h3>An error occured! Check that the provided ID ($geneid) is a $genedb ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+   $ensdb->change_mart_organism($species);
+   @gene=$ensdb->llid_to_ens($ll);
+ }
+ return $gene[0];
 }
 
 sub check_aname {

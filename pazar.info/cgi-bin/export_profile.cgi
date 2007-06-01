@@ -51,7 +51,7 @@ if ($param{mode} eq 'list') {
 		     -user          =>    $ENV{PAZAR_pubuser},
 		     -pass          =>    $ENV{PAZAR_pubpass},
 		     -dbname        =>    $ENV{PAZAR_name},
-		     -drv           =>    'mysql',
+		     -drv           =>    $ENV{PAZAR_drv},
 		     -globalsearch  =>    'yes'); #To
 
     my @projects=$dbh->public_projects;
@@ -273,7 +273,7 @@ TF
 		     -user          =>    $ENV{PAZAR_pubuser},
 		     -pass          =>    $ENV{PAZAR_pubpass},
 		     -dbname        =>    $ENV{PAZAR_name},
-		     -drv           =>    'mysql',
+		     -drv           =>    $ENV{PAZAR_drv},
 		     -globalsearch  =>    'yes'); #To
 
     my $seq_ids= &select($dbh, "SELECT * FROM reg_seq_set WHERE matrix_id='$param{pazar_id}'");

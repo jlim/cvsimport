@@ -5,13 +5,17 @@ use CGI qw( :all);
 
 use pazar;
 
- require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 our $query=new CGI;
 my %params = %{$query->Vars};
 
-my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
 
 my $selfpage;
 if ($params{effect}=~/interaction/i) {
@@ -30,7 +34,7 @@ unless (($user)&&($pass)) {
 }
 
 my $pazar=new 
-pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
+pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 unless ($params{sequence}) {
@@ -90,7 +94,7 @@ if ($@) {
 print $query->h1("Mutation Submission successful!");
 print $query->h2("You can close this window now");
 # print $query->start_form(-method=>'POST',
-# 			 -action=>"http://$cgiroot/addmutation.cgi", -name=>'mut');
+# 			 -action=>"$cgiroot/addmutation.cgi", -name=>'mut');
 # &forward_some_args($query,\%params);
 #     print $query->hidden(-name=>'modeAdd',-value=>'Add');
 # print $query->submit(-name=>'Add Mutation Information',

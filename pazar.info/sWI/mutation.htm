@@ -13,14 +13,14 @@ resetMenu = function() {
 function setCount(target){
 if(target == 0) 
 {
-document.MUT.action="http://serverpath/check_mutant.cgi";
+document.MUT.action="serverpath/check_mutant.cgi";
 document.MUT.target="WindowB";
 window.open('about:blank','WindowB', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=500');
 }
 if(target == 1) 
 {
 document.MUT.target="_self";
-document.MUT.action="http://serverpath/addmutation.cgi";
+document.MUT.action="serverpath/addmutation.cgi";
 }
 }
 //-->

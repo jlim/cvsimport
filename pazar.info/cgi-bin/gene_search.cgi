@@ -114,7 +114,7 @@ my $dbh = pazar->new(
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
 		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    'mysql',
+		      -drv           =>    $ENV{PAZAR_drv},
                       -globalsearch  =>    'yes');
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
@@ -128,6 +128,7 @@ my %colors = (0 => "#fffff0",
 my $get = new CGI;
 my %params = %{$get->Vars};
 my $accn = $params{geneID};
+$accn=~s/\s//g;
 my $dbaccn = $params{ID_list}||'PAZAR_gene';
 my $gene;
 
@@ -143,11 +144,14 @@ if ($accn) {
 	$gene=$gene[0];
         unless ($gene=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
-	my @gene=$gkdb->llid_to_ens($accn);
+        my $species=$gkdb->llid_to_org($accn);
+        if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+        $ensdb->change_mart_organism($species);
+        my @gene=$ensdb->llid_to_ens($accn);
 	$gene=$gene[0];
 	unless ($gene=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } else {
-	my ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+	my $ens = convert_id($ensdb,$gkdb,$dbaccn,$accn);
 	if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$ens;}
     }
 
@@ -348,17 +352,20 @@ sub select {
 }
 
 sub convert_id {
-    my ($auxdb,$genedb,$geneid,$ens)=@_;
-    undef my @id;
-    my $add=$genedb . "_to_llid";
+ my ($ensdb,$gkdb,$genedb,$geneid)=@_;
+undef my @id;
+ my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
-    @id=$auxdb->$add($geneid);
-    my $ll = $id[0];
-    my @ensembl;
-    if ($ll) { 
-	@ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
-    }
-    return $ensembl[0];
+ @id=$gkdb->$add($geneid);
+ my $ll=$id[0];
+ my @gene;
+ if ($ll) {
+   my $species=$gkdb->llid_to_org($ll);
+   if (!$species) {print "<h3>An error occured! Check that the provided ID ($geneid) is a $genedb ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+   $ensdb->change_mart_organism($species);
+   @gene=$ensdb->llid_to_ens($ll);
+ }
+ return $gene[0];
 }
 
 sub write_pazarid {

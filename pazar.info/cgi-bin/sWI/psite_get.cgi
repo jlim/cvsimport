@@ -9,6 +9,7 @@ use pazar;
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 require "$pazarcgipath/getsession.pl";
 
@@ -112,31 +113,31 @@ var movefromedge=0;
 placementx=(ScreenWidth/2)-((580)/500);
 placementy=(ScreenHeight/2)-((380+10)/6);
 WinPop=window.open(PopUpUrl,"","width=580,height=380,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1,left="+placementx+",top="+placementy+",screenX="+placementx+",screenY="+placementy+",");
-}
+}}.qq{
 var ChildWin=null;
 function setCount(target){
     if (document.MM_returnValue) {
 	if (!ChildWin || ChildWin.closed ) {
 if(target == 0) 
 {
-document.CRE.action="http://www.pazar.info/cgi-bin/sWI/TFcomplex.cgi";
+document.CRE.action="$pazar_cgi/sWI/TFcomplex.cgi";
 document.CRE.target="ChildWin";
 ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 }
 if(target == 1) 
 {
-document.CRE.action="http://www.pazar.info/cgi-bin/sWI/psite_get_cre.cgi";
+document.CRE.action="$pazar_cgi/sWI/psite_get_cre.cgi";
 document.CRE.target="ChildWin";
 ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 }
 if(target == 2) 
 {
-document.CRE.action="http://www.pazar.info/cgi-bin/sWI/accept_cre.cgi";
+document.CRE.action="$pazar_cgi/sWI/accept_cre.cgi";
 document.CRE.target="_self";
 }
 if(target == 3) 
 {
-document.CRE.action="http://www.pazar.info/cgi-bin/sWI/geneselect.cgi";
+document.CRE.action="$pazar_cgi/sWI/geneselect.cgi";
 document.CRE.target="_self";
 }
 } else{
@@ -145,7 +146,7 @@ ChildWin.focus();
 	return correctSubmitHandler();
     }
 }
-}
+}}.q{
 
 function correctSubmitHandler(e)
 {
@@ -166,21 +167,20 @@ function MM_popupMsg(msg) { //v1.0
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
-my $docpath=$ENV{SERVER_NAME}.'/sWI';
-my $cgipath=$ENV{PAZARCGIPATH}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
+my $docpath=$pazar_html.'/sWI';
 
 our $query=new CGI;
 
@@ -201,7 +201,7 @@ eval {$pazar = pazar->new(
 		       -pazar_user    =>    $info{user},
 		       -pazar_pass    =>    $info{pass},
 		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -project       =>    $proj);};
 
 if ($@) {
@@ -292,7 +292,7 @@ while (my $buf=<TFC>) {
 }
 close TFC;
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 exit();
 }
@@ -358,7 +358,7 @@ ALTERNATE
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 exit();
 
@@ -371,12 +371,8 @@ my $query=shift;
 print $query->header;
 my $message="under construction";
 $message="Not authenticated and the interface is submission only" if ($err==2);
-#$message="Mea culpa, I did something wrong, flame and burn my creator" if ($err==3);
 print $query->h1("An error has occured because ");
 print $query->h2($message);
-#print a({href=>"http://watson.lsd.ornl.gov/genekeydb/psite/entryform1.htm"},"Go Back");
-#print $query->redirect('http://somewhere.else/in/movie/land');
-
 exit(0);
 }
 

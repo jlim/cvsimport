@@ -19,7 +19,8 @@ my $dbhost = $ENV{PAZAR_host};
 
 my $DBUSER = $ENV{PAZAR_adminuser};
 my $DBPASS = $ENV{PAZAR_adminpass};
-my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
+my $DBDRV  = $ENV{PAZAR_drv};
+my $DBURL = "DBI:$DBDRV:dbname=$dbname;host=$dbhost";
 
 my $session = new CGI::Session("driver:File", undef, {Directory=>"/tmp"});
 $session->expire('+4h');

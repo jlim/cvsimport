@@ -132,7 +132,7 @@ my $dbh = pazar->new(
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
 		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    'mysql',
+		      -drv           =>    $ENV{PAZAR_drv},
                       -globalsearch  =>    'yes');
 
 
@@ -144,6 +144,7 @@ my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKD
 my $get = new CGI;
 my %param = %{$get->Vars};
 my $accn = $param{geneID};
+$accn=~s/[\s]//g;
 my $dbaccn = $param{ID_list}||'PAZAR_TF';
 my @trans;
 my $tfname;
@@ -151,17 +152,25 @@ if ($accn) {
     if ($dbaccn eq 'PAZAR_TF') {
 	unless ($accn=~/TF\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {@trans = ('PAZARid');}
     }if ($dbaccn eq 'EnsEMBL_gene') {
-	@trans = $gkdb->ens_transcripts_by_gene($accn);
+	@trans = $ensdb->ens_transcripts_by_gene($accn);
         unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	push @trans,$accn;
         unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
-	my @gene=$gkdb->llid_to_ens($accn);
+	my $species=$gkdb->llid_to_org($accn);
+	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	$ensdb->change_mart_organism($species);
+	my @gene=$ensdb->llid_to_ens($accn);
 	unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	@trans = $gkdb->ens_transcripts_by_gene($gene[0]);
+	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
     } elsif ($dbaccn eq 'nm') {
-	@trans=$gkdb->nm_to_enst($accn);
+	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, ll_refseq_nm b where a.ll_id=b.ll_id and b.nm_accn=?");
+	$sp->execute($accn);
+	my $species=$sp->fetchrow_array();
+	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	$ensdb->change_mart_organism($species);
+	@trans=$ensdb->nm_to_enst($accn);
 	unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'swissprot') {
 	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
@@ -209,7 +218,7 @@ if ($accn) {
 		      -dbname        =>    $ENV{PAZAR_name},
   	              -pazar_user    =>    $info{user},
 		      -pazar_pass    =>    $info{pass},
-                      -drv           =>    'mysql',
+                      -drv           =>    $ENV{PAZAR_drv},
 		      -project       =>    $restr_proj);
 
 		    my @complexes;

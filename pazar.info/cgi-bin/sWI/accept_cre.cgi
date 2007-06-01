@@ -8,13 +8,10 @@ use pazar::reg_seq;
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
-my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 require "$pazarcgipath/getsession.pl";
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
-my $docroot=$pazarhtdocspath.'/sWI';
-my $cgiroot=$pazar_cgi.'/sWI';
 
 my $query=new CGI;
 my %params = %{$query->Vars};
@@ -29,7 +26,7 @@ my $proj=$params{'project'};
 print $query->header;
 
 my $pazar=new 
-    pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
+    pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
 	  -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
@@ -48,7 +45,7 @@ if ($@) {
     print "<h3>An error occured! Please contact us to report the bug with the following error message:<br>$@</h3>";
     exit();
 }
-print "<body onload='document.F1.submit();'><form action='http://www.pazar.info/cgi-bin/sWI/geneselect.cgi' method='post' name='F1'><input type='hidden' name='project' value='$proj'></form></body></html>";
+print "<body onload='document.F1.submit();'><form action='$pazar_cgi/sWI/geneselect.cgi' method='post' name='F1'><input type='hidden' name='project' value='$proj'></form></body></html>";
 
 
 sub store_natural {
@@ -56,8 +53,10 @@ my ($pazar,$ensdb,$gkdb,$query,$params)=@_;
 my %params=%{$params};
 
 my $accn = $params{'gid'}||$params{'hidgid'};
+$accn=~s/\s//g;
 my $dbaccn = $params{'genedb'};
 my $taccn = $params{'tid'};
+$taccn=~s/\s//g;
 my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
@@ -70,11 +69,14 @@ if ($dbaccn eq 'EnsEMBL_gene') {
     $ens=$gene[0];
     unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
-    my @gene=$gkdb->llid_to_ens($accn);
+    my $species=$gkdb->llid_to_org($accn);
+    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    $ensdb->change_mart_organism($species);
+    my @gene=$ensdb->llid_to_ens($accn);
     $ens=$gene[0];
     unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
-    ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+    $ens = convert_id($ensdb,$gkdb,$dbaccn,$accn);
     if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 }
 unless ($ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit; } #Error message her - gene not in DB
@@ -204,16 +206,19 @@ return $slice->seq;
 }
 
 sub convert_id {
- my ($auxdb,$genedb,$geneid,$ens)=@_;
+ my ($ensdb,$gkdb,$genedb,$geneid)=@_;
 undef my @id;
  my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
- @id=$auxdb->$add($geneid);
+ @id=$gkdb->$add($geneid);
  my $ll=$id[0];
- my @ensembl;
-if ($ll) { 
-  @ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
-}
-return $ensembl[0];
+ my @gene;
+ if ($ll) {
+   my $species=$gkdb->llid_to_org($ll);
+   if (!$species) {print "<h3>An error occured! Check that the provided ID ($geneid) is a $genedb ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+   $ensdb->change_mart_organism($species);
+   @gene=$ensdb->llid_to_ens($ll);
+ }
+ return $gene[0];
 }
 

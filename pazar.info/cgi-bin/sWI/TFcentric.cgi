@@ -13,6 +13,7 @@ use pazar::tf::subunit;
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 require "$pazarcgipath/getsession.pl";
 
@@ -78,16 +79,16 @@ function MM_validateForm() { //v4.0
     } } } else if (test.charAt(0) == 'R') errors += '- '+nm+' is required.\n'; }
   } if (errors) alert('The following error(s) occurred:\n'+errors);
   document.MM_returnValue = (errors == '');
-}
+}}.qq{
 
 function setCount(target){
 if(target == 0) 
 {
-document.SEQ.action="http://www.pazar.info/cgi-bin/sWI/TFcentric_CRE.cgi";
+document.SEQ.action="$pazar_cgi/sWI/TFcentric_CRE.cgi";
 document.SEQ.target="Window3";
 window.open('about:blank','Window3','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 }
-}
+}}.q{
 
 function PopUp(PopUpUrl){
 var ScreenWidth=window.screen.width;
@@ -102,20 +103,20 @@ WinPop=window.open(PopUpUrl,"","width=410,height=440,toolbar=1,location=1,direct
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
 
 my $selfpage="$docroot/TFcentric.htm";
 my $nextpage="$docroot/TFcentric_CRE.htm";
@@ -256,7 +257,7 @@ sub next_page {
     unless ($user&&$pass) {
 	print $query->h3("An error occurred- not a valid user?\n If you believe this is an error, e-mail us and describe the problem");
 # print out the html tail template
-	my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+	my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 	print $template_tail->output;
 	exit();
     }
@@ -283,6 +284,9 @@ sub next_page {
 		$key .='0' ;
 		$params{$key}=$params{$mp};
 		delete $params{$mp};
+		if ($key=~/TF/) {
+		    $params{$key}=~s/\s//g;
+		}
 	    }
 	    foreach my $trans (keys %tfs) {
 		if ($params{$key} eq $trans) {
@@ -296,7 +300,7 @@ sub next_page {
 	    print $query->h2("*** TF data NOT accepted - $params{'TFcomplex'} might already exist within your project with different subunits than the one you defined! ***");
 	    print $query->endform;
 # print out the html tail template
-	    my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+	    my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 	    print $template_tail->output;
 	    exit();
 	} else {
@@ -324,7 +328,7 @@ sub next_page {
                          -onClick=>"setCount(0)");
     print $query->endform;
 # print out the html tail template
-    my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+    my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
     print $template_tail->output;
     exit();
 }
@@ -347,29 +351,38 @@ sub check_TF {
     my %factors;
     for (my $i=0;$i<@$db;$i++) {
 	my $accn=@$tf[$i];
+	$accn=~s/[\s]//g;
 	my $dbaccn=@$db[$i];
 	my @trans;
 	if ($dbaccn eq 'EnsEMBL_gene') {
-	    @trans = $gkdb->ens_transcripts_by_gene($accn);
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    @trans = $ensdb->ens_transcripts_by_gene($accn);
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	    push @trans,$accn;
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	} elsif ($dbaccn eq 'EntrezGene') {
-	    my @gene=$gkdb->llid_to_ens($accn);
-	    unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
+	    my $species=$gkdb->llid_to_org($accn);
+	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	    $ensdb->change_mart_organism($species);
+	    my @gene=$ensdb->llid_to_ens($accn);
+	    unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	    @trans = $ensdb->ens_transcripts_by_gene($gene[0]);
 	} elsif ($dbaccn eq 'refseq') {
-	    @trans=$gkdb->nm_to_enst($accn);
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, ll_refseq_nm b where a.ll_id=b.ll_id and b.nm_accn=?");
+	    $sp->execute($accn);
+	    my $species=$sp->fetchrow_array();
+	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	    $ensdb->change_mart_organism($species);
+	    @trans=$ensdb->nm_to_enst($accn);
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	} elsif ($dbaccn eq 'swissprot') {
 	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?");
 	    $sp->execute($accn);
 	    my $species=$sp->fetchrow_array();
-	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	    $ensdb->change_mart_organism($species);
 	    @trans =$ensdb->swissprot_to_enst($accn);
-	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	}
 	$factors{$accn}=$trans[0];
     }
@@ -382,7 +395,7 @@ sub store_TFs {
 
     my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
     
-    my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
+    my $pazar=new pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
 
     my $tf;
     my @lookup=qw(TF TFDB ENS_TF family class modifications); #Valid properties of a subunit
@@ -417,7 +430,7 @@ sub store_TFs {
 sub get_TF_id {
     my ($user,$pass,$proj,$tfname)=@_;
     
-    my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
+    my $pazar=new pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,-pass=>$ENV{PAZAR_pubpass}, -project=>$proj, -host=>$ENV{PAZAR_host});
 
     my @tfnames = split(/ \(/,$tfname);
     my @ids=$pazar->get_complex_id_by_name($tfnames[0]);

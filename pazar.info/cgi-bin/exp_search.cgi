@@ -114,7 +114,7 @@ my $dbh = pazar->new(
 		      -user          =>    $ENV{PAZAR_pubuser},
 		      -pass          =>    $ENV{PAZAR_pubpass},
 		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    'mysql',
+		      -drv           =>    $ENV{PAZAR_drv},
                       -globalsearch  =>    'yes');
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
@@ -141,7 +141,7 @@ if($res[1]=~/restricted/i) {
 		       -dbname        =>    $ENV{PAZAR_name},
 		       -pazar_user    =>    $info{user},
 		       -pazar_pass    =>    $info{pass},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -project       =>    $res[0]);
 } elsif ($res[1]=~/published/i || $res[1]=~/open/i ) {
     $dbh = pazar->new( 
@@ -150,7 +150,7 @@ if($res[1]=~/restricted/i) {
 		       -user          =>    $ENV{PAZAR_pubuser},
 		       -pass          =>    $ENV{PAZAR_pubpass},
 		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -project       =>    $res[0]);
 }   
 

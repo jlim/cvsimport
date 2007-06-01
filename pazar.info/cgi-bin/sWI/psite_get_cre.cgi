@@ -8,13 +8,17 @@ use pazar::talk;
 use pazar::reg_seq;
 use pazar;
 
-require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 our $query=new CGI;
 my %params = %{$query->Vars};
 
-our $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
-our $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
+our $docroot=$pazarhtdocspath.'/sWI';
+our $cgiroot=$pazar_cgi.'/sWI';
 
 my $user=$info{user};
 my $pass=$info{pass};
@@ -26,7 +30,7 @@ unless (($user)&&($pass)) {
     &goback(2,$query);
 }
 
-my $pazar=new pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser}, -pazar_user=>$user, -pazar_pass=>$pass,
+my $pazar=new pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser}, -pazar_user=>$user, -pazar_pass=>$pass,
                         -pass=>$ENV{PAZAR_pubpass}, -host=>$ENV{PAZAR_host}, -project=>$proj);
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
@@ -84,13 +88,9 @@ my $query=shift;
 print $query->header;
 my $message="under construction";
 $message="Not authenticated and the interface is submission only" if ($err==2);
-#$message="Mea culpa, I did something wrong, flame and burn my creator" if ($err==3);
 print $query->h1("An error has occured because ");
 print $query->h2($message);
-#print a({href=>"http://watson.lsd.ornl.gov/genekeydb/psite/entryform1.htm"},"Go Back");
-#print $query->redirect('http://somewhere.else/in/movie/land');
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => '/usr/local/apache/pazar.info/cgi-bin/tail.tmpl');
+my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
 print $template_tail->output;
 exit(0);
 }
@@ -108,8 +108,10 @@ sub check_seq {
     my %params=%{$params};
 
     my $accn = $params{'gid'}||$params{'hidgid'};
+    $accn=~s/\s//g;
     my $dbaccn = $params{'genedb'};
     my $taccn = $params{'tid'};
+    $taccn=~s/\s//g;
     my $dbtrans = $params{'transdb'};
 
     my ($ens,$err);
@@ -122,11 +124,14 @@ sub check_seq {
 	$ens=$gene[0];
 	unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
-	my @gene=$gkdb->llid_to_ens($accn);
+	my $species=$gkdb->llid_to_org($accn);
+        if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	$ensdb->change_mart_organism($species);
+	my @gene=$ensdb->llid_to_ens($accn);
 	$ens=$gene[0];
 	unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } else {
-	($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+	$ens = convert_id($ensdb,$gkdb,$dbaccn,$accn);
 	if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     }
     unless ($ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} #Error message her - gene not in DB
@@ -212,4 +217,21 @@ sub check_seq {
     $params{tss}=$tss;
 
     return \%params;
+}
+
+sub convert_id {
+ my ($ensdb,$gkdb,$genedb,$geneid)=@_;
+undef my @id;
+ my $add=$genedb . "_to_llid";
+# print "Working on $geneid in $genedb; $add";
+ @id=$gkdb->$add($geneid);
+ my $ll=$id[0];
+ my @gene;
+ if ($ll) {
+   my $species=$gkdb->llid_to_org($ll);
+   if (!$species) {print "<h3>An error occured! Check that the provided ID ($geneid) is a $genedb ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+   $ensdb->change_mart_organism($species);
+   @gene=$ensdb->llid_to_ens($ll);
+ }
+ return $gene[0];
 }

@@ -9,11 +9,15 @@ use pazar::tf;
 use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
 
-require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 #SYNOPSYS: Addin TF that interact with the target sequence and each other to produce a certain effect
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME}.$ENV{PAZARCGI}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
 
 my @voc=qw(TF TFDB family classe modifications);
 my $query=new CGI;
@@ -51,7 +55,7 @@ if ($params{'myfamily'} eq 'Select from existing families') {
 print $query->header;
 
 my $pazar=new 
-pazar(-drv=>'mysql',-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
+pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser},-pazar_user=>$user, -pazar_pass=>$pass,
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
@@ -285,6 +289,7 @@ exit();
 sub forward_args {
 my @voc=qw(add TF TFDB family classe myclass myfamily modifications TFcomplex cell cellstat mycell mytissue cellspecies interact0 interactscale intercomment inttype methodname newmethod newmethoddesc pubmed reference tissue);
 foreach my $key (keys %params) {
+    $key=~s/[123456789]//g;
     unless (grep(/^$key$/,@voc)) {
 	print $query->hidden($key,$params{$key});
     }
@@ -313,7 +318,9 @@ sub next_page {
 	}
 	my @tf;
 	foreach my $tfkey (grep(/^TF([0-9]*)$/,keys %params)) {
-	    push @tf, $params{$tfkey};
+	    my $tfres=$params{$tfkey};
+	    $tfres=~s/\s//g;
+	    push @tf, $tfres;
 	}
 
 	my $tfs=&check_TF($ensdb,$gkdb,\@db,\@tf);
@@ -325,6 +332,9 @@ sub next_page {
 		$key .='0' ;
 		$params{$key}=$params{$mp};
 		delete $params{$mp};
+		if ($key=~/TF/) {
+		    $params{$key}=~s/\s//g;
+		}
 	    }
 	    foreach my $trans (keys %tfs) {
 		if ($params{$key} eq $trans) {
@@ -446,7 +456,7 @@ var MyChildWin=null;
 function setCount(target){
     if (!MyChildWin || MyChildWin.closed ) {
 	if(target == 0) {
-	    document.mut.action="http://$cgiroot/addmutation.cgi";
+	    document.mut.action="$cgiroot/addmutation.cgi";
 	    document.mut.target="MyChildWin";
 	    MyChildWin=window.open('about:blank','MyChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
 	}
@@ -511,29 +521,38 @@ sub check_TF {
     my %factors;
     for (my $i=0;$i<@$db;$i++) {
 	my $accn=@$tf[$i];
+	$accn=~s/[\s]//g;
 	my $dbaccn=@$db[$i];
 	my @trans;
 	if ($dbaccn eq 'EnsEMBL_gene') {
-	    @trans = $gkdb->ens_transcripts_by_gene($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    @trans = $ensdb->ens_transcripts_by_gene($accn);
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	} elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	    push @trans,$accn;
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	} elsif ($dbaccn eq 'EntrezGene') {
-	    my @gene=$gkdb->llid_to_ens($accn);
-	    unless ($gene[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	    @trans = $gkdb->ens_transcripts_by_gene($gene[0]);
+	    my $species=$gkdb->llid_to_org($accn);
+	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	    $ensdb->change_mart_organism($species);
+	    my @gene=$ensdb->llid_to_ens($accn);
+	    unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	    @trans = $ensdb->ens_transcripts_by_gene($gene[0]);
 	} elsif ($dbaccn eq 'refseq') {
-	    @trans=$gkdb->nm_to_enst($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, ll_refseq_nm b where a.ll_id=b.ll_id and b.nm_accn=?");
+	    $sp->execute($accn);
+	    my $species=$sp->fetchrow_array();
+	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
+	    $ensdb->change_mart_organism($species);
+	    @trans=$ensdb->nm_to_enst($accn);
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	} elsif ($dbaccn eq 'swissprot') {
 	    my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?");
 	    $sp->execute($accn);
 	    my $species=$sp->fetchrow_array();
-	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	    $ensdb->change_mart_organism($species);
 	    @trans =$ensdb->swissprot_to_enst($accn);
-	    unless ($trans[0]=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	    unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	}
 	$factors{$accn}=$trans[0];
     }
@@ -580,8 +599,10 @@ my ($pazar,$ensdb,$gkdb,$query,$params)=@_;
 my %params=%{$params};
 
 my $accn = $params{'gid'}||$params{'hidgid'};
+$accn=~s/\s//g;
 my $dbaccn = $params{'genedb'};
 my $taccn = $params{'tid'};
+$taccn=~s/\s//g;
 my $dbtrans = $params{'transdb'};
 
 my ($ens,$err);
@@ -594,11 +615,14 @@ if ($dbaccn eq 'EnsEMBL_gene') {
     $ens=$gene[0];
     unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } elsif ($dbaccn eq 'EntrezGene') {
-    my @gene=$gkdb->llid_to_ens($accn);
+    my $species=$gkdb->llid_to_org($accn);
+    if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+    $ensdb->change_mart_organism($species);
+    my @gene=$ensdb->llid_to_ens($accn);
     $ens=$gene[0];
     unless ($ens=~/\w{4,}\d{6,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 } else {
-    ($ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+    $ens = convert_id($ensdb,$gkdb,$dbaccn,$accn);
     if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 }
 unless ($ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit; } #Error message her - gene not in DB
@@ -729,17 +753,20 @@ return $slice->seq;
 }
 
 sub convert_id {
- my ($auxdb,$genedb,$geneid,$ens)=@_;
+ my ($ensdb,$gkdb,$genedb,$geneid)=@_;
 undef my @id;
  my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
- @id=$auxdb->$add($geneid);
+ @id=$gkdb->$add($geneid);
  my $ll=$id[0];
- my @ensembl;
-if ($ll) { 
-  @ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
-}
-return $ensembl[0];
+ my @gene;
+ if ($ll) {
+   my $species=$gkdb->llid_to_org($ll);
+   if (!$species) {print "<h3>An error occured! Check that the provided ID ($geneid) is a $genedb ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+   $ensdb->change_mart_organism($species);
+   @gene=$ensdb->llid_to_ens($ll);
+ }
+ return $gene[0];
 }
 
 sub check_aname {

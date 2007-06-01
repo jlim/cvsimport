@@ -1,23 +1,26 @@
 #!/usr/bin/perl
 
-use Exporter;
 use CGI qw( :all);
 #use CGI::Debug (report=>'everything', on=>'anything');
 #use GKDB;
 use DBI;
-use Data::Dumper;
+#use Data::Dumper;
 use pazar;
 use pazar::talk;
 
-require '/usr/local/apache/pazar.info/cgi-bin/getsession.pl';
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
+
+require "$pazarcgipath/getsession.pl";
 
 =Description
 Get all transcripts and check the sequence and match the correct position
 and the respective transcript id.
 =cut
 
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
+my $docroot=$pazarhtdocspath.'/sWI';
+my $cgiroot=$pazar_cgi.'/sWI';
 
 undef $id;
 my $query=new CGI;
@@ -27,29 +30,12 @@ print $query->header;
 
 open (SELF, $selfpage);
 
-# my $auxdb=$params{auxDB};
-# if ($auxdb) {
-# my ($auxh,$auxname,$auxpass,$auxuser,$auxdrv);
-# if ($params{auxDB} =~/ensembl/i) {
-#     $auxh=$ENV{ENS_HOST};
-#     $auxuser=$ENV{ENS_USER};
-#     $auxpass=$ENV{ENS_PASS};
-#     $auxdrv=$ENV{ENS_DRV}||'mysql';
-# }
-# if ($params{auxDB} =~/genekeydb/i) {
-#     $auxh=$ENV{GKDB_HOST};
-#     $auxuser=$ENV{GKDB_USER};
-#     $auxpass=$ENV{GKDB_PASS};
-#       $auxdrv=$ENV{GKDB_DRV}||'mysql';
-# }
-
-# our $talkdb=pazar::talk->new(DB=>lc($params{auxDB}),USER=>$auxuser,
-# 		PASS=>$auxpass,HOST=>$auxh,DRV=>$auxdrv,organism=>$params{org});
 my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
 my $accn = $params{'geneid'}||$params{'hidgeneid'};
+$accn=~s/\s//g;
 my $dbaccn = $params{'genedb'};
 my ($gene,$ens,$err);
 
@@ -60,22 +46,25 @@ if (!$accn) {
     if ($dbaccn eq 'EnsEMBL_gene') {
 	unless ($accn=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;} else {
 	    $ens=$accn;
-	    my @ll=$gkdb->ens_to_llid($ens);
+	    my @ll=$ensdb->ens_to_llid($ens);
 	    $gene=$ll[0];
 	}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$ens=$gene[0];
         unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
-	my @ll=$gkdb->ens_to_llid($ens);
+	my @ll=$ensdb->ens_to_llid($ens);
 	$gene=$ll[0];
     } elsif ($dbaccn eq 'EntrezGene') {
-	my @gene=$gkdb->llid_to_ens($accn);
+        my $species=$gkdb->llid_to_org($accn);
+        if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+        $ensdb->change_mart_organism($species);
+        my @gene=$ensdb->llid_to_ens($accn);
 	$ens=$gene[0];
 	unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	$gene=$accn;
     } else {
-	($gene,$ens,$err) =convert_id($gkdb,$dbaccn,$accn);
+	($gene,$ens) = convert_id($ensdb,$gkdb,$dbaccn,$accn);
 	if (!$ens) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
     }
     my $sym;
@@ -96,17 +85,20 @@ display_check($check,$corrected);
 exit();
 
 sub convert_id {
- my ($auxdb,$genedb,$geneid,$ens)=@_;
+ my ($ensdb,$gkdb,$genedb,$geneid)=@_;
 undef my @id;
  my $add=$genedb . "_to_llid";
 # print "Working on $geneid in $genedb; $add";
- @id=$auxdb->$add($geneid);
+ @id=$gkdb->$add($geneid);
  my $ll=$id[0];
- my @ensembl;
-if ($ll) { 
-  @ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
-}
-return $ll,$ensembl[0];
+ my @gene;
+ if ($ll) {
+   my $species=$gkdb->llid_to_org($ll);
+   if (!$species) {print "<h3>An error occured! Check that the provided ID ($geneid) is a $genedb ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+   $ensdb->change_mart_organism($species);
+   @gene=$ensdb->llid_to_ens($ll);
+ }
+ return $ll,$gene[0];
 }
 
 
@@ -304,7 +296,7 @@ my %params=%{$params};
 print $html->h2("Your site was not confirmed, choose one of the following sites (if any):");
 print ("Format is: transcript id followed by absolute position and relative to TSS position"),$html->br;
 my $c=keys %{$tr};
-print $html->start_form(-method=>'POST',-action=>'http://$cgiroot/accept_cre.cgi');
+print $html->start_form(-method=>'POST',-action=>'$cgiroot/accept_cre.cgi');
  #   unless (($trf_llid) || ($params{TF} eq '')|| !defined($params{TF})) {
 #	print $html->h3("Transcription factor gene $params{TF} not recognized, will be ignored, go back if you want to try again");
  #    }

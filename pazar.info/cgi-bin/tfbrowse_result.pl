@@ -17,9 +17,10 @@ require "$pazarcgipath/getsession.pl";
 print "content-type:text/html\n\n";
 
 
-$PAZARDBUSER = $ENV{PAZAR_pubuser};
-$PAZARDBPASS = $ENV{PAZAR_pubpass};
-$PAZARDBURL = "DBI:mysql:dbname=$ENV{PAZAR_name};host=$ENV{PAZAR_host}";
+my $PAZARDBUSER = $ENV{PAZAR_pubuser};
+my $PAZARDBPASS = $ENV{PAZAR_pubpass};
+my $DBDRV  = $ENV{PAZAR_drv};
+my $PAZARDBURL = "DBI:$DBDRV:dbname=$ENV{PAZAR_name};host=$ENV{PAZAR_host}";
 
 
 my $search_alpha = param("search_alpha");
@@ -35,7 +36,7 @@ my $pazar = pazar->new(
                       -user          =>    $ENV{PAZAR_pubuser},
                       -pass          =>    $ENV{PAZAR_pubpass},
                       -dbname        =>    $ENV{PAZAR_name},
-                      -drv           =>    'mysql');
+                      -drv           =>    $ENV{PAZAR_drv});
 
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",

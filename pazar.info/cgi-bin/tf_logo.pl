@@ -1,9 +1,5 @@
 #!/usr/local/bin/perl
 
-use pazar;
-use pazar::gene;
-use pazar::talk;
-
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 #use CGI::Debug( report => 'everything', on => 'anything' );
@@ -12,19 +8,6 @@ use TFBS::PatternGen::MEME;
 use TFBS::Matrix::PFM;
 
 #use Data::Dumper;
-
-#connect to the database
-my $dbh = pazar->new( 
-                      -globalsearch  =>    'yes',
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    'mysql');
-
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};

@@ -30,21 +30,16 @@ function showHide(inputID) {
 if($loggedin eq 'true')
 {
     #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. ".'<a href=\'http://www.pazar.info/cgi-bin/logout.pl\'>Log Out</a>');
+    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
 }
 else
 {
     #log in link
-    $template->param(LOGOUT => '<a href=\'http://www.pazar.info/cgi-bin/login.pl\'>Log In</a>');
+    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
 }
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
-
-my $docroot=$ENV{PAZARHTDOCSPATH}.'/sWI';
-my $cgiroot=$ENV{SERVER_NAME} . $ENV{PAZARCGI}.'/sWI';
-my $docpath=$ENV{SERVER_NAME}.'/sWI';
-my $cgipath=$ENV{PAZARCGIPATH}.'/sWI';
 
 our $query=new CGI;
 
@@ -63,7 +58,7 @@ eval {$pazar = pazar->new(
 		       -pazar_user    =>    $info{user},
 		       -pazar_pass    =>    $info{pass},
 		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    'mysql',
+		       -drv           =>    $ENV{PAZAR_drv},
 		       -project       =>    $proj);};
 
 if ($@) {
@@ -80,7 +75,7 @@ unless ($pid) {
 my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 print "<h1>Cis-Regulatory Sequence Submission</h1><hr>\n";
-print "<form name=\"NewGene\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/psite_get.cgi\" enctype=\"multipart/form-data\" target=\"_self\">\n";
+print "<form name=\"NewGene\" method=\"post\" action=\"$pazar_cgi/sWI/psite_get.cgi\" enctype=\"multipart/form-data\" target=\"_self\">\n";
 &forward_args(\%params);
 print "<input type=\"submit\" value=\"Annotate a New Gene\"></form>\n";
 
@@ -122,19 +117,19 @@ if ($genes) {
 unless ($gene_project[0]->{ID}) {print "<p class=\"warning\">No Genes have been annotated yet in this project!</p>"; exit;}
 
 print "<table width='750' class='summarytable'><tr>\n";
-print "<td class='genelisttabletitle' width='150'><form name=\"species_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'>";
+print "<td class='genelisttabletitle' width='150'><form name=\"species_browse\" method=\"post\" action=\"$pazar_cgi/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'>";
 &forward_args(\%params);
 print "<input type=\"submit\" class=\"submitLink2\" value=\"Species\"></form></td>\n";
-print "<td class='genelisttabletitle' width='100'><form name=\"ID_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'>";
+print "<td class='genelisttabletitle' width='100'><form name=\"ID_browse\" method=\"post\" action=\"$pazar_cgi/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'>";
 &forward_args(\%params);
 print "<input type=\"submit\" class=\"submitLink2\" value=\"PAZAR Gene ID\"></form></td>\n";
-print "<td class='genelisttabletitle' width='100'><form name=\"desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'>";
+print "<td class='genelisttabletitle' width='100'><form name=\"desc_browse\" method=\"post\" action=\"$pazar_cgi/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'>";
 &forward_args(\%params);
 print "<input type=\"submit\" class=\"submitLink2\" value=\"Gene name\"><small>(user defined)</small></form></td>\n";
-print "<td class='genelisttabletitle' width='150'><form name=\"accn_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'>";
+print "<td class='genelisttabletitle' width='150'><form name=\"accn_browse\" method=\"post\" action=\"$pazar_cgi/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'>";
 &forward_args(\%params);
 print "<input type=\"submit\" class=\"submitLink2\" value=\"EnsEMBL Gene ID\"></form></td>\n";
-print "<td class='genelisttabletitle' width='200'><form name=\"ens_desc_browse\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ens_desc'>";
+print "<td class='genelisttabletitle' width='200'><form name=\"ens_desc_browse\" method=\"post\" action=\"$pazar_cgi/sWI/geneselect.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ens_desc'>";
 &forward_args(\%params);
 print "<input type=\"submit\" class=\"submitLink2\" value=\"EnsEMBL Gene Description\"></form></td>\n";
 print "<td class='genelisttabletitle'' width='50'></td>\n";
@@ -168,7 +163,7 @@ print "<td class='basictdnoborder' width='200' bgcolor=\"$colors{$bg_color}\">$g
 print "<td class='basictdnoborder' width='50' bgcolor=\"$colors{$bg_color}\"><a href=\"#$gene_data->{accn}\"  onClick = \"showHide('$gene_data->{ID}');\">Annotate</a></td>\n";
 print "</tr>\n";
 print "<tr><td class='basictdnoborder' bgcolor=\"$colors{$bg_color}\" COLSPAN=6><table width=100% id=\"$gene_data->{ID}\" style=\"$style\">";
-print "<tr><td bgcolor=\"$colors{$bg_color}\"><form name=\"NewSeq\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/psite_get.cgi\" enctype=\"multipart/form-data\" target=\"_self\">&nbsp;<input type='hidden' name='geneID' value='$gene_data->{accn}'><input type='hidden' name='genedesc' value='$gene_data->{desc}'>";
+print "<tr><td bgcolor=\"$colors{$bg_color}\"><form name=\"NewSeq\" method=\"post\" action=\"$pazar_cgi/sWI/psite_get.cgi\" enctype=\"multipart/form-data\" target=\"_self\">&nbsp;<input type='hidden' name='geneID' value='$gene_data->{accn}'><input type='hidden' name='genedesc' value='$gene_data->{desc}'>";
 &forward_args(\%params);
 print "<input type='submit' name='submit' value='Add a regulatory Sequence'></form></td></tr><tr><td>\n";
 
@@ -201,7 +196,7 @@ if (!$regseqs[0]) {
 
 	print "<td width='180' class=\"basictdnoborder\" bgcolor=\"$colors2{$bg_color2}\"><div class='smoverflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end."</div></td>";
 
-	print "<td width='110' class=\"basictdnoborder\" bgcolor=\"$colors2{$bg_color2}\"><div class='smoverflow'><form name=\"addevid$id\" method=\"post\" action=\"http://www.pazar.info/cgi-bin/sWI/psite_get.cgi\" enctype=\"multipart/form-data\"><input type=hidden name='regid' value='$regid'><input type=hidden name='mode' value='addevid'>";
+	print "<td width='110' class=\"basictdnoborder\" bgcolor=\"$colors2{$bg_color2}\"><div class='smoverflow'><form name=\"addevid$id\" method=\"post\" action=\"$pazar_cgi/sWI/psite_get.cgi\" enctype=\"multipart/form-data\"><input type=hidden name='regid' value='$regid'><input type=hidden name='mode' value='addevid'>";
 &forward_args(\%params);
 	print "<input type='submit' name='submit' value='Add Evidence'></form></div></td>";
 	print "</tr>";
@@ -225,12 +220,8 @@ my $query=shift;
 print $query->header;
 my $message="under construction";
 $message="Not authenticated and the interface is submission only" if ($err==2);
-#$message="Mea culpa, I did something wrong, flame and burn my creator" if ($err==3);
 print $query->h1("An error has occured because ");
 print $query->h2($message);
-#print a({href=>"http://watson.lsd.ornl.gov/genekeydb/psite/entryform1.htm"},"Go Back");
-#print $query->redirect('http://somewhere.else/in/movie/land');
-
 exit(0);
 }
 

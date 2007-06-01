@@ -35,9 +35,9 @@ my $dbh= pazar->new(
 		     -user          =>    $ENV{PAZAR_adminuser},
 		     -pass          =>    $ENV{PAZAR_adminpass},
 		     -dbname        =>    $ENV{PAZAR_name},
-		     -drv           =>    'mysql');
+		     -drv           =>    $ENV{PAZAR_drv});
 
-my $ens_dbname = 'ensembl_databases';
+my $ens_dbname = $ENV{TALKDB_ENSEMBL_NAME};
 my $ens_dbhost = $ENV{ENS_HOST};
 my $ens_DBUSER = $ENV{ENS_USER};
 my $ens_DBPASS = $ENV{ENS_PASS};

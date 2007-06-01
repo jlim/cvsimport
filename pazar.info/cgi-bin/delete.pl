@@ -8,7 +8,8 @@ my $dbhost = $ENV{PAZAR_host};
 
 my $DBUSER = $ENV{PAZAR_adminuser};
 my $DBPASS = $ENV{PAZAR_adminpass};
-my $DBURL = "DBI:mysql:dbname=$dbname;host=$dbhost";
+my $DBDRV  = $ENV{PAZAR_drv};
+my $DBURL  = "DBI:$DBDRV:dbname=$dbname;host=$dbhost";
 
 my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
     or die "Can't connect to pazar database";
