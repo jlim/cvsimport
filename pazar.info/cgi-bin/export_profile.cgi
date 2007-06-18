@@ -112,7 +112,7 @@ COLNAMES
 
 #alter file name by adding random number with current time as seed
 		srand(time() ^ ($$ + ($$ << 15) ) );
-		my $randnum = substr(rand() * 100,3);
+		my $randnum = substr(rand() * 10,3);
 		my $logo = $acc.$randnum;
 		my $gd_image = $pfm->draw_logo(-file=>$pazarhtdocspath.'/tmp/precomputed/'.$logo.'.png', -xsize=>130);
 		my $gd_image2 = $pfm->draw_logo(-file=>$pazarhtdocspath.'/tmp/precomputed/'.$logo.'_400.png', -xsize=>400);

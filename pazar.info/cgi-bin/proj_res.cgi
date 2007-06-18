@@ -823,13 +823,16 @@ sub print_tf_attr {
 		      1 => "#FFB5AF"
 		      );
 	my $count=0;
-	$tfname=~s/\//-/g;
-	my $file="$pazarhtdocspath/tmp/".$tfname.".fa";
-	open (TMP, ">$file");
+#	$tfname=~s/\//-/g;
+#	my $file="$pazarhtdocspath/tmp/".$tfname.".fa";
+#	open (TMP, ">$file");
 
-	print "<input type='hidden' name='accn' value='$tfname'>\n";
+#	print "<input type='hidden' name='accn' value='$tfname'>\n";
 	
 	my $pazartfid=write_pazarid($complex->dbid,'TF');
+
+	my $file="$pazarhtdocspath/tmp/".$pazartfid.".fa";
+	open (TMP, ">$file");
 
 	my @classes = ();
 	my @families = ();
@@ -938,7 +941,7 @@ COLNAMES2
 	    }
 	    print "</tr>";
 	    $count++;
-	    my $construct_name=$tfname."_site".$count;
+	    my $construct_name=$pazartfid."_site".$count;
 	    print TMP ">".$construct_name."\n";
 	    print TMP $site->get_seq."\n";
 	    $bg_color = 1 - $bg_color;
@@ -968,7 +971,7 @@ COLNAMES2
 		$prettystring =~ s/ /\&nbsp\;/g;
 		print "<br><table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td ><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
-		my $logo = $tfname.".png";
+		my $logo = $pazartfid.".png";
 		my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
 		print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$logo\">";
 		print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>";
