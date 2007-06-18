@@ -14,10 +14,10 @@ my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 my $get = new CGI;
 my %param = %{$get->Vars};
-foreach my $ac ($get->param('accn')) {
-	push @accns, $ac;
-    }
-my $accn = join('_',@accns);
+# foreach my $ac ($get->param('accn')) {
+# 	push @accns, $ac;
+#     }
+# my $accn = join('_',@accns);
 
 #initialize the html page
 print $get->header("text/html");
@@ -31,9 +31,10 @@ my $count=0;
 srand(time() ^ ($$ + ($$ << 15) ) );
 my $randnum = substr(rand() * 100,3);
 
-my $newaccn = $accn.$randnum;
+#my $newaccn = $accn.$randnum;
 #print "using randum number for filename: $randnum";
-    my $file="$pazarhtdocspath/tmp/".$newaccn.".fa";
+#    my $file="$pazarhtdocspath/tmp/".$newaccn.".fa";
+    my $file="$pazarhtdocspath/tmp/".$randnum.".fa";
     open (TMP, ">$file");
 
 ##########
@@ -72,10 +73,11 @@ if ($count<2) {
 	my @matrixlines = split /\n/, $prettystring;
 	$prettystring = join "<BR>\n", @matrixlines;
 	$prettystring =~ s/ /\&nbsp\;/g;
-	print $get->h3("Custom Profile for TF $accn");
+	print $get->h3("Custom Profile");
 	print "<span style=\"font-size: 14pt;\"><b>Position Frequency Matrix:</b></span><br><br><SPAN style=\"font-size: 11pt;font-family: monospace;\">$prettystring</SPAN><br>";
 #draw the logo
-	my $logo = $newaccn.".png";
+#	my $logo = $newaccn.".png";
+	my $logo = $randnum.".png";
 	my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
 	print "<br><p style=\"font-size: 14pt;\"><b>Logo:</b><br><img src=\"$pazar_html/tmp/$logo\"></p>";
 	print "<p style=\"font-size: 10pt;\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p>";

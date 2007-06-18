@@ -309,9 +309,9 @@ HEADER_TABLE
 	    my $tfproj=$dbh->get_project_name('funct_tf',$tfid);
 	    my $tf_name=$complex->name;
 	    my $pazartfid=write_pazarid($tfid,'TF');
-	    my $tfname_s=$tf_name;
-	    $tfname_s=~s/\//-/g;
-	    print "<input type='hidden' name='accn' value='$tfname_s'";
+# 	    my $tfname_s=$tf_name;
+# 	    $tfname_s=~s/\//-/g;
+# 	    print "<input type='hidden' name='accn' value='$tfname_s'";
 	    my $file="$pazarhtdocspath/tmp/".$pazartfid.".fa";
 	    open (TMP, ">$file");
 
@@ -451,9 +451,7 @@ COLNAMES2
 		    $prettystring =~ s/ /\&nbsp\;/g;
 		    print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
-		    my $accn_s=$accn;
-		    $accn_s=~s/\//-/g;
-		    my $logo = $accn_s.".png";
+		    my $logo = $pazartfid.".png";
 		    my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
 		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$logo\">";
 		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
