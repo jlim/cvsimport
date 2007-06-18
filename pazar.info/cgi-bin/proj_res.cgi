@@ -451,7 +451,7 @@ COLNAMES
     print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates</span></td>";
-    print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display</span></td>";
+    print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
     print "</tr>";
 
                 $prev_gene_accn = $gene_accn;
@@ -867,7 +867,7 @@ COLNAMES2
 	print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span></td>";
 	print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
 	print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
-	print "<td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display</span></td>";
+	print "<td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
 	print "</tr>";
 
 	if (!$complex->{targets}) {
