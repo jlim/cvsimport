@@ -425,7 +425,9 @@ COLNAMES2
 
 		my $construct_name=$cor_accn."_site".$count;
 		print TMP ">".$construct_name."\n";
-		print TMP $site->get_seq."\n";
+		my $construct_seq=$site->get_seq;
+		$construct_seq=~s/N//ig;
+		print TMP $construct_seq."\n";
                 $bg_color = 1 - $bg_color;
             }
 	    print "</table><br>";

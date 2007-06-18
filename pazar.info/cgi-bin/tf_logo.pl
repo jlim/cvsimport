@@ -49,7 +49,9 @@ while (@keys)
     {	
 		$count++;
 		print TMP ">".$key."\n";
-		print TMP $param{$key}."\n";
+		my $construct_seq=$param{$key};
+		$construct_seq=~s/N//ig;
+		print TMP $construct_seq."\n";
 	    }
 }
     close (TMP);
