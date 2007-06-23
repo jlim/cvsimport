@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>PAZAR input/ouput system</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+
+<body>
+<h1>Input/ouput system description</h1>
+<p><br />
+  Inputs can be an entry in the following tables:<br />
+  reg_seq<br />
+  tf_complex<br />
+  condition<br />
+  sample<br />
+  cell<br />
+  matrix<br />
+  construct</p>
+<p><br />
+  Outputs can be an entry in any of the following tables:<br />
+  expression<br />
+  interaction<br />
+  <br />
+  T hen it all depends on what type of relationship we have:<br />
+</p>
+<p>1. If there is one-to-one:<br />
+  reg_seq drives the expression:<br />
+  reg_seq- input_id<br />
+  expression - output_id<br />
+  then we link through i/o link system:<br />
+  input_id is inserted in analysis_i_link<br />
+  output_id is inserted in analysis_o_link<br />
+  now the new analysis_i_link_id and analysis_o_link_id are stored in the <br />
+  new records in analysis_o_link and analysis_i_link tables accordingly.<br />
+  <br />
+  2. However if we have one to many:<br />
+  reg_seq-input_id<br />
+  tf_complex-input<br />
+  interaction-output_id<br />
+  then we do the same thing, except that analysis_i_link_id is not stored <br />
+  in analysis_o_link table.</p>
+<h3>Here is a flowchart explaining the process of storing and querying data.</h3>
+<p><img src="images/iolink.jpg" width="1181" height="1014" /></p>
+</body>
+</html>
