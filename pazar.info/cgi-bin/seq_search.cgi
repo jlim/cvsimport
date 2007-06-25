@@ -132,7 +132,10 @@ unless ($regid) {
     $regid=$params{geneID};
     $regid=~s/^\D+0*//;
 }
-
+unless ($regid) {
+	print "<span class=\"err\" style=\"color:red; font-size:medium\">Access denied</span>";
+	exit;
+}
 #check if access is authorized
 my $projstat=&select($dbh, "SELECT b.project_name,b.status FROM reg_seq a,project b WHERE a.reg_seq_id=$regid AND a.project_id=b.project_id");
 my @res = $projstat->fetchrow_array;
