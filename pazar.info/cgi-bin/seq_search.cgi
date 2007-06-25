@@ -506,7 +506,7 @@ sub select {
 
     my ($dbh, $sql) = @_;
     my $sth=$dbh->prepare($sql);
-    $sth->execute or die "$dbh->errstr\n";
+    $sth->execute or die DBI->errstr . ": full sql: $sql";
     return $sth;
 }
 
