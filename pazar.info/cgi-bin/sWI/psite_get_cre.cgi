@@ -96,7 +96,7 @@ exit(0);
 }
 
 sub getseq {
-my ($chr,$begin,$end)=@_;
+my ($ensdb,$chr,$begin,$end)=@_;
 my $sadapt=$ensdb->get_ens_adaptor;
 my $adapt=$sadapt->get_SliceAdaptor();
 my $slice = $adapt->fetch_by_region('chromosome',$chr,$begin,$end);
@@ -171,7 +171,7 @@ sub check_seq {
 	print $query->h3("Your gene $accn is not from the selected organism $params{organism}!");
 	exit;
     }
-    my $seq=&getseq($chr,$params{start},$params{end});
+    my $seq=&getseq($ensdb,$chr,$params{start},$params{end});
     my $strand;
     if ($params{sequence} && $params{sequence} ne '') {
 	my $element=$params{sequence};
