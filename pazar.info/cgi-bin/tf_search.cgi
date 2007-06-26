@@ -490,7 +490,7 @@ COLNAMES2
 	    } else {
 	    	#Ajax call, no callback func defined for now
 	    	print "<input type='button' name='Generate PFM' value='Generate PFM' onclick=\"cuteGet('','Summary'".$tf_name."','memediv".$tf_name."')\">
-	    		<div id='memediv' name='memediv".$tf_name'"'";
+	    		<div id='memediv' name='memediv".$tf_name."'>";
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 						-binary => 'meme',
