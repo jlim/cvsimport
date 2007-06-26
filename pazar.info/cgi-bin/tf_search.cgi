@@ -29,7 +29,20 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => 'PAZAR TF View');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
+
+ 
 $template->param(JAVASCRIPT_FUNCTION => qq{
+document.getElementsByClassName = function(cl) {
+var retnode = [];
+var myclass = new RegExp('\\b'+cl+'\\b');
+var elem = this.getElementsByTagName('*');
+for (var i = 0; i < elem.length; i++) {
+var classes = elem[i].className;
+if (myclass.test(classes)) retnode.push(elem[i]);
+}
+return retnode;
+};
+
 function setCount(target){
 
 if(target == 0) 
@@ -55,8 +68,6 @@ function verifyCheckedBoxes() {
     var counter;
     
     // iterate through sequenceform elements
-
-
     for(counter=0;counter<document.sequenceform.length;counter++)
     {
 	if (document.sequenceform.elements[counter].checked)
@@ -73,8 +84,44 @@ function verifyCheckedBoxes() {
 	window.open('about:blank','logowin', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
 	document.sequenceform.submit();
     }
+  }
 
-        }});
+function selectallseq (tableId) {
+	tableObj=xGetElementById(tableId);
+	var tbody=tableObj.getElementsByTagName('tbody');
+	var trs = tbody[0].getElementsByTagName('tr');
+	for (x=1; x<trs.length; x++) {
+					tds=trs[x].getElementsByTagName('td');
+					cb=tds[0].firstChild.firstChild;
+					cb.checked=true;
+			}
+}
+
+function resetallseq (tableId) {
+	tableObj=xGetElementById(tableId);
+	var tbody=tableObj.getElementsByTagName('tbody');
+	var trs = tbody[0].getElementsByTagName('tr');
+	for (x=1; x<trs.length; x++) {
+					tds=trs[x].getElementsByTagName('td');
+					cb=tds[0].firstChild.firstChild;
+					cb.checked=false;
+			}
+}
+
+function selectbytype (tableId,target) {
+	tableObj=xGetElementById(tableId);
+	var tbody=tableObj.getElementsByTagName('tbody');
+	var trs = tbody[0].getElementsByTagName('tr');
+	for (x=1; x<trs.length; x++) {
+		if (trs[x].className==target) {
+			tds=trs[x].getElementsByTagName('td');
+			cb=tds[0].firstChild.firstChild;
+			cb.checked=true;
+		}
+	}
+}
+}
+	);
 
 if($loggedin eq 'true')
 {
@@ -355,7 +402,11 @@ COLNAMES
 
 ########### start of HTML table
 print<<COLNAMES2;	    
-		<table class="evidencetableborder"><tr>
+<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$tf_name');">
+<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$tf_name','genomic');">
+<input type="button" name="selecttype2" id="selecttype2" value="Select constructs" onclick="selectbytype('SummaryTable$tf_name','construct');">
+<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$tf_name');">
+		<table id="SummaryTable$tf_name" class="evidencetableborder"><tr>
 		    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
 		    
 COLNAMES2
@@ -396,7 +447,7 @@ COLNAMES2
 		    $count++;
 		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
 
-		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
+		    print "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
 		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
 		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
 		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
@@ -414,7 +465,7 @@ COLNAMES2
 		    my $desc=$site->get_desc||'-';
 		    $seqcounter++;
 		    $count++;
-		    print "<tr><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
+		    print "<tr class=\"construct\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
 		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>".$id."</b><br>$seqname</div></td>";
 		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
 		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
@@ -437,6 +488,9 @@ COLNAMES2
 		print "<span class='red'>There are not enough targets to build a binding profile for this TF!</span><br><br><br><br>\n";
 		next;
 	    } else {
+	    	#Ajax call, no callback func defined for now
+	    	print "<input type='button' name='Generate PFM' value='Generate PFM' onclick=\"cuteGet('','Summary'".$tf_name."','memediv".$tf_name."')\">
+	    		<div id='memediv' name='memediv".$tf_name'"'";
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 						-binary => 'meme',
