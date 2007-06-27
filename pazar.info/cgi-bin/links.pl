@@ -1,44 +1,27 @@
 #!/usr/local/bin/perl
-use DBI;
-use Crypt::Imail;
-use CGI qw( :all);
+
 use HTML::Template;
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
-require "$pazarcgipath/getsession.pl";
-
-my $query=new CGI;
-
 # open the html header template
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR Login');
+$template->param(TITLE => 'PAZAR Links');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
 
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
-print<<Page_Done;
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
+print<<Page;
+          <p class="title1">PAZAR - Links</p>
+<p class="title2">Regulatory Datasets</p>
 
-  
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
-
-  
-  <title>PAZAR weblinks page</title>
-</head>
-
-
-<body>
-
-<table style="text-align: left; width: 891px;" border="1" cellpadding="2" cellspacing="2">
+<table class='summarytable'>
 
   <tbody>
 
@@ -546,11 +529,10 @@ the community through EDGEdb (elegans differential gene expression data)</td>
   </tbody>
 </table>
 
-<br>
-For additional useful links see also <span class="nobr"><a href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104" mce_href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104" rel="nofollow" linktype="raw" linktext="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104">http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104</a></span>
-</body>
-</html>
-Page_Done
+<br><br>
+For additional useful links see also <a href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104">http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104</a>
+
+Page
 
 
 # print out the html tail template

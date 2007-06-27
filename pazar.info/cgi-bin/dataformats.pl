@@ -10,7 +10,7 @@ my $pazarcgipath = $ENV{PAZARCGIPATH};
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR GFF format');
+$template->param(TITLE => 'PAZAR Data Formats');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
 
@@ -18,7 +18,7 @@ $template->param(PAZAR_CGI => $pazar_cgi);
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
-          <p class="title1">PAZAR Data Formats</p>
+          <p class="title1">PAZAR - Data Formats</p>
 <p class="title2"><a href="GFF.pl">PAZAR GFF format</a></p>
 <p>PAZAR GFF format is intended to capture simple annotations. It is not meant to record a detailed annotation. Please use the XML format if you want more options.
 

@@ -10,7 +10,7 @@ my $pazarcgipath = $ENV{PAZARCGIPATH};
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 
 # fill in template parameters
-$template->param(TITLE => 'PAZAR FAQ');
+$template->param(TITLE => 'PAZAR Help');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
 
