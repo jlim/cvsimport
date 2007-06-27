@@ -521,7 +521,8 @@ COLNAMES2
 	    } else {
 	    	#Ajax call, no callback func defined for now
 	    	print "<input type='button' name='Generate PFM' value='Generate PFM' onclick=\"ajaxcall('SummaryTable".$tf_name."','memediv".$tf_name."')\">
-	    		<div id='memediv".$tf_name."' name='memediv".$tf_name."'>";
+	    		<div id='memediv".$tf_name."' name='memediv".$tf_name."'>Not generated</div>";
+=non-ajax
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 						-binary => 'meme',
@@ -545,6 +546,7 @@ COLNAMES2
 		    print "</table><br><br><br><br>\n";
 ########### end of HTML table
 		}
+=cut
 	    }
 	}
     }
