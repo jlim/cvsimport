@@ -5,6 +5,8 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Data::Dumper;
 
 my $cgi=new CGI;
+my $pazarhtdocspath=$ENV{PAZARHTDOCSPATH};
+my $pazar_html=$ENV{PAZAR_HTML};
 print "Content-Type: text/html\n\n";
 my @seq=$cgi->param('seq');
 my $allseq=join("\n",@seq);
@@ -35,9 +37,10 @@ close SEQ;
 		    $prettystring =~ s/ /\&nbsp\;/g;
 		    print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
-		    my $logo = $fn . ".png";
-		    my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
-		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$logo\">";
+		    my $logo =$pazarhtdocspath . '/tmp/' . $fn . '.png';
+warn "LOGO $logo";
+		    my $gd_image = $pfm->draw_logo(-file=>$logo, -xsize=>400);
+		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$fn\.png\">";
 		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
 		    print "</table><br><br><br><br>\n";
 }
