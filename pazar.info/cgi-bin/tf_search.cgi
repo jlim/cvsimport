@@ -32,6 +32,37 @@ $template->param(PAZAR_CGI => $pazar_cgi);
 
  
 $template->param(JAVASCRIPT_FUNCTION => qq{
+function ajaxcall (tableId,divTarget) {
+    divObj=xGetElementById(divTarget);
+   divObj.innerHTML='Generating PFM, please wait...';
+var http = false;
+tableObj=xGetElementById(tableId);
+	var tbody=tableObj.getElementsByTagName('tbody');
+	var trs = tbody[0].getElementsByTagName('tr');
+	args='caller=tfsearch';
+	for (x=1; x<trs.length; x++) {
+					tds=trs[x].getElementsByTagName('td');
+					cb=tds[0].firstChild.firstChild;
+					if (cb.checked==true) {
+						args+="&seq="+cb.value;
+					}
+			}
+if(navigator.appName == "Microsoft Internet Explorer") {
+  http = new ActiveXObject("Microsoft.XMLHTTP");
+} else {
+  http = new XMLHttpRequest();
+}
+
+http.open("GET", "meme_call.pl?"+args,true);
+http.onreadystatechange=function() {
+  if(http.readyState == 4) {
+    divObj.innerHTML=http.responseText;
+  }
+}
+http.send(null);
+}
+
+
 document.getElementsByClassName = function(cl) {
 var retnode = [];
 var myclass = new RegExp('\\b'+cl+'\\b');
@@ -489,8 +520,8 @@ COLNAMES2
 		next;
 	    } else {
 	    	#Ajax call, no callback func defined for now
-	    	print "<input type='button' name='Generate PFM' value='Generate PFM' onclick=\"cuteGet('','Summary'".$tf_name."','memediv".$tf_name."')\">
-	    		<div id='memediv' name='memediv".$tf_name."'>";
+	    	print "<input type='button' name='Generate PFM' value='Generate PFM' onclick=\"ajaxcall('SummaryTable".$tf_name."','memediv".$tf_name."')\">
+	    		<div id='memediv".$tf_name."' name='memediv".$tf_name."'>";
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
 						-binary => 'meme',
