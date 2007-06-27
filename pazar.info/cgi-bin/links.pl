@@ -485,9 +485,9 @@ the community through EDGEdb (elegans differential gene expression data)</td>
 
     <tr>
 
-      <td>TRANSFAC</td>
+      <td class='basictd' style="width: 98px;">TRANSFAC</td>
 
-      <td>eukaryotic transcription factors and their binding profiles</td>
+      <td class='basictd' style="width: 406px;">eukaryotic transcription factors and their binding profiles</td>
 
       <td class='basictd' style="width: 361px;"><a href="http://www.gene-regulation.de/" mce_href="http://www.gene-regulation.de/" rel="nofollow" linktype="raw" linktext="http://www.gene-regulation.de/">http://www.gene-regulation.de/</a><br>
 
@@ -497,9 +497,9 @@ the community through EDGEdb (elegans differential gene expression data)</td>
 
     <tr>
 
-      <td>TRED</td>
+      <td class='basictd' style="width: 98px;">TRED</td>
 
-      <td>Transcriptional Regulatory Element Database</td>
+      <td class='basictd' style="width: 406px;">Transcriptional Regulatory Element Database</td>
 
       <td class='basictd' style="width: 361px;"><a href="http://rulai.cshl.edu/cgi-bin/TRED/tred.cgi?process=home" mce_href="http://rulai.cshl.edu/cgi-bin/TRED/tred.cgi?process=home" rel="nofollow" linktype="raw" linktext="http://rulai.cshl.edu/cgi-bin/TRED/tred.cgi?process=home">http://rulai.cshl.edu/cgi-bin/TRED/tred.cgi?process=home</a></td>
 
@@ -507,9 +507,9 @@ the community through EDGEdb (elegans differential gene expression data)</td>
 
     <tr>
 
-      <td>TRRD</td>
+      <td class='basictd' style="width: 98px;">TRRD</td>
 
-      <td>Transcription Regulatory Regions Db</td>
+      <td class='basictd' style="width: 406px;">Transcription Regulatory Regions Db</td>
 
       <td class='basictd' style="width: 361px;"><a href="http://wwwmgs.bionet.nsc.ru/mgs/gnw/trrd/" mce_href="http://wwwmgs.bionet.nsc.ru/mgs/gnw/trrd/" rel="nofollow" linktype="raw" linktext="http://wwwmgs.bionet.nsc.ru/mgs/gnw/trrd/">http://wwwmgs.bionet.nsc.ru/mgs/gnw/trrd/</a></td>
 
@@ -517,9 +517,9 @@ the community through EDGEdb (elegans differential gene expression data)</td>
 
     <tr>
 
-      <td><font style="color: rgb(0, 0, 0);" color="#ff0033">VISTA Enhancer Browser</font>&nbsp;</td>
+      <td class='basictd' style="width: 98px;">VISTA Enhancer Browser</td>
 
-      <td>A&nbsp;database of tissue-specific human enhancers.</td>
+      <td class='basictd' style="width: 406px;">A database of tissue-specific human enhancers.</td>
 
       <td class='basictd' style="width: 361px;"><a href="http://enhancer.lbl.gov/" mce_href="http://enhancer.lbl.gov" rel="nofollow" linktype="raw" linktext="http://enhancer.lbl.gov">http://enhancer.lbl.gov</a></td>
 
