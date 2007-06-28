@@ -84,9 +84,9 @@ print<<page;
       <td colspan="2">
 <p > Please enter a &nbsp;
       <select name="ID_list" id="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option selected="selected" value="GeneName">User Defined Gene Name</option>
+      <option value="EnsEMBL_gene">EnsEMBL gene ID</option>
       <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
-      <option value="GeneName">User Defined Gene Name</option>
       <option value="EntrezGene">Entrezgene ID</option>
       <option value="nm">RefSeq ID</option>
       <option value="swissprot">Swissprot ID</option>
@@ -198,8 +198,8 @@ my $seqstr=chopstr($reg_seq->seq,115)||'-';
 #print header
 
 print<<HEADER_TABLE;
-<p class="title2">Search Result Details</p>
 <table><tr><td>
+<span class="title2">Gene Details</span><br>
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
@@ -207,7 +207,9 @@ print<<HEADER_TABLE;
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene_accession</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
 <tr><td class="genetabletitle"><span class="title4">Project</span></td><td class="basictd">$res[0]</td></tr>
-</table></td></tr><tr><td><table class="evidencetableborder">
+</table></td></tr>
+<tr><td><span class="title2">Sequence Details</span><br>
+<table class="evidencetableborder">
 <tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence Name</span></td><td class="basictd">$seqname</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence</span></td><td class="basictd"><div style="font-family:monospace;height:62; overflow:auto;">$seqstr</div></td></tr>
@@ -217,7 +219,7 @@ print<<HEADER_TABLE;
 <tr><td class="seqtabletitle"><span class="title4">Quality</span></td><td class="basictd">$quality</td></tr>
 HEADER_TABLE
 
-print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr></table><br><br></td></tr>";
+print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr></table><br><br></td></tr>";
 
 
 

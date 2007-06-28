@@ -169,7 +169,7 @@ print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_
 foreach my $gene_data (@sorted) {
 
 print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{species}</td>";
-print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\"><a href=\"#$gene_data->{accn}\" onClick=\"javascript:window.opener.document.gene_search.geneID.value='$gene_data->{accn}';window.opener.document.gene_search.ID_list.options[0].selected=true;window.opener.focus();window.close();\">$gene_data->{ID}</a></td>";
+print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\"><a href=\"#$gene_data->{accn}\" onClick=\"javascript:window.opener.document.gene_search.geneID.value='$gene_data->{accn}';window.opener.document.gene_search.ID_list.options[1].selected=true;window.opener.focus();window.close();\">$gene_data->{ID}</a></td>";
 print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\">$gene_data->{desc}</td>";
 print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\">$gene_data->{accn}</td>";
 print "<td class='basictd' width='120' bgcolor=\"$colors{$bg_color}\">$gene_data->{ens_desc}</td>";

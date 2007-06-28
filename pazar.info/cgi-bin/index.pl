@@ -23,6 +23,13 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => 'PAZAR Mall');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(JAVASCRIPT_FUNCTION => q{
+function showHide(inputID) {
+	theObj = document.getElementById(inputID)
+	theDisp = theObj.style.display == 'none' ? 'block' : 'none'
+	theObj.style.display = theDisp
+}
+});
 
 if($loggedin eq 'true')
 {
@@ -264,7 +271,8 @@ while (50<=$i&&$i<60) {
                  
 print<<page;
 <table border="0" cellpadding="0" cellspacing="0" width="550">
-<tbody><tr><td style="text-align:justify"><b>WELCOME TO PAZAR MALL!</b><br>
+<tbody><tr><td style="text-align:justify"><b>WELCOME TO PAZAR MALL!</b>&nbsp&nbsp&nbsp<a href="#" onclick = "showHide('details');"><small>Learn More</small></a><br>
+<div id="details" style='display:none'>
 PAZAR can be searched by <a href="$pazar_cgi/gene_search.cgi">Gene</a>, <a href="$pazar_cgi/tf_search.cgi">Transcription Factor</a> or <a href="$pazar_cgi/profilesearch.pl">Profile</a> by clicking on one of the department stores below.<br>
 Each project in PAZAR is a boutique in the mall. You can limit your search to a specific project by clicking on the corresponding boutique on the mall map.<br>
 If you own restricted projects, log in and they will appear in the mall map. If you just created a project and it does not appear on the mall map, please log out and log in again.</td></tr></tbody></table>

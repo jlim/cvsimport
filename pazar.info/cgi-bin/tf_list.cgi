@@ -172,7 +172,7 @@ my $classes=join('<br>',@{$tf_data->{class}});
 my $accns=join('<br>',@{$tf_data->{accn}});
 my $spec=join('<br>',@{$tf_data->{species}});
 print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$spec</td>";
-print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\"><a href=\"#$tf_data->{tfname}\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{tfname}';window.opener.document.tf_search.ID_list.options[2].selected=true;window.opener.focus();window.close();\">$tf_data->{ID}</a></td>";
+print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\"><a href=\"#$tf_data->{tfname}\" onClick=\"javascript:window.opener.document.tf_search.geneID.value='$tf_data->{tfname}';window.opener.document.tf_search.ID_list.options[0].selected=true;window.opener.focus();window.close();\">$tf_data->{ID}</a></td>";
 print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\">$tf_data->{tfname}</td>";
 print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\">$accns</td>";
 print "<td class='basictd' width='120' bgcolor=\"$colors{$bg_color}\">$classes</td>";

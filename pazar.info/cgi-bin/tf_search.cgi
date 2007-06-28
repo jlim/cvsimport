@@ -181,9 +181,9 @@ print<<page;
       <td colspan="2">
 <p > Please enter a &nbsp;
       <select name="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option selected="selected" value="tf_name">User Defined TF name</option>
+      <option value="EnsEMBL_gene">EnsEMBL gene ID</option>
       <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
-      <option value="tf_name">User Defined TF name</option>
       <option value="EntrezGene">Entrezgene ID</option>
       <option value="nm">RefSeq ID</option>
       <option value="swissprot">Swissprot ID</option>
@@ -321,7 +321,7 @@ if ($accn) {
 
 print<<SUMMARY_HEADER;
 <a name='top'></a>
-<p class="title2">Search Result Summary</p>
+<p class="title2">Summary</p>
 <table width='700' class='summarytable'><tr>
 <td class='tftabletitle' width='100'>Species</td>
 <td class='tftabletitle' width='100'>PAZAR TF ID</td>
@@ -365,7 +365,7 @@ my %colors = (0 => "#fffff0",
 	    my $trclasses=join('<br>',@classes);
 
 	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$species</td>";
-	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><a href='#$pazartfid'>$pazartfid</a></td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$pazartfid&nbsp&nbsp<a href='#$pazartfid'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$tf_name</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$traccns</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$trclasses</td>";
@@ -376,7 +376,7 @@ my %colors = (0 => "#fffff0",
 	}
 
 print<<HEADER_TABLE;
-</table><br><hr color='black'><p class="title2">Search Result Details TF by TF</p>
+</table><br><hr color='black'><p class="title2">Details TF-by-TF</p>
 HEADER_TABLE
 
 	foreach my $complex (@tfcomplexes) {
@@ -433,16 +433,12 @@ COLNAMES
 
 ########### start of HTML table
 print<<COLNAMES2;	    
-<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$tf_name');">
-<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$tf_name','genomic');">
-<input type="button" name="selecttype2" id="selecttype2" value="Select constructs" onclick="selectbytype('SummaryTable$tf_name','construct');">
-<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$tf_name');">
-		<table id="SummaryTable$tf_name" class="evidencetableborder"><tr>
-		    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
+<table id="SummaryTable$tf_name" class="evidencetableborder"><tr>
+<td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
 		    
 COLNAMES2
     print "<td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>";
-    print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span></td>";
+    print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>";
     print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
     print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
     print "<td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
@@ -483,8 +479,8 @@ COLNAMES2
 		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
 		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
 		    print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
-			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png'></a><br><br>";
-			print "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif'></a>";
+			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><br><br>";
+			print "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a>";
 			print "</div></td>";
 		}
 		if ($type eq 'construct') {
@@ -513,6 +509,14 @@ COLNAMES2
                 $bg_color = 1 - $bg_color;
             }
 	    print "</table><br>";
+
+print<<Select_buttons;
+<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$tf_name');">
+<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$tf_name','genomic');">
+<input type="button" name="selecttype2" id="selecttype2" value="Select constructs" onclick="selectbytype('SummaryTable$tf_name','construct');">
+<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$tf_name');"><br><br>
+Select_buttons
+
 	    close (TMP);
 
 	    if ($count<2) {
@@ -520,8 +524,9 @@ COLNAMES2
 		next;
 	    } else {
 	    	#Ajax call, no callback func defined for now
-	    	print "<input type='button' name='Generate PFM' value='Generate PFM' onclick=\"ajaxcall('SummaryTable".$tf_name."','memediv".$tf_name."')\">
-	    		<div id='memediv".$tf_name."' name='memediv".$tf_name."'>Not generated</div>";
+	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$tf_name."','memediv".$tf_name."')\"><br><br>
+	    		<div id='memediv".$tf_name."' name='memediv".$tf_name."'>Not generated</div><br><br>";
+
 =non-ajax
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",

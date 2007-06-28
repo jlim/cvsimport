@@ -84,9 +84,9 @@ print<<page;
       <td colspan="2">
 <p > Please enter a &nbsp;
       <select name="ID_list" id="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option selected="selected" value="GeneName">User Defined Gene Name</option>
+      <option value="EnsEMBL_gene">EnsEMBL gene ID</option>
       <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
-      <option value="GeneName">User Defined Gene Name</option>
       <option value="EntrezGene">Entrezgene ID</option>
       <option value="nm">RefSeq ID</option>
       <option value="swissprot">Swissprot ID</option>
@@ -224,7 +224,7 @@ if ($accn) {
 
 print<<SUMMARY_HEADER;
 <a name='top'></a>
-      <p class="title2">Search Result Summary</p>
+      <p class="title2">Summary</p>
 <table width='700' class='summarytable'><tr>
 <td class='genedetailstabletitle' width='100'>Species</td>
 <td class='genedetailstabletitle' width='100'>PAZAR Gene ID</td>
@@ -236,7 +236,7 @@ SUMMARY_HEADER
 
     foreach my $gene_data (@gene_info) {
 	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{species}</td>";
-	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><a href='#$gene_data->{ID}'>$gene_data->{ID}</a></td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{ID}&nbsp&nbsp<a href='#$gene_data->{ID}'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{desc}</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$gene_data->{accn}</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$gene_data->{ens_desc}</td>";
@@ -245,7 +245,7 @@ SUMMARY_HEADER
 
 	$bg_color =  1 - $bg_color;
     }
-    print "</table><br><hr color='black'><p class=\"title2\">Search Result Details Gene by Gene</p>";
+    print "</table><br><hr color='black'><p class=\"title2\">Details Gene-by-Gene</p>";
     
     my $regseq_counter = 0; # counter for naming forms
     foreach my $gene_data (@gene_info) {
@@ -308,7 +308,7 @@ HEADER_TABLE
 
 		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
 		print "</tr>";
 		$bg_color =  1 - $bg_color;
 	    }

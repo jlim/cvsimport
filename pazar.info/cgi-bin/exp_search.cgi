@@ -84,9 +84,9 @@ print<<page;
       <td colspan="2">
 <p > Please enter a &nbsp;
       <select name="ID_list" id="ID_list">
-      <option selected="selected" value="EnsEMBL_gene">EnsEMBL gene ID</option>
+      <option selected="selected" value="GeneName">User Defined Gene Name</option>
+      <option value="EnsEMBL_gene">EnsEMBL gene ID</option>
       <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
-      <option value="GeneName">User Defined Gene Name</option>
       <option value="EntrezGene">Entrezgene ID</option>
       <option value="nm">RefSeq ID</option>
       <option value="swissprot">Swissprot ID</option>
@@ -198,7 +198,6 @@ unless ($user[0]||$user[1]) {
 #print header
 
 print<<HEADER_TABLE;
-<p class="title2">Search Result Details</p>
 <table class="summarytable">
 <tr><td class="analysistabletitle"><span class="title4">Analysis ID</span></td><form name='intdetails' method='post' action="$pazar_cgi/exp_search.cgi" enctype='multipart/form-data'><input type='hidden' name='aid' value="$params{aid}"><td class="basictd"><input type="submit" class="submitLink" value="$pazaranid"></td></form></tr>
 <tr><td class="analysistabletitle"><span class="title4">Analysis Method</span></td><td class="basictd">$met[0]</td></tr>
@@ -252,8 +251,8 @@ my $count=0;
 if ($mode eq 'expression') {
     print "<table class=\"evidencedetailstableborder\"><tr>";
     print "<td width='80' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Type</span></td>";
-    print "<td class=\"analysisdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span></td>";
-    print "<td width='150' class=\"analysisdetailstabletitle\"><span class=\"title4\">Gene ID</span></td>";
+    print "<td class=\"analysisdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
+    print "<td width='150' class=\"analysisdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallredbold\">click an ID to enter Gene View</span></td>";
     print "<td width='300' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
     print "<td width='250' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
     print "<td width='100' class=\"analysisdetailstabletitle\"><span class=\"title4\">Expression Level</span></td>";
