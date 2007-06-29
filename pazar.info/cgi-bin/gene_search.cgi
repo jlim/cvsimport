@@ -93,7 +93,7 @@ print<<page;
       <option value="PAZAR_gene">PAZAR Gene ID</option>
       <option value="PAZAR_seq">PAZAR Sequence ID</option>
       </select>
-&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)">&nbsp; <a href='$pazar_html/ID_help.htm' target='helpwin'onClick="window.open('about:blank','helpwin', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=300, width=300');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a><br></p>
+&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)">&nbsp; <a href='$pazar_html/ID_help.htm' target='helpwin'onClick="window.open('about:blank','helpwin', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=650, width=350');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a><br></p>
       </td>
     </tr>
     <tr align="left">
