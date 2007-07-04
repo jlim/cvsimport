@@ -336,7 +336,7 @@ if ($params{reg_type} eq 'reg_seq') {
 #    &forward_args($query,\%params);
     print $query->hidden(-name=>'project',-value=>$params{'project'});
     print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
-    print $query->hidden(-name=>'aid',-value=>$aid);
+    print $query->hidden(-name=>'aid',-value=>$params{aid});
     print $query->hidden(-name=>'regid',-value=>$regid);
     my $conds;
     if (@conds) {

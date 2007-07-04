@@ -20,6 +20,7 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => 'PAZAR submission interface');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(ONLOAD_FUNCTION => 'resetMenu();');
 $template->param(JAVASCRIPT_FUNCTION => q{
 function MM_findObj(n, d) { //v4.01
   var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {

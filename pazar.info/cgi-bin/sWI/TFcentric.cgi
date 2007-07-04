@@ -24,6 +24,7 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => 'TF-centric Submission');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(ONLOAD_FUNCTION => 'resetMenu();');
 $template->param(JAVASCRIPT_FUNCTION => q{
 function ActivateCheckBox ()
 {

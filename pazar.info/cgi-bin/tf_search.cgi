@@ -29,37 +29,91 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => 'PAZAR TF View');
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
-
+$template->param(ONLOAD_FUNCTION => 'init();');
  
 $template->param(JAVASCRIPT_FUNCTION => qq{
-function ajaxcall (tableId,divTarget) {
-    divObj=xGetElementById(divTarget);
+function ajaxcall (tableId,divTarget,all) {
+    var divObj=xGetElementById(divTarget);
    divObj.innerHTML='Generating PFM, please wait...';
 var http = false;
 tableObj=xGetElementById(tableId);
-	var tbody=tableObj.getElementsByTagName('tbody');
-	var trs = tbody[0].getElementsByTagName('tr');
-	args='caller=tfsearch';
-	for (x=1; x<trs.length; x++) {
-					tds=trs[x].getElementsByTagName('td');
-					cb=tds[0].firstChild.firstChild;
-					if (cb.checked==true) {
-						args+="&seq="+cb.value;
-					}
-			}
+sites=0;
+args='caller=tfsearch';
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        if ((cb.checked==true)||(all==1)) {
+                                                args+="&seq="+cb.value;
+						sites++;
+                                        }
+                        }
+if (sites<2) {
+   divObj.innerHTML='<span style="color:red">There are too few sites to build a binding profile for this TF!</span>';
+   return 0;
+}
+
 if(navigator.appName == "Microsoft Internet Explorer") {
   http = new ActiveXObject("Microsoft.XMLHTTP");
 } else {
   http = new XMLHttpRequest();
 }
 
-http.open("GET", "meme_call.pl?"+args,true);
+http.open("POST", "meme_call.pl",true);
+//Send the proper header information along with the request
+http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+http.setRequestHeader("Content-length", args.length);
+http.setRequestHeader("Connection", "close");
 http.onreadystatechange=function() {
   if(http.readyState == 4) {
     divObj.innerHTML=http.responseText;
   }
 }
-http.send(null);
+http.send(args);
+}
+
+
+function multiTF (divTarget) {
+    divObj=xGetElementById(divTarget);
+   divObj.innerHTML='Generating PFM, please wait...';
+var http = false;
+        args='caller=tfsearch';
+var divs=document.getElementsByTagName('div');
+for (i=0; i<divs.length; i++) {
+        if (divs[i].className=='seqTableDiv') {
+                baseName=divs[i].id;
+                baseName=baseName.replace(/desc/,"");
+        tableObj=xGetElementById('SummaryTable'+baseName);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        if (cb.checked==true) {
+                                                args+="&seq="+cb.value;
+                                        }
+                        }
+        }
+}
+
+if(navigator.appName == "Microsoft Internet Explorer") {
+  http = new ActiveXObject("Microsoft.XMLHTTP");
+} else {
+  http = new XMLHttpRequest();
+}
+
+http.open("POST", "meme_call.pl",true);
+//Send the proper header information along with the request
+http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+http.setRequestHeader("Content-length", args.length);
+http.setRequestHeader("Connection", "close");
+http.onreadystatechange=function() {
+  if(http.readyState == 4) {
+    divObj.innerHTML=http.responseText;
+  }
+}
+http.send(args);
 }
 
 
@@ -76,81 +130,99 @@ return retnode;
 
 function setCount(target){
 
-if(target == 0) 
+if(target == 0)
 {
 document.tf_search.action="$pazar_cgi/tf_list.cgi";
 document.tf_search.target="Window1";
 window.open('about:blank','Window1', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
 }
-if(target == 1) 
+if(target == 1)
 {
 document.tf_search.action="$pazar_cgi/tf_search.cgi";
 document.tf_search.target="_self";
 }
-if(target == 2) 
+if(target == 2)
 {
 document.tf_search.action="$pazar_cgi/tfbrowse_alpha.pl";
 document.tf_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
-}}.q{
-function verifyCheckedBoxes() {            
+}
+
+function verifyCheckedBoxes() {
     var numChecked = 0;
     var counter;
-    
+
     // iterate through sequenceform elements
     for(counter=0;counter<document.sequenceform.length;counter++)
     {
-	if (document.sequenceform.elements[counter].checked)
-	{
-	    numChecked++;
-	}
+        if (document.sequenceform.elements[counter].checked)
+        {
+            numChecked++;
+        }
     }
     if (numChecked < 2)
     {
-	alert('You must select at least 2 sequences\nNumber of sequences selected: ' + numChecked);
+        alert('You must select at least 2 sequences. Number of sequences selected: ' + numChecked);
     }
     else
     {
-	window.open('about:blank','logowin', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
-	document.sequenceform.submit();
+        window.open('about:blank','logowin', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
+        document.sequenceform.submit();
     }
   }
 
 function selectallseq (tableId) {
-	tableObj=xGetElementById(tableId);
-	var tbody=tableObj.getElementsByTagName('tbody');
-	var trs = tbody[0].getElementsByTagName('tr');
-	for (x=1; x<trs.length; x++) {
-					tds=trs[x].getElementsByTagName('td');
-					cb=tds[0].firstChild.firstChild;
-					cb.checked=true;
-			}
+        tableObj=xGetElementById(tableId);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        cb.checked=true;
+                        }
 }
 
 function resetallseq (tableId) {
-	tableObj=xGetElementById(tableId);
-	var tbody=tableObj.getElementsByTagName('tbody');
-	var trs = tbody[0].getElementsByTagName('tr');
-	for (x=1; x<trs.length; x++) {
-					tds=trs[x].getElementsByTagName('td');
-					cb=tds[0].firstChild.firstChild;
-					cb.checked=false;
-			}
+        tableObj=xGetElementById(tableId);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        cb.checked=false;
+                        }
 }
 
 function selectbytype (tableId,target) {
-	tableObj=xGetElementById(tableId);
-	var tbody=tableObj.getElementsByTagName('tbody');
-	var trs = tbody[0].getElementsByTagName('tr');
-	for (x=1; x<trs.length; x++) {
-		if (trs[x].className==target) {
-			tds=trs[x].getElementsByTagName('td');
-			cb=tds[0].firstChild.firstChild;
-			cb.checked=true;
-		}
-	}
+        tableObj=xGetElementById(tableId);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                if (trs[x].className==target) {
+                        tds=trs[x].getElementsByTagName('td');
+                        cb=tds[0].firstChild.firstChild;
+                        cb.checked=true;
+                }
+        }
 }
+
+function init () {
+var divs=document.getElementsByTagName('div');
+for (i=0; i<divs.length; i++) {
+        if (divs[i].className=='seqTableDiv') {
+                baseName=divs[i].id;
+                baseName=baseName.replace(/^desc/,"");
+	try {
+                ajaxcall('SummaryTable'+baseName,'memediv'+baseName,1);
+	}
+catch (err) {
+	alert(err);
+}
+        }
+}
+}
+
 }
 	);
 
@@ -189,7 +261,7 @@ print<<page;
       <option value="swissprot">Swissprot ID</option>
       <option value="PAZAR_TF">PAZAR TF ID</option>
 </select>
-&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)"><br></p>
+&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)">&nbsp; <a href='$pazar_html/TFID_help.htm' target='helpwin'onClick="window.open('about:blank','helpwin', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=650, width=350');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a><br></p>
       </td>
     </tr>
     <tr align="left">
@@ -248,7 +320,9 @@ if ($accn) {
 	my $species=$sp->fetchrow_array();
 	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	$ensdb->change_mart_organism($species);
-	@trans=$ensdb->nm_to_enst($accn);
+	my @gene=$ensdb->nm_to_ens($accn);
+	unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
 	unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'swissprot') {
 	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
@@ -256,7 +330,9 @@ if ($accn) {
 	my $species=$sp->fetchrow_array();
 	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	$ensdb->change_mart_organism($species);
-	@trans =$ensdb->swissprot_to_enst($accn);
+	@gene =$ensdb->swissprot_to_ens($accn);
+	unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
 	unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'tf_name') {
 	@trans = ('none');
@@ -267,11 +343,10 @@ if ($accn) {
     my $seqcounter=0;
 ####start of form
     print "<form name='sequenceform' method='post' target='logowin' action='$pazar_cgi/tf_logo.pl'>";
-
+    my @tfcomplexes;
     foreach my $trans (@trans) {
 #	print "you're looking for transcript: ".$trans."\n";
 	my $tf;
-	my @tfcomplexes;
 	if ($trans eq 'none') {
 	    $tf = $dbh->create_tf;
 	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
@@ -282,7 +357,10 @@ if ($accn) {
 	    @tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
         } else {
 	    $tf = $dbh->create_tf;
-	    @tfcomplexes = $tf->get_tfcomplex_by_transcript($trans);
+	    my @tfcomp = $tf->get_tfcomplex_by_transcript($trans);
+	    foreach my $comp (@tfcomp) {
+		push @tfcomplexes, $comp;
+	    }
 	}
 	if ($loggedin eq 'true') {
 	    foreach my $proj (@projids) {
@@ -307,7 +385,7 @@ if ($accn) {
 			my $PZid=$accn;
 			$PZid=~s/^\D+0*//;
 			$tf = $dbh->create_tf;
-			@tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
+			@complexes = $tf->get_tfcomplex_by_id($PZid);
 		    } else {
 			$tf = $dbhandle->create_tf;
 			@complexes = $tf->get_tfcomplex_by_transcript($trans);
@@ -318,6 +396,7 @@ if ($accn) {
 		}
 	    }
 	}
+    }
 
 print<<SUMMARY_HEADER;
 <a name='top'></a>
@@ -365,7 +444,7 @@ my %colors = (0 => "#fffff0",
 	    my $trclasses=join('<br>',@classes);
 
 	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$species</td>";
-	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$pazartfid&nbsp&nbsp<a href='#$pazartfid'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
+	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$pazartfid&nbsp<a href='#$pazartfid'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$tf_name</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$traccns</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$trclasses</td>";
@@ -433,8 +512,9 @@ COLNAMES
 
 ########### start of HTML table
 print<<COLNAMES2;	    
-<table id="SummaryTable$tf_name" class="evidencetableborder"><tr>
-<td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
+<div id="desc$pazartfid" name="desc$pazartfid" class="seqTableDiv">
+<table id="SummaryTable$pazartfid" class="evidencetableborder"><tr>
+    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
 		    
 COLNAMES2
     print "<td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>";
@@ -508,25 +588,25 @@ COLNAMES2
 		print TMP $construct_seq."\n";
                 $bg_color = 1 - $bg_color;
             }
-	    print "</table><br>";
-
+	#Enclose the TF table in DIV
+	    print "</table></div><br>";
+ 
 print<<Select_buttons;
-<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$tf_name');">
-<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$tf_name','genomic');">
-<input type="button" name="selecttype2" id="selecttype2" value="Select constructs" onclick="selectbytype('SummaryTable$tf_name','construct');">
-<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$tf_name');"><br><br>
+<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$pazartfid');">
+<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$pazartfid','genomic');">
+<input type="button" name="selecttype2" id="selecttype2" value="Select artificial sequences" onclick="selectbytype('SummaryTable$pazartfid','construct');">
+<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$pazartfid');"><br><br>
 Select_buttons
-
+ 
 	    close (TMP);
 
 	    if ($count<2) {
-		print "<span class='red'>There are not enough targets to build a binding profile for this TF!</span><br><br><br><br>\n";
+		print "<div id='memediv".$pazartfid."' name='memediv".$pazartfid."'>Cannot be generated</div><br><br><br><br>\n";
 		next;
 	    } else {
 	    	#Ajax call, no callback func defined for now
-	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$tf_name."','memediv".$tf_name."')\"><br><br>
-	    		<div id='memediv".$tf_name."' name='memediv".$tf_name."'>Not generated</div><br><br>";
-
+	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$pazartfid."','memediv".$pazartfid."')\">&nbsp&nbsp(from $pazartfid only; see bottom of the page to combine sequences from multiple TFs)<br><br>
+	    		<div id='memediv".$pazartfid."' name='memediv".$pazartfid."'>Not generated</div><br><br>";
 =non-ajax
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
@@ -554,7 +634,7 @@ Select_buttons
 =cut
 	    }
 	}
-    }
+    
 
     if ($tfcount==0) {
 	print "<h3>There is currently no available annotation for the Transcription Factor $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this TF or any other TF!</h3>";
@@ -562,11 +642,10 @@ Select_buttons
     }
 
 ####hidden form inputs
-    print "<table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
-    print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
-<tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
-    print "</form>";
-####end of form
+    print "<span class=\"title2\">You can recalculate matrix and logo based on all selected sequences on this page (combining multiple TFs)<br>by clicking here&nbsp&nbsp</span>";
+    print "<input type='button' value='Generate PFM' onClick=\"multiTF('allSeqPFM');\"><br>";
+    print "</form>"; ####end of form
+print '<div id="allSeqPFM" name="allSeqPFM"><span class="red">No matrix built yet!</span></div>'; 
 }
 
 # print out the html tail template
