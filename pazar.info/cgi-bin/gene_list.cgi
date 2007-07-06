@@ -56,7 +56,6 @@ if ($loggedin eq 'true') {
 
 my $gh=$dbh->prepare("SELECT * FROM gene_source WHERE project_id=?")||die DBI::errstr;
 my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
-my $reg_seqs=$dbh->prepare("SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id=?")||die DBI::errstr;
 my %gene_project;
 foreach my $project (@desc) {
      $gh->execute($project->{project_id})||die DBI::errstr;
@@ -64,7 +63,6 @@ foreach my $project (@desc) {
 	    my $found=0;
 	    $tsrs->execute($gene->{gene_source_id})||die DBI::errstr;
 		while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
-		     $reg_seqs->execute($tsr->{tsr_id})||die DBI::errstr;
 			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
 			$coords[5]=~s/\[.*\]//g;
 			$coords[5]=~s/\(.*\)//g;

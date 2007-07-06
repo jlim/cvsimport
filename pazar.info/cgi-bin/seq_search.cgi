@@ -279,11 +279,12 @@ foreach my $inter (@interactors) {
 	my $tfid=$inter->{tfcomplex};
 	my $pazartfid=write_pazarid($tfid,'TF');
 	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
-    }
-    if ($inter->{tftype} eq 'sample') {
+    } elsif ($inter->{tftype} eq 'sample') {
 	my @sample=$dbh->get_data_by_primary_key('sample',$inter->{tfcomplex});
 	my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
 	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$sample[0]."&nbsp;".$samplecell[0]."</div></td>";
+    } else {
+	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>UNKNOWN</div></td>";
     }
     
     my ($table,$pazarid,@dat)=$dbh->links_to_data($inter->{olink},'output');
