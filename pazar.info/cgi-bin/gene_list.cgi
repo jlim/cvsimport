@@ -40,7 +40,7 @@ my %colors = (0 => "#fffff0",
 	      1 => "#BDE0DC");
 
 my $projects=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
-
+our %sqlcache;
 my @desc;
 while (my $project=$projects->fetchrow_hashref) {
     push @desc, $project;
@@ -54,17 +54,17 @@ if ($loggedin eq 'true') {
     }
 }
 
+my $gh=$dbh->prepare("SELECT * FROM gene_source WHERE project_id=?")||die DBI::errstr;
+my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
+my $reg_seqs=$dbh->prepare("SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id=?")||die DBI::errstr;
 my %gene_project;
 foreach my $project (@desc) {
-    my $genes = &select($dbh, "SELECT * FROM gene_source WHERE project_id='$project->{project_id}'");
-    if ($genes) {
-	while (my $gene=$genes->fetchrow_hashref) {
+     $gh->execute($project->{project_id})||die DBI::errstr;
+	while (my $gene=$gh->fetchrow_hashref) {
 	    my $found=0;
-	    my $tsrs = &select($dbh, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
-	    if ($tsrs) {
+	    $tsrs->execute($gene->{gene_source_id})||die DBI::errstr;
 		while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
-		    my $reg_seqs = &select($dbh, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
-		    if ($reg_seqs) {
+		     $reg_seqs->execute($tsr->{tsr_id})||die DBI::errstr;
 			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
 			$coords[5]=~s/\[.*\]//g;
 			$coords[5]=~s/\(.*\)//g;
@@ -82,11 +82,8 @@ foreach my $project (@desc) {
 			    ens_desc => $coords[5],
                             species => $species});
 			$found++;
-		    }
 		}
-	    }
 	}
-    }
 }
 
     print "<head>
@@ -186,9 +183,18 @@ print "</ul></table></body></html>";
 
 sub select {
 
-    my ($dbh, $sql) = @_;
-    my $sth=$dbh->prepare($sql);
-    $sth->execute or die "$dbh->errstr\n";
+    my ($dbh, $sql,$cache) = @_;
+    my $sth;
+    if ($cache) {
+	    unless ($sqlcache{$sql}) {
+		$sth=$dbh->prepare($sql);
+		$sqlcache{$sql}=$sth;
+		}
+	}
+	else {
+		$sth=$dbh->prepare($sql);
+	}
+	    $sth->execute or die "$dbh->errstr\n";
     return $sth;
 }
 
