@@ -498,8 +498,8 @@ HEADER_TABLE
 	    my $trfams=join('<br>',@families);
 
 print<<COLNAMES;
-<a href='#top'>Back to top</a>
-<table class="summarytable"><a name='$pazartfid'></a>
+<a href='#top'>Back to top</a><a name='$pazartfid'></a>
+<table class="summarytable">
 <tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
 <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid">$pazartfid</a></td></tr>

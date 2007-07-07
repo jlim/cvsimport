@@ -260,8 +260,8 @@ SUMMARY_HEADER
 	$bg_color = 0;
 
 print<<HEADER_TABLE;
-<a href='#top'>Back to top</a>
-<table class="summarytable"><a name='$pazargeneid'></a>
+<a href='#top'>Back to top</a><a name='$pazargeneid'></a>
+<table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class=\"basictd\">$geneName</td></tr>
