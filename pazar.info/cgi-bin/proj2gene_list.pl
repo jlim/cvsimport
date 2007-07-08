@@ -22,7 +22,9 @@ my %param = %{$get->Vars};
 
 #initialize the html page
 print $get->header("text/html");
-unless (($ENV{'HTTP_REFERER'} =~ /gene_list.cgi$/) && ($ENV{SERVER_NAME}=~/\w+\.cmmt\.ubc\.ca/)) { print "<span style=\"color:red\">Not allowed!</span>"; exit(); }
+my $refer=$ENV{'HTTP_REFERER'};
+$refer=~s/#[_\w\d]+$//;
+unless (($refer =~ /gene_list.cgi$/) && ($ENV{SERVER_NAME}=~/\w+\.cmmt\.ubc\.ca/)) { print "<span style=\"color:red\">Not allowed!</span>"; exit(); }
 
 #connect to the database
 my $dbh = pazar->new( 
