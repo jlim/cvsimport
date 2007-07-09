@@ -54,7 +54,7 @@ if ($loggedin eq 'true') {
     }
 }
 
-my $gh=$dbh->prepare("SELECT * FROM gene_source WHERE project_id=?")||die DBI::errstr;
+=OLD new=ajax
 my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
 my %gene_project;
 foreach my $project (@desc) {
@@ -83,15 +83,66 @@ foreach my $project (@desc) {
 		}
 	}
 }
+=cut
+my $gh=$dbh->prepare("SELECT count(distinct db_accn) FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
+foreach my $project (@desc) {
+     $gh->execute($project->{project_id})||die DBI::errstr;
+	my $cnt=$gh->fetchrow_array;
+	 $gene_project{$project->{project_name}}{CNT}=$cnt;
+	 $gene_project{$project->{project_name}}{ID}=$project->{project_id};
+}
 
     print "<head>
 <title>PAZAR - Gene List</title>
+<script src='http://sonoma.cmmt.ubc.ca/pazar/js/sortable.js'></script>
 <script type=\"text/javascript\">
 function showHide(inputID) {
-	theObj = document.getElementById(inputID)
-	theDisp = theObj.style.display == \"none\" ? \"block\" : \"none\"
-	theObj.style.display = theDisp
+	var theObj = document.getElementById(inputID);
+		theDisp = theObj.style.display == \"none\" ? \"block\" : \"none\";
+		theObj.style.display = theDisp;
+	if (theObj.getAttribute(\"loaded\")=='no') {
+		var prev=theObj.innerHTML;
+		theObj.setAttribute(\"loaded\",\"yes\");
+		if (theObj.getAttribute(\"genes\")<1000) {
+			theObj.innerHTML=prev+'Loading data now...<br>';
+			getgenes(inputID);
+		}
+		else {
+			theObj.innerHTML=prev+'This project contains more than 1000 genes. It can take a while for the genes to display.<br><input type=\"button\" value=\"Display genes anyway\" onclick=\"getgenes(\\''+inputID+'\\');\">';
+		}
+	}
 }
+
+function getgenes(divId) {
+ var divObj = document.getElementById(divId);
+var http=false;
+if (divObj.getAttribute(\"genes\")>1000) {
+	divObj.innerHTML=\"Loading data now...<br>\";
+}
+if(navigator.appName == \"Microsoft Internet Explorer\") {
+  http = new ActiveXObject(\"Microsoft.XMLHTTP\");
+} else {
+  http = new XMLHttpRequest();
+}
+var args='project_id='+divObj.getAttribute(\"project_id\");
+http.open(\"POST\", \"proj2gene_list2.pl\",true);
+//Send the proper header information along with the request
+http.setRequestHeader(\"Content-type\", \"application\/x-www-form-urlencoded\");
+http.setRequestHeader(\"Content-length\", args.length);
+http.setRequestHeader(\"Connection\", \"close\");
+http.onreadystatechange=function() {
+  if(http.readyState == 4) {
+    divObj.innerHTML=http.responseText;
+ 	for (j=0;j<divObj.childNodes.length;j++) {
+      		if( divObj.childNodes[j].tagName == 'TABLE' ) {
+       	 		ts_makeSortable(divObj.childNodes[j]);
+      		}
+  	}
+  }
+}
+http.send(args);
+}
+
 </script>
 <STYLE type=\"text/css\">
 .title1 {
@@ -139,8 +190,11 @@ $div_id=~s/ /_/g;
 my $style='display:none';
 if ($param{opentable} eq $proj_name) {$style='display:block';}
 
-print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></li></td></tr><tr><td width='750'>
-<div id=\"$div_id\" style=\"$style\"><table width='750' class='summarytable'><tr>";
+print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a>&nbsp&nbsp<small>($gene_project{$proj_name}{CNT} genes)</small></li></td></tr><tr><td  width='750'>
+<div id=\"$div_id\" style=\"$style\" loaded=\"no\" project_id=\"$gene_project{$proj_name}{ID}\" genes=\"$gene_project{$proj_name}{CNT}\">";
+
+=OLD new ajax
+<table width='750' class='summarytable'><tr>";
     print "<td class='genedetailstabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
     print "<td class='genedetailstabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";
     print "<td class='genedetailstabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Gene name\"><small>(user defined)</small></form></td>";
@@ -172,7 +226,10 @@ print "</tr>";
 
 $bg_color =  1 - $bg_color;
 }
-print "</table><br></div></td></tr>";
+print "</table>";
+=cut
+
+print "<br></div></td></tr>";
 }
 print "</ul></table></body></html>";
 

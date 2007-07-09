@@ -24,7 +24,7 @@ my %param = %{$get->Vars};
 print $get->header("text/html");
 my $refer=$ENV{'HTTP_REFERER'};
 $refer=~s/#[_\w\d]+$//;
-unless (($refer =~ /gene_list.cgi$/) && ($ENV{SERVER_NAME}=~/\w+\.cmmt\.ubc\.ca/)) { print "<span style=\"color:red\">Not allowed!</span>"; exit(); }
+unless ($ENV{SERVER_NAME}=~/\w+\.cmmt\.ubc\.ca/) { print "<span style=\"color:red\">Not allowed!</span>"; exit(); }
 
 #connect to the database
 my $dbh = pazar->new( 
@@ -43,35 +43,29 @@ my %colors = (0 => "#fffff0",
 
 my $project=$param{project_id};
 
-my $gh=$dbh->prepare("SELECT * FROM gene_source WHERE project_id='$project'")||die DBI::errstr;
-my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
+my $gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id='$project' and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
 my %gene_project;
-     $gh->execute()||die DBI::errstr;
-	while (my $gene=$gh->fetchrow_hashref) {
-	    my $found=0;
-	    $tsrs->execute($gene->{gene_source_id})||die DBI::errstr;
-		while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
-			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-			$coords[5]=~s/\[.*\]//g;
-			$coords[5]=~s/\(.*\)//g;
-			$coords[5]=~s/\.//g;
-			my $species = $talkdb->current_org();
-			$species = ucfirst($species)||'-';
+$gh->execute()||die DBI::errstr;
+while (my $gene=$gh->fetchrow_hashref) {
+    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
+    $coords[5]=~s/\[.*\]//g;
+    $coords[5]=~s/\(.*\)//g;
+    $coords[5]=~s/\.//g;
+    my $species = $talkdb->current_org();
+    $species = ucfirst($species)||'-';
 
-			my $pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
-			my $gene_desc=$gene->{description};
-			if ($gene_desc eq '0'||$gene_desc eq '') {$gene_desc='-';}
-			push (@{$gene_project{$project->{project_name}}}, {
-                            ID => $pazargeneid,
-			    accn => $gene->{db_accn},
-			    desc => $gene_desc,
-			    ens_desc => $coords[5],
-                            species => $species});
-			$found++;
-		}
-	}
+    my $pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
+    my $gene_desc=$gene->{description};
+    if ($gene_desc eq '0'||$gene_desc eq '') {$gene_desc='-';}
+    push (@{$gene_project{$project->{project_name}}}, {
+	ID => $pazargeneid,
+	accn => $gene->{db_accn},
+	desc => $gene_desc,
+	ens_desc => $coords[5],
+	species => $species});
+}
 
-    print "<table width='750'><ul>";
+#    print "<table class=\"sortable\" width='750'><ul>";
 
 my @proj_names=sort(keys %gene_project);
 foreach my $proj_name (@proj_names) {
@@ -80,14 +74,14 @@ $div_id=~s/ /_/g;
 my $style='display:none';
 if ($param{opentable} eq $proj_name) {$style='display:block';}
 
-print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></li></td></tr><tr><td width='750'>
-<div id=\"$div_id\" style=\"$style\"><table width='750' class='summarytable'><tr>";
-    print "<td class='genedetailstabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
-    print "<td class='genedetailstabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";
-    print "<td class='genedetailstabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Gene name\"><small>(user defined)</small></form></td>";
-    print "<td class='genedetailstabletitle' width='80'><form name=\"accn_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene ID\"></form></td>";
-    print "<td class='genedetailstabletitle' width='120'><form name=\"ens_desc_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ens_desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene Description\"></form></td>";
-    print "</tr>";
+#print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a></li></td></tr><tr><td width='750'><div id=\"$div_id\" style=\"$style\">";
+print "<table width='750' class='sortable'><thead><tr>";
+    print "<th class='genedetailstabletitle' width='100'>Species</th>";
+    print "<th class='genedetailstabletitle' width='100'>PAZAR Gene ID</th>";
+    print "<th class='genedetailstabletitle' width='100'>Gene name</th>";
+    print "<th class='genedetailstabletitle' width='100'>EnsEMBL Gene ID</th>";
+    print "<th class='genedetailstabletitle' width='100'>EnsEMBL Gene Description</th>";
+    print "</tr></thead><tbody>";
 
     my @sorted;
     if ($param{BROWSE} eq 'species') {
@@ -113,9 +107,10 @@ print "</tr>";
 
 $bg_color =  1 - $bg_color;
 }
-print "</table><br></div></td></tr>";
+print "</tbody></table>";
+#print "<br></div></td></tr>";
 }
-print "</ul></table></body></html>";
+#print "</ul></table></body></html>";
 
 
 
