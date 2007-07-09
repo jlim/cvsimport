@@ -18,7 +18,9 @@ $template->param(PAZAR_CGI => $pazar_cgi);
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
-          <p class="title1">PAZAR - FAQ</p>
+          <p class="title1">PAZAR - Help</p>
+<p class="title3">Tutorials</p>
+ <ul type=disc><li>Mall Overview and Introduction (2 min)<br><a href="$pazar_html/tutorials/Overview.htm">Overview tutorial</a></li></ul>
 
 <p class="title3">What is PAZAR?</p>
 

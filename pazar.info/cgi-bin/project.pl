@@ -220,20 +220,14 @@ print<<page2b;
 page2b
 }
 
-my $gh=$dbh->prepare("SELECT * FROM gene_source WHERE project_id=?")||die DBI::errstr;
-my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
+my $gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
 $gh->execute($projid)||die DBI::errstr;
 while (my $gene=$gh->fetchrow_hashref) {
-    my $found=0;
-    $tsrs->execute($gene->{gene_source_id})||die DBI::errstr;
-    while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
-	my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-	$coords[5]=~s/\[.*\]//g;
-	$coords[5]=~s/\(.*\)//g;
-	$coords[5]=~s/\.//g;
-	$gene{$gene->{db_accn}}=$coords[5]||'-';
-	$found++;
-    }
+    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
+    $coords[5]=~s/\[.*\]//g;
+    $coords[5]=~s/\(.*\)//g;
+    $coords[5]=~s/\.//g;
+    $gene{$gene->{db_accn}}=$coords[5]||'-';
 }
 
 if (%gene) {

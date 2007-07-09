@@ -125,7 +125,7 @@ if(navigator.appName == \"Microsoft Internet Explorer\") {
   http = new XMLHttpRequest();
 }
 var args='project_id='+divObj.getAttribute(\"project_id\");
-http.open(\"POST\", \"proj2gene_list2.pl\",true);
+http.open(\"POST\", \"proj2gene_list.pl\",true);
 //Send the proper header information along with the request
 http.setRequestHeader(\"Content-type\", \"application\/x-www-form-urlencoded\");
 http.setRequestHeader(\"Content-length\", args.length);
