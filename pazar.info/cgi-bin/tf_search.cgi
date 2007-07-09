@@ -642,7 +642,7 @@ Select_buttons
     }
 
 ####hidden form inputs
-    print "<span class=\"title2\">You can recalculate matrix and logo based on all selected sequences on this page (combining multiple TFs)<br>by clicking here&nbsp&nbsp</span>";
+    print "<hr color='black'><span class=\"title2\">You can recalculate matrix and logo based on all selected sequences on this page (combining multiple TFs)<br>by clicking here&nbsp&nbsp</span>";
     print "<input type='button' value='Generate PFM' onClick=\"multiTF('allSeqPFM');\"><br>";
     print "</form>"; ####end of form
 print '<div id="allSeqPFM" name="allSeqPFM"><span class="red">No matrix built yet!</span></div>'; 

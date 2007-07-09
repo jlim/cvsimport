@@ -42,7 +42,7 @@ warn "LOGO $logo";
 		    my $gd_image = $pfm->draw_logo(-file=>$logo, -xsize=>400);
 		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$fn\.png\">";
 		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
-		    print "</table><br><br><br><br>\n";
+		    print "</table><br><br>\n";
 }
 		    
 exit();
