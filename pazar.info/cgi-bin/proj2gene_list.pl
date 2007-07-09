@@ -24,7 +24,7 @@ my %param = %{$get->Vars};
 print $get->header("text/html");
 my $refer=$ENV{'HTTP_REFERER'};
 $refer=~s/#[_\w\d]+$//;
-unless ($ENV{SERVER_NAME}=~/\w+\.cmmt\.ubc\.ca/) { print "<span style=\"color:red\">Not allowed!</span>"; exit(); }
+unless ($ENV{SERVER_NAME}=~ (/\w+\.cmmt\.ubc\.ca/||/pazar.info/) ) { print "<span style=\"color:red\">Not allowed!</span>"; exit(); }
 
 #connect to the database
 my $dbh = pazar->new( 
