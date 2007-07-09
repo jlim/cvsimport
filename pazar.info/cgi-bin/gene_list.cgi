@@ -13,6 +13,7 @@ use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
 use constant DB_HOST => $ENV{PAZAR_host};
 
+my $pazar_html = $ENV{PAZAR_HTML};
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
@@ -94,7 +95,7 @@ foreach my $project (@desc) {
 
     print "<head>
 <title>PAZAR - Gene List</title>
-<script src='http://sonoma.cmmt.ubc.ca/pazar/js/sortable.js'></script>
+<script src='$pazar_html/js/sortable.js'></script>
 <script type=\"text/javascript\">
 function showHide(inputID) {
 	var theObj = document.getElementById(inputID);
