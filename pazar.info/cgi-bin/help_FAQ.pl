@@ -18,61 +18,115 @@ $template->param(PAZAR_CGI => $pazar_cgi);
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
-          <p class="title1">PAZAR - Help</p>
-<p class="title3">Tutorials</p>
- <ul type=disc><li>Mall Overview and Introduction (2 min)<br><a href="$pazar_html/tutorials/Overview.htm">Overview tutorial</a></li></ul>
 
-<p class="title3">What is PAZAR?</p>
-
+<p class="title1">PAZAR - Help</p>
+<hr color='black'>
+<p class="title2">Content</p>
+<a href="#What is PAZAR?"><span class="title3">What is PAZAR?</span><br></a>
+<a href="#Tutorials"><span class="title3">Tutorials</span><br></a>
+<a href="#PAZAR Search Interface"><span class="title3">PAZAR Search Interface</span><br></a>
+<a href="#1. PAZAR Mall Overview"><span class="title4 margin">1. PAZAR Mall Overview</span><br></a>
+<a href="#2. Search by Gene"><span class="title4 margin">2. Search by Gene</span><br></a>
+<a href="#2.1 Introduction"><span class="bold margin2">2.1. Introduction</span><br></a>
+<a href="#2.2 Gene identifiers"><span class="bold margin2">2.2 Gene identifiers</span><br></a>
+<a href="#2.3 Gene View"><span class="bold margin2">2.3 Gene View</span><br></a>
+<a href="#2.4 Sequence View"><span class="bold margin2">2.4 Sequence View</span><br></a>
+<a href="#2.5 Analysis View"><span class="bold margin2">2.5 Analysis View</span><br></a>
+<a href="#3. Search by Transcription Factor"><span class="title4 margin">3. Search by Transcription Factor</span><br></a>
+<a href="#3.1 Introduction"><span class="bold margin2">3.1. Introduction</span><br></a>
+<a href="#3.2 TF identifiers"><span class="bold margin2">3.2 TF identifiers</span><br></a>
+<a href="#3.3 TF View"><span class="bold margin2">3.3 TF View</span><br></a>
+<a href="#3.4 Position Frequency Matrix and Binding Profile"><span class="bold margin2">3.4 Position Frequency Matrix and Binding Profile</span><br></a>
+<a href="#4. Search by Transcription Factor Binding Profile"><span class="title4 margin">4. Search by Transcription Factor Binding Profile</span><br></a>
+<a href="#5. Search within a specific Boutique Project"><span class="title4 margin">5. Search within a specific Boutique Project</span><br></a>
+<a href="#PAZAR Submission Interface"><span class="title3">PAZAR Submission Interface</span><br></a>
+<a href="#1. Introduction"><span class="title4 margin">1. Introduction</span></a><br>
+<a href="#Screenshots"><span class="title4 margin">2. Submission Interface Screenshots</span><br></a>
+<a href='#FAQ Topics'><span class="title4 margin">3. Frequently Asked Questions</span></a><br>
+<span class="bold margin2"><a href="#Sequence Retrieval">Sequence Retrieval</a></span><br>
+<span class="bold margin2"><a href="#Sequence Entry">Sequence Entry</a></span><br>
+<span class="bold margin2"><a href="#Experimental Nomenclature">Experimental Nomenclature</a></span><br>
+<span class="bold margin2"><a href="#Submission Interface">Submission Interface</a></span><br>
+<hr color='black'>
+<a name="What is PAZAR?"></a><p class="title3">What is PAZAR?</p>
  <ul type=disc><li>A software framework for the construction and maintenance of regulatory sequence data annotations which allows multiple boutique databases to function independently within a larger system (or information mall). For more information, see the <a href="$pazar_cgi/overview.pl">Overview</a> section.</li></ul>
 
-<p class="title3">How does one browse PAZAR?</p>
+<a name="Tutorials"></a><p class="title3">Tutorials</p>
+ <ul type=disc><li>Mall Overview and Introduction:  <a href="$pazar_html/tutorials/Overview.htm">Overview tutorial</a>  (2 min)</li></ul>
+ <ul type=disc><li>Search by Gene:  <a href="$pazar_html/tutorials/Gene.htm">Gene Search tutorial</a>  (2:27 min)</li></ul>
+ <ul type=disc><li>Search by Transcription Factor:  <a href="$pazar_html/tutorials/tf.htm">TF Search tutorial</a>  (3:02 min)</li></ul>
+ <ul type=disc><li>Search by Transcription Factor Binding Profile:  <a href="$pazar_html/tutorials/TF_Binding_Profile_Search.htm">TF Profile Search tutorial</a>  (0:54 min)</li></ul>
+ <ul type=disc><li>Search within a specific Boutique Project:  <a href="$pazar_html/tutorials/boutique.htm">Boutique Search tutorial</a>  (1:02 min)</li></ul>
 
- <ul type=disc><li>Click on 'Genes', 'TFMART' or 'TF PROFILES' to search for regulated genes, transcription factors or transcription factor binding profiles respectively.</li></ul>
-<ul type=disc><li>Select the features of interest and browse results.</li></ul>
-
-<p class="title3">How does one enter data in PAZAR?</p>
-
+<a name="PAZAR Search Interface"></a><p class="title3">PAZAR Search Interface</p>
+<a name="1. PAZAR Mall Overview"></a><p class="title4 margin">1. PAZAR Mall Overview</p>
+<p>The PAZAR Mall is the graphic user interface for the PAZAR database. Boutique datasets within PAZAR are represented by stores within the mall. In addition, the mall has six separate floors that are accessible via the escalator. Boutique datasets can be made public or private as is needed, and all boutique datasets are listed in the mall directory found at the bottom of the page.<br>
+Three general query types can be conducted within PAZAR. 
+Users can search PAZAR by gene, by TF, or by TF-binding profile simply by clicking on their corresponding department stores found at the ends of the mall. A more in-depth discussion of each of these search types may be found in the search type specific tutorials. While each of these queries will consider all of the public data within PAZAR, queries of specific boutique datasets can also be performed by clicking on their corresponding stores or their names listed in the mall directory found at the bottom of the page. PAZAR contact information is accessible via the information booth, found at the centre of the mall. In addition, links to other relevant internet sources, and PAZAR export formats are accessible via buttons found at the far left of the PAZAR main page.</p>
+<a name="2. Search by Gene"></a><p class="title4 margin">2. Search by Gene</p>
+<a name="2.1 Introduction"></a><p class="bold margin2">2.1. Introduction</p>
+<p>In order to search PAZAR by gene, click on the 'Genes' department store at the upper right corner of the mall. This causes a query window to appear. Here, users have multiple options for their gene-specific query. Users can view the list of all genes in PAZAR for a given boutique database by clicking on the 'View Gene List' button. Alternatively, users can search for a specific gene within all of PAZAR based upon several gene-specific identifiers.</p>
+<a name="2.2 Gene identifiers"></a><p class="bold margin2">2.2 Gene identifiers</p>
+<p><b><u>User Defined Gene Name:</u> </b><font color='red'>(eg. GFAP)</font><br>
+Gene symbol as defined by the user. We do not automatically use official symbols as they vary across species. The results will display all entries containing the provided subset of characters.<br>
+<b><u>EnsEMBL gene ID:</u> </b><font color='red'>(eg. ENSG00000131095)</font><br>
+EnsEMBL stable gene ID. This is the reference ID in PAZAR, thus the one to use preferentially.<br>
+<b><u>EnsEMBL transcript ID:</u> </b><font color='red'>(eg. ENST00000253408)</font><br>
+EnsEMBL stable transcript ID. This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>Entrezgene ID:</u> </b><font color='red'>(eg. 2670)</font><br>
+NCBI Entrez Gene ID. This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>RefSeq ID:</u> </b><font color='red'>(eg. NM_002055)</font><br>
+Refseq DNA ID. Do not use the ID that includes the version at the end (NM_002055.2). This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>Swissprot ID:</u> </b><font color='red'>(eg. Q9UFD0)</font><br>
+UniProtKB/Swiss-Prot ID.  This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>PAZAR Gene ID:</u> </b><font color='red'>(eg. GS0000217</font>)<br>
+PAZAR Gene IDs are unique to a project. Therefore, the same gene (same EnsEMBL Gene ID) will have different PAZAR Gene IDs if annotated in different projects. Use EnsEMBL Gene IDs to get all data about a gene across projects.<br>
+<b><u>PAZAR Sequence ID:</u> </b><font color='red'>(eg. RS0000226)</font><br>
+Providing a PAZAR Sequence ID will open directly the sequence view for this particular sequence.</p>
+<a name="2.3 Gene View"></a><p class="bold margin2">2.3 Gene View</p>
+<p>At the top of the Gene View page is a summary table of all of the genes obtained from the search. By clicking on the magnifying glass next to the PAZAR gene ID, users will be taken directly to the specific data for their gene of interest. Within this section, users find a gene-specific summary table followed by a list of all of the PAZAR regulatory sequences that correspond to that gene. Users can visualize the genomic context of each regulatory sequence by clicking on the links to the UCSC Genome Browser and Ensembl found at the far right of the page. Also, by clicking on the regulatory sequence ID for a specific regulatory sequence, found in the far left column, users can access the PAZAR Sequence view for that sequence.</p>
+<a name="2.4 Sequence View"></a><p class="bold margin2">2.4 Sequence View</p>
+<p>In this view, data is color-coded, with gene-specific information presented in blue and sequence-specific data in orange. A gene-specific summary table is presented at the top of the page followed by a table of statistics pertaining to the specific regulatory sequence of interest. A third table summarizing the supporting experimental data for this regulatory sequence is also present at the bottom of the page. Clicking on the Analysis ID found in the leftmost column of this table takes users to the PAZAR Analysis View.</p>
+<a name="2.5 Analysis View"></a><p class="bold margin2">2.5 Analysis View</p>
+<p>The Analysis View is color-coded green. Within this view is a more in-depth description of the supporting experimental data.</p>
+<a name="3. Search by Transcription Factor"></a><p class="title4 margin">3. Search by Transcription Factor</p>
+<a name="3.1 Introduction"></a><p class="bold margin2">3.1. Introduction</p>
+<p>To search PAZAR by TF, click on the 'TFMART' department store found at the left hand side of the mall. This causes a query window to appear. Users can view the list of all TFs in PAZAR for a given boutique database by clicking on the 'View TF List' button. Alternatively, users can search for a specific TF within all of PAZAR based upon several TF-specific identifiers.</p>
+<a name="3.2 TF identifiers"></a><p class="bold margin2">3.2 TF identifiers</p>
+<p><b><u>User Defined TF Name:</u> </b><font color='red'>(eg. NF1)</font><br>
+TF name as defined by the user. We will be using soon a controlled vocabulary to replace this free text. The results will display all entries containing the provided subset of characters.<br>
+<b><u>EnsEMBL gene ID:</u> </b><font color='red'>(eg. ENSG00000162599)</font><br>
+EnsEMBL stable gene ID. This ID will be converted to the corresponding EnsEMBL transcript IDs first.<br>
+<b><u>EnsEMBL transcript ID:</u> </b><font color='red'>(eg. ENST00000294608)</font><br>
+EnsEMBL stable transcript ID. This is the reference ID for TFs in PAZAR, thus the one to use preferentially.<br>
+<b><u>Entrezgene ID:</u> </b><font color='red'>(eg. 4774)</font><br>
+NCBI Entrez Gene ID. This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>RefSeq ID:</u> </b><font color='red'>(eg. NM_005595)</font><br>
+Refseq DNA ID. Do not use the ID that includes the version at the end (NM_005595.1). This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>Swissprot ID:</u> </b><font color='red'>(eg. Q12857)</font><br>
+UniProtKB/Swiss-Prot ID.  This ID will be converted to an EnsEMBL gene ID first.<br>
+<b><u>PAZAR TF ID:</u> </b><font color='red'>(eg. TF0000231</font>)<br>
+PAZAR TF IDs are unique to a project. Therefore, the same TF (same EnsEMBL Gene ID) will have different PAZAR TF IDs if annotated in different projects. Use EnsEMBL Gene IDs to get all data about a TF across projects.</p>
+<a name="3.3 TF View"></a><p class="bold margin2">3.3 TF View</p>
+<p>At the top of the TF View is a summary table of all of the TFs obtained from the search. By clicking on the magnifying glass next to the PAZAR TF ID, users will be taken directly to the specific data for their TF of interest. Within this section, users find a TF-specific summary table followed by a list of all of the PAZAR regulatory sequences that are bound by that TF. Users can visualize the genomic context of each regulatory sequence by clicking on the links to the UCSC Genome Browser and Ensembl found at the far right of the page. Also, by clicking on a regulatory sequence ID or a gene ID, users can access the PAZAR Sequence or Gene view respectively. In addition, a position frequency scoring matrix and transcription factor binding profile are generated dynamically using the MEME software for each transcription factor. Users can construct a custom scoring matrix and binding profile based upon a subset of the sequences for that TF by clicking in the check boxes of those sequences meant to be included and clicking 'Generate PFM with selected sequences'. Alternatively, users can generate scoring matrices and binding profiles based upon just genomic or artificial sequences by clicking on 'Select genomic sequences' or 'Select artificial sequences' respectively. As well, users can generate a custom scoring matrix and binding profile based upon selected sequences from any of the transcription factors displayed on the page by clicking 'Generate PFM' at the very bottom of the page.</p>
+<a name="3.4 Position Frequency Matrix and Binding Profile"></a><p class="bold margin2">3.4 Position Frequency Matrix and Sequence logo Generation</p>
+<p>Based on an alignment of all known sites, the total number of observations of each nucleotide is recorded for each position, producing a Position Frequency Matrix (PFM). The sequence logo scales each nucleotide by the total bits of information multiplied by the relative occurence of the nucleotide at the position. Sequence logos enable fast and intuitive visual assessment of pattern characterics.<br>In PAZAR, PFMs and Logos are produced by using the probabilistic motif discovery algorithm MEME (see reference below).<br>
+Timothy L. Bailey and Charles Elkan, "Fitting a mixture model by expectation maximization to discover motifs in biopolymers", Proceedings of the Second International Conference on Intelligent Systems for Molecular Biology, pp. 28-36, AAAI Press, Menlo Park, California, 1994.</p>
+<a name="4. Search by Transcription Factor Binding Profile"></a><p class="title4 margin">4. Search by Transcription Factor Binding Profile</p>
+<p>To search PAZAR by transcription factor binding profile, click on the 'TF PROFILES' department store found near to the bottom of the mall. This will cause a query window to appear. Users can retrieve TF binding profiles sorted by their associated project, name, species, or class by clicking on the corresponding buttons found near to the middle of the query page. On the PAZAR TF Binding Profile view, users are provided with a summary table with specific data for each transcription factor. Clicking 'More', found at the right hand side of the screen causes a secondary window to appear with even more detailed information regarding that specific transcription factor. The binding profiles in PAZAR are dynamically generated using the MEME software.</p>
+<a name="5. Search within a specific Boutique Project"></a><p class="title4 margin">5. Search within a specific Boutique Project</p>
+<p>One might desire to limit queries to a single collection. To do so, the user must find the corresponding boutique in the mall map or directory and click on it. The 'Project View' provides a brief description of the dataset as well as some statistics on the data it contains. Below, the user can choose amongst various filters to search through the data and display it in the 'Gene View', where regulatory sequences will be grouped by the genes they regulate, or in the 'TF View', where the sequences are grouped by the TFs that bind to them.</p>
+<a name="PAZAR Submission Interface"></a><p class="title3">PAZAR Submission Interface</p>
+<a name="1. Introduction"></a><p class="title4 margin">1. Introduction</p>
+<p> To enter data into PAZAR please follow those steps:<br>
 <ul type=disc><li>Register under the <a href="$pazar_cgi/register.pl">Register</a> section.</li></ul>
 <ul type=disc><li>Click on <a href="$pazar_cgi/editprojects.pl">My Projects</a> to see all the projects you belong to and to create new ones.</li></ul>
-<ul type=disc><li>Click on <a href="$pazar_cgi/sWI/entry.pl">Submit</a> to enter new data. For more detailed questions on the submission interface, see the <a href="#FAQTOPICS">FAQ topics</a> section below.</li></ul>
-<ul type=disc><li>If one has a pre-existing dataset, an automated data import can be realized upon contacting the PAZAR development team.</li></ul>
-
-<p class="title3"><a name='FAQTOPICS'></a>FAQ TOPICS</p>
-
-<ul type=disc>
- <li><span style='font-family:
-     Verdana'><a href="#SEQUENCERETRIEVAL">SEQUENCE RETRIEVAL</a></span></li>
-</ul>
-
-<ul type=disc>
- <li><span style='font-family:
-     Verdana'><a href="#SEQUENCEENTRY">SEQUENCE ENTRY</a></span></li>
-</ul>
-
-<ul type=disc>
- <li><span style='font-family:
-     Verdana'><a href="#EXPERIMENTALNOMENCLATURE">EXPERIMENTAL NOMENCLATURE</a></span></li>
-</ul>
-
-<ul type=disc>
- <li><span style='font-family:
-     Verdana'><a href="#PAZARUSERINTERFACE">PAZAR USER INTERFACE</a></span></li
-</ul>
-
-<p class="title3">PAZAR User Interface Screenshots</p>
-<a href="$pazar_html/images/PAZAR_Screenshots_100406.pdf">PAZAR
-Screenshots (10-04-06)</a>
-
-
-
-<hr>
-<p class="title3">FAQ TOPICS</p>
-
-<p class="bold"><a name='SEQUENCERETRIEVAL'></a>SEQUENCE
-RETRIEVAL</p>
-
-<table class='summarytable'>
+<ul type=disc><li>Click on <a href="$pazar_cgi/sWI/entry.pl">Submit</a> to enter new data. For more detailed questions on the submission interface, see the FAQ topics</a> section below.</li></ul>
+<ul type=disc><li>If one has a pre-existing dataset, an automated data import can be realized upon contacting the PAZAR development team.</li></ul></p>
+<a name='Screenshots'></a><p class="title4 margin">2. Submission Interface Screenshots</p>
+<a href="$pazar_html/images/PAZAR_Screenshots_100406.pdf">Screenshots (10-04-06)</a>
+<a name="FAQ Topics"></a><p class="title4 margin">3. Frequently Asked Questions</p>
+<a name="Sequence Retrieval"></a><p class="bold margin2">Sequence Retrieval</p><table class='summarytable'>
  <tr>
   <td class='basictd'>
   <p><span style='font-family:Verdana'><b>Question</b></span></p>
@@ -107,9 +161,7 @@ RETRIEVAL</p>
   </td>
  </tr>
 </table>
-
-<p class="bold"><a name=SEQUENCEENTRY></a>SEQUENCE ENTRY </p>
-
+<a name='Sequence Entry'></a><p class="bold margin2">Sequence Entry</p>
 <table class='summarytable'>
   <tr>
    <td class='basictd'>
@@ -217,10 +269,7 @@ RETRIEVAL</p>
   </td>
  </tr>
 </table>
-
-<p class="bold"><a name=EXPERIMENTALNOMENCLATURE></a>EXPERIMENTAL
-NOMENCLATURE </p>
-
+<a name='Experimental Nomenclature'></a><p class="bold margin2">Experimental Nomenclature</p>
 <table class='summarytable'>
   <tr>
    <td class='basictd'>
@@ -422,9 +471,7 @@ used for the same experiment, which should be submitted to PAZAR?  </span></p>
   </td>
  </tr>
 </table>
-
-<p class="bold"><a name=PAZARUSERINTERFACE></a>PAZAR USER INTERFACE </p>
-
+<a name='Submission Interface'></a><p class="bold margin2">Submission Interface</p>
 <table class='summarytable'>
   <tr>
    <td class='basictd'>
