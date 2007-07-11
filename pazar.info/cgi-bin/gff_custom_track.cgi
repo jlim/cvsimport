@@ -26,7 +26,7 @@ my $ucscdb = "";
 my $flanking_bp = 50;
 
 print "Content-Type: text/html\n\n";
-print "<html><head><title>GFF custom track test</title></head><body>";
+print "<html><head><title>GFF custom track</title></head><body>";
 
 
 ###database connection
@@ -150,53 +150,19 @@ else
 #browser position chr5:142638872-142638896
 #track name=ORegAnno description='ORegAnno-curated regulatory elements' color=160,1,1 url="http://www.bcgsc.ca:8080/oregano/recordview.action?recid=$$"
     print GFF $header."\n";
+#    print $header."\n";
 
     foreach my $project (@projects) {
 	my $proj=$project->{name};
 	my $pid=$project->{id};
-	my $rsh = &select($dbh, "SELECT reg_seq_id FROM reg_seq WHERE project_id='$pid'");
-	while (my $rsid=$rsh->fetchrow_array) {
-	    my $regseq=$dbh->get_reg_seq_by_regseq_id($rsid);
-	    unless (lc($regseq->binomial_species) eq lc($params{species})) {
-		next;
-	    }
-	    my @rest;
-=pod
-		push @rest,'sequence'.'="'.$regseq->seq.'"';
+	my $sp=uc($params{species});
+	my $rsh = &select($dbh, "SELECT reg_seq_id, begin, end, strand  FROM reg_seq a, coordinate b, location c WHERE a.project_id='$pid' AND c.location_id=b.location_id AND b.coordinate_id=a.coordinate_id AND chr='$chr' AND species='$sp'");
+	while (my ($regid,$rsstart,$rsend,$rsstrand)=$rsh->fetchrow_array) {
 
-	    push @rest,'db_seqinfo'.'="'.$regseq->seq_dbname.":".$regseq->seq_dbassembly.'"';
-	    if ($regseq->gene_description) {
-	    push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description.'"';
-	} else {
-	    push @rest,'db_geneinfo'.'="'.$regseq->gene_dbname.":".$regseq->gene_accession.'"';
-	}
-	    push @rest,'species'.'="'.$regseq->binomial_species.'"';
-	    =cut
-
-		=pod
-		push @rest,'sequence'.'='.$regseq->seq;
-
-	    push @rest,'db_seqinfo'.'='.$regseq->seq_dbname.":".$regseq->seq_dbassembly;
-	    if ($regseq->gene_description) {
-	    push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession.":".$regseq->gene_description;
-	} else {
-	    push @rest,'db_geneinfo'.'='.$regseq->gene_dbname.":".$regseq->gene_accession;
-	}
-	    push @rest,'species'.'='.$regseq->binomial_species;
-=cut
-
-#	    my $rest=join(';',@rest);
-            my $rsid7d = sprintf "%07d",$rsid;
-	    my $id="RS".$rsid7d;
-	    my $rschr = $regseq->chromosome;
-	    $rschr=~s/\s//g;
-	    my $rsstart = $regseq->start;
-	    $rsstart=~s/\s//g;
-	    my $rsend = $regseq->end;
-	    $rsend=~s/\s//g;
-
-	    my $gff='chr'.$rschr."\t".join("\t",$proj,$id,$rsstart,$rsend,'.',$regseq->strand,'.',$proj."_".$id);
+	    my $id=write_pazarid($regid,'RS');
+	    my $gff='chr'.$chr."\t".join("\t",$proj,$id,$rsstart,$rsend,'.',$rsstrand,'.',$proj."_".$id);
 	    print GFF $gff."\n";
+#	    print $gff."\n";
 	}
     }
     close(GFF);
@@ -237,4 +203,12 @@ sub select {
     my $sth=$dbh->prepare($sql);
     $sth->execute or die "$dbh->errstr\n";
     return $sth;
+}
+
+sub write_pazarid {
+    my $id=shift;
+    my $type=shift;
+    my $id7d = sprintf "%07d",$id;
+    my $pazarid=$type.$id7d;
+    return $pazarid;
 }
