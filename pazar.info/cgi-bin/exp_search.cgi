@@ -512,6 +512,8 @@ if ($mode eq 'expression') {
 	    my @sample=$dbh->get_data_by_primary_key('sample',$tfid);
 	    my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
 	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$sample[0]."&nbsp;".$samplecell[0]."</div></td>";
+	} else {
+	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>UNKNOWN</div></td>";
 	}
 	print "</tr>";
     	$bg_color = 1 - $bg_color;
