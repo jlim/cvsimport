@@ -27,7 +27,103 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => "PAZAR - Project Search Results");
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(ONLOAD_FUNCTION => 'init();');
 $template->param(JAVASCRIPT_FUNCTION => q{
+function ajaxcall (tableId,divTarget,all) {
+    var divObj=xGetElementById(divTarget);
+   divObj.innerHTML='Generating PFM, please wait...';
+var http = false;
+tableObj=xGetElementById(tableId);
+sites=0;
+args='caller=tfsearch';
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        if ((cb.checked==true)||(all==1)) {
+                                                args+="&seq="+cb.value;
+						sites++;
+                                        }
+                        }
+if (sites<2) {
+   divObj.innerHTML='<span style="color:red">There are too few sites to build a binding profile for this TF!</span>';
+   return 0;
+}
+
+if(navigator.appName == "Microsoft Internet Explorer") {
+  http = new ActiveXObject("Microsoft.XMLHTTP");
+} else {
+  http = new XMLHttpRequest();
+}
+
+http.open("POST", "meme_call.pl",true);
+//Send the proper header information along with the request
+http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+http.setRequestHeader("Content-length", args.length);
+http.setRequestHeader("Connection", "close");
+http.onreadystatechange=function() {
+  if(http.readyState == 4) {
+    divObj.innerHTML=http.responseText;
+  }
+}
+http.send(args);
+}
+
+
+function multiTF (divTarget) {
+    divObj=xGetElementById(divTarget);
+   divObj.innerHTML='Generating PFM, please wait...';
+var http = false;
+        args='caller=tfsearch';
+var divs=document.getElementsByTagName('div');
+for (i=0; i<divs.length; i++) {
+        if (divs[i].className=='seqTableDiv') {
+                baseName=divs[i].id;
+                baseName=baseName.replace(/desc/,"");
+        tableObj=xGetElementById('SummaryTable'+baseName);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        if (cb.checked==true) {
+                                                args+="&seq="+cb.value;
+                                        }
+                        }
+        }
+}
+
+if(navigator.appName == "Microsoft Internet Explorer") {
+  http = new ActiveXObject("Microsoft.XMLHTTP");
+} else {
+  http = new XMLHttpRequest();
+}
+
+http.open("POST", "meme_call.pl",true);
+//Send the proper header information along with the request
+http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+http.setRequestHeader("Content-length", args.length);
+http.setRequestHeader("Connection", "close");
+http.onreadystatechange=function() {
+  if(http.readyState == 4) {
+    divObj.innerHTML=http.responseText;
+  }
+}
+http.send(args);
+}
+
+
+document.getElementsByClassName = function(cl) {
+var retnode = [];
+var myclass = new RegExp('\\b'+cl+'\\b');
+var elem = this.getElementsByTagName('*');
+for (var i = 0; i < elem.length; i++) {
+var classes = elem[i].className;
+if (myclass.test(classes)) retnode.push(elem[i]);
+}
+return retnode;
+};
 function verifyCheckedBoxes() {            
     var numChecked = 0;
     var counter;
@@ -52,7 +148,59 @@ function verifyCheckedBoxes() {
 	document.sequenceform.submit();
     }
 
-        }});
+}
+function selectallseq (tableId) {
+        tableObj=xGetElementById(tableId);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        cb.checked=true;
+                        }
+}
+
+function resetallseq (tableId) {
+        tableObj=xGetElementById(tableId);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                                        tds=trs[x].getElementsByTagName('td');
+                                        cb=tds[0].firstChild.firstChild;
+                                        cb.checked=false;
+                        }
+}
+
+function selectbytype (tableId,target) {
+        tableObj=xGetElementById(tableId);
+        var tbody=tableObj.getElementsByTagName('tbody');
+        var trs = tbody[0].getElementsByTagName('tr');
+        for (x=1; x<trs.length; x++) {
+                if (trs[x].className==target) {
+                        tds=trs[x].getElementsByTagName('td');
+                        cb=tds[0].firstChild.firstChild;
+                        cb.checked=true;
+                }
+        }
+}
+
+function init () {
+var divs=document.getElementsByTagName('div');
+for (i=0; i<divs.length; i++) {
+        if (divs[i].className=='seqTableDiv') {
+                baseName=divs[i].id;
+                baseName=baseName.replace(/^desc/,"");
+	try {
+                ajaxcall('SummaryTable'+baseName,'memediv'+baseName,1);
+	}
+catch (err) {
+	alert(err);
+}
+        }
+}
+}
+
+});
 
 if($loggedin eq 'true')
 {
@@ -116,11 +264,11 @@ $dbh= pazar->new(
 		       -project       =>    $proj);
 }
 
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+our $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 my $projid = $dbh->get_projectid();
 
-print "<p class=\"title1\">PAZAR - \'$proj\' Search Results</p>";
+print "<h1>PAZAR \'$proj\' Search Results</h1>";
 
 ###
 ### gene-centric view
@@ -414,7 +562,7 @@ my $filter =
 	if (!@filters) {push @filters, 'none';}
 	if ($res==0) {
 	    $res=1;
-	    print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR Gene View</h1>";
+	    print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><hr color='black'><p class='title2'>Details Gene-by-Gene</p>";
 	}
 	if ($exprs[0] || $inters[0] || $datalinks==2) {
 	    $filt=1;
@@ -761,21 +909,21 @@ COLNAMES
 	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
 	print "<p class=\"warning\">No regulatory sequence and/or TF was found using this set of filters!<br></p>";
     } else{
-	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><h1>PAZAR TF View</h1>";
+	print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><hr color='black'><p class='title2'>Details TF-by-TF</p>";
 ####start of form
 	print "<form name='sequenceform' method='post' target='logowin' action='$pazar_cgi/tf_logo.pl'>";
 	my $seqcounter = 0;
 	foreach my $tf (keys %inters) {
 	$seqcounter=&print_tf_attr($dbh,$tf,\@{$inters{$tf}},$seqcounter);
-	}
+    }
 ####hidden form inputs
-print "<table bordercolor='white' bgcolor='white'><tr><td class=\"title2\">Click Go to recalculate matrix and logo based on selected sequences</td>";
-print "<td><input type='button' value='Go' onClick=\"verifyCheckedBoxes();\"></td></tr>
-<tr><td>(you can combine sequences from multiple TFs)</td></tr></table>";
-print "</form>";
-####end of form
+    print "<hr color='black'><span class=\"title2\">You can recalculate matrix and logo based on all selected sequences on this page (combining multiple TFs)<br>by clicking here&nbsp&nbsp</span>";
+    print "<input type='button' value='Generate PFM' onClick=\"multiTF('allSeqPFM');\"><br>";
+    print "</form>"; ####end of form
+print '<div id="allSeqPFM" name="allSeqPFM"><span class="red">No matrix built yet!</span></div>'; 
     }
 }
+
 
 ###  print out the html tail template
 my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
@@ -837,14 +985,23 @@ sub print_tf_attr {
 	my @classes = ();
 	my @families = ();
 	my @transcript_accessions = ();
-
+	my $species;
 	while (my $subunit=$complex->next_subunit) {
 	    my $class=!$subunit->get_class?'-':$subunit->get_class;
 	    my $fam=!$subunit->get_fam?'-':$subunit->get_fam;
 	    push(@classes,$class);
 	    push(@families,$fam);
 	    push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
+	    unless ($species) {
+		my @ens_coords = $ensdb->get_ens_chr($tr_accn);
+		$ens_coords[5]=~s/\[.*\]//g;
+		$ens_coords[5]=~s/\(.*\)//g;
+		$ens_coords[5]=~s/\.//g;
+		$species = $ensdb->current_org();
+		$species = ucfirst($species);
+	    }
 	}
+	unless ($species) { $species='-';}
 	my $traccns=join('<br>',@transcript_accessions);
 	my $trclasses=join('<br>',@classes);
 	my $trfams=join('<br>',@families);
@@ -852,8 +1009,9 @@ sub print_tf_attr {
 ########### start of HTML table
 	print<<COLNAMES;
 	<table class="summarytable">
+<tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tfname</td></tr>
-	    <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$tfname">$pazartfid</a></td></tr>
+	    <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid">$pazartfid</a></td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 	    <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
@@ -862,12 +1020,13 @@ COLNAMES
 
 ########### start of HTML table
 	print<<COLNAMES2;	    
-	<table class="evidencetableborder"><tr>
-	    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
+<div id="desc$pazartfid" name="desc$pazartfid" class="seqTableDiv">
+<table id="SummaryTable$pazartfid" class="evidencetableborder"><tr>
+    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
 	    
 COLNAMES2
 	print "<td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>";
-	print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span></td>";
+	print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>";
 	print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
 	print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
 	print "<td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
@@ -877,6 +1036,7 @@ COLNAMES2
 	    print "<p class=\"warning\">No target could be found for this TF!</p><br>";
 	    next;
 	}
+
 	my @rsids;
 	my @coids;
 	while (my $site=$complex->next_target) {
@@ -948,13 +1108,25 @@ COLNAMES2
 	    print TMP $construct_seq."\n";
 	    $bg_color = 1 - $bg_color;
 	}
-	print "</table>";
+	print "</table></div><br>";
+
+print<<Select_buttons;
+<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$pazartfid');">
+<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$pazartfid','genomic');">
+<input type="button" name="selecttype2" id="selecttype2" value="Select artificial sequences" onclick="selectbytype('SummaryTable$pazartfid','construct');">
+<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$pazartfid');"><br><br>
+Select_buttons
+ 
 	close (TMP);
 
 	if ($count<2) {
 	    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p><br>";
 	    next;
 	} else {
+	    	#Ajax call, no callback func defined for now
+	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$pazartfid."','memediv".$pazartfid."')\">&nbsp&nbsp(from $pazartfid only; see bottom of the page to combine sequences from multiple TFs)<br><br>
+	    		<div id='memediv".$pazartfid."' name='memediv".$pazartfid."'>Not generated</div><br><br>";
+=non-ajax
 
 	    my $patterngen =
 		TFBS::PatternGen::MEME->new(-seq_file=> "$file",
@@ -980,8 +1152,9 @@ COLNAMES2
 		print "</table><br>";
 ########### end of HTML table
 	    }
+=cut
+
 	}
-	print "<br><br>";
     }
     return $seqcounter;
 }

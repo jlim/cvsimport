@@ -581,7 +581,7 @@ COLNAMES2
 		}
                 print "</tr>";
 
-		my $construct_name=$cor_accn."_site".$count;
+		my $construct_name=$pazartfid."_site".$count;
 		print TMP ">".$construct_name."\n";
 		my $construct_seq=$site->get_seq;
 		$construct_seq=~s/N//ig;
