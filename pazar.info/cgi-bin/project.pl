@@ -99,7 +99,7 @@ my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_
 
 my $projid = $dbh->get_projectid();
 
-print "<h1>PAZAR Project View: \'$proj\'</h1>";
+print "<h1>PAZAR Project View: \'$proj\' <a href='$pazar_cgi/help_FAQ.pl#5.%20Search%20within%20a%20specific%20Boutique%20Project' target='helpwin' onClick=\"window.open('about:blank','helpwin');\"><img src=\"$pazar_html/images/help.gif\" alt='Help' align='bottom' width=12></a></h1>";
 print "<p><span class=\"title4\">Description</span><br>";
 print $descrip."<br>";
 print "</p>";

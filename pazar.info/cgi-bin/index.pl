@@ -273,9 +273,10 @@ print<<page;
 <table border="0" cellpadding="0" cellspacing="0" width="550">
 <tbody><tr><td style="text-align:justify"><b>WELCOME TO PAZAR MALL!</b>&nbsp&nbsp&nbsp<a href="#" onclick = "showHide('details');"><small>Learn More</small></a><br>
 <div id="details" style='display:none'>
-PAZAR can be searched by <a href="$pazar_cgi/gene_search.cgi">Gene</a>, <a href="$pazar_cgi/tf_search.cgi">Transcription Factor</a> or <a href="$pazar_cgi/profilesearch.pl">Profile</a> by clicking on one of the department stores below.<br>
+PAZAR is your one stop shopping experience for transcription factors and regulatory sequence annotations. PAZAR can be searched by <a href="$pazar_cgi/gene_search.cgi">Gene</a>, <a href="$pazar_cgi/tf_search.cgi">Transcription Factor</a> or <a href="$pazar_cgi/profilesearch.pl">Profile</a> by clicking on one of the department stores below.<br>
 Each project in PAZAR is a boutique in the mall. You can limit your search to a specific project by clicking on the corresponding boutique on the mall map.<br>
-If you own restricted projects, log in and they will appear in the mall map. If you just created a project and it does not appear on the mall map, please log out and log in again.</td></tr></tbody></table>
+If you own restricted projects, log in and they will appear in the mall map. If you just created a project and it does not appear on the mall map, please log out and log in again.<br><br>
+<a href="$pazar_html/tutorials/Overview.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Mall Overview and Introduction Tutorial</a>  (2 min)</td></tr></tbody></table>
 <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0" width="600" height="700" id="TF_Mall" align="middle">
 <param name="allowScriptAccess" value="sameDomain" />
 page

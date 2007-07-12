@@ -52,20 +52,22 @@ print<<page;
  <ul type=disc><li>A software framework for the construction and maintenance of regulatory sequence data annotations which allows multiple boutique databases to function independently within a larger system (or information mall). For more information, see the <a href="$pazar_cgi/overview.pl">Overview</a> section.</li></ul>
 
 <a name="Tutorials"></a><p class="title3">Tutorials</p>
- <ul type=disc><li>Mall Overview and Introduction:  <a href="$pazar_html/tutorials/Overview.htm">Overview tutorial</a>  (2 min)</li></ul>
- <ul type=disc><li>Search by Gene:  <a href="$pazar_html/tutorials/Gene.htm">Gene Search tutorial</a>  (2:27 min)</li></ul>
- <ul type=disc><li>Search by Transcription Factor:  <a href="$pazar_html/tutorials/tf.htm">TF Search tutorial</a>  (3:02 min)</li></ul>
- <ul type=disc><li>Search by Transcription Factor Binding Profile:  <a href="$pazar_html/tutorials/TF_Binding_Profile_Search.htm">TF Profile Search tutorial</a>  (0:54 min)</li></ul>
- <ul type=disc><li>Search within a specific Boutique Project:  <a href="$pazar_html/tutorials/boutique.htm">Boutique Search tutorial</a>  (1:02 min)</li></ul>
+ <ul type=disc><li>Mall Overview and Introduction:  <a href="$pazar_html/tutorials/Overview.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Overview Tutorial</a>  (2 min)</li></ul>
+ <ul type=disc><li>Search by Gene:  <a href="$pazar_html/tutorials/Gene.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Gene Search Tutorial</a>  (2:27 min)</li></ul>
+ <ul type=disc><li>Search by Transcription Factor:  <a href="$pazar_html/tutorials/tf.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">TF Search Tutorial</a>  (3:02 min)</li></ul>
+ <ul type=disc><li>Search by Transcription Factor Binding Profile:  <a href="$pazar_html/tutorials/TF_Binding_Profile_Search.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">TF Profile Search Tutorial</a>  (0:54 min)</li></ul>
+ <ul type=disc><li>Search within a specific Boutique Project:  <a href="$pazar_html/tutorials/boutique.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Boutique Search Tutorial</a>  (1:02 min)</li></ul>
 
 <a name="PAZAR Search Interface"></a><p class="title3">PAZAR Search Interface</p>
 <a name="1. PAZAR Mall Overview"></a><p class="title4 margin">1. PAZAR Mall Overview</p>
 <p>The PAZAR Mall is the graphic user interface for the PAZAR database. Boutique datasets within PAZAR are represented by stores within the mall. In addition, the mall has six separate floors that are accessible via the escalator. Boutique datasets can be made public or private as is needed, and all boutique datasets are listed in the mall directory found at the bottom of the page.<br>
 Three general query types can be conducted within PAZAR. 
 Users can search PAZAR by gene, by TF, or by TF-binding profile simply by clicking on their corresponding department stores found at the ends of the mall. A more in-depth discussion of each of these search types may be found in the search type specific tutorials. While each of these queries will consider all of the public data within PAZAR, queries of specific boutique datasets can also be performed by clicking on their corresponding stores or their names listed in the mall directory found at the bottom of the page. PAZAR contact information is accessible via the information booth, found at the centre of the mall. In addition, links to other relevant internet sources, and PAZAR export formats are accessible via buttons found at the far left of the PAZAR main page.</p>
+<p><a href="$pazar_html/tutorials/Overview.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Mall Overview and Introduction Tutorial</a>  (2 min)</p>
 <a name="2. Search by Gene"></a><p class="title4 margin">2. Search by Gene</p>
 <a name="2.1 Introduction"></a><p class="bold margin2">2.1. Introduction</p>
 <p>In order to search PAZAR by gene, click on the 'Genes' department store at the upper right corner of the mall. This causes a query window to appear. Here, users have multiple options for their gene-specific query. Users can view the list of all genes in PAZAR for a given boutique database by clicking on the 'View Gene List' button. Alternatively, users can search for a specific gene within all of PAZAR based upon several gene-specific identifiers.</p>
+<p><a href="$pazar_html/tutorials/Gene.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Gene Search Tutorial</a>  (2:27 min)</p>
 <a name="2.2 Gene identifiers"></a><p class="bold margin2">2.2 Gene identifiers</p>
 <p><b><u>User Defined Gene Name:</u> </b><font color='red'>(eg. GFAP)</font><br>
 Gene symbol as defined by the user. We do not automatically use official symbols as they vary across species. The results will display all entries containing the provided subset of characters.<br>
@@ -92,6 +94,7 @@ Providing a PAZAR Sequence ID will directly open the Sequence View for this part
 <a name="3. Search by Transcription Factor"></a><p class="title4 margin">3. Search by Transcription Factor</p>
 <a name="3.1 Introduction"></a><p class="bold margin2">3.1. Introduction</p>
 <p>To search PAZAR by TF, click on the 'TFMART' department store found at the left hand side of the mall. This causes a query window to appear. Users can view the list of all TFs in PAZAR for a given boutique database by clicking on the 'View TF List' button. Alternatively, users can search for a specific TF within all of PAZAR based upon several TF-specific identifiers.</p>
+<p><a href="$pazar_html/tutorials/tf.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">TF Search Tutorial</a>  (3:02 min)</p>
 <a name="3.2 TF identifiers"></a><p class="bold margin2">3.2 TF identifiers</p>
 <p><b><u>User Defined TF Name:</u> </b><font color='red'>(eg. NF1)</font><br>
 TF name as defined by the user. We will be using soon a controlled vocabulary to replace this free text. The results will display all entries containing the provided subset of characters.<br>
@@ -114,8 +117,10 @@ PAZAR TF IDs are unique to a project. Therefore, the same TF (same EnsEMBL Gene 
 Timothy L. Bailey and Charles Elkan, "Fitting a mixture model by expectation maximization to discover motifs in biopolymers", Proceedings of the Second International Conference on Intelligent Systems for Molecular Biology, pp. 28-36, AAAI Press, Menlo Park, California, 1994.</p>
 <a name="4. Search by Transcription Factor Binding Profile"></a><p class="title4 margin">4. Search by Transcription Factor Binding Profile</p>
 <p>To search PAZAR by transcription factor binding profile, click on the 'TF PROFILES' department store found near to the bottom of the mall. This will cause a query window to appear. Users can retrieve TF binding profiles sorted by their associated project, name, species, or class by clicking on the corresponding buttons found near to the middle of the query page. On the PAZAR TF Binding Profile view, users are provided with a summary table with specific data for each transcription factor. Clicking 'More', found at the right hand side of the screen causes a secondary window to appear with even more detailed information regarding that specific transcription factor. The binding profiles in PAZAR are dynamically generated using the MEME software.</p>
+<p><a href="$pazar_html/tutorials/TF_Binding_Profile_Search.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">TF Profile Search Tutorial</a>  (0:54 min)</p>
 <a name="5. Search within a specific Boutique Project"></a><p class="title4 margin">5. Search within a specific Boutique Project</p>
 <p>One might desire to limit queries to a single collection. To do so, the user must find the corresponding boutique in the mall map or directory and click on it. The 'Project View' provides a brief description of the dataset as well as some statistics on the data it contains. Below, the user can choose amongst various filters to search through the data and display it in the 'Gene View', where regulatory sequences will be grouped by the genes they regulate, or in the 'TF View', where the sequences are grouped by the TFs that bind to them.</p>
+<p><a href="$pazar_html/tutorials/boutique.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Boutique Search Tutorial</a>  (1:02 min)</p>
 <a name="PAZAR Submission Interface"></a><p class="title3">PAZAR Submission Interface</p>
 <a name="1. Introduction"></a><p class="title4 margin">1. Introduction</p>
 <p> To enter data into PAZAR please follow those steps:<br>

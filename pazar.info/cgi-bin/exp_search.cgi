@@ -72,7 +72,7 @@ else
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<page;
-<h1>PAZAR Analysis View</h1>
+<h1>PAZAR Analysis View <a href='$pazar_cgi/help_FAQ.pl#2.5%20Analysis%20View' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody><tr>
               <td colspan="2">
