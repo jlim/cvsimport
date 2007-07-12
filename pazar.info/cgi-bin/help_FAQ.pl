@@ -82,7 +82,7 @@ UniProtKB/Swiss-Prot ID.  This ID will be converted to an EnsEMBL gene ID first.
 <b><u>PAZAR Gene ID:</u> </b><font color='red'>(eg. GS0000217</font>)<br>
 PAZAR Gene IDs are unique to a project. Therefore, the same gene (same EnsEMBL Gene ID) will have different PAZAR Gene IDs if annotated in different projects. Use EnsEMBL Gene IDs to get all data about a gene across projects.<br>
 <b><u>PAZAR Sequence ID:</u> </b><font color='red'>(eg. RS0000226)</font><br>
-Providing a PAZAR Sequence ID will open directly the sequence view for this particular sequence.</p>
+Providing a PAZAR Sequence ID will directly open the Sequence View for this particular sequence.</p>
 <a name="2.3 Gene View"></a><p class="bold margin2">2.3 Gene View</p>
 <p>At the top of the Gene View page is a summary table of all of the genes obtained from the search. By clicking on the magnifying glass next to the PAZAR gene ID, users will be taken directly to the specific data for their gene of interest. Within this section, users find a gene-specific summary table followed by a list of all of the PAZAR regulatory sequences that correspond to that gene. Users can visualize the genomic context of each regulatory sequence by clicking on the links to the UCSC Genome Browser and Ensembl found at the far right of the page. Also, by clicking on the regulatory sequence ID for a specific regulatory sequence, found in the far left column, users can access the PAZAR Sequence view for that sequence.</p>
 <a name="2.4 Sequence View"></a><p class="bold margin2">2.4 Sequence View</p>
