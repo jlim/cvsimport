@@ -21,14 +21,14 @@ print<<Page;
 <p class="title1">PAZAR - Links</p>
 <hr color='black'>
 <p class="title2">Content</p>
-<a href="#1. Useful Softwares"><span class="title2">1. Useful Software</span></a><br>
+<a href="#1. Useful Software"><span class="title2">1. Useful Software</span></a><br>
 <a href="#1.1 Introduction"><span class="title4 margin">1.1 Introduction</span></a><br>
 <a href="#1.2 Software Classes"><span class="title4 margin">1.2 Software Classes</span></a><br>
 <a href="#1.3 Software List"><span class="title4 margin">1.3 Software List</span></a><br>
 <a href="#2. Regulatory Datasets"><span class="title2">2. Regulatory Datasets</span></a><br>
 <p>For additional useful links see also <a href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104" target='extlinks' onClick="windowopen('about:blank','extlinks');">http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104</a></p>
 <hr color='black'>
-<a name='1. Useful Software'></a><p class="title2">1. Useful Softwares</p>
+<a name='1. Useful Software'></a><p class="title2">1. Useful Software</p>
 <a name='1.1 Introduction'></a><p class="title4 margin">1.1 Introduction</p>
 <p>The data found within PAZAR can be used in association with a large array of online resources.  We do not directly provide such tools within PAZAR.  We believe the data should be accessed by sequence analysis tools through the PAZAR software interface. For now, one must still copy data from PAZAR and paste it into the web services you choose to use.  The following list of resources is not comprehensive.  If you have encountered a program that you think is noteworthy, please let us know.</p>
 <a name='1.2 Software Classes'></a><p class="title4 margin">1.2 Software Classes</p>
