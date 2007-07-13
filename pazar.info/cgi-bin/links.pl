@@ -18,8 +18,100 @@ $template->param(PAZAR_CGI => $pazar_cgi);
 print "Content-Type: text/html\n\n", $template->output;
 
 print<<Page;
-          <p class="title1">PAZAR - Links</p>
-<p class="title2">Regulatory Datasets</p>
+<p class="title1">PAZAR - Links</p>
+<hr color='black'>
+<p class="title2">Content</p>
+<a href="#1. Useful Softwares"><span class="title2">1. Useful Softwares</span></a><br>
+<a href="#1.1 Introduction"><span class="title4 margin">1.1 Introduction</span></a><br>
+<a href="#1.2 Software Classes"><span class="title4 margin">1.2 Software Classes</span></a><br>
+<a href="#1.3 Software List"><span class="title4 margin">1.3 Software List</span></a><br>
+<a href="#2. Regulatory Datasets"><span class="title2">2. Regulatory Datasets</span></a><br>
+<p>For additional useful links see also <a href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104" target='extlinks' onClick="windowopen('about:blank','extlinks');">http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104</a></p>
+<hr color='black'>
+<a name='1. Useful Softwares'></a><p class="title2">1. Useful Softwares</p>
+<a name='1.1 Introduction'></a><p class="title4 margin">1.1 Introduction</p>
+<p>The data found within PAZAR can be used in association with a large array of online resources.  We do not directly provide such tools within PAZAR.  We believe the data should be accessed by sequence analysis tools through the PAZAR software interface. The following list of resources is not comprehensive.  If you have encountered a program that you think is noteworthy, please let us know.</p>
+<a name='1.2 Software Classes'></a><p class="title4 margin">1.2 Software Classes</p>
+<table class='summarytable'>
+<tbody><tr>
+<td class='basictd' style="text-align: center;"><b>Software Class</b></td>
+<td class='basictd' style="text-align: center;"><b>Explanation</b></td></tr>
+<tr>
+<td class='basictd'>TFBS Discrimination</td>
+<td class='basictd'>Given a count matrix summarizing the binding sites for a TF, predict TFBS in a sequence of your choice.</td></tr>
+<tr>
+<td class='basictd'>Pattern Discovery</td>
+<td class='basictd'>Given a set of regulatory sequences, you wish to find new patterns that might be a novel type of TFBS.</td></tr>
+<tr>
+<td class='basictd'>TFBS Over-representation</td>
+<td class='basictd'>Given a set of genes and a count matrix, you wish to determine if the pattern defined by the count matrix is significantly enriched compared to background.
+Unfortunately there is no TFBS over-representation tool that allows for user-submitted binding profiles.  Tools like oPOSSUM must analyze enormous numbers of genes to perform the analysis and therefore do not offer submission (yet).</td></tr>
+<tr>
+<td class='basictd'>TFBS Model Comparison</td>
+<td class='basictd'>You have recovered a new TFBS pattern (count matrix) and wish to see if the pattern resembles other known TFBS profiles. Once you find a pattern, it is natural to want to compare it against a database of patterns to see if it matches a characterized type of TFBS.</td></tr>
+<tr>
+<td class='basictd'>TFBS Combination Detection</td>
+<td class='basictd'>You have a set of TFBS count matrices (1 or more), and wish to find segments in a DNA sequence significantly enriched for combinations of matches to the pattern(s).</td></tr>
+<tr>
+<td class='basictd'>TF Information</td>
+<td class='basictd'>Sometimes you need to look up information about a gene or protein.  Everyone knows about EnrezGene and UniProt.  You might also try www.transcriptionfactors.org</td></tr>
+</tbody></table>
+<a name='1.3 Software List'></a><p class="title4 margin">1.3 Software List</p>
+<table class='summarytable'>
+<tbody><tr>
+<td class='basictd' style="text-align: center;"><b>Name</b></td>
+<td class='basictd' style="text-align: center;"><b>Class(es)</b></td>
+<td class='basictd' style="text-align: center;"><b>URL</td></b></tr>
+<tr>
+<td class='basictd'>AHAB</td>
+<td class='basictd'>TFBS Combination Detection</td>
+<td class='basictd'><a href='http://gaspard.bio.nyu.edu/Ahab.html'>http://gaspard.bio.nyu.edu/Ahab.html</a></td></tr>
+<tr>
+<td class='basictd'>Cluster Buster</td>
+<td class='basictd'>TFBS Combination Detection</td>
+<td class='basictd'><a href='http://zlab.bu.edu/cluster-buster/cbust.html'>http://zlab.bu.edu/cluster-buster/cbust.html</a></td></tr>
+<tr>
+<td class='basictd'>ConSite</td>
+<td class='basictd'>TFBS Discrimination</td>
+<td class='basictd'><a href='http://asp.ii.uib.no:8090/cgi-bin/CONSITE/consite/'>http://asp.ii.uib.no:8090/cgi-bin/CONSITE/consite/</a></td></tr>
+<tr>
+<td class='basictd'>CRE works</td>
+<td class='basictd'>TFBS Discrimination<br>TFBS Combination Detection</td>
+<td class='basictd'><a href='http://genereg.ornl.gov/scancre/'>http://genereg.ornl.gov/scancre/</a></td></tr>
+<tr>
+<td class='basictd'>FOOTER</td>
+<td class='basictd'>TFBS Discrimination</td>
+<td class='basictd'><a href='http://biodev.hgen.pitt.edu/footer_php/Footerv2_0.php'>http://biodev.hgen.pitt.edu/footer_php/Footerv2_0.php</a></td></tr>
+<tr>
+<td class='basictd'>JASPAR</td>
+<td class='basictd'>TFBS Model Comparison</td>
+<td class='basictd'><a href='http://jaspar.genereg.net/'>http://jaspar.genereg.net/</a></td></tr>
+<tr>
+<td class='basictd'>MAST</td>
+<td class='basictd'>TFBS Discrimination<br>TFBS Combination Detection</td>
+<td class='basictd'><a href='http://meme.sdsc.edu/meme/mast.html'>http://meme.sdsc.edu/meme/mast.html</a></td><tr>
+<td class='basictd'>MSCAN</td>
+<td class='basictd'>TFBS Combination Detection</td>
+<td class='basictd'></td></tr>
+</td></tr>
+<tr>
+<td class='basictd'>RSA TOOLS</td>
+<td class='basictd'>TFBS Discrimination<br>Pattern Discovery</td>
+<td class='basictd'><a href='http://rsat.ulb.ac.be/rsat/'>http://rsat.ulb.ac.be/rsat/</a></td></tr>
+<tr>
+<td class='basictd'>STAMP</td>
+<td class='basictd'>TFBS Model Comparison</td>
+<td class='basictd'><a href='http://www.benoslab.pitt.edu/stamp/'>http://www.benoslab.pitt.edu/stamp/</a></td></tr>
+<tr>
+<td class='basictd'>TOUCAN</td>
+<td class='basictd'>TFBS Discrimination<br>Pattern Discovery<br>TFBS Combination Detection</td>
+<td class='basictd'><a href='http://homes.esat.kuleuven.be/~saerts/software/toucan.php'>http://homes.esat.kuleuven.be/~saerts/software/toucan.php</a></td></tr>
+<tr>
+<td class='basictd'>WebMotifs</td>
+<td class='basictd'>Pattern Discovery</td>
+<td class='basictd'><a href='http://fraenkel.mit.edu/webmotifs/'>http://fraenkel.mit.edu/webmotifs/</a></td></tr>
+</tbody></table><br><br>
+<a name='2. Regulatory Datasets'></a><p class="title2">2. Regulatory Datasets</p>
 
 <table class='summarytable'>
 
@@ -27,11 +119,11 @@ print<<Page;
 
     <tr>
 
-      <td class='basictd' style="width: 98px; text-align: center;">Name</td>
+      <td class='basictd' style="width: 98px; text-align: center;"><b>Name</b></td>
 
-      <td class='basictd' style="width: 406px; text-align: center;">Description</td>
+      <td class='basictd' style="width: 406px; text-align: center;"><b>Description</b></td>
 
-      <td class='basictd' style="text-align: center; width: 361px;">URL</td>
+      <td class='basictd' style="text-align: center; width: 361px;"><b>URL</b></td>
 
     </tr>
 
@@ -524,14 +616,8 @@ the community through EDGEdb (elegans differential gene expression data)</td>
       <td class='basictd' style="width: 361px;"><a href="http://enhancer.lbl.gov/" mce_href="http://enhancer.lbl.gov" rel="nofollow" linktype="raw" linktext="http://enhancer.lbl.gov">http://enhancer.lbl.gov</a></td>
 
     </tr>
-
-  
-  </tbody>
-</table>
-
-<br><br>
-For additional useful links see also <a href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104">http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104</a>
-
+</tbody>
+</table><br>
 Page
 
 
