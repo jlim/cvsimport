@@ -138,18 +138,20 @@ if ($accn) {
     } elsif ($dbaccn eq 'PAZAR_gene') {
 	unless ($accn=~/GS\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {$gene='PAZARid';}
     } elsif ($dbaccn eq 'EnsEMBL_gene') {
-	unless ($accn=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$accn;}
+	my @gene = $ensdb->ens_transcripts_by_gene($accn);
+	$gene=$gene[0];
+ 	unless ($gene) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$accn;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$gene=$gene[0];
-        unless ($gene=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+        unless ($gene) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
         my $species=$gkdb->llid_to_org($accn);
         if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
         $ensdb->change_mart_organism($species);
         my @gene=$ensdb->llid_to_ens($accn);
 	$gene=$gene[0];
-	unless ($gene=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($gene) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } else {
 	my $ens = convert_id($ensdb,$gkdb,$dbaccn,$accn);
 	if (!$ens) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;} else {$gene=$ens;}
@@ -250,6 +252,8 @@ SUMMARY_HEADER
     my $regseq_counter = 0; # counter for naming forms
     foreach my $gene_data (@gene_info) {
 	$species=$gene_data->{species};
+	my $ensspecies=$species;
+	$ensspecies=~s/ /_/g;
 	$pazargeneid=$gene_data->{ID};
 	$geneName=$gene_data->{desc};
 	$gene=$gene_data->{accn};
@@ -265,9 +269,9 @@ print<<HEADER_TABLE;
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class=\"basictd\">$geneName</td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene</td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene" target='enswin' onClick="window.open('about:blank','enswin');">$gene</a></td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
-<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class=\"basictd\">$proj</td></tr>
+<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class=\"basictd\"><a href="$pazar_cgi/project.pl?project_name=$proj">$proj</a></td></tr>
 </table><br>
 HEADER_TABLE
 

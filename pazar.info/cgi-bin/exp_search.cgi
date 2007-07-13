@@ -203,11 +203,11 @@ print<<HEADER_TABLE;
 <tr><td class="analysistabletitle"><span class="title4">Analysis Method</span></td><td class="basictd">$met[0]</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Cell Type</span></td><td class="basictd">$cellinfo</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Time</span></td><td class="basictd">$timeinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Reference (PMID)</span></td><td class="basictd">$ref[0]</td></tr>
+<tr><td class="analysistabletitle"><span class="title4">Reference (PMID)</span></td><td class="basictd"><a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$ref[0]" target='pubwin' onClick="window.open('about:blank','pubwin');">$ref[0]</a></td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Comments</span></td><td class="basictd">$comments</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Evidence</span></td><td class="basictd">$evinfo</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Annotator</span></td><td class="basictd">$userinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Project</span></td><td class="basictd">$res[0]</td></tr></table>
+<tr><td class="analysistabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr></table>
 HEADER_TABLE
 
 my @analysis=$dbh->get_analysis_structure_by_id($aid);
@@ -323,7 +323,7 @@ if ($mode eq 'expression') {
 	    }
 	    if ($mut[3]>0) {
 		my @mutref=$dbh->get_data_by_primary_key('ref',$mut[3]);
-		print "<b>PMID:</b> $mutref[0]<br>";
+		print "<b>PMID:</b> <a href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$mutref[0]\" target='pubwin' onClick=\"window.open('about:blank','pubwin');\">$mutref[0]</a><br>";
 	    }
 	    if ($mut[5] && $mut[5] ne '0') {
 		print "<b>Comments:</b> $mut[5]<br>";
@@ -469,7 +469,7 @@ if ($mode eq 'expression') {
 	    }
 	    if ($mut[3]>0) {
 		my @mutref=$dbh->get_data_by_primary_key('ref',$mut[3]);
-		print "<b>PMID:</b> $mutref[0]<br>";
+		print "<b>PMID:</b> <a href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$mutref[0]\" target='pubwin' onClick=\"window.open('about:blank','pubwin');\">$mutref[0]</a><br>";
 	    }
 	    if ($mut[5] && $mut[5] ne '0') {
 		print "<b>Comments:</b> $mut[5]<br>";

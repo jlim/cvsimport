@@ -303,16 +303,17 @@ if ($accn) {
 	unless ($accn=~/TF\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {@trans = ('PAZARid');}
     }if ($dbaccn eq 'EnsEMBL_gene') {
 	@trans = $ensdb->ens_transcripts_by_gene($accn);
-        unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+        unless ($trans[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
+	my @gene = $ensdb->ens_transcr_to_gene($accn);
+        unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	push @trans,$accn;
-        unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'EntrezGene') {
 	my $species=$gkdb->llid_to_org($accn);
 	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	$ensdb->change_mart_organism($species);
 	my @gene=$ensdb->llid_to_ens($accn);
-	unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
     } elsif ($dbaccn eq 'nm') {
 	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, ll_refseq_nm b where a.ll_id=b.ll_id and b.nm_accn=?");
@@ -321,9 +322,9 @@ if ($accn) {
 	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
 	$ensdb->change_mart_organism($species);
 	my @gene=$ensdb->nm_to_ens($accn);
-	unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
-	unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($trans[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'swissprot') {
 	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
 	$sp->execute($accn)||die;
@@ -331,9 +332,9 @@ if ($accn) {
 	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	$ensdb->change_mart_organism($species);
 	@gene =$ensdb->swissprot_to_ens($accn);
-	unless ($gene[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
 	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
-	unless ($trans[0]=~/\w{2,}\d{4,}/) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
+	unless ($trans[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
     } elsif ($dbaccn eq 'tf_name') {
 	@trans = ('none');
 	$tfname = '%'.$accn.'%';
@@ -482,7 +483,6 @@ HEADER_TABLE
 		push(@classes,$class);
 		push(@families,$fam);
 		my $tr_accn=$subunit->get_transcript_accession($dbh);
-		push(@transcript_accessions, $tr_accn);
 		unless ($species) {
 		    my @ens_coords = $ensdb->get_ens_chr($tr_accn);
 		    $ens_coords[5]=~s/\[.*\]//g;
@@ -491,6 +491,10 @@ HEADER_TABLE
 		    $species = $ensdb->current_org();
 		    $species = ucfirst($species);
 		}
+		my $ensspecies=$species;
+		$ensspecies=~s/ /_/g;
+		my $link_tr_accn="<a href=\"http://www.ensembl.org/$ensspecies/geneview?gene=$tr_accn\" target='enswin' onClick=\"window.open('about:blank','enswin');\">$tr_accn</a>";
+		push(@transcript_accessions, $link_tr_accn);
 	    }
 	    unless ($species) { $species='-';}
 	    my $traccns=join('<br>',@transcript_accessions);

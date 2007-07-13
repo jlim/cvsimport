@@ -568,7 +568,10 @@ my $filter =
 	    $filt=1;
 	    my $gene_accn = $regseq->gene_accession;
 	    my $gene_desc = $regseq->gene_description || '';
-	    my $gene_sp = $regseq->binomial_species;
+	    my $lcsp = lc($regseq->binomial_species);
+	    my $gene_sp = ucfirst($lcsp);
+	    my $ensspecies=$gene_sp;
+	    $ensspecies=~s/ /_/g;
 	    my $pazargeneid = write_pazarid($regseq->PAZAR_gene_ID,'GS');
 	    if ($gene_accn ne $prev_gene_accn) {
 		if ($prev_gene_accn) {print "</table><br><br>";}
@@ -586,7 +589,7 @@ print<<HEADER_TABLE;
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$gene_sp</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class="basictd"><form name="genelink$pazargeneid[0]" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$gene_accn"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</form></td></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$gene_desc</td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene_accn</td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accn" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accn</a></td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
 </table><br>
 HEADER_TABLE
@@ -991,7 +994,7 @@ sub print_tf_attr {
 	    my $fam=!$subunit->get_fam?'-':$subunit->get_fam;
 	    push(@classes,$class);
 	    push(@families,$fam);
-	    push(@transcript_accessions, $subunit->get_transcript_accession($dbh));
+	    my $tr_accn=$subunit->get_transcript_accession($dbh);
 	    unless ($species) {
 		my @ens_coords = $ensdb->get_ens_chr($tr_accn);
 		$ens_coords[5]=~s/\[.*\]//g;
@@ -1000,6 +1003,11 @@ sub print_tf_attr {
 		$species = $ensdb->current_org();
 		$species = ucfirst($species);
 	    }
+	    my $ensspecies=$species;
+	    $ensspecies=~s/ /_/g;
+	    my $link_tr_accn="<a href=\"http://www.ensembl.org/$ensspecies/geneview?gene=$tr_accn\" target='enswin' onClick=\"window.open('about:blank','enswin');\">$tr_accn</a>";
+	    push(@transcript_accessions, $link_tr_accn);
+
 	}
 	unless ($species) { $species='-';}
 	my $traccns=join('<br>',@transcript_accessions);

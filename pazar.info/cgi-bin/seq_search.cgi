@@ -181,6 +181,8 @@ my $quality=$reg_seq->quality||'-';
 
 my $species = $ensdb->current_org();
 $species = ucfirst($species)||'-';
+my $ensspecies=$species;
+$ensspecies=~s/ /_/g;
 
 my $transcript=$reg_seq->transcript_accession || '-';
 
@@ -204,9 +206,9 @@ print<<HEADER_TABLE;
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$geneName</td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$gene_accession</td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accession" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accession</a></td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
-<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class="basictd">$res[0]</td></tr>
+<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr>
 </table></td></tr>
 <tr><td><span class="title2">Sequence Details</span><br>
 <table class="evidencetableborder">
@@ -300,7 +302,7 @@ foreach my $inter (@interactors) {
     }
 
     my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$ref[0]."</div></td>";
+    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$ref[0]\" target='pubwin' onClick=\"window.open('about:blank','pubwin');\">$ref[0]</a></div></td>";
 
     print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
     my @mutants=$dbh->get_mutants_by_analysis_id($inter->{aid});
@@ -430,7 +432,7 @@ foreach my $exp (@expressors) {
     print join(" ",@data)."</div></td>";
 
     my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$ref[0]."</div></td>";
+    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$ref[0]\" target='pubwin' onClick=\"window.open('about:blank','pubwin');\">$ref[0]</a></div></td>";
 
     print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
     my @mutants=$dbh->get_mutants_by_analysis_id($exp->{aid});
