@@ -21,16 +21,16 @@ print<<Page;
 <p class="title1">PAZAR - Links</p>
 <hr color='black'>
 <p class="title2">Content</p>
-<a href="#1. Useful Softwares"><span class="title2">1. Useful Softwares</span></a><br>
+<a href="#1. Useful Softwares"><span class="title2">1. Useful Software</span></a><br>
 <a href="#1.1 Introduction"><span class="title4 margin">1.1 Introduction</span></a><br>
 <a href="#1.2 Software Classes"><span class="title4 margin">1.2 Software Classes</span></a><br>
 <a href="#1.3 Software List"><span class="title4 margin">1.3 Software List</span></a><br>
 <a href="#2. Regulatory Datasets"><span class="title2">2. Regulatory Datasets</span></a><br>
 <p>For additional useful links see also <a href="http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104" target='extlinks' onClick="windowopen('about:blank','extlinks');">http://bioinformatics.ubc.ca/resources/links_directory/?subcategory_id=104</a></p>
 <hr color='black'>
-<a name='1. Useful Softwares'></a><p class="title2">1. Useful Softwares</p>
+<a name='1. Useful Software'></a><p class="title2">1. Useful Softwares</p>
 <a name='1.1 Introduction'></a><p class="title4 margin">1.1 Introduction</p>
-<p>The data found within PAZAR can be used in association with a large array of online resources.  We do not directly provide such tools within PAZAR.  We believe the data should be accessed by sequence analysis tools through the PAZAR software interface. The following list of resources is not comprehensive.  If you have encountered a program that you think is noteworthy, please let us know.</p>
+<p>The data found within PAZAR can be used in association with a large array of online resources.  We do not directly provide such tools within PAZAR.  We believe the data should be accessed by sequence analysis tools through the PAZAR software interface. For now, one must still copy data from PAZAR and paste it into the web services you choose to use.  The following list of resources is not comprehensive.  If you have encountered a program that you think is noteworthy, please let us know.</p>
 <a name='1.2 Software Classes'></a><p class="title4 margin">1.2 Software Classes</p>
 <table class='summarytable'>
 <tbody><tr>
@@ -350,19 +350,6 @@ the community through EDGEdb (elegans differential gene expression data)</td>
 
     <tr>
 
-      <td class='basictd' style="width: 98px;">Hughes, Tim</td>
-
-      <td class='basictd' style="width: 406px;"> Tim Hughes at UT is doing mouse TF binding arrays with Bulyk <br>
-
-      <a href="http://hugheslab.med.utoronto.ca/" mce_href="http://hugheslab.med.utoronto.ca/" rel="nofollow" linktype="raw" linktext="http://hugheslab.med.utoronto.ca/"></a></td>
-
-      <td class='basictd' style="width: 361px;">
- <a href="http://hugheslab.med.utoronto.ca/" mce_href="http://hugheslab.med.utoronto.ca/" rel="nofollow" linktype="raw" linktext="http://hugheslab.med.utoronto.ca/">http://hugheslab.med.utoronto.ca/</a></td>
-
-    </tr>
-
-    <tr>
-
       <td class='basictd' style="width: 98px; color: rgb(0, 0, 0);">JASPAR</td>
 
       <td class='basictd' style="width: 406px;">high-quality transcription factor binding profile database.</td>
@@ -550,16 +537,6 @@ the community through EDGEdb (elegans differential gene expression data)</td>
       <td class='basictd' style="width: 406px;">ENCyclopedia Of DNA Elements</td>
 
       <td class='basictd' style="width: 361px;"><a href="http://www-shgc.stanford.edu/genetics/encode.html" mce_href="http://www-shgc.stanford.edu/genetics/encode.html" rel="nofollow" linktype="raw" linktext="http://www-shgc.stanford.edu/genetics/encode.html">http://www-shgc.stanford.edu/genetics/encode.html</a></td>
-
-    </tr>
-
-    <tr>
-
-      <td class='basictd' style="width: 98px;">Stubbs, Lisa</td>
-
-      <td class='basictd' style="width: 406px;">Chemistry, Materials and Life Sciences Directorate (CMLS)</td>
-
-      <td class='basictd' style="width: 361px;"><a href="http://www.llnl.gov/bio/people/stubbs/" mce_href="http://www.llnl.gov/bio/people/stubbs/" rel="nofollow" linktype="raw" linktext="http://www.llnl.gov/bio/people/stubbs/">http://www.llnl.gov/bio/people/stubbs/</a></td>
 
     </tr>
 
