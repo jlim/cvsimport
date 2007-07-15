@@ -219,7 +219,10 @@ print<<page2b;
     </tr>
 page2b
 }
-
+my $checkcount=$dbh->prepare("SELECT count(*) FROM gene_source a, tsr b WHERE a.project_id='$projid' and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
+$checkcount->execute||die;
+my $gc=$checkcount->fetchrow_array;
+unless ($gc>1000) {
 my $gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
 $gh->execute($projid)||die DBI::errstr;
 while (my $gene=$gh->fetchrow_hashref) {
@@ -247,6 +250,14 @@ foreach my $accn (@sortedaccn) {
 	print "<option value=\"$accn\"> $gene{$accn} ($accn) </option>";
     }
 print "</select><br><br></td></tr>";
+}
+}
+else  {
+print<<page3a;
+<tr><td></td><td>
+<span style="color:red">Browse by gene disabled- over 1000 genes in this project</span>
+</td></tr>
+page3a
 }
 
 print<<page4;
