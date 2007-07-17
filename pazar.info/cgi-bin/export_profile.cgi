@@ -19,6 +19,10 @@ my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 require "$pazarcgipath/getsession.pl";
 
 my $get = new CGI;
+
+########### start of HTML table
+print $get->header("text/html");
+
 my %param = %{$get->Vars};
 
 if ($param{mode} eq 'list') {
@@ -43,7 +47,7 @@ if ($param{mode} eq 'list') {
 }
 
 # send the obligatory Content-Type and print the template output
-    print "Content-Type: text/html\n\n", $template->output;
+    print $template->output;
 
 
     my $dbh= pazar->new( 

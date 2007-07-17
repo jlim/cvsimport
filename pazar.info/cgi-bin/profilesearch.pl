@@ -33,7 +33,7 @@ print "Content-Type: text/html\n\n", $template->output;
 print<<PAGE;
 <p class="title1">PAZAR Profile Search <a href='$pazar_cgi/help_FAQ.pl#4.%20Search%20by%20Transcription%20Factor%20Binding%20Profile' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></p>
 <p><span class="title4">Description</span><br>
-This search engine is for pre-computed profiles stored in the PAZAR boutiques.<br>They might not be linked to the sequences used to built them and even not to an identifiable transcription factor. For instance, they might have been built from multiple species and/or multiple factors presenting similar binding properties.<br>If you want to build a profile from a specific Transcription Factor using all its annotated binding sites, use the <a href="$pazar_cgi/tfsearch.pl">TF Search Engine</a> where profiles are generated dynamically.</p>
+This search engine is for pre-computed profiles stored in the PAZAR boutiques.<br>They might not be linked to the sequences used to built them and even not to an identifiable transcription factor. For instance, they might have been built from multiple species and/or multiple factors presenting similar binding properties.<br>If you want to build a profile from a specific Transcription Factor using all its annotated binding sites, use the <a href="$pazar_cgi/tf_search.cgi">TF Search Engine</a> where profiles are generated dynamically.</p>
 <p><span class=\"title4\">Search Engine</span><br>
 <FORM method='post' action ="$pazar_cgi/export_profile.cgi" enctype="multipart/form-data" target="_self">Sort Profiles by: 
 <input type="hidden" name="mode" value="list">
