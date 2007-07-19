@@ -19,10 +19,8 @@ my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 require "$pazarcgipath/getsession.pl";
 
 my $get = new CGI;
-
 ########### start of HTML table
-print $get->header("text/html");
-
+    print $get->header("text/html");
 my %param = %{$get->Vars};
 
 if ($param{mode} eq 'list') {
@@ -47,7 +45,8 @@ if ($param{mode} eq 'list') {
 }
 
 # send the obligatory Content-Type and print the template output
-    print $template->output;
+    #print "Content-Type: text/html\n\n",
+print $template->output;
 
 
     my $dbh= pazar->new( 
@@ -116,7 +115,7 @@ COLNAMES
 
 #alter file name by adding random number with current time as seed
 		srand(time() ^ ($$ + ($$ << 15) ) );
-		my $randnum = substr(rand() * 10,3);
+		my $randnum = substr(rand() * 100,3);
 		my $logo = $acc.$randnum;
 		my $gd_image = $pfm->draw_logo(-file=>$pazarhtdocspath.'/tmp/precomputed/'.$logo.'.png', -xsize=>130);
 		my $gd_image2 = $pfm->draw_logo(-file=>$pazarhtdocspath.'/tmp/precomputed/'.$logo.'_400.png', -xsize=>400);
@@ -225,8 +224,6 @@ $bg_color=1-$bg_color;
     my $logo = $param{logo}."_400.png";
     my $prettystring = $param{pfm};
 
-########### start of HTML table
-    print $get->header("text/html");
 
 print<<DETAILS;
 <head><title>PAZAR - TF Profiles</title></head>
