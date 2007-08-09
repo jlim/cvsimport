@@ -40,7 +40,6 @@ This search engine is for pre-computed profiles stored in the PAZAR boutiques.<b
 <input type="submit" name="BROWSE" value="Project">
 <input type="submit" name="BROWSE" value="Name">
 <input type="submit" name="BROWSE" value="Species">
-<input type="submit" name="BROWSE" value="Class">
 </form></p>
 PAGE
 

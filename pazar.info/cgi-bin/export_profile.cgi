@@ -81,8 +81,6 @@ print<<COLNAMES;
     </td> 
     <td align="center"  valign="center" bgcolor="#e65656"><span class="title4">Species</span>
     </td> 
-    <td align="center" valign="center"  bgcolor="#e65656"><span class="title4">Class,Family</span>
-    </td> 
     <td align="center" valign="center"  bgcolor="#e65656"><span class="title4">Logo</span>
     </td> 
     <td align="center"  valign="center" bgcolor="#e65656"><span class="title4"></span>
@@ -132,50 +130,17 @@ COLNAMES
 		    $pmid=$matrix_info->{pubmed};
 		    $exptype=$matrix_info->{exptype};
 		}
-		my @tfs=$dbh->get_factor_by_matrix_id($mid);
-		if (@tfs) {
-		    foreach my $tf (@tfs) {
-			my $classes;
-			my $tfs;
-			if ($tf->{tfcomplex}) {
-			    my $tfh=$dbh->create_tf();
-			    my $complex=$tfh->get_tfcomplex_by_id($tf->{tfcomplex},'notargets');
-			    $subnb=0;
-			    while (my $subunit=$complex->next_subunit) {
-				my $tid = $subunit->get_transcript_accession($dbh);
-				my $cl = $subunit->get_class; 
-				if ($subunit->get_fam && $subunit->get_fam ne '') {
-				    $cl.=','.$subunit->get_fam;
-				}
-				if ($subnb==0) {
-				    $classes=$cl;
-				    $tfs=$tid;
-				    $subnb++;
-				} else {
-				    $classes.='<br>'.$cl;
-				    $tfs.='<br>'.$tid;
-				}
-			    }
-			}
-			my @an=$dbh->get_data_by_primary_key('analysis',$tf->{aid});
-			my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-			$exptype=$met[0];
-			my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-			$pmid=$ref[0];
-			push @profiles, { project => $proj_name,
+		push @profiles,         { project => $proj_name,
 					  dbid => $dbname."::".$acc,
 					  name => $name,
 					  desc => $desc,
 					  species => $species,
-					  class => $classes,
 					  pmid => $pmid,
 					  method => $exptype,
-					  transcript => $tfs,
 					  pfm => $prettystring,
 					  pazar_id => $mid,
                                           logo => $logo};
-		    }
-		}
+
 	    }
 	}
     }
@@ -206,9 +171,8 @@ print<<ROWS;
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{name}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{desc}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{species}</td>
-    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}">$sorted[$i]->{class}</td>
     <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><img src="$pazar_html/tmp/precomputed/$logo"></td>
-    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><form name='$sorted[$i]->{logo}' method='post' action ="$pazar_cgi/export_profile.cgi" enctype="multipart/form-data" target='Detail_win'><input type="hidden" name="mode" value="details"><input type="hidden" name="project" value="$sorted[$i]->{project}"><input type="hidden" name="dbid" value="$sorted[$i]->{dbid}"><input type="hidden" name="name" value="$sorted[$i]->{name}"><input type="hidden" name="class" value="$sorted[$i]->{class}"><input type="hidden" name="species" value="$sorted[$i]->{species}"><input type="hidden" name="pmid" value="$sorted[$i]->{pmid}"><input type="hidden" name="method" value="$sorted[$i]->{method}"><input type="hidden" name="transcript" value="$sorted[$i]->{transcript}"><input type="hidden" name="pazar_id" value="$sorted[$i]->{pazar_id}"><input type="hidden" name="pfm" value="$sorted[$i]->{pfm}"><input type="hidden" name="logo" value="$sorted[$i]->{logo}"><input value="More" name="submit" type="submit" onClick="window.open('about:blank','Detail_win', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=450')"></form></td>
+    <td align="center" width="" valign="center" bgcolor="$colors{$bg_color}"><form name='$sorted[$i]->{logo}' method='post' action ="$pazar_cgi/export_profile.cgi" enctype="multipart/form-data" target='Detail_win'><input type="hidden" name="mode" value="details"><input type="hidden" name="project" value="$sorted[$i]->{project}"><input type="hidden" name="desc" value="$sorted[$i]->{desc}"><input type="hidden" name="dbid" value="$sorted[$i]->{dbid}"><input type="hidden" name="name" value="$sorted[$i]->{name}"><input type="hidden" name="species" value="$sorted[$i]->{species}"><input type="hidden" name="pmid" value="$sorted[$i]->{pmid}"><input type="hidden" name="method" value="$sorted[$i]->{method}"><input type="hidden" name="pazar_id" value="$sorted[$i]->{pazar_id}"><input type="hidden" name="pfm" value="$sorted[$i]->{pfm}"><input type="hidden" name="logo" value="$sorted[$i]->{logo}"><input value="More" name="submit" type="submit" onClick="window.open('about:blank','Detail_win', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=500')"></form></td>
     </tr>
 ROWS
 
@@ -220,9 +184,55 @@ $bg_color=1-$bg_color;
   print $template_tail->output;
 
 } elsif ($param{mode} eq 'details') {
+    print "<head><title>PAZAR - TF Profiles</title></head><body>";
+
+    my $dbh= pazar->new( 
+		     -host          =>    $ENV{PAZAR_host},
+		     -user          =>    $ENV{PAZAR_pubuser},
+		     -pass          =>    $ENV{PAZAR_pubpass},
+		     -dbname        =>    $ENV{PAZAR_name},
+		     -drv           =>    $ENV{PAZAR_drv},
+		     -globalsearch  =>    'yes');
 
     my $logo = $param{logo}."_400.png";
     my $prettystring = $param{pfm};
+
+my $method=$param{method};
+my $pmid=$param{pmid};
+my @tfs=$dbh->get_factor_by_matrix_id($param{pazar_id});
+my $classes = '-';
+my $tfs = '-';
+
+if (@tfs) {
+    if (@tfs>1) {
+	print "<span class='warning'>WARNING! More than one TF is linked to this matrix. Reporting only the information about one of them.</span><br>";
+    }
+    if ($tfs[0]->{tfcomplex}) {
+	my $tfh=$dbh->create_tf();
+	my $complex=$tfh->get_tfcomplex_by_id($tfs[0]->{tfcomplex},'notargets');
+	$subnb=0;
+	while (my $subunit=$complex->next_subunit) {
+	    my $tid = $subunit->get_transcript_accession($dbh);
+	    my $cl = $subunit->get_class; 
+	    if ($subunit->get_fam && $subunit->get_fam ne '') {
+		$cl.=','.$subunit->get_fam;
+	    }
+	    if ($subnb==0) {
+		$classes=$cl;
+		$tfs=$tid;
+		$subnb++;
+	    } else {
+		$classes.='<br>'.$cl;
+		$tfs.='<br>'.$tid;
+	    }
+	}
+    }
+    my @an=$dbh->get_data_by_primary_key('analysis',$tfs[0]->{aid});
+    my @met=$dbh->get_data_by_primary_key('method',$an[3]);
+    $method=$met[0] if ($met[0]);
+    my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
+    $pmid=$ref[0] if ($ref[0]);
+}
 
 
 print<<DETAILS;
@@ -231,7 +241,7 @@ print<<DETAILS;
 <tr><td width="400" align="center" valign="center"><img src="$pazar_html/tmp/precomputed/$logo"></td></tr>
 <tr><td width="400" align="center" valign="center"><span style="font-family: monospace;">$prettystring<br><br></span></td></tr>
 <tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Matrix Info</span></td></tr>
-<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
+<tr width='100%'><td width='100%'><table width='100%' bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
         <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Project</b></td>
             <td bgcolor="#fffff0" align="left" valign="center">$param{project}</td>
             <td bgcolor="#9ad3e2" align="left" valign="center"><b>Database::ID</b></td>
@@ -243,9 +253,9 @@ print<<DETAILS;
             <td bgcolor="#fffff0" align="left" valign="center">$param{species}</td>
         </tr>
     <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>PubmedID</b></td>
-            <td bgcolor="#fffff0" align="left" valign="center">$param{pmid}</td>
+            <td bgcolor="#fffff0" align="left" valign="center">$pmid</td>
             <td bgcolor="#9ad3e2" align="left" valign="center"><b>Experiment</b></td>
-            <td bgcolor="#fffff0" align="left" valign="center">$param{method}</td>
+            <td bgcolor="#fffff0" align="left" valign="center">$method</td>
         </tr>
 DETAILS
 
@@ -258,31 +268,27 @@ print<<DESC;
 DESC
     }
 
+print "</table><br></td></tr>";
+
+if ($tfs ne '-') {
 print<<TF; 
-</table><br></td></tr>
 <tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Transcription Factor Info</span></td></tr>
-<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
-        <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Accession Number</b></td>
-            <td bgcolor="#fffff0" align="left" valign="center">$param{transcript}</td>
+<tr width='100%'><td width='100%'><table width='100%' bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
+        <tr width='100%'><td bgcolor="#9ad3e2" align="left" valign="center"><b>Accession Number</b></td>
+            <td bgcolor="#fffff0" align="left" valign="center">$tfs</td>
             <td bgcolor="#9ad3e2" align="left" valign="center"><b>Class,Family</b></td>
-            <td bgcolor="#fffff0" align="left" valign="center">$param{class}</td>
+            <td bgcolor="#fffff0" align="left" valign="center">$classes</td>
         </tr>
 </table><br></td></tr>
 TF
-    my $dbh= pazar->new( 
-		     -host          =>    $ENV{PAZAR_host},
-		     -user          =>    $ENV{PAZAR_pubuser},
-		     -pass          =>    $ENV{PAZAR_pubpass},
-		     -dbname        =>    $ENV{PAZAR_name},
-		     -drv           =>    $ENV{PAZAR_drv},
-		     -globalsearch  =>    'yes'); #To
+}
 
     my $seq_ids= &select($dbh, "SELECT * FROM reg_seq_set WHERE matrix_id='$param{pazar_id}'");
     if ($seq_ids) {
 
 print<<SITES1; 
 <tr><td width="400" bgcolor="#e65656" align="center" valign="center"><span class="title4">Individual Binding Sites</span></td></tr>
-<tr><td><table width="400" bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
+<tr width='100%'><td width='100%'><table width='100%' bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=2>
 SITES1
 
         while (my $seq_id=$seq_ids->fetchrow_hashref) {
@@ -291,7 +297,7 @@ SITES1
 	    if ($construct_id && $construct_id ne '0' && $construct_id ne 'NULL') {
 		my @dat=$dbh->get_data_by_primary_key('construct',$construct_id);
 print<<SITES2;
-        <tr><td bgcolor="#9ad3e2" align="left" valign="center"><b>Artificial Sequence</b></td>
+        <tr width='100%'><td bgcolor="#9ad3e2" align="left" valign="center"><b>Artificial Sequence</b></td>
             <td bgcolor="#fffff0" align="left" valign="center">$dat[2]</td>
         </tr>
 SITES2
