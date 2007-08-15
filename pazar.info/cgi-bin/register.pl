@@ -3,6 +3,9 @@ use DBI;
 use Crypt::Imail;
 use CGI qw( :all);
 use HTML::Template;
+use Digest::MD5 qw(md5_hex);
+use CGI::HTMLError trace => 1;
+
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
@@ -49,6 +52,9 @@ $template->param(JAVASCRIPT_FUNCTION => q{function verify() {
 	    }
 	    if (document.regform.last.value=="") {
 		themessage = themessage + "\\n -  Last Name";
+	    }
+	    if (document.regform.code.value=="") {
+		themessage = themessage + "\\n -  Verification Number";
 	    }
 	    if (document.regform.passwordcheck.value != document.regform.password.value)
 	    {
@@ -110,6 +116,20 @@ if ($params{mode} eq 'register') {
     my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
     or die "Can't connect to the database";
 
+#make sure user name is not empty
+    my $usernamenull = "false";
+    if ($params{username} eq "")
+    {
+	$usernamenull = "true";
+    }
+
+#make sure passwords are not empty fields
+    my $passwordsnull = "false";
+    if ($params{password} eq "" || $params{passwordcheck} eq "")
+    {
+	$passwordnull = "true";
+    }
+
 #make sure passwords match
     my $pwmatch = "false";
     if ($params{password} eq $params{passwordcheck})
@@ -117,7 +137,30 @@ if ($params{mode} eq 'register') {
 	$pwmatch = "true";
     }
 
+#check verification code
+    my $sessionexpired = "false";
+    my $verified = "true";
+
+    my $skey    = 'ChangeIt';         # secret key
+    my $code    = $params{'code'};  # user put code
+    my $session = $params{'hv_sess'};
+    my $hash    = $params{'hv_hash'};
+    my $expire  = 60*2;   # seconds expire session
     
+    if (time - $session > $expire ) {
+#session expired
+	$sessionexpired = "true";
+    }
+    if ($hash ne md5_hex($code,$skey,$session) ) {
+#verification incorrect
+	$verified = "false";
+    }
+    else
+    {
+	#verification correct
+	$verified = "true";
+    }
+
 #check for duplicate user name
     my $query1 = "select username from users where username='$params{username}'";
 
@@ -127,7 +170,10 @@ if ($params{mode} eq 'register') {
     @res1 = $sth1->fetchrow_array;
 
     my $duplicates = scalar(@res1);
-    if($duplicates == 0 && $pwmatch eq "true")
+
+
+#check if all conditions met before creating account
+    if($duplicates == 0 && $pwmatch eq "true" && $passwordnull ne "true" && $usernamenull ne "true" && $sessionexpired eq "false" && $verified eq "true")
     {
 #    #perform insert
 
@@ -168,15 +214,34 @@ if ($params{mode} eq 'register') {
 #print error
 
     print "<p class=\"title1\">PAZAR User and Project creation</p>";
+    if($sessionexpired eq "true" )
+    {
+	print "<p class=\"warning\">The verification code has expired</p>";
+    }
+
+    if($verified eq "false")
+    {
+	print "<p class=\"warning\">The verification code entered is incorrect</p>";
+    }
+
 	    if($duplicates != 0)
 	{
-	    print "<p class=\"warning\">Please choose another user name</p>";
+	    print "<p class=\"warning\">The entered user name is already in use. Please choose another user name</p>";
 	}
 	if($pwmatch ne "true")
 	{
 	    print "<p class=\"warning\">Passwords do not match. Please re-enter passwords</p>";
 	}
-
+        #if username and passwords not filled in
+        if($usernamenull eq "true")
+	{
+	    print "<p class=\"warning\">User name not entered. Please enter a user name</p>";
+	}
+    
+        if ($passwordnull eq "true" )
+	{
+	    print "<p class=\"warning\">No password entered. Please enter a password</p>";
+	}
 
 	print "<FORM  name=\"regform\" method=\"POST\" action=\"$pazar_cgi/register.pl\">";
 	print "<table>";
@@ -204,6 +269,9 @@ print<<Error_Page_2;
 	    <tr><td >Affiliation</td><td><input type="text" name="affiliation" maxlength=64 value=$params{affiliation}></td></tr>
 	    <tr><td >First name</td><td><input type="text" name="first" maxlength=32 value=$params{first}></td></tr>
 	    <tr><td >Last name</td><td><input type="text" name="last" maxlength=32 value=$params{last}></td></tr>
+	    <tr><td>Verification image</td><td><script src="captcha/hv.pl"></script></td></tr>
+	    <tr><td>Verification number<br>(from image above)</td><td><input type="text" name="code" size="10"></td></tr>
+
 	    <tr><td colspan=2><input type="hidden" name="mode" value="register"></td></tr>
 	    <tr><td></td><td><INPUT type="button" onClick="verify();" name="Register" value="Register">
 	    <INPUT type="reset" name="Reset" value="Reset"></td></tr>
@@ -227,6 +295,8 @@ print<<Page_Done;
 	<tr><td >Affiliation</td><td><input type="text" name="affiliation" maxlength=64></td></tr>
 	<tr><td >First name</td><td><input type="text" name="first" maxlength=32></td></tr>
 	<tr><td >Last name</td><td><input type="text" name="last" maxlength=32></td></tr>
+	<tr><td>Verification image</td><td><script src="captcha/hv.pl"></script></td></tr>
+	<tr><td>Verification number<br>(from image above)</td><td><input type="text" name="code" size="10"></td></tr>
 	<tr><td colspan=2><input type="hidden" name="mode" value="register"></td></tr>
 	<tr><td></td><td><INPUT type="button" onClick="verify();" name="Register" value="Register">
 	<INPUT type="reset" name="Reset" value="Reset"></td></tr>
