@@ -11,12 +11,17 @@ print "Content-Type: text/html\n\n";
 my @seq=$cgi->param('seq');
 my $allseq=join("\n",@seq);
 #print "Allseq $allseq";
-my $filename=md5_hex($allseq);
-my $fn=$filename . '.fa';
+my $fn=md5_hex($allseq) . '.fa';
 open (SEQ,">/tmp/$fn")||print "Cannot open tmp file to write";
 my $i=0;
 foreach my $s (@seq) {
 	$i++;
+if (length($s)<8) {
+my $def=8-length($s);
+my $fl='N'x$def;
+my $ns=$fl.$s.$fl;
+$s=$ns;
+}
 	print SEQ ">pazarseqs\_$i\n$s\n";
 }
 close SEQ;
@@ -38,8 +43,8 @@ close SEQ;
 		    $prettystring =~ s/ /\&nbsp\;/g;
 		    print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
 #draw the logo
-		    my $logo =$pazarhtdocspath . '/tmp/' . $filename . '.png';
-#warn "LOGO $logo";
+		    my $logo =$pazarhtdocspath . '/tmp/' . $fn . '.png';
+warn "LOGO $logo";
 		    my $gd_image = $pfm->draw_logo(-file=>$logo, -xsize=>400);
 		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$fn\.png\">";
 		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
