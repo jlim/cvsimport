@@ -24,6 +24,7 @@ print<<page;
 <p class="title2">Content</p>
 <a href="#What is PAZAR?"><span class="title3">What is PAZAR?</span><br></a>
 <a href="#Tutorials"><span class="title3">Tutorials</span><br></a>
+<a href="#Definitions"><span class="title3">PAZAR Definitions</span><br></a>
 <a href="#PAZAR Search Interface"><span class="title3">PAZAR Search Interface</span><br></a>
 <a href="#1. PAZAR Mall Overview"><span class="title4 margin">1. PAZAR Mall Overview</span><br></a>
 <a href="#2. Search by Gene"><span class="title4 margin">2. Search by Gene</span><br></a>
@@ -58,6 +59,9 @@ print<<page;
  <ul type=disc><li>Search by Transcription Factor Binding Profile:  <a href="$pazar_html/tutorials/TF_Binding_Profile_Search.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">TF Profile Search Tutorial</a>  (0:54 min)</li></ul>
  <ul type=disc><li>Search within a specific Boutique Project:  <a href="$pazar_html/tutorials/boutique.htm" target='tutwin' onClick="window.open('about:blank','tutwin');">Boutique Search Tutorial</a>  (1:02 min)</li></ul>
 
+<a name="Definitions"></a><p class="title3">PAZAR Definitions</p>
+ <ul type=disc><li><a name="TFcomplexDef"></a><b>Transcription Factor Complex:</b></li></ul>
+<p>In PAZAR, all Trancription Factors (TFs) are defined as complexes, a complex comprising from one to any number of individual proteins. This allows users to define different binding specificities for the same TF protein depending on if it acts as a monomer (one protein instance), a monodimer (two identical proteins bound together) or an heterodimer (two different proteins bound together). Thus, when submitting a new TF in PAZAR, the annotator is first asked to give a name to the complex (the name should reflect all proteins present in the complex). Then he will have to define each protein included in the complex (also called subunit) one after the other by providing at least their gene identifier, then clicking on 'Add more TFs to this complex'.</p>
 <a name="PAZAR Search Interface"></a><p class="title3">PAZAR Search Interface</p>
 <a name="1. PAZAR Mall Overview"></a><p class="title4 margin">1. PAZAR Mall Overview</p>
 <p>The PAZAR Mall is the graphic user interface for the PAZAR database. Boutique datasets within PAZAR are represented by stores within the mall. In addition, the mall has six separate floors that are accessible via the escalator. Boutique datasets can be made public or private as is needed, and all boutique datasets are listed in the mall directory found at the bottom of the page.<br>

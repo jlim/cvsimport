@@ -242,6 +242,8 @@ if ($params{TFcentric}) {
 
 open (TFC,$alterpage);
 while (my $buf=<TFC>) {
+    $buf=~s/pazar_cgi/$pazar_cgi/g;
+    $buf=~s/pazar_html/$pazar_html/g;
 	if ($buf=~/action/i) {
 		$buf=~s/serverpath/$cgiroot/i;
 	}

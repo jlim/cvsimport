@@ -10,6 +10,7 @@ use pazar::tf::tfcomplex;
 use pazar::tf::subunit;
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
@@ -118,6 +119,8 @@ foreach my $key (keys %params) {
 my $started=1;
 while (my $buf=<SELF>) {
     $buf=~s/serverpath/$cgiroot/;
+    $buf=~s/pazar_cgi/$pazar_cgi/g;
+    $buf=~s/pazar_html/$pazar_html/g;
     unless (@mytfs) {
 	$buf=~s/MUT\.mytfs\.disabled\=true\;//;
 	$buf=~s/MUT\.mytfs\.disabled\=false\;//;
