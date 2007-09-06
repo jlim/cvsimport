@@ -572,7 +572,7 @@ else {
 
 print<<Page_Done;
 
-	<p class="title1">PAZAR Project Manager</p>
+	<p class="title1">PAZAR Project Management</p>
 
 
 	<FORM  method="POST" action="$pazar_cgi/dologin.pl">
@@ -584,6 +584,13 @@ print<<Page_Done;
 	<tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
 	</table>
 	</FORM>
+<p>
+<table>
+<tr><td>New User?</td><td><a href="$pazar_cgi/register.pl">Click here to REGISTER</a></td></tr>
+
+<tr><td>Forgotten Password?</td><td><a href="mailto:pazar\@cmmt.ubc.ca">Click here to EMAIL US</a></td></tr>
+</table>
+</p>
 
 Page_Done
     }
