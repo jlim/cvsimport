@@ -45,6 +45,16 @@ resetMenu = function() {
 <h1>Describe your Binding Sequence</h1>
 
 <form style="height: 546px;" action="serverpath/addcre.cgi" method="post" name="CRE">
+ <h3>Sequence Description </h3>
+  <p>sequence 
+    <textarea name="csequence" id="csequence" cols="100" rows="2"></textarea></p>
+    <p>construct name 
+    <input name="constructname" type="text" id="constructname" maxlength=45>
+  </p>
+  <p>comment 
+    <textarea name="artificialcomment" cols="100" rows="2" id="artificialcomment"></textarea>
+  </p>
+<hr>
   <h3>Interaction type between the TF complex (factor) and this sequence </h3>
   <table width="200">
     <tr>
@@ -104,19 +114,9 @@ resetMenu = function() {
   <p><b>Comments</b> concerning this specific experiment<textarea name="analysis_desc" cols="100" rows="2" id="analysis_desc"></textarea>
   </p>
   <hr>
- <h3>Sequence Description </h3>
-  <p>sequence 
-    <textarea name="csequence" id="csequence" cols="100" rows="2"></textarea></p>
-    <p>construct name 
-    <input name="constructname" type="text" id="constructname" maxlength=45>
-  </p>
-  <p>comment 
-    <textarea name="artificialcomment" cols="100" rows="2" id="artificialcomment"></textarea>
-  </p>
   <p> 
     <input name="submit2" type="submit" id="submit2" onClick="MM_validateForm('interact0','','NisNum','csequence','','R','constructname','','R');return document.MM_returnValue" value="Submit Data">
     <input name="cancel" id="cancel" value="Cancel" type="reset">
-  </p>
-  <hr>
+  </p><br>
 </form>
 </body></html>
