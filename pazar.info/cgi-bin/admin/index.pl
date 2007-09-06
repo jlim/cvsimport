@@ -38,8 +38,8 @@ my $sth = $dbh->prepare("select * from project");
 
 $sth->execute;
 print "<H2>PROJECT INFORMATION<H2>";
-	print "<table border=1>";
-	print "<tr><td width='100'><b>Project ID</b></td><td width='150'><b>Project Name</b></td></td><td><b>Status</b></td><td width='200'><b>Last Edit</b></td><td width='300'><b>Statistics</b></td><td><b>Users</b></td><td><b>Description</b></td></tr>";
+	print "<table width=1200 border=1>";
+	print "<tr><td width=100><b>Project ID</b></td><td width=150><b>Project Name</b></td></td><td><b>Status</b></td><td width=200><b>Last Edit</b></td><td width=500><b>Statistics</b></td><td><b>Users</b></td><td><b>Description</b></td></tr>";
 while(my $href=$sth->fetchrow_hashref)
 {
 	print "<tr><td>".$href->{"project_id"} ."</td><td>" . $href->{"project_name"} . "</td><td>" . $href->{"status"} . "</td><td>" . $href->{"edit_date"}  . "</td>";
@@ -90,13 +90,13 @@ print "</table>";
 print "<H2>USER INFORMATION</H2>";
 
        print "<table border=1>";
-        print "<tr><td width='100'><b>User ID</b></td><td width='150'><b>Username</b></td></td><td><b>First Name</b></td><td width='200'><b>Last Name</b></td><td width='300'><b>Creation Date</b></td><td><b>Affiliation</b></td><td><b>Stable ID</b></td></tr>";
+        print "<tr><td width=100><b>User ID</b></td><td width=150><b>Username</b></td></td><td><b>First Name</b></td><td width=200><b>Last Name</b></td><td width=300><b>Creation Date</b></td><td><b>Affiliation</b></td><td><b>Stable ID</b></td></tr>";
 
 my $usersth = $dbh->prepare("select * from users");
 $usersth->execute;
 while(my $userhref = $usersth->fetchrow_hashref)
 {
-	print "<tr><td>".$userhref->{"user_id"}."</td><td>".  $userhref->{"username"} ."</td><td>".$userhref->{"first_name"} ."&nbsp;</td><td>".$userhref->{"last_name"}."&nbsp;</td><td>". $userhref->{"edit_date"}."</td><td>". $userhref->{"aff"}."&nbsp;</td><td>". $userhref->{"stable_id"}."&nbsp;</td></tr>";
+	print "<tr><td width=100>".$userhref->{"user_id"}."</td><td width=150>".  $userhref->{"username"} ."</td><td>".$userhref->{"first_name"} ."&nbsp;</td><td width=200>".$userhref->{"last_name"}."&nbsp;</td><td width=300>". $userhref->{"edit_date"}."</td><td>". $userhref->{"aff"}."&nbsp;</td><td>". $userhref->{"stable_id"}."&nbsp;</td></tr>";
 }
 
 print "</table>";
