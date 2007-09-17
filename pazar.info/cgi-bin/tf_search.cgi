@@ -240,6 +240,22 @@ else
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
+#connect to the database
+my $dbh = pazar->new( 
+		      -host          =>    $ENV{PAZAR_host},
+		      -user          =>    $ENV{PAZAR_pubuser},
+		      -pass          =>    $ENV{PAZAR_pubpass},
+		      -dbname        =>    $ENV{PAZAR_name},
+		      -drv           =>    $ENV{PAZAR_drv},
+                      -globalsearch  =>    'yes');
+
+
+my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+
+my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
+
+my @pubprojects = $dbh->public_projects;
+
 print<<page;
 <h1>PAZAR TF View <a href='$pazar_cgi/help_FAQ.pl#3.3%20TF%20View' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -267,29 +283,24 @@ print<<page;
     <tr align="left">
       <td colspan="2"><p > Or browse the current list of reported TFs
 &nbsp;
-      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)"><br><br></p>
       </td>
     </tr>
-   </form>
-  </tbody>
-</table>
-<hr color='black'> 
+    <tr align="left">
+      <td width='400' valign=top><span class='red'>!!!NEW!!!</span> Select projects you want to exclude from your search:<br><small>Make your selection before performing your query and hitting the Submit button above.<br>Hold the 'Ctrl' button ('Command' button on Mac) to select/unselect one or more projects.</small></td>
+      <td valign=top><select name="excl_proj" size="3" multiple="multiple">
 page
 
-#connect to the database
-my $dbh = pazar->new( 
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    $ENV{PAZAR_drv},
-                      -globalsearch  =>    'yes');
-
-
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
-
+my %unsort_proj;
+foreach my $project (@pubprojects) {
+    my $proj = $dbh->get_project_name_by_ID($project);
+    my $proj_lc=lc($proj);
+    $unsort_proj{$proj_lc}=$proj;
+}
+foreach my $projname (sort(keys %unsort_proj)) {
+    print "<option value=\"$unsort_proj{$projname}\"> $unsort_proj{$projname}</option>";
+}
+print "</td></tr></form></tbody></table><hr color='black'>";
 
 my $get = new CGI;
 my %param = %{$get->Vars};
@@ -399,9 +410,22 @@ if ($accn) {
 	}
     }
 
+my @excluded_proj;
+my $excluded='none';
+if ($param{excl_proj}) {
+    foreach my $val ($get->param('excl_proj')) {
+	push @excluded_proj, $val;
+    }
+    $excluded=join('__',@excluded_proj);
+} elsif ($param{excluded}) {
+    $excluded=$param{excluded};
+    @excluded_proj=split(/__/,$excluded);
+}
+
 print<<SUMMARY_HEADER;
 <a name='top'></a>
 <p class="title2">Summary</p>
+<p><b>Projects excluded from the search:</b> $excluded</p>
 <table width='700' class='summarytable'><tr>
 <td class='tftabletitle' width='100'>Species</td>
 <td class='tftabletitle' width='100'>PAZAR TF ID</td>
@@ -418,6 +442,9 @@ my %colors = (0 => "#fffff0",
 	foreach my $complex (@tfcomplexes) {
 
 	    my $tfproj=$dbh->get_project_name('funct_tf',$complex->dbid);
+	    if (grep(/^$tfproj$/,@excluded_proj)) {
+		next;
+	    }
 	    my $tf_name=$complex->name;
 	    my $pazartfid=write_pazarid($complex->dbid,'TF');
 
@@ -461,10 +488,14 @@ HEADER_TABLE
 
 	foreach my $complex (@tfcomplexes) {
 	    $bg_color = 0;
-
-	    $tfcount++;
 	    my $tfid=$complex->dbid;
 	    my $tfproj=$dbh->get_project_name('funct_tf',$tfid);
+	    if (grep(/^$tfproj$/,@excluded_proj)) {
+		next;
+	    }
+
+	    $tfcount++;
+
 	    my $tf_name=$complex->name;
 	    my $pazartfid=write_pazarid($tfid,'TF');
 # 	    my $tfname_s=$tf_name;
@@ -506,7 +537,7 @@ print<<COLNAMES;
 <table class="summarytable">
 <tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
-<tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid">$pazartfid</a></td></tr>
+<tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid&excluded=$excluded">$pazartfid</a></td></tr>
 <tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
@@ -559,12 +590,12 @@ COLNAMES2
 		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
 
 		    print "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
-		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
-		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
+		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a><br>$seqname</div></td>";
+		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
 		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
 		    print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
-			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><br><br>";
-			print "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a>";
+			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><br><br>";
+			print "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a>";
 			print "</div></td>";
 		}
 		if ($type eq 'construct') {
@@ -641,7 +672,7 @@ Select_buttons
     
 
     if ($tfcount==0) {
-	print "<h3>There is currently no available annotation for the Transcription Factor $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this TF or any other TF!</h3>";
+	print "<p><b>Projects excluded from the search:</b> $excluded</p><h3>No annotation could be found for the Transcription Factor $accn!<br>Do not hesitate to create your own project and enter information about this TF or any other TF!</h3>";
 	exit;
     }
 

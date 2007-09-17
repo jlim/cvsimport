@@ -90,12 +90,19 @@ else
     print "Loading genome browser...";
 #continue with the rest of the file********************************************
 
+    my @excluded_proj;
+    if ($params{excluded}) {
+	@excluded_proj=split(/__/,$params{excluded});
+    }
+
     my @projects;
     
     my $projects=&select($dbh, "SELECT project_id, project_name FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
     while (my ($pid,$proj)=$projects->fetchrow_array) {
-	push @projects, {name => $proj,
-			 id   => $pid};
+	unless (grep(/^$proj$/,@excluded_proj)) {
+	    push @projects, {name => $proj,
+			     id   => $pid};
+	}
     }
 
 
@@ -104,8 +111,10 @@ else
 	    my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
 	    my @restr_proj=$restricted->fetchrow_array();
 	    if (@restr_proj) {
-		push @projects,  {name => $restr_proj[0],
-				  id   => $proj}};
+		unless (grep(/^$restr_proj[0]$/,@excluded_proj)) {
+		    push @projects,  {name => $restr_proj[0],
+				      id   => $proj}};
+	    }
 	}
     }
 

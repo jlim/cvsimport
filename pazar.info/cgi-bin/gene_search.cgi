@@ -71,6 +71,21 @@ else
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
+#connect to the database
+my $dbh = pazar->new( 
+		      -host          =>    $ENV{PAZAR_host},
+		      -user          =>    $ENV{PAZAR_pubuser},
+		      -pass          =>    $ENV{PAZAR_pubpass},
+		      -dbname        =>    $ENV{PAZAR_name},
+		      -drv           =>    $ENV{PAZAR_drv},
+                      -globalsearch  =>    'yes');
+
+my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+
+my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
+
+my @pubprojects = $dbh->public_projects;
+
 print<<page;
 <h1>PAZAR Gene View <a href='$pazar_cgi/help_FAQ.pl#2.3%20Gene%20View' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -99,27 +114,25 @@ print<<page;
     <tr align="left">
       <td colspan="2"><p > Or browse the current list of annotated genes
 &nbsp;
-      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br><br></p>
       </td>
     </tr>
-   </form>
-  </tbody>
-</table>
-<hr color='black'>
+    <tr align="left">
+      <td width='400' valign=top><span class='red'>!!!NEW!!!</span> Select projects you want to exclude from your search:<br><small>Make your selection before performing your query and hitting the Submit button above.<br>Hold the 'Ctrl' button ('Command' button on Mac) to select/unselect one or more projects.</small></td>
+      <td valign=top><select name="excl_proj" size="3" multiple="multiple">
 page
 
-#connect to the database
-my $dbh = pazar->new( 
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    $ENV{PAZAR_drv},
-                      -globalsearch  =>    'yes');
+my %unsort_proj;
+foreach my $project (@pubprojects) {
+    my $proj = $dbh->get_project_name_by_ID($project);
+    my $proj_lc=lc($proj);
+    $unsort_proj{$proj_lc}=$proj;
+}
+foreach my $projname (sort(keys %unsort_proj)) {
+    print "<option value=\"$unsort_proj{$projname}\"> $unsort_proj{$projname}</option>";
+}
+print "</td></tr></form></tbody></table><hr color='black'>";
 
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
 
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
@@ -159,17 +172,32 @@ if ($accn) {
 
 #get open or published projects
     my %projects;
-    my @pubprojects = $dbh->public_projects;
+    my @excluded_proj;
+    my $excluded='none';
+    if ($params{excl_proj}) {
+	foreach my $val ($get->param('excl_proj')) {
+	    push @excluded_proj, $val;
+	}
+	$excluded=join('__',@excluded_proj);
+    } elsif ($params{excluded}) {
+	$excluded=$params{excluded};
+	@excluded_proj=split(/__/,$excluded);
+    }
+
     foreach my $project (@pubprojects) {
 	my $projname = $dbh->get_project_name_by_ID($project);
-	$projects{$project}=$projname;
+	unless (grep(/^$projname$/,@excluded_proj)) {
+	    $projects{$project}=$projname;
+	}
     }
 
 #get user's restricted projects if logged in
     if ($loggedin eq 'true') {
 	foreach my $proj (@projids) {
 	    my $projname = $dbh->get_project_name_by_ID($proj);
-	    $projects{$proj}=$projname;
+	    unless (grep(/^$projname$/,@excluded_proj)) {
+		$projects{$proj}=$projname;
+	    }
 	}
     }
 
@@ -216,7 +244,7 @@ if ($accn) {
     }
 
     if (!@gene_info) {
-	print "<h3>There is currently no available annotation for gene $accn in PAZAR!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</h3>";
+	print "<p><b>Projects excluded from the search:</b> $excluded</p><h3>No annotation could be found for gene $accn!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</h3>";
 
 # print out the html tail template and exit
 	my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
@@ -227,6 +255,7 @@ if ($accn) {
 print<<SUMMARY_HEADER;
 <a name='top'></a>
       <p class="title2">Summary</p>
+<p><b>Projects excluded from the search:</b> $excluded</p>
 <table width='700' class='summarytable'><tr>
 <td class='genedetailstabletitle' width='100'>Species</td>
 <td class='genedetailstabletitle' width='100'>PAZAR Gene ID</td>
@@ -267,7 +296,7 @@ print<<HEADER_TABLE;
 <a href='#top'>Back to top</a><a name='$pazargeneid'></a>
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='excluded' value="$excluded"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class=\"basictd\">$geneName</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene" target='enswin' onClick="window.open('about:blank','enswin');">$gene</a></td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
@@ -297,7 +326,7 @@ HEADER_TABLE
 
 #print out default information
 		print "<tr>";
-		print "<form name='details$regseq_counter' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
+		print "<form name='details$regseq_counter' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'><input type='hidden' name='excluded' value='$excluded'>";
 		
 		my $id=write_pazarid($regseq->accession_number,'RS');
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
@@ -312,7 +341,7 @@ HEADER_TABLE
 
 		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='excluded' value='$excluded'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
 		print "</tr>";
 		$bg_color =  1 - $bg_color;
 	    }

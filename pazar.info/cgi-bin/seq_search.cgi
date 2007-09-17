@@ -71,6 +71,19 @@ else
 # send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
 
+#connect to the database
+my $dbh = pazar->new( 
+		      -host          =>    $ENV{PAZAR_host},
+		      -user          =>    $ENV{PAZAR_pubuser},
+		      -pass          =>    $ENV{PAZAR_pubpass},
+		      -dbname        =>    $ENV{PAZAR_name},
+		      -drv           =>    $ENV{PAZAR_drv},
+                      -globalsearch  =>    'yes');
+
+my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+
+my @pubprojects = $dbh->public_projects;
+
 print<<page;
 <h1>PAZAR Sequence View <a href='$pazar_cgi/help_FAQ.pl#2.4%20Sequence%20View' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></h1>
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -99,25 +112,25 @@ print<<page;
     <tr align="left">
       <td colspan="2"><p > Or browse the current list of annotated genes
 &nbsp;
-      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br></p>
+      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br><br></p>
       </td>
     </tr>
-   </form>
-  </tbody>
-</table>
-<hr color='black'>
+    <tr align="left">
+      <td width='400' valign=top><span class='red'>!!!NEW!!!</span> Select projects you want to exclude from your search:<br><small>Make your selection before performing your query and hitting the Submit button above.<br>Hold the 'Ctrl' button ('Command' button on Mac) to select/unselect one or more projects.</small></td>
+      <td valign=top><select name="excl_proj" size="3" multiple="multiple">
 page
 
-#connect to the database
-my $dbh = pazar->new( 
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    $ENV{PAZAR_drv},
-                      -globalsearch  =>    'yes');
+my %unsort_proj;
+foreach my $project (@pubprojects) {
+    my $proj = $dbh->get_project_name_by_ID($project);
+    my $proj_lc=lc($proj);
+    $unsort_proj{$proj_lc}=$proj;
+}
+foreach my $projname (sort(keys %unsort_proj)) {
+    print "<option value=\"$unsort_proj{$projname}\"> $unsort_proj{$projname}</option>";
+}
+print "</td></tr></form></tbody></table><hr color='black'>";
 
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 my $bg_color = 0;
 my %colors = (0 => "#fffff0",
@@ -136,6 +149,9 @@ unless ($regid) {
 	print "<span class=\"err\" style=\"color:red; font-size:medium\">Access denied</span>";
 	exit;
 }
+
+my $excluded=$params{excluded}||'none';
+
 #check if access is authorized
 my $projstat=&select($dbh, "SELECT b.project_name,b.status FROM reg_seq a,project b WHERE a.reg_seq_id=$regid AND a.project_id=b.project_id");
 my @res = $projstat->fetchrow_array;
@@ -204,7 +220,7 @@ print<<HEADER_TABLE;
 <span class="title2">Gene Details</span><br>
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
 <tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$geneName</td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accession" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accession</a></td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
@@ -212,7 +228,7 @@ print<<HEADER_TABLE;
 </table></td></tr>
 <tr><td><span class="title2">Sequence Details</span><br>
 <table class="evidencetableborder">
-<tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
+<tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence Name</span></td><td class="basictd">$seqname</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence</span></td><td class="basictd"><div style="font-family:monospace;height:62; overflow:auto;">$seqstr</div></td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Coordinates</span></td><td class="basictd">$coord</td></tr>
@@ -221,7 +237,7 @@ print<<HEADER_TABLE;
 <tr><td class="seqtabletitle"><span class="title4">Quality</span></td><td class="basictd">$quality</td></tr>
 HEADER_TABLE
 
-print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr></table><br><br></td></tr>";
+print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr></table><br><br></td></tr>";
 
 
 
@@ -254,7 +270,7 @@ foreach my $inter (@interactors) {
     my @an=$dbh->get_data_by_primary_key('analysis',$inter->{aid});
     my $pazaranid=write_pazarid($inter->{aid},'AN');
 
-    print "<tr><form name='intdetails$count' method='post' action='$pazar_cgi/exp_search.cgi' enctype='multipart/form-data'><input type='hidden' name='aid' value=\"$inter->{aid}\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"$pazaranid\"></div></td></form>";
+    print "<tr><form name='intdetails$count' method='post' action='$pazar_cgi/exp_search.cgi' enctype='multipart/form-data'><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='aid' value=\"$inter->{aid}\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"$pazaranid\"></div></td></form>";
 
     my @met=$dbh->get_data_by_primary_key('method',$an[3]);
     print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$met[0]</div></td>";
@@ -280,7 +296,7 @@ foreach my $inter (@interactors) {
 	my $complex = $tf->get_tfcomplex_by_id($inter->{tfcomplex}, 'notargets');
 	my $tfid=$inter->{tfcomplex};
 	my $pazartfid=write_pazarid($tfid,'TF');
-	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
+	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
     } elsif ($inter->{tftype} eq 'sample') {
 	my @sample=$dbh->get_data_by_primary_key('sample',$inter->{tfcomplex});
 	my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
@@ -365,7 +381,7 @@ foreach my $exp (@expressors) {
     my @an=$dbh->get_data_by_primary_key('analysis',$exp->{aid});
     my $pazaranid=write_pazarid($exp->{aid},'AN');
 
-    print "<tr><form name='expdetails$count' method='post' action='$pazar_cgi/exp_search.cgi' enctype='multipart/form-data'><input type='hidden' name='aid' value=\"$exp->{aid}\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"$pazaranid\"></div></td></form>";
+    print "<tr><form name='expdetails$count' method='post' action='$pazar_cgi/exp_search.cgi' enctype='multipart/form-data'><input type='hidden' name='aid' value=\"$exp->{aid}\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='excluded' value=\"$excluded\"><input type=\"submit\" class=\"submitLink\" value=\"$pazaranid\"></div></td></form>";
 
     my @met=$dbh->get_data_by_primary_key('method',$an[3]);
     print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$met[0]</div></td>";
@@ -413,7 +429,7 @@ foreach my $exp (@expressors) {
 	    my $tf = $dbh->create_tf;
 	    my $complex = $tf->get_tfcomplex_by_id($tfid, 'notargets');
 	    my $pazartfid=write_pazarid($tfid,'TF');
-	    print "<form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
+	    print "<form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
 	}
     }
     if ($nocond==0) {
