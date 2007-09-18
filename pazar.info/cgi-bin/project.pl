@@ -58,6 +58,12 @@ my %param = %{$get->Vars};
 
 ###getting the project_name
 my $proj=$param{project_name};
+unless ($proj) {
+	print h2("Project name should be defined. Try again. If you believe this to be an error, contact the site administrators below");
+	print '<a href="mailto:pazar@cmmt.ubc.ca?subject=Bug report on project.pl">Bug report</a>';
+	print end_html;
+	exit();
+}
 
 ###database connection
 my $dbh0= pazar->new( 
