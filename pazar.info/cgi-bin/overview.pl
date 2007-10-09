@@ -38,7 +38,7 @@ framework for the construction and maintenance of regulatory sequence
 data annotations; a framework which allows multiple boutique databases
 to function independently within a larger system (or information mall).
 Our goal is to be the <b>public repository for regulatory data</b>.</p>
-          <p ><a href="$pazar_html/PAZARposter.pdf">Download PAZAR's poster</a></p>
+          <p ><a href="$pazar_html/PAZARposter.pdf">Download PAZAR's poster</a>&nbsp;&nbsp;<a target="publication" href="http://genomebiology.com/2007/8/10/R207">Publication</a></p>
           <p class="title2">PAZAR's principles:</p>
           <p >(1)
 to be OPEN-ACCESS and OPEN-SOURCE, providing a completely transparent
