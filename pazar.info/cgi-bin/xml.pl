@@ -39,7 +39,7 @@ print<<page;
             <a href="$pazar_html/pazarexample3.xml">example 3</a> 
             describes a gene reporter assay and the influence of co-expression 
             with a transcription factor.
-          <br><br></p>
+          <br><br>Note: the xml examples above may be displayed as blank pages in certain web browsers, such as Safari. In these cases, the example files can be opened in a text editor and viewed on the user\'s computer after being downloaded and saved.</p>
           <p class="title2">
           <span class="red">NEW!!!</span> Try our 
           Step-by-step documentation:</p>
