@@ -40,7 +40,7 @@ print "Content-Type: text/html\n\n", $template->output;
 	<p class="title1">PAZAR Login</p>
 	<FORM  method="POST" action="$pazar_cgi/dologin.pl">
 	<table>
-	<tr><td >User name</td><td> <input type="text" name="username"></td></tr>      
+	<tr><td >Email</td><td> <input type="text" name="username"></td></tr>      
 	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
 	<tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
 	</table>
