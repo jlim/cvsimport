@@ -55,6 +55,19 @@ document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
+
+function confirm_entry(aid,projid)
+{
+input_box=confirm("Are you sure you want to delete this analysis?");
+if (input_box==true)
+
+{ 
+// submit analysis id to delete page
+    location.href="deleteanalysis.pl?aid="+aid+"&pid="+projid;
+}
+
+}
+
 });
 
 if($loggedin eq 'true')
@@ -199,7 +212,30 @@ for (my $i=0;$i<5;$i++) {
 }
 unless ($timeinfo) {$timeinfo='-';}
 my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-my $comments=$an[7]||'-';
+
+my $comments = $an[7]||'-';
+my $commentseditable = "false";
+my $analysis_projid = "";
+# make comments editable if page is viewed by project member
+if ($loggedin eq 'true') {	
+	$analysis_projid = $an[9];
+	foreach my $proj (@projids) {
+	#see if $proj is the same as the analysis project or if my userid is same as analysis user_id
+	if($proj == $analysis_projid)
+	{
+		#comments are editable
+		$commentseditable = "true";
+	}
+    }
+
+
+if($commentseditable eq "true")
+{
+	$comments = "<div id =\"ajaxcomment\">".$an[7]."</div><input type=\"button\" name=\"commentupdatebutton\" value=\"Update Comments\" onClick=\"javascript:window.open('updateanalysiscomments.pl?mode=form&pid=$analysis_projid&aid=$aid');\">";
+}
+
+}
+
 my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
 my $evinfo='Type: '.$ev[0].'<br>Status: '.$ev[1];
 my @user=$dbh->get_data_by_primary_key('users',$an[0]);
@@ -222,8 +258,17 @@ print<<HEADER_TABLE;
 <tr><td class="analysistabletitle"><span class="title4">Comments</span></td><td class="basictd">$comments</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Evidence</span></td><td class="basictd">$evinfo</td></tr>
 <tr><td class="analysistabletitle"><span class="title4">Annotator</span></td><td class="basictd">$userinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr></table>
+<tr><td class="analysistabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr>
 HEADER_TABLE
+
+#show delete button if user is logged in and member of the project ie. same requirements as editing analysis comments
+
+if($commentseditable eq "true")
+{
+    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Analysis\" onClick=\"confirm_entry(".$aid.",".$analysis_projid.")\"></td></tr>";
+}
+
+    print "</table>";
 
 my @analysis=$dbh->get_analysis_structure_by_id($aid);
 my @idlist;
