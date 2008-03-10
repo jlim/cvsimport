@@ -223,6 +223,19 @@ catch (err) {
 }
 }
 
+function confirm_entry(tfid)
+{
+input_box=confirm("Are you sure you want to delete this TF?");
+if (input_box==true)
+
+{ 
+// submit tfid to delete page
+    location.href="deletetf.pl?tfid="+tfid;
+}
+
+}
+
+
 }
 	);
 
@@ -532,6 +545,39 @@ HEADER_TABLE
 	    my $trclasses=join('<br>',@classes);
 	    my $trfams=join('<br>',@families);
 
+
+my $tf_editable = "false";
+#make gene name editable if page viewed by project member
+if ($loggedin eq 'true') {
+
+#determine the project that this tf belongs to
+
+my $tfsth = &select($dbh,"select project_id from funct_tf where funct_tf_id=".$tfid);
+#$geneName = $geneName . "gene id: ".$pazargeneid;
+
+my $tfresultshref = $tfsth->fetchrow_hashref;
+
+    my $tf_projid = $tfresultshref->{"project_id"};
+
+	foreach my $proj (@projids) {
+	#see if $proj is the same as the sequence or if my userid is same as sequence user_id
+	if($proj == $tf_projid)
+	{
+		#gene name is editable
+		$tf_editable = "true";
+	}
+    }
+
+
+if($tf_editable eq "true")
+{
+	$tf_name = "<div id =\"ajaxtfname\">".$tf_name."</div><input type=\"button\" name=\"tfnameupdatebutton\" value=\"Update TF Name\" onClick=\"javascript:window.open('updatetfname.pl?mode=form&pid=$tf_projid&tfid=".$tfid."');\">";
+}
+
+}
+
+
+
 print<<COLNAMES;
 <a href='#top'>Back to top</a><a name='$pazartfid'></a>
 <table class="summarytable">
@@ -542,8 +588,17 @@ print<<COLNAMES;
 <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Project</span></td><td class="basictd">$tfproj</td></tr>
-</table><br>
 COLNAMES
+
+=pod
+if($tf_editable eq "true")
+{
+    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This TF\" onClick=\"confirm_entry(".$tfid.")\"></td></tr>";
+}
+=cut
+
+print "</table><br>";
+
 
 ########### start of HTML table
 print<<COLNAMES2;	    
