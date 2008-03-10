@@ -55,6 +55,19 @@ document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
+
+function confirm_entry(seqid,projid)
+{
+input_box=confirm("Are you sure you want to delete this sequence?");
+if (input_box==true)
+
+{ 
+// submit sequence id to delete page
+    location.href="deleteseq.pl?sid="+seqid+"&pid="+projid;
+}
+
+}
+
 });
 
 if($loggedin eq 'true')
@@ -192,6 +205,35 @@ $ens_coords[5]=~s/\.//g;
 my $geneDescription = $ens_coords[5]||'-';
 my $gene_accession=$reg_seq->gene_accession||'-';
 my $seqname=$reg_seq->id||'-';
+
+#make seq name editable if page viewd by project member
+my $seq_projid = "";
+my $seqname_editable = "false";
+
+if ($loggedin eq 'true') {
+#determine the project that this reg seq belongs to
+my $regseqsth = &select($dbh,"select project_id from reg_seq where reg_seq_id=".$regid);
+my $regseqresultshref = $regseqsth->fetchrow_hashref;
+
+$seq_projid = $regseqresultshref->{"project_id"};
+
+	foreach my $proj (@projids) {
+	#see if $proj is the same as the sequence or if my userid is same as sequence user_id
+	if($proj == $seq_projid)
+	{
+		#comments are editable
+		$seqname_editable = "true";
+	}
+    }
+
+
+if($seqname_editable eq "true")
+{
+	$seqname = "<div id =\"ajaxseqname\">".$seqname."</div><input type=\"button\" name=\"seqnameupdatebutton\" value=\"Update Sequence Name\" onClick=\"javascript:window.open('updatesequencename.pl?mode=form&pid=$seq_projid&sid=$regid');\">";
+}
+
+}
+
 my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
 my $quality=$reg_seq->quality||'-';
 
@@ -237,9 +279,18 @@ print<<HEADER_TABLE;
 <tr><td class="seqtabletitle"><span class="title4">Quality</span></td><td class="basictd">$quality</td></tr>
 HEADER_TABLE
 
-print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr></table><br><br></td></tr>";
+
+    print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr>";
+
+#show delete button if user is logged in and member of the project ie. same requirements as editing sequence name
 
 
+if($seqname_editable eq "true")
+{
+    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Sequence\" onClick=\"confirm_entry(".$regid.",".$seq_projid.")\"></td></tr>";
+}
+
+print "</table><br><br></td></tr>";
 
 ####################### get data objects for retrieving lines of evidence
 my @interactors=$dbh->get_interacting_factor_by_regseq_id($regid);
