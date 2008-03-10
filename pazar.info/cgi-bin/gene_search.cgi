@@ -55,6 +55,20 @@ document.gene_search.target="Window2";
 window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
 }
 }
+
+function confirm_entry(geneid)
+{
+input_box=confirm("Are you sure you want to delete this gene?");
+if (input_box==true)
+
+{ 
+// submit geneid to delete page
+    location.href="deletegene.pl?gid="+geneid;
+}
+
+}
+
+
 });
 
 if($loggedin eq 'true')
@@ -289,6 +303,38 @@ SUMMARY_HEADER
 	$geneDescription=$gene_data->{ens_desc};
 	$proj=$gene_data->{proj};
 
+my $genename_editable = "false";
+#make gene name editable if page viewed by project member
+if ($loggedin eq 'true') {
+
+#determine the project that this reg seq belongs to
+
+my $genenamesth = &select($dbh,"select project_id from gene_source where gene_source_id=".$gene_data->{GID});
+#$geneName = $geneName . "gene id: ".$pazargeneid;
+
+my $genenameresultshref = $genenamesth->fetchrow_hashref;
+
+    my $gene_projid = $genenameresultshref->{"project_id"};
+
+	foreach my $proj (@projids) {
+	#see if $proj is the same as the sequence or if my userid is same as sequence user_id
+	if($proj == $gene_projid)
+	{
+		#gene name is editable
+		$genename_editable = "true";
+	}
+    }
+
+
+if($genename_editable eq "true")
+{
+	$geneName = "<div id =\"ajaxgenename\">".$geneName."</div><input type=\"button\" name=\"genenameupdatebutton\" value=\"Update Gene Name\" onClick=\"javascript:window.open('updategenename.pl?mode=form&pid=$gene_projid&gid=".$gene_data->{GID}."');\">";
+}
+
+}
+
+
+
 #print details
 	$bg_color = 0;
 
@@ -301,8 +347,17 @@ print<<HEADER_TABLE;
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene" target='enswin' onClick="window.open('about:blank','enswin');">$gene</a></td></tr>
 <tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
 <tr><td class="genetabletitle"><span class="title4">Project</span></td><td class=\"basictd\"><a href="$pazar_cgi/project.pl?project_name=$proj">$proj</a></td></tr>
-</table><br>
 HEADER_TABLE
+
+#show delete button if user is logged in and member of the project ie. same requirements as editing gene name
+=pod
+if($genename_editable eq "true")
+{
+    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Gene\" onClick=\"confirm_entry(".$gene_data->{GID}.")\"></td></tr>";
+}
+=cut
+print "</table><br>";
+
 
 ########### start of reg_seq table
     print "<table class=\"searchtable\"><tr><td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
