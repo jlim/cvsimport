@@ -38,7 +38,7 @@ framework for the construction and maintenance of regulatory sequence
 data annotations; a framework which allows multiple boutique databases
 to function independently within a larger system (or information mall).
 Our goal is to be the <b>public repository for regulatory data</b>.</p>
-          <p ><a href="$pazar_html/PAZARposter.pdf">Download PAZAR's poster</a>&nbsp;&nbsp;<a target="publication" href="http://genomebiology.com/2007/8/10/R207">Publication</a></p>
+          <p ><a href="$pazar_html/PAZARposter.pdf">Download PAZAR's poster</a></p>
           <p class="title2">PAZAR's principles:</p>
           <p >(1)
 to be OPEN-ACCESS and OPEN-SOURCE, providing a completely transparent
@@ -70,7 +70,11 @@ participate in further API development and to create and maintain their
 own annotation interfaces. Two forums are also available so that
 everyone can ask for help (<a href="https://sourceforge.net/forum/forum.php?forum_id=520428" target="_blank">'Help' forum</a>) or make any comment or
 suggestion (<a href="https://sourceforge.net/forum/forum.php?forum_id=512784" target="_blank">'Open Discussion' forum</a>).</p>
-
+          <p class="title2">License:</p>
+          <p >The PAZAR data and code are available under the <a href="http://www.gnu.org/copyleft/lesser.html" target="_blank">GNU Lesser General Public License (LGPL)</a></p>
+          <p class="title2">Publication:</p>
+          <p >Please use the citation information below when referring to PAZAR in publication.</p>
+<p>Portales-Casamar E, Kirov S, Lim J, Lithwick S, Swanson MI, Ticoll A, Snoddy J, Wasserman WW.<br>PAZAR: a Framework for Collection and Dissemination of Cis-regulatory Sequence Annotation.<br><a target="publication" href="http://genomebiology.com/2007/8/10/R207">Genome Biology 2007, 8, R207.</a></p>
 page
 
 # print out the html tail template
