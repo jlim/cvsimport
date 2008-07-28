@@ -71,7 +71,7 @@ own annotation interfaces. Two forums are also available so that
 everyone can ask for help (<a href="https://sourceforge.net/forum/forum.php?forum_id=520428" target="_blank">'Help' forum</a>) or make any comment or
 suggestion (<a href="https://sourceforge.net/forum/forum.php?forum_id=512784" target="_blank">'Open Discussion' forum</a>).</p>
           <p class="title2">License:</p>
-          <p >The PAZAR data and code are available under the <a href="http://www.gnu.org/copyleft/lesser.html" target="_blank">GNU Lesser General Public License (LGPL)</a></p>
+          <p >The PAZAR code is available under the <a href="http://www.gnu.org/copyleft/lesser.html" target="_blank">GNU Lesser General Public License (LGPL)</a>.<br>The PAZAR data in "public" or "open" data collections are available under the <a href="http://www.gnu.org/copyleft/lesser.html" target="_blank">GNU LGPL</a>, while data in "private" collections are property of the curators of those collections and permission must be explicitly provided. Only "public" and "open" collections can be accessed by anonymous users.</p>
           <p class="title2">Publication:</p>
           <p >Please use the citation information below when referring to PAZAR in publication.</p>
 <p>Portales-Casamar E, Kirov S, Lim J, Lithwick S, Swanson MI, Ticoll A, Snoddy J, Wasserman WW.<br>PAZAR: a Framework for Collection and Dissemination of Cis-regulatory Sequence Annotation.<br><a target="publication" href="http://genomebiology.com/2007/8/10/R207">Genome Biology 2007, 8, R207.</a></p>
