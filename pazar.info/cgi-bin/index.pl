@@ -54,7 +54,7 @@ my $dbh = pazar->new(
 		      -drv           =>    DB_DRV,
                       -globalsearch  =>    'yes');
 
-my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published' ORDER BY edit_date");
+my $projects=&select($dbh, "SELECT * FROM project WHERE status='open' OR status='published' ORDER BY project_id");
 my @desc;
 while (my $project=$projects->fetchrow_hashref) {
     my $flashdesc=$project->{description};
