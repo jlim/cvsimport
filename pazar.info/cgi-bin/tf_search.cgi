@@ -49,6 +49,21 @@ args='caller=tfsearch';
 						sites++;
                                         }
                         }
+// pass the tf name to ajax page
+headTableObj=xGetElementById('Head'+tableId);
+var headtbody=headTableObj.getElementsByTagName('tbody');
+var headtrs = headtbody[0].getElementsByTagName('tr');
+var headtd = headtrs[1].getElementsByTagName('td')[1];
+args+="&tfname="+headtd.innerHTML;
+
+// now pass tableid (includes tfid and project id), to make forms unique on meme_call page
+args+="&tfpid="+tableId;
+
+//pass project name
+//var tfidtd = headtrs[6].getElementsByTagName('td')[1];
+//args+="&tfpid="+tfidtd.innerHTML;
+
+
 if (sites<2) {
    divObj.innerHTML='<span style="color:red">There are too few sites to build a binding profile for this TF!</span>';
    return 0;
@@ -548,7 +563,6 @@ HEADER_TABLE
 
 my $tf_editable = "false";
 #make gene name editable if page viewed by project member
-if ($loggedin eq 'true') {
 
 #determine the project that this tf belongs to
 
@@ -558,6 +572,11 @@ my $tfsth = &select($dbh,"select project_id from funct_tf where funct_tf_id=".$t
 my $tfresultshref = $tfsth->fetchrow_hashref;
 
     my $tf_projid = $tfresultshref->{"project_id"};
+
+
+if ($loggedin eq 'true') {
+
+#determine the project that this tf belongs to
 
 	foreach my $proj (@projids) {
 	#see if $proj is the same as the sequence or if my userid is same as sequence user_id
@@ -580,7 +599,7 @@ if($tf_editable eq "true")
 
 print<<COLNAMES;
 <a href='#top'>Back to top</a><a name='$pazartfid'></a>
-<table class="summarytable">
+<table id="HeadSummaryTable$pazartfid\_$tf_projid" class="summarytable">
 <tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
 <tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid&excluded=$excluded">$pazartfid</a></td></tr>
@@ -602,8 +621,8 @@ print "</table><br>";
 
 ########### start of HTML table
 print<<COLNAMES2;	    
-<div id="desc$pazartfid" name="desc$pazartfid" class="seqTableDiv">
-<table id="SummaryTable$pazartfid" class="evidencetableborder"><tr>
+<div id="desc$pazartfid\_$tf_projid" name="desc$pazartfid\_$tf_projid" class="seqTableDiv">
+<table id="SummaryTable$pazartfid\_$tf_projid" class="evidencetableborder"><tr>
     <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
 		    
 COLNAMES2
@@ -682,21 +701,21 @@ COLNAMES2
 	    print "</table></div><br>";
  
 print<<Select_buttons;
-<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$pazartfid');">
-<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$pazartfid','genomic');">
-<input type="button" name="selecttype2" id="selecttype2" value="Select artificial sequences" onclick="selectbytype('SummaryTable$pazartfid','construct');">
-<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$pazartfid');"><br><br>
+<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$pazartfid\_$tf_projid');">
+<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$pazartfid\_$tf_projid','genomic');">
+<input type="button" name="selecttype2" id="selecttype2" value="Select artificial sequences" onclick="selectbytype('SummaryTable$pazartfid\_$tf_projid','construct');">
+<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$pazartfid\_$tf_projid');"><br><br>
 Select_buttons
  
 	    close (TMP);
 
 	    if ($count<2) {
-		print "<div id='memediv".$pazartfid."' name='memediv".$pazartfid."'>Cannot be generated</div><br><br><br><br>\n";
+		print "<div id='memediv".$pazartfid."_".$tf_projid."' name='memediv".$pazartfid."'>Cannot be generated</div><br><br><br><br>\n";
 		next;
 	    } else {
 	    	#Ajax call, no callback func defined for now
-	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$pazartfid."','memediv".$pazartfid."')\">&nbsp&nbsp(from $pazartfid only; see bottom of the page to combine sequences from multiple TFs)<br><br>
-	    		<div id='memediv".$pazartfid."' name='memediv".$pazartfid."'>Not generated</div><br><br>";
+	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$pazartfid."_".$tf_projid."','memediv".$pazartfid."_".$tf_projid."')\">&nbsp&nbsp(from $pazartfid only; see bottom of the page to combine sequences from multiple TFs)<br><br>
+	    		<div id='memediv".$pazartfid."_".$tf_projid."' name='memediv".$pazartfid."_".$tf_projid."'>Not generated</div><br><br>";
 =non-ajax
 		my $patterngen =
 		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
