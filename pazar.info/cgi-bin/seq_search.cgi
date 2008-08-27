@@ -42,7 +42,7 @@ var myTextField = document.getElementById('ID_list');
 
 if(myTextField.value == "PAZAR_seq") {
 document.gene_search.target="_self";
-document.gene_search.action="$pazar_cgi/seq_search.cgi";
+document.gene_search.action="$pazar_cgi/seq_search_new.cgi";
 } else {
 document.gene_search.target="_self";
 document.gene_search.action="$pazar_cgi/gene_search.cgi";
@@ -270,7 +270,7 @@ print<<HEADER_TABLE;
 </table></td></tr>
 <tr><td><span class="title2">Sequence Details</span><br>
 <table class="evidencetableborder">
-<tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
+<tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search_new.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence Name</span></td><td class="basictd">$seqname</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence</span></td><td class="basictd"><div style="font-family:monospace;height:62; overflow:auto;">$seqstr</div></td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Coordinates</span></td><td class="basictd">$coord</td></tr>
@@ -279,17 +279,68 @@ print<<HEADER_TABLE;
 <tr><td class="seqtabletitle"><span class="title4">Quality</span></td><td class="basictd">$quality</td></tr>
 HEADER_TABLE
 
+#strip out <br> from seqstr and store in another variable
+my $plainstr = $seqstr;
+$plainstr =~ s/<br>//g;
 
     print "<tr><form name='display' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'><td  class=\"seqtabletitle\"><span class=\"title4\">Display Genomic Context</span></td><td  class=\"basictd\"><input type='hidden' name='excluded' value=\"$excluded\"><input type='hidden' name='chr' value='".$reg_seq->chromosome."'><input type='hidden' name='start' value='".$reg_seq->start."'><input type='hidden' name='end' value='".$reg_seq->end."'><input type='hidden' name='species' value='".$reg_seq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display.resource.value='ucsc';document.display.submit();\"><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display.resource.value='ucsc';\">-->&nbsp;&nbsp;&nbsp;<a href='#' onClick=\"javascript:document.display.resource.value='ensembl';document.display.submit();\"><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display.resource.value='ensembl';\">--></td></form></tr>";
 
 #show delete button if user is logged in and member of the project ie. same requirements as editing sequence name
-
 
 if($seqname_editable eq "true")
 {
     print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Sequence\" onClick=\"confirm_entry(".$regid.",".$seq_projid.")\"></td></tr>";
 }
 
+print "</table><br>";
+
+#seq_chr1 = chromosome name, seq_rc1 = reverse graph param, species2 = ortholog species name
+
+my $species_fixed = $species;
+$species_fixed =~ s/ /%20/g;
+
+#determine value for seq_rc1
+
+my $revcomp = "yes";
+
+if($reg_seq->strand eq '+')
+{
+	$revcomp = 'no';
+}
+
+
+#determine value for species2
+my $species2 = "mouse";
+
+if($species eq "mus musculus")
+{
+	$species2 = "human";
+}
+else
+{
+	$species2 = "mouse";
+}
+
+my $rs_chr = $reg_seq->chromosome;
+my $rs_start = $reg_seq->start;
+my $rs_end = $reg_seq->end;
+
+#print "<table class=\"evidencetableborder\">";
+
+#print "<tr><td class=\"seqtabletitle\"><span class=\"title4\">Run a regulatory analysis on this sequence</span></td><td><input type='button' value='Run OrcaTK' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?from=select_seqs_coords&species1=$species_fixed&seq_chr1=$rs_chr&seq_start1=$rs_start&seq_end1=$rs_end&seq_rc1=$revcomp&species2=$species2&seq=$plainstr\");></td></tr>";
+
+=delete
+#show delete button if user is logged in and member of the project ie. same requirements as editing sequence name
+if($seqname_editable eq "true")
+{
+    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Sequence\" onClick=\"confirm_entry(".$regid.",".$seq_projid.")\"></td></tr>";
+}
+=cut
+#print "<table><tr><td><span class=\"title4\">Run a regulatory analysis on this sequence: </span></td><td><input type='button' value='Run ORCAtk' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?from=select_seqs_coords&species1=$species_fixed&seq_chr1=$rs_chr&seq_start1=$rs_start&seq_end1=$rs_end&seq_rc1=$revcomp&species2=$species2&seq=$plainstr\");></td></tr>";
+
+print "<table><tr><td><span class=\"title4\">Run a regulatory analysis on this sequence: </span></td><td><input type='button' value='Run ORCAtk' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/ORCAtk/orca?rm=select_seq1_coords&species=$species_fixed&chr=$rs_chr&start=$rs_start&end=$rs_end\");></td></tr>";
+
+#http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_seq1_coords&species=<species>&chr=<chr_name>&start=<start>&end=<end> 
 print "</table><br><br></td></tr>";
 
 ####################### get data objects for retrieving lines of evidence
