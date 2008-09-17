@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 print "Content-type:text/html\n\n";
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
