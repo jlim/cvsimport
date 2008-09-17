@@ -335,8 +335,10 @@ SUMMARY_HEADER
     }
 
 #then, summary of markers, all in the same table but different colors
+    my $marks=0;
     foreach my $marker_data (@marker_info) {
-	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><span class='warning'>*</span></red>$marker_data->{species}</td>";
+	$marks++;
+	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><span class='warning'>*</span>$marker_data->{species}</td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><span class='warning'>*</span>$marker_data->{ID}&nbsp&nbsp<a href='#$marker_data->{ID}'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\"><span class='warning'>*</span>$marker_data->{desc}</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\"><span class='warning'>*</span>$marker_data->{accn}</td>";
@@ -346,8 +348,11 @@ SUMMARY_HEADER
 
 	$bg_color =  1 - $bg_color;
     }
-
-    print "</table><p><i><span class='warning'>*</span>Those genes are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the described sequence.</i></p><hr color='black'><p class=\"title2\">Details Gene-by-Gene</p>";
+    if ($marks == 0) {
+	print "</table><p></p><hr color='black'><p class=\"title2\">Details Gene-by-Gene</p>";
+    } else {
+	print "</table><p><i><span class='warning'>*</span>The genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the described sequence.</i></p><hr color='black'><p class=\"title2\">Details Gene-by-Gene</p>";
+    }
     
     my $regseq_counter = 0; # counter for naming forms
 
