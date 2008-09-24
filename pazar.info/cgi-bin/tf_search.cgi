@@ -606,7 +606,7 @@ print<<COLNAMES;
 <tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
 <tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
-<tr><td class="tftabletitle"><span class="title4">Project</span></td><td class="basictd">$tfproj</td></tr>
+<tr><td class="tftabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$tfproj">$tfproj</a></td></tr>
 COLNAMES
 
 =pod
