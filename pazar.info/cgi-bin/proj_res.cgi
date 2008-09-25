@@ -598,22 +598,25 @@ HEADER_TABLE
 print<<COLNAMES;	    
 		<table class="searchtable"><tr>
 COLNAMES
-    print "<td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
-    print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
-    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates<br><small>[assembly]</small></span></td>";
-    print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
-    print "</tr>";
+
+                print "<td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
+                print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
+                print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
+                print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates<br><small>[assembly]</small></span></td>";
+                print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
+                print "</tr>";
 
                 $prev_gene_accn = $gene_accn;
 	    }
 	    &print_gene_attr($regseq,\%colors,$bg_color,$display_counter);
-	    print "</tr>";
 	    $display_counter++;
 	    $bg_color =  1 - $bg_color;
 	}
     }
     if (!@filters) {push @filters, 'none';}
+    if ($filt==1) {
+	print "</table>";
+    }
     if ($res==1 && $filt==0) {
 	print "<p class=\"warning\">No regulatory sequence was found using this set of filters!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>";
     }
@@ -944,23 +947,24 @@ sub print_gene_attr {
     my %colors=%{$colors};
 
 #print out default information
-		print "<tr>";
-		print "<form name='details$regseq_counter' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
-		
-		my $id=write_pazarid($regseq->accession_number,'RS');
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
+    print "<tr>";
+    print "<form name='details$regseq_counter' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value='".$regseq->accession_number."'>";
+    
+    my $id=write_pazarid($regseq->accession_number,'RS');
+    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type=\"submit\" class=\"submitLink\" value=\"".$id."\"></div></td></form>";
 
-		my $seqname=$regseq->id||'-';
-		print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$seqname."&nbsp;</div></td>";	       
+    my $seqname=$regseq->id||'-';
+    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$seqname."&nbsp;</div></td>";	       
 
-		my $seqstr=chopstr($regseq->seq,40);
-		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
+    my $seqstr=chopstr($regseq->seq,40);
+    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (".$regseq->strand.")<br><small>[".$regseq->seq_dbname." ".$regseq->seq_dbassembly."]</small></div></td>";
+    print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (".$regseq->strand.")<br><small>[".$regseq->seq_dbname." ".$regseq->seq_dbassembly."]</small></div></td>";
 
-		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
+    print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
-		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='hidden' name='chr' value='".$regseq->chromosome."'><input type='hidden' name='start' value='".$regseq->start."'><input type='hidden' name='end' value='".$regseq->end."'><input type='hidden' name='species' value='".$regseq->binomial_species."'><input type='hidden' name='resource' value='ucsc'><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ucsc_logo.png'></a><!--<input type='submit' name='ucsc' value='ucsc' onClick=\"javascript:document.display$regseq_counter.resource.value='ucsc';\">--><br><br><a href='#' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';document.display$regseq_counter.submit();\"><img src='$pazar_html/images/ensembl_logo.gif'></a><!--<input type='submit' name='ensembl' value='ensembl' onClick=\"javascript:document.display$regseq_counter.resource.value='ensembl';\">--></div></td></form>";
+    print "</tr>";
 }
 
 sub print_tf_attr {
