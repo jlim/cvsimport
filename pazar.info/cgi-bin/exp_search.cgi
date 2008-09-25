@@ -346,7 +346,7 @@ if ($mode eq 'expression') {
 	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-	    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
+	    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
 	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>$coord</div></td>";
 	}
 
@@ -493,8 +493,8 @@ if ($mode eq 'expression') {
 	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-	    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Coordinates:<br>$coord</div></td>";
+	    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
+	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>$coord</div></td>";
 	}
 #get mutant and print out all information
 	if ($seqtable eq 'mutation_set') {

@@ -476,7 +476,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
     print "<table class=\"searchtable\"><tr><td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
     print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates</span></td>";
+    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates<br><small>[assembly]</small></span></td>";
     print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
     print "</tr>";
 
@@ -505,7 +505,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 		my $seqstr=chopstr($regseq->seq,40);
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (strand ".$regseq->strand.")</div></td>";
+		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (".$regseq->strand.")<br><small>[".$regseq->seq_dbname." ".$regseq->seq_dbassembly."]</small></div></td>";
 
 #		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
@@ -586,7 +586,7 @@ if($genename_editable eq "true")
     print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Gene\" onClick=\"confirm_entry(".$gene_data->{GID}.")\"></td></tr>";
 }
 =cut
-print "</table><p><i><span class='warning'>*</span>This gene is used as a marker located in the vicinity of a regulatory region. It has not been shown to be regulated by the described sequence.</i></p><br>";
+print "</table><p><i><span class='warning'>*</span>The genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the described sequence.</i></p><br>";
 
 #print "<table class=\"summarytable\">";
 #print "<tr><td class=\"genetabletitle\"><span class=\"title4\">Run a regulatory region analysis for this gene</span></td><td class=\"basictd\"><a target=\"orcawin\" href=\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?sid=$sid&from=select_seqs_name&rm=select_gene&species1=$species_monomial&gene_name=$geneName\">Run OrcaTK</a></td></tr>";
@@ -602,7 +602,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
     print "<table class=\"searchtable\"><tr><td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
     print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates</span></td>";
+    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates<br><small>[assembly]</small></span></td>";
     print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
     print "</tr>";
 
@@ -631,7 +631,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 		my $seqstr=chopstr($regseq->seq,40);
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (strand ".$regseq->strand.")</div></td>";
+		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (".$regseq->strand.")<br><small>[".$regseq->seq_dbname." ".$regseq->seq_dbassembly."]</small></div></td>";
 
 #		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 

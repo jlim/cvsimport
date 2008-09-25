@@ -234,7 +234,7 @@ if($seqname_editable eq "true")
 
 }
 
-my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
+my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.") <small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
 my $quality=$reg_seq->quality||'-';
 
 my $species = $ensdb->current_org();
@@ -273,7 +273,7 @@ print<<HEADER_TABLE;
 <tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search_new.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence Name</span></td><td class="basictd">$seqname</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence</span></td><td class="basictd"><div style="font-family:monospace;height:62; overflow:auto;">$seqstr</div></td></tr>
-<tr><td class="seqtabletitle"><span class="title4">Coordinates</span></td><td class="basictd">$coord</td></tr>
+<tr><td class="seqtabletitle"><span class="title4">Coordinates <small>[assembly]</small></span></td><td class="basictd">$coord</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">EnsEMBL Transcript ID</span></td><td class="basictd">$transcript</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Transcription Start Site</span></td><td class="basictd">$tss</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Quality</span></td><td class="basictd">$quality</td></tr>

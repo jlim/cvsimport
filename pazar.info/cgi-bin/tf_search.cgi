@@ -661,7 +661,7 @@ COLNAMES2
 		    $species = ucfirst($species)||'-';
 		    $seqcounter++;
 		    $count++;
-		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
+		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
 
 		    print "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
 		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a><br>$seqname</div></td>";
