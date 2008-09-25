@@ -601,7 +601,7 @@ COLNAMES
     print "<td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
     print "<td width='150' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence Name</span></td>";
     print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates</span></td>";
+    print "<td width='300' class=\"genedetailstabletitle\"><span class=\"title4\">Coordinates<br><small>[assembly]</small></span></td>";
     print "<td width='100' class=\"genedetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
     print "</tr>";
 
@@ -682,7 +682,7 @@ COLNAMES
 		my $trans=$subunit->get_transcript_accession($dbh);
 		my $gene=$ensdb->ens_transcr_to_gene($trans);
 		my $species=$ensdb->current_org();
-		if (!grep(/^$species$/,@species)) {
+		if (!grep(/^$species$/i,@species)) {
 		    next;
 		} else {
 		    if (!grep(/^$funct_name$/,@tfs)) {
@@ -956,7 +956,7 @@ sub print_gene_attr {
 		my $seqstr=chopstr($regseq->seq,40);
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
 
-		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (strand ".$regseq->strand.")</div></td>";
+		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>chr".$regseq->chromosome.":".$regseq->start."-".$regseq->end." (".$regseq->strand.")<br><small>[".$regseq->seq_dbname." ".$regseq->seq_dbassembly."]</small></div></td>";
 
 		print "<form name='display$regseq_counter' method='post' action='$pazar_cgi/gff_custom_track.cgi' enctype='multipart/form-data' target='_blank'>";
 
@@ -1075,7 +1075,7 @@ COLNAMES2
 		my $species = $ensdb->current_org();
 		$species = ucfirst($species)||'-';
 
-		my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (strand ".$reg_seq->strand.")";
+		my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
 
 		print "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";

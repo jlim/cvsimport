@@ -268,7 +268,7 @@ if($commentseditable eq "true")
     print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Analysis\" onClick=\"confirm_entry(".$aid.",".$analysis_projid.")\"></td></tr>";
 }
 
-    print "</table>";
+    print "</table><br><br>";
 
 my @analysis=$dbh->get_analysis_structure_by_id($aid);
 my @idlist;
@@ -453,6 +453,7 @@ if ($mode eq 'expression') {
 	print "</tr>";
 	$bg_color = 1 - $bg_color;
     }
+    print "</table>";
 } elsif ($mode eq 'interaction') {
     print "<table class=\"evidencedetailstableborder\"><tr>";
     print "<td width='80' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Type</span></td>";
@@ -578,6 +579,7 @@ if ($mode eq 'expression') {
 	print "</tr>";
     	$bg_color = 1 - $bg_color;
     }
+    print "</table>";
 }
 
 # print out the html tail template

@@ -484,7 +484,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 #loop through regseqs and print tables
 	my @regseqs = $dbh->get_reg_seqs_by_gene_id($gene_data->{GID}); 
 	if (!$regseqs[0]) {
-	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span><br><br><br><br>";
+	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span>";
 	    next;
 	} else {
 	    my @ens_coords = $ensdb->get_ens_chr($gene);
@@ -514,7 +514,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 		$bg_color =  1 - $bg_color;
 	    }
 	}
-	print "</table><br><br><br><br>";
+	print "</table>";
     }
 
 ###gene details for markers###
@@ -610,7 +610,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 #loop through regseqs and print tables
 	my @regseqs = $dbh->get_reg_seqs_by_marker_id($gene_data->{GID}); 
 	if (!$regseqs[0]) {
-	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span><br><br><br><br>";
+	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span>";
 	    next;
 	} else {
 	    my @ens_coords = $ensdb->get_ens_chr($gene);
@@ -640,7 +640,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 		$bg_color =  1 - $bg_color;
 	    }
 	}
-	print "</table><br><br><br><br>";
+	print "</table>";
     }
 }
 
