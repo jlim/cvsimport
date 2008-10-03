@@ -4,6 +4,7 @@ use HTML::Template;
 use Exporter;
 use CGI qw(  :all);
 use pazar;
+use pazar::talk;
 #use CGI::Debug(report => everything, on => anything);
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
