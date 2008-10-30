@@ -65,7 +65,7 @@ args+="&tfpid="+tableId;
 
 
 if (sites<2) {
-   divObj.innerHTML='<span style="color:red">There are too few sites to build a binding profile for this TF!</span>';
+   divObj.innerHTML='<p class="warning">There are not enough targets to build a binding profile for this TF!</p>';
    return 0;
 }
 
@@ -231,9 +231,9 @@ for (i=0; i<divs.length; i++) {
 	try {
                 ajaxcall('SummaryTable'+baseName,'memediv'+baseName,1);
 	}
-#catch (err) {
-#	alert(err);
-#}
+catch (err) {
+	alert(err);
+}
         }
 }
 }

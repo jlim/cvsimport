@@ -47,7 +47,7 @@ args='caller=tfsearch';
                                         }
                         }
 if (sites<2) {
-   divObj.innerHTML='<span style="color:red">There are too few sites to build a binding profile for this TF!</span>';
+   divObj.innerHTML='<p class="warning">There are not enough targets to build a binding profile for this TF!</p>';
    return 0;
 }
 
@@ -193,9 +193,9 @@ for (i=0; i<divs.length; i++) {
 	try {
                 ajaxcall('SummaryTable'+baseName,'memediv'+baseName,1);
 	}
-#catch (err) {
-#	alert(err);
-#}
+catch (err) {
+	alert(err);
+}
         }
 }
 }
@@ -1132,7 +1132,7 @@ Select_buttons
 	close (TMP);
 
 	if ($count<2) {
-	    print "<p class=\"warning\">There are not enough targets to build a binding profile for this TF!</p><br>";
+	    print "<div id='memediv".$pazartfid."' name='memediv".$pazartfid."'>Not generated</div>";
 	    next;
 	} else {
 	    	#Ajax call, no callback func defined for now
