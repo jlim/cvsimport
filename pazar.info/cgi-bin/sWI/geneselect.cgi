@@ -89,27 +89,29 @@ if ($genes) {
 	my $found=0;
 	my $tsrs = &select($pazar, "SELECT * FROM tsr WHERE gene_source_id='$gene->{gene_source_id}'");
 	if ($tsrs) {
-	    while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
-		my $reg_seqs = &select($pazar, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq, tsr WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
-		if ($reg_seqs) {
-		    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-		    $coords[5]=~s/\[.*\]//g;
-		    $coords[5]=~s/\(.*\)//g;
-		    $coords[5]=~s/\.//g;
-		    my $species = $talkdb->current_org();
-		    $species = ucfirst($species)||'-';
+	    while ((my $tsr=$tsrs->fetchrow_hashref) && ($found==0)) {
+		if ($tsr->{tsr_id}) {
+		    my $reg_seqs = &select($pazar, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.tsr_id='$tsr->{tsr_id}'");
+		    if ($reg_seqs) {
+			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
+			$coords[5]=~s/\[.*\]//g;
+			$coords[5]=~s/\(.*\)//g;
+			$coords[5]=~s/\.//g;
+			my $species = $talkdb->current_org();
+			$species = ucfirst($species)||'-';
 
-		    my $pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
-		    my $gene_desc=$gene->{description};
-		    if ($gene_desc eq '0'||$gene_desc eq '') {$gene_desc='-';}
-		    push @gene_project, {
-			ID => $pazargeneid,
-			shortID => $gene->{gene_source_id},
-			accn => $gene->{db_accn},
-			desc => $gene_desc,
-			ens_desc => $coords[5],
-			species => $species};
-		    $found++;
+			my $pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
+			my $gene_desc=$gene->{description};
+			if ($gene_desc eq '0'||$gene_desc eq '') {$gene_desc='-';}
+			push @gene_project, {
+			    ID => $pazargeneid,
+			    shortID => $gene->{gene_source_id},
+			    accn => $gene->{db_accn},
+			    desc => $gene_desc,
+			    ens_desc => $coords[5],
+			    species => $species};
+			$found++;
+		    }
 		}
 	    }
 	}
@@ -136,6 +138,9 @@ print "<input type=\"submit\" class=\"submitLink2\" value=\"EnsEMBL Gene Descrip
 print "<td class='genelisttabletitle'' width='50'></td>\n";
 print "</tr>\n";
 
+unless ($params{BROWSE}) {
+    $params{BROWSE}='ens_desc';
+}
 my @sorted;
 if ($params{BROWSE} eq 'species') {
     @sorted=sort {lc($a->{species}) cmp lc($b->{species}) or lc($a->{desc}) cmp lc($b->{desc})} @gene_project;
