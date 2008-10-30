@@ -464,13 +464,7 @@ if($genename_editable eq "true")
 =cut
 print "</table><br>";
 
-#print "<table class=\"summarytable\">";
-#print "<tr><td class=\"genetabletitle\"><span class=\"title4\">Run a regulatory region analysis for this gene</span></td><td class=\"basictd\"><!--<a target=\"orcawin\" href=\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?sid=$sid&from=select_seqs_name&rm=select_gene&species1=$species_monomial&gene_name=$geneName\">Run OrcaTK</a>--><input type=\"button\" value=\"Run OrcaTK\" OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?sid=$sid&from=select_seqs_name&rm=select_gene&species1=$species_monomial&gene_name=$geneName\");></td></tr>";
-#print "</table><br>";
-#print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis for this gene: </span><input type=\"button\" value=\"Run ORCAtk\" OnClick=javascript:window.open(\"http://www.cisreg.ca/cgi-bin/OrcaTK/orca?sid=$sid&from=select_seqs_name&rm=select_gene&species1=$species_monomial&gene_name=$geneName\");></td></tr></table><br>";
-
-print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis for this gene: </span><input type=\"button\" value=\"Run ORCAtk\" OnClick=javascript:window.open(\"http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_gene1&species=$species_urlfriendly&ensembl_id=$gene\");></td></tr></table><br>";
-#http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_transcript1&species=<species>&ensembl_id=<ensembl_id> 
+print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis for this gene: </span><input type=\"button\" value=\"Run ORCAtk\" OnClick=javascript:window.open(\"http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_gene1&species=$species_urlfriendly&ensembl_id=".trim($gene)."\");></td></tr></table><br>";
 
 ########### start of reg_seq table
     print "<table class=\"searchtable\"><tr><td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
@@ -565,6 +559,7 @@ if($genename_editable eq "true")
 
 my $sid = $$ . time;
 my $species_urlfriendly = $species;
+$species_urlfriendly = trim($species_urlfriendly); #remove spaces from beginning and end
 $species_urlfriendly =~ s/ /%20/g;
 
 
@@ -588,15 +583,9 @@ if($genename_editable eq "true")
 =cut
 print "</table><p><i><span class='warning'>*</span>The genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the described sequence.</i></p><br>";
 
-#print "<table class=\"summarytable\">";
-#print "<tr><td class=\"genetabletitle\"><span class=\"title4\">Run a regulatory region analysis for this gene</span></td><td class=\"basictd\"><a target=\"orcawin\" href=\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?sid=$sid&from=select_seqs_name&rm=select_gene&species1=$species_monomial&gene_name=$geneName\">Run OrcaTK</a></td></tr>";
-#print "</table><br>";
 
-#print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis for this gene: </span><input type=\"button\" value=\"Run ORCAtk\" OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?sid=$sid&from=select_seqs_name&rm=select_gene&species1=$species_monomial&gene_name=$geneName\");></td></tr></table><br>"; 
+print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis for this gene: </span><input type=\"button\" value=\"Run ORCAtk\" OnClick=javascript:window.open(\"http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_gene1&species=$species_urlfriendly&ensembl_id=".trim($gene)."\");></td></tr></table><br>";
 
-print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis for this gene: </span><input type=\"button\" value=\"Run ORCAtk\" OnClick=javascript:window.open(\"http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_gene1&species=$species_urlfriendly&ensembl_id=$gene\");></td></tr></table><br>";
-
-#http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_transcript1&species=<species>&ensembl_id=<ensembl_id> 
 
 ########### start of reg_seq table
     print "<table class=\"searchtable\"><tr><td class=\"genedetailstabletitle\" width='100'><span class=\"title4\">RegSeq ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
@@ -702,3 +691,13 @@ sub write_pazarid {
     my $pazarid=$type.$id7d;
     return $pazarid;
 }
+
+# Perl trim function to remove whitespace from the start and end of the string
+sub trim($)
+{
+        my $string = shift;
+        $string =~ s/^\s+//;
+        $string =~ s/\s+$//;
+        return $string;
+}
+
