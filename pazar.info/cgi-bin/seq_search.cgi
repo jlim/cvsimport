@@ -42,7 +42,7 @@ var myTextField = document.getElementById('ID_list');
 
 if(myTextField.value == "PAZAR_seq") {
 document.gene_search.target="_self";
-document.gene_search.action="$pazar_cgi/seq_search_new.cgi";
+document.gene_search.action="$pazar_cgi/seq_search.cgi";
 } else {
 document.gene_search.target="_self";
 document.gene_search.action="$pazar_cgi/gene_search.cgi";
@@ -270,7 +270,7 @@ print<<HEADER_TABLE;
 </table></td></tr>
 <tr><td><span class="title2">Sequence Details</span><br>
 <table class="evidencetableborder">
-<tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search_new.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
+<tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence Name</span></td><td class="basictd">$seqname</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Sequence</span></td><td class="basictd"><div style="font-family:monospace;height:62; overflow:auto;">$seqstr</div></td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Coordinates <small>[assembly]</small></span></td><td class="basictd">$coord</td></tr>
@@ -325,9 +325,7 @@ my $rs_chr = $reg_seq->chromosome;
 my $rs_start = $reg_seq->start;
 my $rs_end = $reg_seq->end;
 
-#print "<table class=\"evidencetableborder\">";
 
-#print "<tr><td class=\"seqtabletitle\"><span class=\"title4\">Run a regulatory analysis on this sequence</span></td><td><input type='button' value='Run OrcaTK' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?from=select_seqs_coords&species1=$species_fixed&seq_chr1=$rs_chr&seq_start1=$rs_start&seq_end1=$rs_end&seq_rc1=$revcomp&species2=$species2&seq=$plainstr\");></td></tr>";
 
 =delete
 #show delete button if user is logged in and member of the project ie. same requirements as editing sequence name
@@ -336,11 +334,9 @@ if($seqname_editable eq "true")
     print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Sequence\" onClick=\"confirm_entry(".$regid.",".$seq_projid.")\"></td></tr>";
 }
 =cut
-#print "<table><tr><td><span class=\"title4\">Run a regulatory analysis on this sequence: </span></td><td><input type='button' value='Run ORCAtk' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/OrcaTK/orcatk?from=select_seqs_coords&species1=$species_fixed&seq_chr1=$rs_chr&seq_start1=$rs_start&seq_end1=$rs_end&seq_rc1=$revcomp&species2=$species2&seq=$plainstr\");></td></tr>";
 
-print "<table><tr><td><span class=\"title4\">Run a regulatory analysis on this sequence: </span></td><td><input type='button' value='Run ORCAtk' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/ORCAtk/orca?rm=select_seq1_coords&species=$species_fixed&chr=$rs_chr&start=$rs_start&end=$rs_end\");></td></tr>";
+print "<table><tr><td><span class=\"title4\">Run a regulatory analysis on this sequence: </span></td><td><input type='button' value='Run ORCAtk' OnClick=javascript:window.open(\"http://burgundy.cmmt.ubc.ca/cgi-bin/ORCAtk/orca?rm=select_seq1_coords&species=".trim($species_fixed)."&chr=".trim($rs_chr)."&start=".trim($rs_start)."&end=".trim($rs_end)."\");></td></tr>";
 
-#http://www.cisreg.ca/cgi-bin/ORCAtk/orca?rm=select_seq1_coords&species=<species>&chr=<chr_name>&start=<start>&end=<end> 
 print "</table><br><br></td></tr>";
 
 ####################### get data objects for retrieving lines of evidence
@@ -656,4 +652,13 @@ sub write_pazarid {
     my $id7d = sprintf "%07d",$id;
     my $pazarid=$type.$id7d;
     return $pazarid;
+}
+
+# Perl trim function to remove whitespace from the start and end of the string
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
 }
