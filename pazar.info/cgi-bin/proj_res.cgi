@@ -193,9 +193,9 @@ for (i=0; i<divs.length; i++) {
 	try {
                 ajaxcall('SummaryTable'+baseName,'memediv'+baseName,1);
 	}
-catch (err) {
-	alert(err);
-}
+#catch (err) {
+#	alert(err);
+#}
         }
 }
 }
