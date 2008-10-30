@@ -54,7 +54,11 @@ headTableObj=xGetElementById('Head'+tableId);
 var headtbody=headTableObj.getElementsByTagName('tbody');
 var headtrs = headtbody[0].getElementsByTagName('tr');
 var headtd = headtrs[1].getElementsByTagName('td')[1];
-args+="&tfname="+headtd.innerHTML;
+//args+="&tfname="+headtd.innerHTML;
+var tfnameDivObj=xGetElementById('Hidden'+tableId);
+args+="&tfname="+tfnameDivObj.innerHTML;
+
+
 
 // now pass tableid (includes tfid and project id), to make forms unique on meme_call page
 args+="&tfpid="+tableId;
@@ -571,7 +575,11 @@ my $tfsth = &select($dbh,"select project_id from funct_tf where funct_tf_id=".$t
 
 my $tfresultshref = $tfsth->fetchrow_hashref;
 
-    my $tf_projid = $tfresultshref->{"project_id"};
+my $tf_projid = $tfresultshref->{"project_id"};
+
+
+#print hidden table to store original TF name for passing to ajax javascript function
+print "<div id=\"HiddenSummaryTable$pazartfid\_$tf_projid\" style=\"visibility:hidden\">$tf_name</div>";
 
 
 if ($loggedin eq 'true') {
