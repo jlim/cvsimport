@@ -302,6 +302,11 @@ eval {
 		    exit();
 		}
 	    }
+	    unless ($tfid > 0) {
+		print $query->h2("An error occurred- No TF was selected!");
+		exit();
+	    }
+
 	    my $conc=$params{"tf_quant$i"}||'na';
 	    my $scale=$params{"tf_scale$i"}||'na';
 	    my $tfcondid=$pazar->table_insert('bio_condition','co-expression','Transcription Factor',$tfid,$conc,$scale);
