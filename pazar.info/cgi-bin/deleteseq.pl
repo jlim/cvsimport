@@ -31,7 +31,17 @@ my $get = new CGI;
 my %params = %{$get->Vars};
 
 
-#checke if logged in
+#connect to the database
+my $pazar = pazar->new(
+                      -host          =>    $ENV{PAZAR_host},
+                      -user          =>    $ENV{PAZAR_pubuser},
+                      -pass          =>    $ENV{PAZAR_pubpass},
+                      -dbname        =>    $ENV{PAZAR_name},
+                      -drv           =>    $ENV{PAZAR_drv},
+                      -globalsearch  =>    'yes');
+
+
+#check if logged in
 
 if($loggedin eq "true")
 {
@@ -83,6 +93,105 @@ if($loggedin eq "true")
 
 	$dbh->do("delete from anchor_reg_seq where reg_seq_id=".$sequenceid);
 ##	print "delete from anchor_reg_seq where reg_seq_id=".$sequenceid."<br>";
+
+## delete associated analysis entries
+
+## get analysis ids
+my ($analysisid,$ainputid)=$pazar->get_analysis_by_regseq_id($sequenceid);
+## use deleteanalysis.pl code##############################
+
+
+
+        $dbh->do("delete from analysis where analysis_id=".$analysisid);
+##    print "delete from analysis where analysis_id=".$analysisid."<br>";
+        print "Analysis with ID: ".$analysisid." deleted<br>";
+
+        my $sth1 = $dbh->prepare("select analysis_input_id from analysis_input where analysis_id=$analysisid");
+        $sth1->execute;
+        while(my $href1 = $sth1->fetchrow_hashref)
+        {
+##      print "<font color='red'><b>Looping on analysis input id: ".$href1->{analysis_input_id}."</b></font><br>";
+            my $sth3 = $dbh->prepare("select analysis_i_link_id,analysis_o_link_id from analysis_i_link where analysis_input_id=".$href1->{analysis_input_id});
+            $sth3->execute;
+            #iterate through analysis_i_link records
+            while(my $href3 = $sth3->fetchrow_hashref)
+            {
+##          print "<b>looping on analysis_i_link records</b><br>";
+                #delete the analysis output
+                my $sth4 = $dbh->prepare("select analysis_output_id from analysis_o_link where analysis_i_link_id=".$href3->{analysis_i_link_id}." OR analysis_o_link_id=".$href3->{analysis_o_link_id}); # maybe too inclusive?
+                $sth4->execute;
+
+                #iterate over analysis output ids
+                while(my $href4 = $sth4->fetchrow_hashref)
+                {
+                    #select io_type_id from analysis_output
+
+                    #delete the io_type
+                    #check if io_type only associated with analysis outputs being deleted
+                    #if so
+                    my $outputiosth = $dbh->prepare("select io_type_id from analysis_output where analysis_output_id=".$href4->{analysis_output_id});
+                    $outputiosth->execute;
+                    my $outputiohref = $outputiosth->fetchrow_hashref;
+                    my $output_iotypeid = $outputiohref->{io_type_id};
+
+                    #figure out how many analysis outputs refer to the io_type record
+                    my $outputs_sth = $dbh->prepare("select analysis_output_id from analysis_output where analysis_output_id!=".$href4->{analysis_output_id}." AND io_type_id=".$output_iotypeid);
+                    $outputs_sth->execute;
+                    my $numreferringoutputs = 0;
+                    while(my $outputs_href = $outputs_sth->fetchrow_hashref)
+                    {
+                        $numreferringoutputs++;
+                    }
+                    if($numreferringoutputs == 0)
+                    {
+                        $dbh->do("delete from io_type where io_type_id=".$output_iotypeid);
+##                  print "output iotype: delete from io_type where io_type_id=".$output_iotypeid."<br>";
+                    }
+                    #should we only delete if not referenced by other inputs?
+                    $dbh->do("delete from analysis_output where analysis_output_id=".$href4->{analysis_output_id});
+##              print "delete from analysis_output where analysis_output_id=".$href4->{analysis_output_id}."<br>";
+                    print "Deleted analysis output with ID: ".$href4->{analysis_output_id}."<br>";
+                }
+
+                #delete analysis_o_link
+                $dbh->do("delete from analysis_o_link where analysis_o_link_id=".$href3->{analysis_o_link_id});
+##          print "delete from analysis_o_link where analysis_o_link_id=".$href3->{analysis_o_link_id}."<br>";
+
+                $dbh->do("delete from analysis_i_link where analysis_i_link_id=".$href3->{analysis_i_link_id});
+##          print "delete from analysis_i_link where analysis_i_link_id=".$href3->{analysis_i_link_id}."<br>";
+            }
+
+            my $sth2 = $dbh->prepare("select io_type_id from analysis_input where analysis_id=$analysisid");
+            $sth2->execute;
+            #check if io_type only associated with analysis inputs being deleted
+            #if so
+
+            my $inputiosth = $dbh->prepare("select io_type_id from analysis_input where analysis_input_id=".$href1->{analysis_input_id});
+            $inputiosth->execute;
+            my $inputiohref = $inputiosth->fetchrow_hashref;
+            my $input_iotypeid = $inputiohref->{io_type_id};
+
+            #figure out how many analysis outputs refer to the io_type record
+            my $inputs_sth = $dbh->prepare("select analysis_input_id from analysis_input where analysis_input_id!=".$href1->{analysis_input_id}." AND io_type_id=".$input_iotypeid);
+            $inputs_sth->execute;
+            my $numreferringinputs = 0;
+            while(my $inputs_href = $inputs_sth->fetchrow_hashref)
+            {
+                $numreferringinputs++;
+            }
+            if($numreferringinputs == 0)
+            {
+                #make sure these io records aren't linked to other analysis inputs (not being deleted)
+                $dbh->do("delete from io_type where io_type_id=".$input_io_type_id);
+##          print "input iotype: delete from io_type where io_type_id=".$input_iotypeid."<br>";
+            }
+            $dbh->do("delete from analysis_input where analysis_input_id=".$href1->{analysis_input_id});
+##      print "delete from analysis_input where analysis_input_id=".$href1->{analysis_input_id}."<br>";
+            print "Deleted analysis input with ID: ".$href1->{analysis_input_id}."<br>";
+        }
+
+#######################################################
+
 
         #get matrix_id referenced with the reg_seq_id (may return >1)
 	my $matrixsth = $dbh->prepare("select matrix_id from reg_seq_set where reg_seq_id=".$sequenceid);
