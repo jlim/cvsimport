@@ -72,10 +72,15 @@ everyone can ask for help (<a href="https://sourceforge.net/forum/forum.php?foru
 suggestion (<a href="https://sourceforge.net/forum/forum.php?forum_id=512784" target="_blank">'Open Discussion' forum</a>).</p>
           <p class="title2">License:</p>
           <p >The PAZAR code is available under the <a href="http://www.gnu.org/copyleft/lesser.html" target="_blank">GNU Lesser General Public License (LGPL)</a>.<br>The PAZAR data in "public" or "open" data collections are available under the <a href="http://www.gnu.org/copyleft/lesser.html" target="_blank">GNU LGPL</a>, while data in "private" collections are property of the curators of those collections and permission must be explicitly provided. Only "public" and "open" collections can be accessed by anonymous users.</p>
-          <p class="title2">Publication:</p>
+<a name="publications"></a>
+          <p class="title2">Publications:</p>
           <p >Please use the citation information below when referring to PAZAR in publication.</p>
 <p>Portales-Casamar E, Kirov S, Lim J, Lithwick S, Swanson MI, Ticoll A, Snoddy J, Wasserman WW.<br>PAZAR: a Framework for Collection and Dissemination of Cis-regulatory Sequence Annotation.<br><a target="publication" href="http://genomebiology.com/2007/8/10/R207">Genome Biology 2007, 8, R207.</a></p>
+
+<p>Portales-Casamar E, Arenillas D, Lim J, Swanson MI, Jiang S, McCallum A, Kirov S, Wasserman WW.<br>The PAZAR database of gene regulatory information coupled to the ORCA toolkit for the study of regulatory sequences.<br><a target="publication" href="http://nar.oxfordjournals.org/cgi/content/abstract/37/suppl_1/D54?maxtoshow=&HITS=10&hits=10&RESULTFORMAT=&fulltext=pazar&searchid=1&FIRSTINDEX=0&resourcetype=HWCIT">Nucleic Acids Res. 2009 Jan;37(Database issue):D54-60.</a></p>
 page
+
+
 
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
