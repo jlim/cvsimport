@@ -271,7 +271,7 @@ while (50<=$i&&$i<60) {
                  
 print<<page;
 <table border="0" cellpadding="0" cellspacing="0" width="550">
-<tbody><tr><td style="text-align:justify"><b>WELCOME TO PAZAR MALL!</b>&nbsp&nbsp&nbsp<a href="#" onclick = "showHide('details');"><small>Learn More</small></a>&nbsp;&nbsp;<a target="publication" href="http://genomebiology.com/2007/8/10/R207"><small>Publication</small></a><br>
+<tbody><tr><td style="text-align:justify"><b>WELCOME TO PAZAR MALL!</b>&nbsp&nbsp&nbsp<a href="#" onclick = "showHide('details');"><small>Learn More</small></a>&nbsp;&nbsp;<a target="publication" href="$pazar_cgi/overview.pl#publications"><small>Publications</small></a><br>
 <div id="details" style='display:none'>
 PAZAR is your one stop shopping experience for transcription factors and regulatory sequence annotations. PAZAR can be searched by <a href="$pazar_cgi/gene_search.cgi">Gene</a>, <a href="$pazar_cgi/tf_search.cgi">Transcription Factor</a> or <a href="$pazar_cgi/profilesearch.pl">Profile</a> by clicking on one of the department stores below.<br>
 Each project in PAZAR is a boutique in the mall. You can limit your search to a specific project by clicking on the corresponding boutique on the mall map.<br>
