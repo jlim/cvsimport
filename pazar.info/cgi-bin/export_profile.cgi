@@ -178,7 +178,7 @@ ROWS
 
 $bg_color=1-$bg_color;
     }
-print "</table>";
+print "</table";
 
 ###  print out the html tail template
   my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");

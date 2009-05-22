@@ -55,7 +55,7 @@ if ($loggedin eq 'true') {
     }
 }
 
-=OLD new=ajax
+=oLD new=ajax
 my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
 my %gene_project;
 foreach my $project (@desc) {
@@ -85,13 +85,27 @@ foreach my $project (@desc) {
 	}
 }
 =cut
+my %gene_project;
+my %marker_project;
+
+my $mh=$dbh->prepare("SELECT count(distinct db_accn) FROM marker where project_id=?")||die DBI::errstr;  
+
 my $gh=$dbh->prepare("SELECT count(distinct db_accn) FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
 foreach my $project (@desc) {
      $gh->execute($project->{project_id})||die DBI::errstr;
 	my $cnt=$gh->fetchrow_array;
+
+     $mh->execute($project->{project_id})||die DBI::errstr;
+        my $mcnt=$mh->fetchrow_array;
+
 	 $gene_project{$project->{project_name}}{CNT}=$cnt;
 	 $gene_project{$project->{project_name}}{ID}=$project->{project_id};
+
+         $marker_project{$project->{project_name}}{CNT}=$mcnt;
+         $marker_project{$project->{project_name}}{ID}=$project->{project_id};
+
 }
+
 
     print "<head>
 <title>PAZAR - Gene List</title>
@@ -114,6 +128,7 @@ function showHide(inputID) {
 	}
 }
 
+
 function getgenes(divId) {
  var divObj = document.getElementById(divId);
 var http=false;
@@ -126,6 +141,18 @@ if(navigator.appName == \"Microsoft Internet Explorer\") {
   http = new XMLHttpRequest();
 }
 var args='project_id='+divObj.getAttribute(\"project_id\");
+
+//check if divId is for marker or gene ie. ends with 'markers' or not and send type param
+if (divId.match(\"markers\"+\"\$\"))
+{
+	args+='&table=marker';
+}
+else
+{
+	args+='&table=gene_source';
+}
+
+
 http.open(\"POST\", \"proj2gene_list.pl\",true);
 //Send the proper header information along with the request
 http.setRequestHeader(\"Content-type\", \"application\/x-www-form-urlencoded\");
@@ -191,10 +218,22 @@ $div_id=~s/ /_/g;
 my $style='display:none';
 if ($param{opentable} eq $proj_name) {$style='display:block';}
 
+#generate div ids for markers
+
+my $mdiv_id=$proj_name."markers";
+$mdiv_id=~s/ /_/g;
+my $mstyle='display:none';
+if ($param{opentable} eq $proj_name."markers") {$mstyle='display:block';}
+
+#####################
+
 print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a>&nbsp&nbsp<small>($gene_project{$proj_name}{CNT} genes)</small></li></td></tr><tr><td  width='750'>
 <div id=\"$div_id\" style=\"$style\" loaded=\"no\" project_id=\"$gene_project{$proj_name}{ID}\" genes=\"$gene_project{$proj_name}{CNT}\">";
 
-=OLD new ajax
+print " <tr><td width='750'><li><a href=\"#$mdiv_id\" onclick = \"showHide('$mdiv_id');\">$proj_name markers</a>&nbsp&nbsp<small>($marker_project{$proj_name}{CNT} genes)</small></li></td></tr><tr><td  width='750'>
+<div id=\"$mdiv_id\" style=\"$mstyle\" loaded=\"no\" project_id=\"$marker_project{$proj_name}{ID}\" genes=\"$marker_project{$proj_name}{CNT}\">";
+
+=oLD new ajax
 <table width='750' class='summarytable'><tr>";
     print "<td class='genedetailstabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
     print "<td class='genedetailstabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";

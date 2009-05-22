@@ -1,10 +1,11 @@
 #!/usr/bin/perl
 
-#use strict;ø
+#use strict;
 
 use pazar;
 use pazar::gene;
 use pazar::talk;
+use pazar::reg_seq;
 
 use HTML::Template;
 
@@ -268,7 +269,10 @@ if($commentseditable eq "true")
     print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Analysis\" onClick=\"confirm_entry(".$aid.",".$analysis_projid.")\"></td></tr>";
 }
 
-    print "</table><br><br>";
+    print "</table>";
+
+    print "<p><i><span class='warning'>*</span>Genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the associated sequence.</i></p>";
+print "<br>";
 
 my @analysis=$dbh->get_analysis_structure_by_id($aid);
 my @idlist;
@@ -325,7 +329,7 @@ if ($mode eq 'expression') {
 	$count++;
 #get reg_seq and print out all information
 	if ($seqtable eq 'reg_seq') {
-	    my $reg_seq=$dbh->get_reg_seq_by_regseq_id($seqid);
+	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$seqid);
 	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Genomic Sequence</div></td>";
 
 	    my $regid=$reg_seq->accession_number;
@@ -333,7 +337,17 @@ if ($mode eq 'expression') {
 	    my $seqname=$reg_seq->id;
 	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
 	    my $gid=$reg_seq->PAZAR_gene_ID;
-	    my $pazargeneid = write_pazarid($gid,'GS');
+#check whether the representative gene in reg_seq object is gene or marker
+
+my $gidprefix = 'GS';
+my $asterisk = "";
+if($reg_seq->gene_type eq "marker")
+{
+	$gidprefix = 'MK';
+	$asterisk = "<span class='warning'>*</span>";
+}
+
+	    my $pazargeneid = write_pazarid($gid,$gidprefix);
 	    my $gene_accession=$reg_seq->gene_accession;
 	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 	    $ens_coords[5]=~s/\[.*\]//g;
@@ -341,7 +355,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
 
 	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -361,9 +375,18 @@ if ($mode eq 'expression') {
 	    my $seqname=$mut[1];
 	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>$pazarmutid</b><br>$seqname</div></td>";
 
-	    my $reg_seq=$dbh->get_reg_seq_by_regseq_id($regid);
+	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$regid);
 	    my $gid=$reg_seq->PAZAR_gene_ID;
-	    my $pazargeneid = write_pazarid($gid,'GS');
+
+	my $gidprefix = 'GS';
+	my $asterisk = "";
+	if($reg_seq->gene_type eq "marker")
+	{
+	        $gidprefix = 'MK';
+	        $asterisk = "<span class='warning'>*</span>";
+	}
+
+	    my $pazargeneid = write_pazarid($gid,$gidprefix);
 	    my $gene_accession=$reg_seq->gene_accession;
 	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 	    $ens_coords[5]=~s/\[.*\]//g;
@@ -371,7 +394,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
 
 	    my $seqstr=chopstr($mut[4],40)||'-';
 	    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -473,7 +496,7 @@ if ($mode eq 'expression') {
 	$count++;
 #get reg_seq and print out all information
 	if ($seqtable eq 'reg_seq') {
-	    my $reg_seq=$dbh->get_reg_seq_by_regseq_id($seqid);
+	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$seqid);
 	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Genomic Sequence</div></td>";
 
 	    my $regid=$reg_seq->accession_number;
@@ -481,7 +504,16 @@ if ($mode eq 'expression') {
 	    my $seqname=$reg_seq->id;
 	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
 	    my $gid=$reg_seq->PAZAR_gene_ID;
-	    my $pazargeneid = write_pazarid($gid,'GS');
+
+        my $gidprefix = 'GS';
+	my $asterisk = "";
+        if($reg_seq->gene_type eq "marker")
+        {
+         $gidprefix = 'MK';
+         $asterisk = "<span class='warning'>*</span>";	 
+        }
+
+	    my $pazargeneid = write_pazarid($gid,$gidprefix);
 	    my $gene_accession=$reg_seq->gene_accession;
 	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 	    $ens_coords[5]=~s/\[.*\]//g;
@@ -489,7 +521,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
 
 	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
 		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
@@ -508,9 +540,19 @@ if ($mode eq 'expression') {
 	    my $seqname=$mut[1];
 	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>$pazarmutid</b><br>$seqname</div></td>";
 
-	    my $reg_seq=$dbh->get_reg_seq_by_regseq_id($regid);
+	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$regid);
 	    my $gid=$reg_seq->PAZAR_gene_ID;
-	    my $pazargeneid = write_pazarid($gid,'GS');
+
+        my $gidprefix = 'GS';
+	my $asterisk = "";
+
+           if($reg_seq->gene_type eq "marker")
+	   {
+                $gidprefix = 'MK';
+                $asterisk = "<span class='warning'>*</span>";
+           }
+
+	    my $pazargeneid = write_pazarid($gid,$gidprefix);
 	    my $gene_accession=$reg_seq->gene_accession;
 	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 	    $ens_coords[5]=~s/\[.*\]//g;
@@ -518,7 +560,7 @@ if ($mode eq 'expression') {
 	    $ens_coords[5]=~s/\.//g;
 	    my $species = $ensdb->current_org();
 	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br><b>$ens_coords[5]</b><br>$species</form></div></td>";
+	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
 
 	    my $seqstr=chopstr($mut[4],40)||'-';
 	    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
