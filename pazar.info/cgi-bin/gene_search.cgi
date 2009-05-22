@@ -5,6 +5,7 @@
 use pazar;
 use pazar::gene;
 use pazar::talk;
+use pazar::reg_seq;
 
 use HTML::Template;
 
@@ -163,7 +164,7 @@ if ($accn) {
     if ($dbaccn eq 'GeneName') {
 	$gene='GeneName';
     } elsif ($dbaccn eq 'PAZAR_gene') {
-	unless ($accn=~/GS\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {$gene='PAZARid';}
+	unless ($accn=~/GS\d{7}/i || $accn=~/MK\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {$gene='PAZARid';}
     } elsif ($dbaccn eq 'EnsEMBL_gene') {
 	my @gene = $ensdb->ens_transcripts_by_gene($accn);
 	$gene=$gene[0];
@@ -215,34 +216,123 @@ if ($accn) {
 	}
     }
 
-    my $pazarsth;
-#get the gene info
-    if ($gene eq 'PAZARid') {
-	my $PZid=$accn;
-	$PZid=~s/^\D+0*//;
-	$pazarsth = $dbh->prepare("select * from gene_source where gene_source_id='$PZid'");
-    } elsif ($gene eq 'GeneName') {
-	$pazarsth = $dbh->prepare("select * from gene_source where description like '%$accn%'");
-    } else {
-	$pazarsth = $dbh->prepare("select * from gene_source where db_accn='$gene'");
-    }
-    $pazarsth->execute();
 
-#get the marker info
-    my $markersth;
+
+# can either get pazar id or ensembl id or gene name for value of $accn
+my $accntype = "";
+
+if($accn=~/GS\d{7}/i)
+{
+$accntype = "gene";
+}
+
+if($accn=~/MK\d{7}/i)
+{
+$accntype = "marker";
+}
+
+
+    my $pazarsth = undef;
+    my $geneobj = undef;
+    my @geneobjs = ();
+
+    my $markersth = undef;
+    my $markerobj = undef;
+    my @markerobjs = ();
+
+
     if ($gene eq 'PAZARid') {
-	my $PZid=$accn;
-	$PZid=~s/^\D+0*//;
-	$markersth = $dbh->prepare("select * from marker where marker_id='$PZid'");
-    } elsif ($gene eq 'GeneName') {
-	$markersth = $dbh->prepare("select * from marker where description like '%$accn%'");
-    } else {
-	$markersth = $dbh->prepare("select * from marker where db_accn='$gene'");
+        my $PZid=$accn;
+        $PZid=~s/^\D+0*//;
+
+	if($accntype eq "gene")
+	{
+	        $geneobj = pazar::gene::get_by_id($PZid,'gene',$dbh);
+	}
+	elsif($accntype eq "marker")
+	{
+		$markerobj = pazar::gene::get_by_id($PZid,'marker',$dbh);	
+	}
     }
-    $markersth->execute();
+
+    elsif ($gene eq 'GeneName') {
+        $pazarsth = $dbh->prepare("select * from gene_source where description like '%$accn%'");
+        $pazarsth->execute();
+        $markersth = $dbh->prepare("select * from marker where description like '%$accn%'");
+        $markersth->execute();
+    }
+    else {
+       #value of $gene should be set to an ensembl accession by now
+        @geneobjs = pazar::gene::get_by_accn($dbh,$gene,'gene');
+        @markerobjs =  pazar::gene::get_by_accn($dbh,$gene,'marker');
+    }
+
+
 		
-#get the gene descriptions
+# get gene information
+
     my @gene_info;
+
+# pazar gene id was entered
+if(defined $geneobj)
+{
+        my $pid=$geneobj->project->id;
+        if (grep(/^$pid$/,(keys %projects))) {
+            my $geneaccn = $geneobj->db_accn;
+            my $geneName = $geneobj->description||'-';
+            my $geneid = $geneobj->id;
+            my $pazargeneid = write_pazarid($geneobj->id,'GS');
+            my $proj = $projects{$pid};
+            my @ens_coords = $ensdb->get_ens_chr($geneaccn);
+            $ens_coords[5]=~s/\[.*\]//g;
+            $ens_coords[5]=~s/\(.*\)//g;
+            $ens_coords[5]=~s/\.//g;
+            my $geneDescription = $ens_coords[5]||'-';
+            my $species = $ensdb->current_org();
+            $species = ucfirst($species)||'-';
+
+            push @gene_info, { desc => $geneName,
+                               GID => $geneid,
+                               ID => $pazargeneid,
+                               proj => $proj,
+                               ens_desc => $geneDescription,
+                               species => $species,
+                               accn => $geneaccn};
+        }
+}
+
+# if we have a gene accession
+foreach $geneobj (@geneobjs)
+{
+	my $pid=$geneobj->project->id;
+	if (grep(/^$pid$/,(keys %projects))) {
+	    my $geneaccn = $geneobj->db_accn;
+	    my $geneName = $geneobj->description||'-';
+	    my $geneid = $geneobj->id;
+	    my $pazargeneid = write_pazarid($geneobj->id,'GS');
+	    my $proj = $projects{$pid};
+	    my @ens_coords = $ensdb->get_ens_chr($geneaccn);
+	    $ens_coords[5]=~s/\[.*\]//g;
+	    $ens_coords[5]=~s/\(.*\)//g;
+	    $ens_coords[5]=~s/\.//g;
+	    my $geneDescription = $ens_coords[5]||'-';
+	    my $species = $ensdb->current_org();
+	    $species = ucfirst($species)||'-';
+
+	    push @gene_info, { desc => $geneName,
+                               GID => $geneid,
+                               ID => $pazargeneid,
+                               proj => $proj,
+                               ens_desc => $geneDescription,
+                               species => $species,
+                               accn => $geneaccn};
+	}
+}
+
+
+# if we are searching for a gene name
+if(defined $pazarsth)
+{
     while (my $res = $pazarsth->fetchrow_hashref) {
 	my $pid=$res->{project_id};
 	if (grep(/^$pid$/,(keys %projects))) {
@@ -268,9 +358,70 @@ if ($accn) {
                                accn => $geneaccn};
 	}
     }
+}
 
-#get the marker descriptions
+#get the marker information
     my @marker_info;
+
+# marker id was entered
+if (defined $markerobj)
+{
+       my $pid=$markerobj->project->id;
+        if (grep(/^$pid$/,(keys %projects))) {
+            my $geneaccn = $markerobj->db_accn;
+            my $geneName = $markerobj->description||'-';
+            my $geneid = $markerobj->id;
+            my $pazargeneid = write_pazarid($markerobj->id,'MK');
+            my $proj = $projects{$pid};
+            my @ens_coords = $ensdb->get_ens_chr($geneaccn);
+            $ens_coords[5]=~s/\[.*\]//g;
+            $ens_coords[5]=~s/\(.*\)//g;
+            $ens_coords[5]=~s/\.//g;
+            my $geneDescription = $ens_coords[5]||'-';
+            my $species = $ensdb->current_org();
+            $species = ucfirst($species)||'-';
+
+            push @marker_info, { desc => $geneName,
+                               GID => $geneid,
+                               ID => $pazargeneid,
+                               proj => $proj,
+                               ens_desc => $geneDescription,
+                               species => $species,
+                               accn => $geneaccn};
+        }	
+}
+
+# gene accession associated with markers
+foreach $markerobj (@markerobjs)
+{
+	my $pid=$markerobj->project->id;
+	if (grep(/^$pid$/,(keys %projects))) {
+	    my $geneaccn = $markerobj->db_accn;
+	    my $geneName = $markerobj->description||'-';
+	    my $geneid = $markerobj->id;
+	    my $pazargeneid = write_pazarid($markerobj->id,'MK');
+	    my $proj = $projects{$pid};
+	    my @ens_coords = $ensdb->get_ens_chr($geneaccn);
+	    $ens_coords[5]=~s/\[.*\]//g;
+	    $ens_coords[5]=~s/\(.*\)//g;
+	    $ens_coords[5]=~s/\.//g;
+	    my $geneDescription = $ens_coords[5]||'-';
+	    my $species = $ensdb->current_org();
+	    $species = ucfirst($species)||'-';
+
+	    push @marker_info, { desc => $geneName,
+                               GID => $geneid,
+                               ID => $pazargeneid,
+                               proj => $proj,
+                               ens_desc => $geneDescription,
+                               species => $species,
+                               accn => $geneaccn};
+	}
+}
+
+# find markers associated with gene name
+if (defined $markersth)
+{
     while (my $res = $markersth->fetchrow_hashref) {
 	my $pid=$res->{project_id};
 	if (grep(/^$pid$/,(keys %projects))) {
@@ -296,6 +447,10 @@ if ($accn) {
                                accn => $geneaccn};
 	}
     }
+}
+
+
+################### end of section modified to use API #######################
 
 ###if no data finish the script###
     if (!@gene_info && !@marker_info) {
@@ -326,7 +481,7 @@ SUMMARY_HEADER
 	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{species}</td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{ID}&nbsp&nbsp<a href='#$gene_data->{ID}'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{desc}</td>";
-	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$gene_data->{accn}</td>";
+	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">".uc($gene_data->{accn})."</td>";
 	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$gene_data->{ens_desc}</td>";
 	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{proj}</td>";
 	print "</tr>";
@@ -363,7 +518,7 @@ SUMMARY_HEADER
 	$ensspecies=~s/ /_/g;
 	$pazargeneid=$gene_data->{ID};
 	$geneName=$gene_data->{desc};
-	$gene=$gene_data->{accn};
+	$gene=uc($gene_data->{accn});
 	$geneDescription=$gene_data->{ens_desc};
 	$proj=$gene_data->{proj};
 
@@ -371,9 +526,29 @@ my $genename_editable = "false";
 #make gene name editable if page viewed by project member
 if ($loggedin eq 'true') {
 
+
+#determine type of gene depending on whether pazar id starts with GS or MK
+
+my $genetype = "gene_source";
+if($gene_data->{ID} =~ /MK/)
+{
+	$genetype = "marker";
+}
+
+
 #determine the project that this reg seq belongs to
 
-my $genenamesth = &select($dbh,"select project_id from gene_source where gene_source_id=".$gene_data->{GID});
+my $genenamesth = "";
+
+if($genetype eq "gene_source")
+{
+	$genenamesth = &select($dbh,"select project_id from gene_source where gene_source_id=".$gene_data->{GID});
+}
+else
+{
+	$genenamesth = &select($dbh,"select project_id from marker where marker_id=".$gene_data->{GID});
+}
+
 #$geneName = $geneName . "gene id: ".$pazargeneid;
 
 my $genenameresultshref = $genenamesth->fetchrow_hashref;
@@ -392,7 +567,7 @@ my $genenameresultshref = $genenamesth->fetchrow_hashref;
 
 if($genename_editable eq "true")
 {
-	$geneName = "<div id =\"ajaxgenename\">".$geneName."</div><input type=\"button\" name=\"genenameupdatebutton\" value=\"Update Gene Name\" onClick=\"javascript:window.open('updategenename.pl?mode=form&pid=$gene_projid&gid=".$gene_data->{GID}."');\">";
+	$geneName = "<div id =\"ajaxgenename\">".$geneName."</div><input type=\"button\" name=\"genenameupdatebutton\" value=\"Update Gene Name\" onClick=\"javascript:window.open('updategenename.pl?mode=form&pid=$gene_projid&genetype=".$genetype."&gid=".$gene_data->{GID}."');\">";
 }
 
 }
@@ -445,7 +620,7 @@ if(lc($species_monomial) eq "dasypus novemcinctus")
 
 
 print<<HEADER_TABLE;
-<a href='#top'>Back to top</a><a name='$pazargeneid'></a>
+<br><a href='#top'>Back to top</a><a name='$pazargeneid'></a>
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='excluded' value="$excluded"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
@@ -476,7 +651,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 
 
 #loop through regseqs and print tables
-	my @regseqs = $dbh->get_reg_seqs_by_gene_id($gene_data->{GID}); 
+	my @regseqs = pazar::reg_seq::get_reg_seqs_by_gene_id($dbh,$gene_data->{GID}); 
 	if (!$regseqs[0]) {
 	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span>";
 	    next;
@@ -562,9 +737,8 @@ my $species_urlfriendly = $species;
 $species_urlfriendly = trim($species_urlfriendly); #remove spaces from beginning and end
 $species_urlfriendly =~ s/ /%20/g;
 
-
 print<<HEADER_TABLE;
-<a href='#top'>Back to top</a><a name='$pazargeneid'></a>
+<br><a href='#top'>Back to top</a><a name='$pazargeneid'></a>
 <table class="summarytable">
 <tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd"><span class='warning'>*</span>$species</td></tr>
 <tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class=\"basictd\"><form name=\"genelink$pazargeneid\" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><span class='warning'>*</span><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='excluded' value="$excluded"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\">&nbsp;</form></td></tr>
@@ -597,7 +771,7 @@ print "<table><tr><td><span class=\"title4\">Run a regulatory region analysis fo
 
 
 #loop through regseqs and print tables
-	my @regseqs = $dbh->get_reg_seqs_by_marker_id($gene_data->{GID}); 
+	my @regseqs = pazar::reg_seq::get_reg_seqs_by_marker_id($dbh,$gene_data->{GID}); 
 	if (!$regseqs[0]) {
 	    print "</table><span class='red'>There is currently no available annotation for this gene!<br>Do not hesitate to create your own project and enter information about this gene or any other gene!</span>";
 	    next;
