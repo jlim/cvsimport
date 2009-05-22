@@ -41,10 +41,13 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS)
 
 #get analysis id and project id
     my $geneid = $params{gid};
+
+    my $genetype = $params{genetype};
+
     my $projectid = $params{pid};
     my $mode = $params{mode};
     my $genename = $params{genename};
-my $genenameeditable = "false";
+    my $genenameeditable = "false";
 
 	foreach my $proj (@projids) {
 	#see if $proj is the same as the analysis project or if my userid is same as analysis user_id
@@ -96,7 +99,15 @@ FORM_DONE
 }
 elsif ($mode eq "update")
 {
-$dbh->do("update gene_source set description='$genename' where gene_source_id=$geneid");
+
+	if($genetype eq "marker")
+	{
+		$dbh->do("update marker set description='$genename' where marker_id=$geneid");
+	}
+	else
+	{
+		$dbh->do("update gene_source set description='$genename' where gene_source_id=$geneid");
+	}
 
 #more HTML
     print "<script>window.opener.document.getElementById('ajaxgenename').innerHTML=\"$genename\"</script>";
