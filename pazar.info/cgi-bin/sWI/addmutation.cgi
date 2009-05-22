@@ -4,6 +4,7 @@ use CGI qw( :all);
 #use CGI::Debug(report => everything, on => anything);
 
 use pazar;
+use pazar::reg_seq;
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
@@ -38,7 +39,7 @@ pazar(-drv=>$ENV{PAZAR_drv},-dbname=>$ENV{PAZAR_name},-user=>$ENV{PAZAR_pubuser}
                         -pass=>$ENV{PAZAR_pubpass}, -project=>$params{project}, -host=>$ENV{PAZAR_host});
 
 unless ($params{sequence}) {
-    my $regseq=$pazar->get_reg_seq_by_regseq_id($params{regid});
+    my $regseq=pazar::reg_seq::get_reg_seq_by_regseq_id($pazar,$params{regid});
     $params{sequence}=$regseq->seq;
     $params{sequence}=~s/\s*//g;
 }
