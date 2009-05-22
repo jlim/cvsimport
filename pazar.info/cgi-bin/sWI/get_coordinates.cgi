@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
 use CGI qw( :all);
+#use CGI::Debug (report=>'everything', on=>'anything');
+#use GKDB;
 use DBI;
 #use Data::Dumper;
 use pazar;
@@ -42,9 +44,7 @@ if (!$accn) {
     exit;
 } else {
     if ($dbaccn eq 'EnsEMBL_gene') {
-	my @gene = $ensdb->ens_transcripts_by_gene($accn);
-	$gene=$gene[0];
- 	unless ($gene) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!",1); exit;} else {
+	unless ($accn=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;} else {
 	    $ens=$accn;
 	    my @ll=$ensdb->ens_to_llid($ens);
 	    $gene=$ll[0];
@@ -52,16 +52,16 @@ if (!$accn) {
     } elsif ($dbaccn eq 'EnsEMBL_transcript') {
 	my @gene = $ensdb->ens_transcr_to_gene($accn);
 	$ens=$gene[0];
-        unless ($ens) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!",1); exit;}
+        unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	my @ll=$ensdb->ens_to_llid($ens);
 	$gene=$ll[0];
     } elsif ($dbaccn eq 'EntrezGene') {
         my $species=$gkdb->llid_to_org($accn);
-        if (!$species) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!",1); exit;}
+        if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
         $ensdb->change_mart_organism($species);
         my @gene=$ensdb->llid_to_ens($accn);
 	$ens=$gene[0];
-	unless ($ens) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
+	unless ($ens=~/\w{4,}\d{6,}/) {print_self($query,"Check that the provided ID ($accn) is a $dbaccn ID! You will have the best results using an EnsEMBL gene ID!",1); exit;}
 	$gene=$accn;
     } else {
 	($gene,$ens) = convert_id($ensdb,$gkdb,$dbaccn,$accn);
