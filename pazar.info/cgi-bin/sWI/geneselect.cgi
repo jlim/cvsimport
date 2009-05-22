@@ -5,6 +5,7 @@ use Exporter;
 use CGI qw(  :all);
 use pazar;
 use pazar::talk;
+use pazar::reg_seq;
 #use CGI::Debug(report => everything, on => anything);
 
 my $pazar_cgi = $ENV{PAZAR_CGI};
@@ -82,6 +83,9 @@ print "<input type=\"submit\" value=\"Annotate a New Gene\"></form>\n";
 
 print "<span class='title3'>OR Add/Modify data in one of the following genes:</span><br>\n";
 
+
+
+#goes from gene_source -> tsrs -> anchor_reg_seq
 my @gene_project;
 my $genes = &select($pazar, "SELECT * FROM gene_source WHERE project_id='$pid'");
 if ($genes) {
@@ -117,6 +121,40 @@ if ($genes) {
 	}
     }
 }
+
+
+#get information from marker -> anchor_reg_seq
+my $markers = &select($pazar, "SELECT * FROM marker WHERE project_id='$pid'");
+if ($markers)
+{
+        while(my $marker = $markers->fetchrow_hashref)
+        {
+                my $reg_seqs = &select($pazar, "SELECT distinct reg_seq.* FROM reg_seq, anchor_reg_seq WHERE reg_seq.reg_seq_id=anchor_reg_seq.reg_seq_id AND anchor_reg_seq.marker_id='$marker->{marker_id}'");
+
+                   if ($reg_seqs) {
+                        my @coords = $talkdb->get_ens_chr($marker->{db_accn});
+                        $coords[5]=~s/\[.*\]//g;
+                        $coords[5]=~s/\(.*\)//g;
+                        $coords[5]=~s/\.//g;
+                        my $species = $talkdb->current_org();
+                        $species = ucfirst($species)||'-';
+
+                        my $pazargeneid = write_pazarid($marker->{marker_id},'MK');
+                        my $marker_desc=$marker->{description};
+                        if ($marker_desc eq '0'||$marker_desc eq '') {$marker_desc='-';}
+
+                        push @gene_project, {
+                            ID => $pazargeneid,
+                            shortID => $marker->{marker_id},
+                            accn => $marker->{db_accn},
+                            desc => $marker_desc,
+                            ens_desc => $coords[5],
+                            species => $species};                        
+                    }
+        }
+}
+
+
 unless ($gene_project[0]->{ID}) {print "<p class=\"warning\">No Genes have been annotated yet in this project!</p>"; exit;}
 
 print "<table width='750' class='summarytable'><tr>\n";
@@ -185,7 +223,7 @@ print "<td width='240' class=\"seqlisttabletitle\"><span class=\"bold\">Sequence
 print "<td width='180' class=\"seqlisttabletitle\"><span class=\"bold\">Coordinates</span></td>";
 print "<td width='110' class=\"seqlisttabletitle\"></td>";
 print "</tr>";
-my @regseqs = $pazar->get_reg_seqs_by_accn($gene_data->{accn}); 
+my @regseqs = pazar::reg_seq::get_reg_seqs_by_accn($pazar,$gene_data->{accn}); 
 if (!$regseqs[0]) {
     print "<p class=\"warning\">No Regulatory Sequence has been annotated for this gene yet!</p>";
 } else {
