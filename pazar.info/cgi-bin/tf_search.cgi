@@ -3,6 +3,7 @@
 use pazar;
 use pazar::gene;
 use pazar::talk;
+use pazar::reg_seq;
 
 use HTML::Template;
 
@@ -33,22 +34,37 @@ $template->param(ONLOAD_FUNCTION => 'init();');
  
 $template->param(JAVASCRIPT_FUNCTION => qq{
 function ajaxcall (tableId,divTarget,all) {
-    var divObj=xGetElementById(divTarget);
-   divObj.innerHTML='Generating PFM, please wait...';
+var divObj=xGetElementById(divTarget);
+divObj.innerHTML='Generating PFM, please wait...';
 var http = false;
 tableObj=xGetElementById(tableId);
 sites=0;
 args='caller=tfsearch';
-        var tbody=tableObj.getElementsByTagName('tbody');
-        var trs = tbody[0].getElementsByTagName('tr');
-        for (x=1; x<trs.length; x++) {
-                                        tds=trs[x].getElementsByTagName('td');
-                                        cb=tds[0].firstChild.firstChild;
-                                        if ((cb.checked==true)||(all==1)) {
-                                                args+="&seq="+cb.value;
-						sites++;
-                                        }
-                        }
+var tbody=tableObj.getElementsByTagName('tbody');
+var trs = tbody[0].getElementsByTagName('tr');
+for (x=1; x<trs.length; x++) {
+	tds=trs[x].getElementsByTagName('td');
+    cb=tds[0].firstChild.firstChild;
+    if ((cb.checked==true)||(all==1)) {
+        args+="&seq="+cb.value;
+		sites++;
+     }
+}
+
+if (sites == 0) {
+	tableObj=xGetElementById("sml"+tableId);
+	tbody=tableObj.getElementsByTagName('tbody');
+	trs = tbody[0].getElementsByTagName('tr');
+	for (x=1; x<trs.length; x++) {
+		tds=trs[x].getElementsByTagName('td');
+	    cb=tds[0].firstChild.firstChild;
+	    if ((cb.checked==true)||(all==1)) {
+	        args+="&seq="+cb.value;
+			sites++;
+	     }
+	}
+}
+
 // pass the tf name to ajax page
 headTableObj=xGetElementById('Head'+tableId);
 var headtbody=headTableObj.getElementsByTagName('tbody');
@@ -94,25 +110,40 @@ http.send(args);
 
 
 function multiTF (divTarget) {
-    divObj=xGetElementById(divTarget);
-   divObj.innerHTML='Generating PFM, please wait...';
+divObj=xGetElementById(divTarget);
+divObj.innerHTML='Generating PFM, please wait...';
 var http = false;
-        args='caller=tfsearch';
+args='caller=tfsearch';
 var divs=document.getElementsByTagName('div');
 for (i=0; i<divs.length; i++) {
         if (divs[i].className=='seqTableDiv') {
                 baseName=divs[i].id;
                 baseName=baseName.replace(/desc/,"");
-        tableObj=xGetElementById('SummaryTable'+baseName);
-        var tbody=tableObj.getElementsByTagName('tbody');
-        var trs = tbody[0].getElementsByTagName('tr');
-        for (x=1; x<trs.length; x++) {
-                                        tds=trs[x].getElementsByTagName('td');
-                                        cb=tds[0].firstChild.firstChild;
-                                        if (cb.checked==true) {
-                                                args+="&seq="+cb.value;
-                                        }
-                        }
+                sites=0;
+                tableObj=xGetElementById('SummaryTable'+baseName);
+                var tbody=tableObj.getElementsByTagName('tbody');
+                var trs = tbody[0].getElementsByTagName('tr');
+                for (x=1; x<trs.length; x++) {
+                    tds=trs[x].getElementsByTagName('td');
+                    cb=tds[0].firstChild.firstChild;
+                    if (cb.checked==true) {
+                        args+="&seq="+cb.value;
+                        sites++;
+                    }
+                }
+                if (sites == 0) {
+					tableObj=xGetElementById('smlSummaryTable'+baseName);
+					tbody=tableObj.getElementsByTagName('tbody');
+					trs = tbody[0].getElementsByTagName('tr');
+					for (x=1; x<trs.length; x++) {
+						tds=trs[x].getElementsByTagName('td');
+					    cb=tds[0].firstChild.firstChild;
+					    if (cb.checked==true) {
+					        args+="&seq="+cb.value;
+					     }
+					}
+				}
+
         }
 }
 
@@ -200,6 +231,14 @@ function selectallseq (tableId) {
                                         cb=tds[0].firstChild.firstChild;
                                         cb.checked=true;
                         }
+        tableObj2=xGetElementById("sml"+tableId);
+        var tbody2=tableObj2.getElementsByTagName('tbody');
+        var trs2 = tbody2[0].getElementsByTagName('tr');
+        for (x=1; x<trs2.length; x++) {
+                                        tds2=trs2[x].getElementsByTagName('td');
+                                        cb2=tds2[0].firstChild.firstChild;
+                                        cb2.checked=true;
+                        }
 }
 
 function resetallseq (tableId) {
@@ -210,6 +249,14 @@ function resetallseq (tableId) {
                                         tds=trs[x].getElementsByTagName('td');
                                         cb=tds[0].firstChild.firstChild;
                                         cb.checked=false;
+                        }
+        tableObj2=xGetElementById("sml"+tableId);
+        var tbody2=tableObj2.getElementsByTagName('tbody');
+        var trs2 = tbody2[0].getElementsByTagName('tr');
+        for (x=1; x<trs2.length; x++) {
+                                        tds2=trs2[x].getElementsByTagName('td');
+                                        cb2=tds2[0].firstChild.firstChild;
+                                        cb2.checked=false;
                         }
 }
 
@@ -222,6 +269,16 @@ function selectbytype (tableId,target) {
                         tds=trs[x].getElementsByTagName('td');
                         cb=tds[0].firstChild.firstChild;
                         cb.checked=true;
+                }
+        }
+        tableObj2=xGetElementById("sml"+tableId);
+        var tbody2=tableObj2.getElementsByTagName('tbody');
+        var trs2 = tbody2[0].getElementsByTagName('tr');
+        for (x=1; x<trs2.length; x++) {
+                if (trs2[x].className==target) {
+                        tds2=trs2[x].getElementsByTagName('td');
+                        cb2=tds2[0].firstChild.firstChild;
+                        cb2.checked=true;
                 }
         }
 }
@@ -254,6 +311,12 @@ if (input_box==true)
 
 }
 
+function toggleRows(sname,snumb,stotal) {
+	for (var i = 1; i<=stotal;i++) {
+		document.getElementById(i+"_"+sname).className = "hide";
+	}
+	document.getElementById(snumb+"_"+sname).className = "show";
+}
 
 }
 	);
@@ -624,22 +687,12 @@ if($tf_editable eq "true")
 }
 =cut
 
-print "</table><br>";
+print "</table>";
 
+    print "<p><i><span class='warning'>*</span>Genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the associated sequence.</i></p>";
+print "<br>";
 
-########### start of HTML table
-print<<COLNAMES2;	    
-<div id="desc$pazartfid\_$tf_projid" name="desc$pazartfid\_$tf_projid" class="seqTableDiv">
-<table id="SummaryTable$pazartfid\_$tf_projid" class="evidencetableborder"><tr>
-    <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
-		    
-COLNAMES2
-    print "<td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>";
-    print "<td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>";
-    print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
-    print "<td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>";
-    print "</tr>";
+########### start of binding sites HTML table
 
 	    if (!$complex->{targets}) {
 		print "<span class='red'>No target could be found for this TF!</span><br><br><br><br>\n";
@@ -648,6 +701,8 @@ COLNAMES2
 	    my $count = 0;
 	    my @rsids;
 	    my @coids;
+            my $bigrow;
+            my $smlrow;
 	    while (my $site=$complex->next_target) {
 		my $type=$site->get_type;
 		if ($type eq 'matrix') {next;}
@@ -657,9 +712,20 @@ COLNAMES2
 		    push @rsids, $rsid;
 		    my $id=write_pazarid($rsid,'RS');
 		    my $seqname=!$site->get_name?'':$site->get_name;
-		    my $reg_seq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+		    my $reg_seq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$site->get_dbid);
 		    my $gid=$reg_seq->PAZAR_gene_ID;
-		    my $pazargeneid = write_pazarid($gid,'GS');
+
+			#check whether the gene is a marker or not
+			my $gidprefix = 'GS';
+			my $asterisk = "";
+			my $genetype = $reg_seq->gene_type;
+			if($genetype eq "marker")
+			{
+			        $gidprefix = "MK";
+			        $asterisk = "<span class='warning'>*</span>";
+			}
+
+		    my $pazargeneid = write_pazarid($gid,$gidprefix);
 		    my $gene_accession=$reg_seq->gene_accession;
 		    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 		    $ens_coords[5]=~s/\[.*\]//g;
@@ -670,16 +736,29 @@ COLNAMES2
 		    $seqcounter++;
 		    $count++;
 		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
+		    my $sml_coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")";
+		    my $longer;
+		    if (length($site->get_seq)> 35) {
+			$longer='...';
+		    }
 
-		    print "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
-		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a><br>$seqname</div></td>";
-		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
-		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
-		    print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
-			print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><br><br>";
-			print "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a>";
-			print "</div></td>";
-		}
+		    $bigrow.= "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
+		    $smlrow.= "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic</div></td>";
+		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a><br>$seqname</div></td>";
+		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a></div></td>";
+		    $bigrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$asterisk<a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded\">".$pazargeneid."</a><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</div></td>";
+		    $smlrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>$asterisk<a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded\">".$pazargeneid."</a></div></td>";
+		    $bigrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
+		    $smlrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div>".substr($site->get_seq,0,35)."$longer</div></td>";
+		    $bigrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
+		    $smlrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>".$sml_coord."</div></td>";
+		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><br><br>";
+		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'>UCSC</a> ";
+		    $bigrow.= "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a>";
+		    $smlrow.= "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'>EnsEMBL</a>";
+		    $bigrow.= "</div></td>";
+		    $smlrow.= "</div></td>";		}
+
 		if ($type eq 'construct') {
 		    my $coid=$site->get_dbid;
 		    if (grep/^$coid$/,@coids) {next;}
@@ -689,14 +768,21 @@ COLNAMES2
 		    my $desc=$site->get_desc||'-';
 		    $seqcounter++;
 		    $count++;
-		    print "<tr class=\"construct\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
-		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>".$id."</b><br>$seqname</div></td>";
-		    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
-		    print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
-			print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Description:</b><br>".$desc."</div></td>";
-		    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
+		    $bigrow.= "<tr class=\"construct\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
+		    $smlrow.= "<tr class=\"construct\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial</div></td>";
+		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>".$id."</b><br>$seqname</div></td>";
+		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><b>".$id."</b></div></td>";
+		    $bigrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
+		    $smlrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>-</div></td>";
+		    $bigrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
+		    $smlrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div>".substr($site->get_seq,0,35)."$longer</div></td>";
+		    $bigrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Description:</b><br>".$desc."</div></td>";
+		    $smlrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>".$desc."</div></td>";
+		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
+		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
 		}
-                print "</tr>";
+		$bigrow.= "</tr>";
+		$smlrow.= "</tr>";
 
 		my $construct_name=$pazartfid."_site".$count;
 		print TMP ">".$construct_name."\n";
@@ -705,8 +791,49 @@ COLNAMES2
 		print TMP $construct_seq."\n";
                 $bg_color = 1 - $bg_color;
             }
-	#Enclose the TF table in DIV
-	    print "</table></div><br>";
+            
+            my $showhide_1="show";
+            my $showhide_2="hide";
+            if ($count > 40) {
+		$showhide_1="hide";
+		$showhide_2="show";
+	    }
+
+print<<SITE_TABLE;	    
+        <a href="#$pazartfid" onClick="toggleRows('list$pazartfid','1','2')">More sequence details</a><span>&nbsp&nbsp&nbsp</span> 
+	<a href="#$pazartfid" onClick="toggleRows('list$pazartfid','2','2')">Less sequence details</a>
+
+        <div id="desc$pazartfid\_$tf_projid" name="desc$pazartfid\_$tf_projid" class="seqTableDiv">
+
+	<div id="1_list$pazartfid" class="$showhide_1">
+        <table id="SummaryTable$pazartfid\_$tf_projid" class="evidencetableborder"><tr>
+        <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
+        <td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>
+        <td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>
+        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>
+        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>
+        <td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>
+        </tr>
+        $bigrow
+        </table><br>
+        </div>
+
+	<div id="2_list$pazartfid" class="$showhide_2">
+        <table id="smlSummaryTable$pazartfid\_$tf_projid" class="evidencetableborder"><tr>
+        <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
+        <td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>
+        <td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>
+        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>
+        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>
+        <td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>
+        </tr>
+        $smlrow
+        </table></div><br>
+
+        </div>
+
+SITE_TABLE
+
  
 print<<Select_buttons;
 <input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$pazartfid\_$tf_projid');">

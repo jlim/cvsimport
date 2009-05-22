@@ -5,11 +5,13 @@
 use pazar;
 use pazar::gene;
 use pazar::talk;
+use pazar::reg_seq;
 
 use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
+use CGI::HTMLError trace => 1;
 #use CGI::Debug( report => 'everything', on => 'anything' );
 
 #use Data::Dumper;
@@ -168,7 +170,7 @@ my $excluded=$params{excluded}||'none';
 #check if access is authorized
 my $projstat=&select($dbh, "SELECT b.project_name,b.status FROM reg_seq a,project b WHERE a.reg_seq_id=$regid AND a.project_id=b.project_id");
 my @res = $projstat->fetchrow_array;
-undef $dbh;
+#undef $dbh;
 if($res[1]=~/restricted/i) {
     $dbh = pazar->new( 
 		       -globalsearch  =>    'no',		      
@@ -192,11 +194,43 @@ if($res[1]=~/restricted/i) {
 }   
 
 #get reg_seq and print out all information
-my $reg_seq=$dbh->get_reg_seq_by_regseq_id($regid);
+
+
+my $reg_seq = undef;
+
+	if($regid ne "")
+	{
+		$reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$regid);
+	}
+	else
+	{
+		$reg_seq = undef;
+	}
+
+
+
+if(!defined $reg_seq)
+{
+	print "<h3>An error occured! Check that the provided ID ($regid) is a PAZAR Sequence ID!</h3>";
+}
+else
+{
+
 
 my $geneName = $reg_seq->gene_description||'-';
 my $gid=$reg_seq->PAZAR_gene_ID;
-my $pazargeneid = write_pazarid($gid,'GS');
+
+#check whether the gene is a marker or not
+my $gidprefix = 'GS';
+my $asterisk = "";
+my $genetype = $reg_seq->gene_type;
+if($genetype eq "marker")
+{
+	$gidprefix = "MK";
+	$asterisk = "<span class='warning'>*</span>";
+}
+
+my $pazargeneid = write_pazarid($gid,$gidprefix);
     
 my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 $ens_coords[5]=~s/\[.*\]//g;
@@ -261,13 +295,24 @@ print<<HEADER_TABLE;
 <table><tr><td>
 <span class="title2">Gene Details</span><br>
 <table class="summarytable">
-<tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
-<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$geneName</td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accession" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accession</a></td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
-<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr>
-</table></td></tr>
+<tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$asterisk$species</td></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><form name='genelink' method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$pazargeneid"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value="$excluded"><td class="basictd">$asterisk<input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</td></form></tr>
+<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$asterisk$geneName</td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$asterisk<a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accession" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accession</a></td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$asterisk$geneDescription</td></tr>
+<tr><td class="genetabletitle"><span class="title4">Project</span></td><td class="basictd">$asterisk<a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr>
+</table>
+HEADER_TABLE
+#print text if displaying a marker
+if($genetype eq "marker")
+{
+print<<MARKERTEXT
+<p><i><span class='warning'>*</span>A red asterisk indicates that the gene is a marker located in the vicinity of the regulatory region. It has not been shown to be regulated by the described sequence.</i></p
+>
+MARKERTEXT
+}
+print<<HEADER_TABLE2; 
+</td></tr>
 <tr><td><span class="title2">Sequence Details</span><br>
 <table class="evidencetableborder">
 <tr><td class="seqtabletitle"><span class="title4">PAZAR Sequence ID</span></td><form name='details' method='post' action="$pazar_cgi/seq_search.cgi" enctype='multipart/form-data'><input type='hidden' name='regid' value="$regid"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$id">&nbsp;</td></form></tr>
@@ -277,7 +322,7 @@ print<<HEADER_TABLE;
 <tr><td class="seqtabletitle"><span class="title4">EnsEMBL Transcript ID</span></td><td class="basictd">$transcript</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Transcription Start Site</span></td><td class="basictd">$tss</td></tr>
 <tr><td class="seqtabletitle"><span class="title4">Quality</span></td><td class="basictd">$quality</td></tr>
-HEADER_TABLE
+HEADER_TABLE2
 
 #strip out <br> from seqstr and store in another variable
 my $plainstr = $seqstr;
@@ -600,6 +645,11 @@ if(scalar(@expressors)>0)
 
 #end table around evidence
 print "</td></tr></table></td></tr></table>";
+
+
+} #end of else (get_reg_seq_by_regseq_id result defined)
+
+
 
 # print out the html tail template
 my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
