@@ -111,6 +111,10 @@ print $descrip."<br>";
 print "</p>";
 
 print "<p><span class=\"title4\">Statistics</span><br>";
+
+my $mnb=&select($dbh, "SELECT count(distinct db_accn) FROM marker WHERE project_id='$projid'");
+my $markernb=$mnb->fetchrow_array||'0';
+
 my $gnb=&select($dbh, "SELECT count(distinct db_accn) FROM gene_source a, tsr b WHERE a.project_id='$projid' and a.gene_source_id=b.gene_source_id");
 my $genenb=$gnb->fetchrow_array||'0';
 my $rnb=&select($dbh, "SELECT count(reg_seq_id) FROM reg_seq WHERE project_id='$projid'");
@@ -124,7 +128,7 @@ my $matrixnb=$mnb->fetchrow_array||'0';
 my $refnb=&select($dbh, "SELECT count(ref_id) FROM ref WHERE project_id='$projid'");
 my $refsnb=$refnb->fetchrow_array||'0';
 
-print "Regulated Genes: ".$genenb."<br>";
+print "Regulated Genes (or markers): ". ($genenb + $markernb)."<br>";
 print "Regulatory sequence (genomic): ".$regseqnb."<br>";
 print "Regulatory sequence (artificial): ".$constrnb."<br>";
 print "Transcription Factors: ".$tfnb."<br>";
@@ -225,39 +229,64 @@ print<<page2b;
     </tr>
 page2b
 }
+
+my $markercount=$dbh->prepare("SELECT count(*) FROM marker WHERE project_id='$projid'")||die DBI::errstr;
+$markercount->execute||die;
+
+my $mc = $markercount->fetchrow_array;
+
 my $checkcount=$dbh->prepare("SELECT count(*) FROM gene_source a, tsr b WHERE a.project_id='$projid' and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
 $checkcount->execute||die;
-my $gc=$checkcount->fetchrow_array;
-unless ($gc>1000) {
-my $gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
-$gh->execute($projid)||die DBI::errstr;
-while (my $gene=$gh->fetchrow_hashref) {
-    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-    $coords[5]=~s/\[.*\]//g;
-    $coords[5]=~s/\(.*\)//g;
-    $coords[5]=~s/\.//g;
-    $gene{$gene->{db_accn}}=$coords[5]||'-';
-}
 
-if (%gene) {
+my $gc=$checkcount->fetchrow_array;
+
+unless (($gc+$mc)>1000) {
+
+	#display both genes and markers
+
+my $mh=$dbh->prepare("SELECT * FROM marker WHERE project_id=?")||die DBI::errstr;
+        $mh->execute($projid)||die DBI::errstr;
+
+	my $gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
+	$gh->execute($projid)||die DBI::errstr;
+
+	while (my $gene=$gh->fetchrow_hashref) {
+	    my @coords = $talkdb->get_ens_chr($gene->{db_accn});
+	    $coords[5]=~s/\[.*\]//g;
+	    $coords[5]=~s/\(.*\)//g;
+	    $coords[5]=~s/\.//g;
+	    $gene{$gene->{db_accn}}=$coords[5]||'-';
+	}
+
+	#now add markers tp $gene hashtable
+        while (my $marker=$mh->fetchrow_hashref) {
+            my @coords = $talkdb->get_ens_chr($marker->{db_accn});
+            $coords[5]=~s/\[.*\]//g;
+            $coords[5]=~s/\(.*\)//g;
+            $coords[5]=~s/\.//g;
+            $gene{$marker->{db_accn}}=$coords[5]||'-';
+        }
+
+
+	if (%gene) {
 
 print<<page3;
     <tr>
       <td class='basictdnoborder'>
       <input type="checkbox" name="gene_filter"></td>
-<td class='basictdnoborder'><b> Restrict to one or more Regulated Gene: </b></td></tr>
+<td class='basictdnoborder'><b> Restrict to one or more Regulated Genes (or markers): </b></td></tr>
          <tr><td class='basictdnoborder'> <br> </td>
 <td class='basictdnoborder'>
         <select name="gene" size="3" multiple="multiple">
 page3
 
-my @sortedaccn=sort {lc($gene{$a}) cmp lc($gene{$b})} (keys %gene);
-foreach my $accn (@sortedaccn) {
-	print "<option value=\"$accn\"> $gene{$accn} ($accn) </option>";
-    }
-print "</select><br><br></td></tr>";
-}
-}
+	my @sortedaccn=sort {lc($gene{$a}) cmp lc($gene{$b})} (keys %gene);
+	foreach my $accn (@sortedaccn) {
+		print "<option value=\"$accn\"> $gene{$accn} ($accn) </option>";
+	    }
+	print "</select><br><br></td></tr>";
+	}
+} #unless > 1000
 else  {
 print<<page3a;
 <tr><td></td><td>

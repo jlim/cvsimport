@@ -287,7 +287,7 @@ if ($param{submit}=~/gene/i) {
 	}
 	unless ($param{region_filter} eq 'on') {
 	    foreach my $sp (@species) {
-		my @seqs=$dbh->get_reg_seq_by_species($sp);
+		my @seqs=pazar::reg_seq::get_reg_seq_by_species($dbh,$sp);
 		foreach my $regseq (@seqs) {
 		    push @reg_seqs, $regseq;
 		}
@@ -299,7 +299,7 @@ if ($param{submit}=~/gene/i) {
 	    if (scalar(@species)>1) {print "<p class=\"warning\">You have to choose a unique species when using the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	    if ($param{chr_filter} eq 'on') {
 		unless ($param{bp_filter} eq 'on') {
-		    @reg_seqs=$dbh->get_reg_seq_by_chromosome($param{chromosome},$param{species});
+		    @reg_seqs=pazar::reg_seq::get_reg_seq_by_chromosome($dbh,$param{chromosome},$param{species});
 	if (!grep(/chromosome filter/, @filters)) {
 		    my $filter='chromosome filter: '.$param{chromosome};
 		    push @filters, $filter;
@@ -312,7 +312,7 @@ if ($param{submit}=~/gene/i) {
 		    my $filter='region filter: '.$param{chromosome}.':'.$param{bp_start}.'-'.$param{bp_end};
 		    push @filters, $filter;
 		}
-		    @reg_seqs=$dbh->get_reg_seq_by_region($param{bp_start},$param{bp_end},$param{chromosome},$param{species});
+		    @reg_seqs=pazar::reg_seq::get_reg_seq_by_region($dbh,$param{bp_start},$param{bp_end},$param{chromosome},$param{species});
                     if (!$reg_seqs[0]) {print "<p class=\"warning\">No regulatory sequence was found between bp $param{bp_start} and $param{bp_end} on chromosome $param{chromosome} in species $param{species}<br><form><input type=\"button\" name=\"change_filters\" value=\"Modify Filters\" onclick=\"parent.location.href='$pazar_cgi/project.pl&project_name=\"$proj\"'\"></form></p>\n"; exit;}
 		}
 	    }
@@ -331,7 +331,7 @@ if ($param{submit}=~/gene/i) {
 	push @filters, $filter;
     }
         foreach my $accn (@genes) {
-	    my @seqs=$dbh->get_reg_seqs_by_accn($accn);
+	    my @seqs=pazar::reg_seq::get_reg_seqs_by_accn($dbh,$accn);
 	    foreach my $regseq (@seqs) {
 		push @reg_seqs, $regseq;
 	    }
@@ -342,7 +342,7 @@ if ($param{submit}=~/gene/i) {
     if (!$reg_seqs[0]) {
 	my @rsid = $dbh->get_all_regseq_ids();
 	foreach my $id (@rsid) {
-	    my @seqs=$dbh->get_reg_seq_by_regseq_id($id);
+	    my @seqs=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$id);
 	    foreach my $regseq (@seqs) {
 		push @reg_seqs, $regseq;
 	    }
@@ -563,6 +563,10 @@ my $filter =
 	if ($res==0) {
 	    $res=1;
 	    print "<p><span class=\"title3\">Selected filters: </span><br>".join('; ',@filters)."<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p><hr color='black'><p class='title2'>Details Gene-by-Gene</p>";
+
+print<<MARKERTEXT;
+<p><i><span class='warning'>*</span>A red asterisk indicates that the gene is a marker located in the vicinity of the regulatory region. It has not been shown to be regulated by the described sequence.</i></p>
+MARKERTEXT
 	}
 	if ($exprs[0] || $inters[0] || $datalinks==2) {
 	    $filt=1;
@@ -572,7 +576,17 @@ my $filter =
 	    my $gene_sp = ucfirst($lcsp);
 	    my $ensspecies=$gene_sp;
 	    $ensspecies=~s/ /_/g;
-	    my $pazargeneid = write_pazarid($regseq->PAZAR_gene_ID,'GS');
+
+	    my $gidprefix = 'GS';
+	    my $asterisk = "";
+	    my $genetype = $regseq->gene_type;
+	    if($genetype eq "marker")
+	    {
+	 	    $gidprefix = 'MK';
+	            $asterisk = "<span class='warning'>*</span>";
+	    }
+
+	    my $pazargeneid = write_pazarid($regseq->PAZAR_gene_ID,$gidprefix);
 	    if ($gene_accn ne $prev_gene_accn) {
 		if ($prev_gene_accn) {print "</table><br><br>";}
 		$bg_color = 0;
@@ -582,15 +596,16 @@ my $filter =
 		$ens_coords[5]=~s/\.//g;
 		my $geneDescription = $ens_coords[5]||'-';
 
+
 #print header
 
 print<<HEADER_TABLE;
 <table class="summarytable">
-<tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$gene_sp</td></tr>
-<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class="basictd"><form name="genelink$pazargeneid[0]" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$gene_accn"><input type='hidden' name='ID_list' value='EnsEMBL_gene'><input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</form></td></tr>
-<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$gene_desc</td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd"><a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accn" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accn</a></td></tr>
-<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$geneDescription</td></tr>
+<tr><td class="genetabletitle"><span class="title4">Species</span></td><td class="basictd">$asterisk$gene_sp</td></tr>
+<tr><td class="genetabletitle"><span class="title4">PAZAR Gene ID</span></td><td class="basictd"><form name="genelink$pazargeneid[0]" method='post' action="$pazar_cgi/gene_search.cgi" enctype='multipart/form-data'><input type='hidden' name='geneID' value="$gene_accn"><input type='hidden' name='ID_list' value='EnsEMBL_gene'>$asterisk<input type="submit" class="submitLink" value="$pazargeneid">&nbsp;</form></td></tr>
+<tr><td class="genetabletitle"><span class="title4">Gene Name (user defined)</span></td><td class="basictd">$asterisk$gene_desc</td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene ID</span></td><td class="basictd">$asterisk<a href="http://www.ensembl.org/$ensspecies/geneview?gene=$gene_accn" target='enswin' onClick="window.open('about:blank','enswin');">$gene_accn</a></td></tr>
+<tr><td class="genetabletitle"><span class="title4">EnsEMBL Gene Description</span></td><td class="basictd">$asterisk$geneDescription</td></tr>
 </table><br>
 HEADER_TABLE
 
@@ -743,7 +758,7 @@ COLNAMES
 	}
 	unless ($param{region_filter} eq 'on') {
 	    foreach my $sp (@species) {
-		my @seqs=$dbh->get_reg_seq_by_species($sp);
+		my @seqs=pazar::reg_seq::get_reg_seq_by_species($dbh,$sp);
 		foreach my $regseq (@seqs) {
 		    push @reg_seqs, $regseq->accession_number;
 		}
@@ -754,7 +769,7 @@ COLNAMES
 	    if (scalar(@species)>1) {print "<p class=\"warning\">You have to choose a unique species when using the region filter!<br><form name=\"modify_filters\" METHOD=\"post\" ACTION=\"$pazar_cgi/project.pl\" enctype=\"multipart/form-data\" target=\"_self\"><input type=\"hidden\" name=\"project_name\" value=\"$proj\"><input type=\"submit\" name=\"submit\" value=\"Modify Filters\"></form></p>\n"; exit;}
 	    if ($param{chr_filter} eq 'on') {
 		unless ($param{bp_filter} eq 'on') {
-		    my @seqs=$dbh->get_reg_seq_by_chromosome($param{chromosome},$param{species});
+		    my @seqs=pazar::reg_seq::get_reg_seq_by_chromosome($dbh,$param{chromosome},$param{species});
 		    foreach my $regseq (@seqs) {
 			push @reg_seqs, $regseq->accession_number;
 		    }
@@ -770,7 +785,7 @@ COLNAMES
 			my $filter='region filter: '.$param{chromosome}.':'.$param{bp_start}.'-'.$param{bp_end};
 			push @filters, $filter;
 		    }
-		    my @seqs=$dbh->get_reg_seq_by_region($param{bp_start},$param{bp_end},$param{chromosome},$param{species});
+		    my @seqs=pazar::reg_seq::get_reg_seq_by_region($dbh,$param{bp_start},$param{bp_end},$param{chromosome},$param{species});
 		    foreach my $regseq (@seqs) {
 			push @reg_seqs, $regseq->accession_number;
 		    }
@@ -793,7 +808,7 @@ COLNAMES
 	    push @filters, $filter;
 	}
         foreach my $accn (@genes) {
-	    my @seqs=$dbh->get_reg_seqs_by_accn($accn);
+	    my @seqs=pazar::reg_seq::get_reg_seqs_by_accn($dbh,$accn);
 	    foreach my $regseq (@seqs) {
 		push @reg_seqs, $regseq->accession_number;
 	    }
@@ -809,7 +824,7 @@ COLNAMES
 #	    print "<span>$type</span>";
 	    if ($type eq 'matrix') {next;}
 	    if ($type eq 'reg_seq') {
-		my @regseq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
+		my @regseq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$site->get_dbid);
 		my $rsid=$regseq[0]->accession_number;
 		if ($reg_seqs[0]) {
 		    unless (grep(/^$rsid$/,@reg_seqs)) {next;}
@@ -1030,6 +1045,12 @@ sub print_tf_attr {
 	    </table><br>
 COLNAMES
 
+
+print<<MARKERTEXT;
+<p><i><span class='warning'>*</span>A red asterisk indicates that the gene is a marker located in the vicinity of the regulatory region. It has not been shown to be regulated by the described sequence.</i></p>
+MARKERTEXT
+
+
 ########### start of HTML table
 	print<<COLNAMES2;	    
 <div id="desc$pazartfid" name="desc$pazartfid" class="seqTableDiv">
@@ -1069,8 +1090,18 @@ COLNAMES2
 		push @rsids, $rsid;
 		my $id=write_pazarid($rsid,'RS');
 		my $seqname=!$site->get_name?'':$site->get_name;
-		my $reg_seq = $dbh->get_reg_seq_by_regseq_id($site->get_dbid);
-		my $pazargeneid = write_pazarid($reg_seq->PAZAR_gene_ID,'GS');
+		my $reg_seq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$site->get_dbid);
+
+            my $gidprefix = 'GS';
+            my $asterisk = "";
+            my $genetype = $reg_seq->gene_type;
+            if($genetype eq "marker")
+            {
+                    $gidprefix = 'MK';
+                    $asterisk = "<span class='warning'>*</span>";
+            }
+
+		my $pazargeneid = write_pazarid($reg_seq->PAZAR_gene_ID,$gidprefix);
 		my $gene_accession=$reg_seq->gene_accession;
 		my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
 		$ens_coords[5]=~s/\[.*\]//g;
@@ -1083,7 +1114,7 @@ COLNAMES2
 
 		print "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid\">".$id."</a><br>$seqname</div></td>";
-		print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gene_search.cgi?geneID=$gene_accession\">".$pazargeneid."</a><br><b>$ens_coords[5]</b><br>$species</div></td>";
+		print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$asterisk<a href=\"$pazar_cgi/gene_search.cgi?geneID=$gene_accession\">".$pazargeneid."</a><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</div></td>";
 		print "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
 		print "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
 		print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png'></a><br><br>";

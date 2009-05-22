@@ -43,7 +43,21 @@ my %colors = (0 => "#fffff0",
 
 my $project=$param{project_id};
 
-my $gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id='$project' and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
+my $table = $param{table};
+
+
+my $gh;
+
+if($table eq "marker")
+{
+        $gh=$dbh->prepare("SELECT * FROM marker where project_id='$project'")||die DBI::errstr;
+}
+else
+{
+	$gh=$dbh->prepare("SELECT * FROM gene_source a, tsr b WHERE a.project_id='$project' and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
+}
+
+
 my %gene_project;
 $gh->execute()||die DBI::errstr;
 while (my $gene=$gh->fetchrow_hashref) {
@@ -54,7 +68,18 @@ while (my $gene=$gh->fetchrow_hashref) {
     my $species = $talkdb->current_org();
     $species = ucfirst($species)||'-';
 
-    my $pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
+    my $pazargeneid = "";
+
+    if($table eq "marker")
+    {
+    	$pazargeneid = write_pazarid($gene->{marker_id},'MK');
+    }
+    else
+    {
+	$pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
+    }
+
+
     my $gene_desc=$gene->{description};
     if ($gene_desc eq '0'||$gene_desc eq '') {$gene_desc='-';}
     push (@{$gene_project{$project->{project_name}}}, {
