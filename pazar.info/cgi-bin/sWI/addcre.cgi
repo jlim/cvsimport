@@ -309,6 +309,7 @@ unless ($pazar) {
 }
 
 my $regseq=pazar::reg_seq->new(
+			  -pazar=>$pazar,
                           -seq=>$seq,
                           -id=>$params{seqname},
                           -quality=>$params{quality},
