@@ -7,6 +7,8 @@ use pazar;
 use pazar::reg_seq;
 use pazar::talk;
 
+#use CGI::HTMLError trace => 1;
+
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
@@ -119,7 +121,7 @@ $pazar->add_input('funct_tf',$tfid);
 $pazar->store_analysis($aid);
 $pazar->reset_inputs;
 $pazar->reset_outputs;
-};
+}; #end of eval block
     my $pazaraid=write_pazarid($aid,'AN');
 
 my $JSCRIPT=<<END;
@@ -308,6 +310,8 @@ unless ($pazar) {
     exit;
 }
 
+
+
 my $regseq=pazar::reg_seq->new(
 			  -pazar=>$pazar,
                           -seq=>$seq,
@@ -330,7 +334,7 @@ my $regseq=pazar::reg_seq->new(
                           -transcript_fuzzy_start=>$params{fstart}||$tss,
                           -transcript_fuzzy_end=>$params{fend}||$tss);
 
-my $rsid=$pazar->store_reg_seq($regseq);
+my $rsid=pazar::reg_seq->store_reg_seq($pazar,$regseq);
 return $rsid;
 }
 
