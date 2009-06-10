@@ -732,7 +732,7 @@ my $regseq=pazar::reg_seq->new(
                           -transcript_fuzzy_start=>$params{fstart}||$tss,
                           -transcript_fuzzy_end=>$params{fend}||$tss);
 
-my $rsid=$pazar->store_reg_seq($regseq);
+my $rsid=pazar::reg_seq->store_reg_seq($pazar,$regseq);
 return $rsid;
 }
 
