@@ -340,7 +340,7 @@ if ($param{submit}=~/gene/i) {
 
     }
     if (!$reg_seqs[0]) {
-	my @rsid = $dbh->get_all_regseq_ids();
+	my @rsid = pazar::reg_seq::get_all_regseq_ids($dbh);
 	foreach my $id (@rsid) {
 	    my @seqs=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$id);
 	    foreach my $regseq (@seqs) {
