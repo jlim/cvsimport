@@ -1,49 +1,28 @@
 #!/usr/bin/perl
-
 use HTML::Template;
-
-my $pazar_cgi = $ENV{PAZAR_CGI};
-my $pazar_html = $ENV{PAZAR_HTML};
+use CGI qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+my $pazar_cgi    = $ENV{PAZAR_CGI};
+my $pazar_html   = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
+my $get = new CGI;
+my %param = %{ $get->Vars };
+our $searchtab = $param{"searchtab"} || "profiles";
 require "$pazarcgipath/getsession.pl";
+require "$pazarcgipath/searchbox.pl";
 
-# open the html header template
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
-
-# fill in template parameters
-$template->param(TITLE => 'PAZAR Profile Search');
+$template->param(TITLE      => "View pre-computed profiles | PAZAR");
 $template->param(PAZAR_HTML => $pazar_html);
-$template->param(PAZAR_CGI => $pazar_cgi);
-
-if($loggedin eq 'true')
-{
-    #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
+$template->param(PAZAR_CGI  => $pazar_cgi);
+if ($loggedin eq "true") {
+	$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> 
+	<a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});
+} else {
+	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
 }
-else
-{
-    #log in link
-    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
-}
-
-# send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
-
-print<<PAGE;
-<p class="title1">PAZAR Profile Search <a href='$pazar_cgi/help_FAQ.pl#4.%20Search%20by%20Transcription%20Factor%20Binding%20Profile' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></p>
-<p><span class="title4">Description</span><br>
-This search engine is for pre-computed profiles stored in the PAZAR boutiques.<br>They might not be linked to the sequences used to built them and even not to an identifiable transcription factor. For instance, they might have been built from multiple species and/or multiple factors presenting similar binding properties.<br>If you want to build a profile from a specific Transcription Factor using all its annotated binding sites, use the <a href="$pazar_cgi/tf_search.cgi">TF Search Engine</a> where profiles are generated dynamically.</p>
-<p><span class=\"title4\">Search Engine</span><br>
-<FORM method='post' action ="$pazar_cgi/export_profile.cgi" enctype="multipart/form-data" target="_self">Sort Profiles by: 
-<input type="hidden" name="mode" value="list">
-<input type="submit" name="BROWSE" value="Project">
-<input type="submit" name="BROWSE" value="Name">
-<input type="submit" name="BROWSE" value="Species">
-</form></p>
-PAGE
-
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
-print $template_tail->output;
-
+print $bowz;
+my $tplt = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
+print $tplt->output;

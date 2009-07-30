@@ -1,933 +1,733 @@
 #!/usr/bin/perl
-
 use pazar;
 use pazar::gene;
 use pazar::talk;
 use pazar::reg_seq;
-
 use HTML::Template;
-
+use TFBS::Matrix::PFM;
+use TFBS::PatternGen::MEME;
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-#use CGI::Debug( report => 'everything', on => 'anything' );
 
-use TFBS::PatternGen::MEME;
-use TFBS::Matrix::PFM;
-
-#use Data::Dumper;
-
-my $pazar_cgi = $ENV{PAZAR_CGI};
-my $pazar_html = $ENV{PAZAR_HTML};
-my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazar_cgi       = $ENV{PAZAR_CGI};
+my $pazar_html      = $ENV{PAZAR_HTML};
+my $pazarcgipath    = $ENV{PAZARCGIPATH};
 my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
+my $get = new CGI;
+my %param = %{ $get->Vars };
+our $searchtab = $param{"searchtab"} || "tfs";
+
 require "$pazarcgipath/getsession.pl";
+require "$pazarcgipath/searchbox.pl";
 
-# open the html header template
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
+$template->param(TITLE => "Search for transcription factors (TFs) | PAZAR");
+$template->param(PAZAR_HTML          => $pazar_html);
+$template->param(PAZAR_CGI           => $pazar_cgi);
+$template->param(ONLOAD_FUNCTION     => "init();");
+$template->param(JAVASCRIPT_FUNCTION => qq{ });
 
-# fill in template parameters
-$template->param(TITLE => 'PAZAR TF View');
-$template->param(PAZAR_HTML => $pazar_html);
-$template->param(PAZAR_CGI => $pazar_cgi);
-$template->param(ONLOAD_FUNCTION => 'init();');
- 
-$template->param(JAVASCRIPT_FUNCTION => qq{
-function ajaxcall (tableId,divTarget,all) {
-var divObj=xGetElementById(divTarget);
-divObj.innerHTML='Generating PFM, please wait...';
-var http = false;
-tableObj=xGetElementById(tableId);
-sites=0;
-args='caller=tfsearch';
-var tbody=tableObj.getElementsByTagName('tbody');
-var trs = tbody[0].getElementsByTagName('tr');
-for (x=1; x<trs.length; x++) {
-	tds=trs[x].getElementsByTagName('td');
-    cb=tds[0].firstChild.firstChild;
-    if ((cb.checked==true)||(all==1)) {
-        args+="&seq="+cb.value;
-		sites++;
-     }
-}
-
-if (sites == 0) {
-	tableObj=xGetElementById("sml"+tableId);
-	tbody=tableObj.getElementsByTagName('tbody');
-	trs = tbody[0].getElementsByTagName('tr');
-	for (x=1; x<trs.length; x++) {
-		tds=trs[x].getElementsByTagName('td');
-	    cb=tds[0].firstChild.firstChild;
-	    if ((cb.checked==true)||(all==1)) {
-	        args+="&seq="+cb.value;
-			sites++;
-	     }
-	}
-}
-
-// pass the tf name to ajax page
-headTableObj=xGetElementById('Head'+tableId);
-var headtbody=headTableObj.getElementsByTagName('tbody');
-var headtrs = headtbody[0].getElementsByTagName('tr');
-var headtd = headtrs[1].getElementsByTagName('td')[1];
-//args+="&tfname="+headtd.innerHTML;
-var tfnameDivObj=xGetElementById('Hidden'+tableId);
-args+="&tfname="+tfnameDivObj.innerHTML;
-
-
-
-// now pass tableid (includes tfid and project id), to make forms unique on meme_call page
-args+="&tfpid="+tableId;
-
-//pass project name
-//var tfidtd = headtrs[6].getElementsByTagName('td')[1];
-//args+="&tfpid="+tfidtd.innerHTML;
-
-
-if (sites<2) {
-   divObj.innerHTML='<p class="warning">There are not enough targets to build a binding profile for this TF!</p>';
-   return 0;
-}
-
-if(navigator.appName == "Microsoft Internet Explorer") {
-  http = new ActiveXObject("Microsoft.XMLHTTP");
+if ($loggedin eq "true") {
+	$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> 
+	<a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});
 } else {
-  http = new XMLHttpRequest();
+	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
 }
 
-http.open("POST", "meme_call.pl",true);
-//Send the proper header information along with the request
-http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-http.setRequestHeader("Content-length", args.length);
-http.setRequestHeader("Connection", "close");
-http.onreadystatechange=function() {
-  if(http.readyState == 4) {
-    divObj.innerHTML=http.responseText;
-  }
-}
-http.send(args);
-}
-
-
-function multiTF (divTarget) {
-divObj=xGetElementById(divTarget);
-divObj.innerHTML='Generating PFM, please wait...';
-var http = false;
-args='caller=tfsearch';
-var divs=document.getElementsByTagName('div');
-for (i=0; i<divs.length; i++) {
-        if (divs[i].className=='seqTableDiv') {
-                baseName=divs[i].id;
-                baseName=baseName.replace(/desc/,"");
-                sites=0;
-                tableObj=xGetElementById('SummaryTable'+baseName);
-                var tbody=tableObj.getElementsByTagName('tbody');
-                var trs = tbody[0].getElementsByTagName('tr');
-                for (x=1; x<trs.length; x++) {
-                    tds=trs[x].getElementsByTagName('td');
-                    cb=tds[0].firstChild.firstChild;
-                    if (cb.checked==true) {
-                        args+="&seq="+cb.value;
-                        sites++;
-                    }
-                }
-                if (sites == 0) {
-					tableObj=xGetElementById('smlSummaryTable'+baseName);
-					tbody=tableObj.getElementsByTagName('tbody');
-					trs = tbody[0].getElementsByTagName('tr');
-					for (x=1; x<trs.length; x++) {
-						tds=trs[x].getElementsByTagName('td');
-					    cb=tds[0].firstChild.firstChild;
-					    if (cb.checked==true) {
-					        args+="&seq="+cb.value;
-					     }
-					}
-				}
-
-        }
-}
-
-if(navigator.appName == "Microsoft Internet Explorer") {
-  http = new ActiveXObject("Microsoft.XMLHTTP");
-} else {
-  http = new XMLHttpRequest();
-}
-
-http.open("POST", "meme_call.pl",true);
-//Send the proper header information along with the request
-http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-http.setRequestHeader("Content-length", args.length);
-http.setRequestHeader("Connection", "close");
-http.onreadystatechange=function() {
-  if(http.readyState == 4) {
-    divObj.innerHTML=http.responseText;
-  }
-}
-http.send(args);
-}
-
-
-document.getElementsByClassName = function(cl) {
-var retnode = [];
-var myclass = new RegExp('\\b'+cl+'\\b');
-var elem = this.getElementsByTagName('*');
-for (var i = 0; i < elem.length; i++) {
-var classes = elem[i].className;
-if (myclass.test(classes)) retnode.push(elem[i]);
-}
-return retnode;
-};
-
-function setCount(target){
-
-if(target == 0)
-{
-document.tf_search.action="$pazar_cgi/tf_list.cgi";
-document.tf_search.target="Window1";
-window.open('about:blank','Window1', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
-}
-if(target == 1)
-{
-document.tf_search.action="$pazar_cgi/tf_search.cgi";
-document.tf_search.target="_self";
-}
-if(target == 2)
-{
-document.tf_search.action="$pazar_cgi/tfbrowse_alpha.pl";
-document.tf_search.target="Window2";
-window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
-}
-}
-
-function verifyCheckedBoxes() {
-    var numChecked = 0;
-    var counter;
-
-    // iterate through sequenceform elements
-    for(counter=0;counter<document.sequenceform.length;counter++)
-    {
-        if (document.sequenceform.elements[counter].checked)
-        {
-            numChecked++;
-        }
-    }
-    if (numChecked < 2)
-    {
-        alert('You must select at least 2 sequences. Number of sequences selected: ' + numChecked);
-    }
-    else
-    {
-        window.open('about:blank','logowin', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=600');
-        document.sequenceform.submit();
-    }
-  }
-
-function selectallseq (tableId) {
-        tableObj=xGetElementById(tableId);
-        var tbody=tableObj.getElementsByTagName('tbody');
-        var trs = tbody[0].getElementsByTagName('tr');
-        for (x=1; x<trs.length; x++) {
-                                        tds=trs[x].getElementsByTagName('td');
-                                        cb=tds[0].firstChild.firstChild;
-                                        cb.checked=true;
-                        }
-        tableObj2=xGetElementById("sml"+tableId);
-        var tbody2=tableObj2.getElementsByTagName('tbody');
-        var trs2 = tbody2[0].getElementsByTagName('tr');
-        for (x=1; x<trs2.length; x++) {
-                                        tds2=trs2[x].getElementsByTagName('td');
-                                        cb2=tds2[0].firstChild.firstChild;
-                                        cb2.checked=true;
-                        }
-}
-
-function resetallseq (tableId) {
-        tableObj=xGetElementById(tableId);
-        var tbody=tableObj.getElementsByTagName('tbody');
-        var trs = tbody[0].getElementsByTagName('tr');
-        for (x=1; x<trs.length; x++) {
-                                        tds=trs[x].getElementsByTagName('td');
-                                        cb=tds[0].firstChild.firstChild;
-                                        cb.checked=false;
-                        }
-        tableObj2=xGetElementById("sml"+tableId);
-        var tbody2=tableObj2.getElementsByTagName('tbody');
-        var trs2 = tbody2[0].getElementsByTagName('tr');
-        for (x=1; x<trs2.length; x++) {
-                                        tds2=trs2[x].getElementsByTagName('td');
-                                        cb2=tds2[0].firstChild.firstChild;
-                                        cb2.checked=false;
-                        }
-}
-
-function selectbytype (tableId,target) {
-        tableObj=xGetElementById(tableId);
-        var tbody=tableObj.getElementsByTagName('tbody');
-        var trs = tbody[0].getElementsByTagName('tr');
-        for (x=1; x<trs.length; x++) {
-                if (trs[x].className==target) {
-                        tds=trs[x].getElementsByTagName('td');
-                        cb=tds[0].firstChild.firstChild;
-                        cb.checked=true;
-                }
-        }
-        tableObj2=xGetElementById("sml"+tableId);
-        var tbody2=tableObj2.getElementsByTagName('tbody');
-        var trs2 = tbody2[0].getElementsByTagName('tr');
-        for (x=1; x<trs2.length; x++) {
-                if (trs2[x].className==target) {
-                        tds2=trs2[x].getElementsByTagName('td');
-                        cb2=tds2[0].firstChild.firstChild;
-                        cb2.checked=true;
-                }
-        }
-}
-
-function init () {
-var divs=document.getElementsByTagName('div');
-for (i=0; i<divs.length; i++) {
-        if (divs[i].className=='seqTableDiv') {
-                baseName=divs[i].id;
-                baseName=baseName.replace(/^desc/,"");
-	try {
-                ajaxcall('SummaryTable'+baseName,'memediv'+baseName,1);
+sub pnum {
+	my $num = shift;
+	my @aum = split(//,$num);
+	my $fnu;
+	while (@aum) {
+		my $len = @aum;
+		if ($len > 3) {
+			$fnu = pop(@aum) . $fnu;
+			$fnu = pop(@aum) . $fnu;
+			$fnu = pop(@aum) . $fnu;
+			$fnu = "," . $fnu;
+		} else {
+			while (@aum) {
+				$fnu = pop(@aum) . $fnu;
+			}
+		}
 	}
-catch (err) {
-	alert(err);
-}
-        }
-}
+	return $fnu;
 }
 
-function confirm_entry(tfid)
-{
-input_box=confirm("Are you sure you want to delete this TF?");
-if (input_box==true)
+my $dbh = pazar->new(
+	-host         => $ENV{PAZAR_host},
+	-user         => $ENV{PAZAR_pubuser},
+	-pass         => $ENV{PAZAR_pubpass},
+	-dbname       => $ENV{PAZAR_name},
+	-drv          => $ENV{PAZAR_drv},
+	-globalsearch => "yes"
+);
 
-{ 
-// submit tfid to delete page
-    location.href="deletetf.pl?tfid="+tfid;
-}
+my $ensdb = pazar::talk->new(
+	DB   => "ensembl",
+	USER => $ENV{ENS_USER},
+	PASS => $ENV{ENS_PASS},
+	HOST => $ENV{ENS_HOST},
+	DRV  => "mysql"
+);
 
-}
+my $gkdb = pazar::talk->new(
+	DB   => "genekeydb",
+	USER => $ENV{GKDB_USER},
+	PASS => $ENV{GKDB_PASS},
+	HOST => $ENV{GKDB_HOST},
+	DRV  => "mysql"
+);
 
-function toggleRows(sname,snumb,stotal) {
-	for (var i = 1; i<=stotal;i++) {
-		document.getElementById(i+"_"+sname).className = "hide";
-	}
-	document.getElementById(snumb+"_"+sname).className = "show";
-}
-
-}
-	);
-
-if($loggedin eq 'true')
-{
-    #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
-}
-else
-{
-    #log in link
-    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
-}
-
-# send the obligatory Content-Type and print the template output
 print "Content-Type: text/html\n\n", $template->output;
-
-#connect to the database
-my $dbh = pazar->new( 
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    $ENV{PAZAR_drv},
-                      -globalsearch  =>    'yes');
-
-
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
-my $gkdb = pazar::talk->new(DB=>'genekeydb',USER=>$ENV{GKDB_USER},PASS=>$ENV{GKDB_PASS},HOST=>$ENV{GKDB_HOST},DRV=>'mysql');
-
 my @pubprojects = $dbh->public_projects;
 
-print<<page;
-<h1>PAZAR TF View <a href='$pazar_cgi/help_FAQ.pl#3.3%20TF%20View' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></h1>
-          <table border="0" cellpadding="0" cellspacing="0" width="100%">
-            <tbody><tr>
-              <td colspan="2">
-      <p class="title2">Search by TF</p>
-      </td>
-    </tr>
-<form name="tf_search" method="post" action="" enctype="multipart/form-data" target="">
-    <tr align="left">
-      <td colspan="2">
-<p > Please enter a &nbsp;
-      <select name="ID_list">
-      <option selected="selected" value="tf_name">User Defined TF name</option>
-      <option value="EnsEMBL_gene">EnsEMBL gene ID</option>
-      <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
-      <option value="EntrezGene">Entrezgene ID</option>
-      <option value="nm">RefSeq ID</option>
-      <option value="swissprot">Swissprot ID</option>
-      <option value="PAZAR_TF">PAZAR TF ID</option>
-</select>
-&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)">&nbsp; <a href='$pazar_html/TFID_help.htm' target='helpwin'onClick="window.open('about:blank','helpwin', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=650, width=350');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a><br></p>
-      </td>
-    </tr>
-    <tr align="left">
-      <td colspan="2"><p > Or browse the current list of reported TFs
-&nbsp;
-      <input value="View TF List" name="submit" type="submit"  onClick="setCount(0)"><br><br></p>
-      </td>
-    </tr>
-    <tr align="left">
-      <td width='400' valign=top><span class='red'>!!!NEW!!!</span> Select projects you want to exclude from your search:<br><small>Make your selection before performing your query and hitting the Submit button above.<br>Hold the 'Ctrl' button ('Command' button on Mac) to select/unselect one or more projects.</small></td>
-      <td valign=top><select name="excl_proj" size="3" multiple="multiple">
-page
-
 my %unsort_proj;
+my $checkl_proj;
 foreach my $project (@pubprojects) {
-    my $proj = $dbh->get_project_name_by_ID($project);
-    my $proj_lc=lc($proj);
-    $unsort_proj{$proj_lc}=$proj;
+	my $proj    = $dbh->get_project_name_by_ID($project);
+	my $proj_lc = lc($proj);
+	$unsort_proj{$proj_lc} = $proj;
 }
-foreach my $projname (sort(keys %unsort_proj)) {
-    print "<option value=\"$unsort_proj{$projname}\"> $unsort_proj{$projname}</option>";
+foreach my $projname (sort(keys %unsort_proj) ) {
+	my $pn = $unsort_proj{$projname};
+	if (length($pn) > 14) {
+		$pn = substr($pn, 0, 14) . "...";
+	}
+	$checkl_proj .= qq{<div class="float-l w20p ov-hide sml"><input type="checkbox" name="excl_proj" value="$pn"> $pn</div>};
 }
-print "</td></tr></form></tbody></table><hr color='black'>";
 
-my $get = new CGI;
-my %param = %{$get->Vars};
-my $accn = $param{geneID};
-$accn=~s/[\s]//g;
-my $dbaccn = $param{ID_list}||'PAZAR_TF';
-my @trans;
+print $bowz;
+
+my $accn  = $param{geneID};
+$accn =~ s/[\s]//g;
+my $dbaccn = $param{ID_list} || "PAZAR_TF";
 my $tfname;
+my @trans;
 if ($accn) {
-    if ($dbaccn eq 'PAZAR_TF') {
-	unless ($accn=~/TF\d{7}/i) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>"; exit;} else {@trans = ('PAZARid');}
-    }if ($dbaccn eq 'EnsEMBL_gene') {
-	@trans = $ensdb->ens_transcripts_by_gene($accn);
-        unless ($trans[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-    } elsif ($dbaccn eq 'EnsEMBL_transcript') {
-	my @gene = $ensdb->ens_transcr_to_gene($accn);
-        unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	push @trans,$accn;
-    } elsif ($dbaccn eq 'EntrezGene') {
-	my $species=$gkdb->llid_to_org($accn);
-	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
-	$ensdb->change_mart_organism($species);
-	my @gene=$ensdb->llid_to_ens($accn);
-	unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
-    } elsif ($dbaccn eq 'nm') {
-	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, ll_refseq_nm b where a.ll_id=b.ll_id and b.nm_accn=?");
-	$sp->execute($accn);
-	my $species=$sp->fetchrow_array();
-	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL transcript ID!"; exit;}
-	$ensdb->change_mart_organism($species);
-	my @gene=$ensdb->nm_to_ens($accn);
-	unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
-	unless ($trans[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-    } elsif ($dbaccn eq 'swissprot') {
-	my $sp=$gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?")||die;
-	$sp->execute($accn)||die;
-	my $species=$sp->fetchrow_array();
-	if (!$species) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	$ensdb->change_mart_organism($species);
-	@gene =$ensdb->swissprot_to_ens($accn);
-	unless ($gene[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-	@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
-	unless ($trans[0]) {print "<h3>An error occured! Check that the provided ID ($accn) is a $dbaccn ID!</h3>You will have the best results using an EnsEMBL gene ID!"; exit;}
-    } elsif ($dbaccn eq 'tf_name') {
-	@trans = ('none');
-	$tfname = '%'.$accn.'%';
-    }
-
-    my $tfcount=0;
-    my $seqcounter=0;
-####start of form
-    print "<form name='sequenceform' method='post' target='logowin' action='$pazar_cgi/tf_logo.pl'>";
-    my @tfcomplexes;
-    foreach my $trans (@trans) {
-#	print "you're looking for transcript: ".$trans."\n";
-	my $tf;
-	if ($trans eq 'none') {
-	    $tf = $dbh->create_tf;
-	    @tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
-	} elsif ($trans eq 'PAZARid') {
-	    my $PZid=$accn;
-	    $PZid=~s/^\D+0*//;
-	    $tf = $dbh->create_tf;
-	    @tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
-        } else {
-	    $tf = $dbh->create_tf;
-	    my @tfcomp = $tf->get_tfcomplex_by_transcript($trans);
-	    foreach my $comp (@tfcomp) {
-		push @tfcomplexes, $comp;
-	    }
+	if ($dbaccn eq "PAZAR_TF") {
+		unless ($accn =~ /TF\d{7}/i) {
+			print qq{<div class="emp">The PAZAR TF ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a PAZAR TF ID.</div>};
+			&exitscr();
+		} else {
+			@trans = ("PAZARid");
+		}
 	}
-	if ($loggedin eq 'true') {
-	    foreach my $proj (@projids) {
-		my $restricted=&select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
-		my $restr_proj=$restricted->fetchrow_array();
-		if ($restr_proj) {
-		    my $dbhandle = pazar->new( 
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-  	              -pazar_user    =>    $info{user},
-		      -pazar_pass    =>    $info{pass},
-                      -drv           =>    $ENV{PAZAR_drv},
-		      -project       =>    $restr_proj);
-
-		    my @complexes;
-		    if ($trans eq 'none') {
-			$tf = $dbhandle->create_tf;
-			@complexes = $tf->get_tfcomplex_by_name($tfname);
-		    } elsif ($trans eq 'PAZARid') {
-			my $PZid=$accn;
-			$PZid=~s/^\D+0*//;
+	if ($dbaccn eq "EnsEMBL_gene") {
+		@trans = $ensdb->ens_transcripts_by_gene($accn);
+		unless ($trans[0]) {
+			print qq{<div class="emp">The Ensembl Gene ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+	} elsif ($dbaccn eq "EnsEMBL_transcript") {
+		my @gene = $ensdb->ens_transcr_to_gene($accn);
+		unless ($gene[0]) {
+			print qq{<div class="emp">The Ensembl Transcript ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is an Ensembl Transcript ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		push @trans, $accn;
+	} elsif ($dbaccn eq "EntrezGene") {
+		my $species = $gkdb->llid_to_org($accn);
+		if (!$species) {
+			print qq{<div class="emp">The Entrez Gene ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is an Entrez Gene ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		$ensdb->change_mart_organism($species);
+		my @gene = $ensdb->llid_to_ens($accn);
+		unless ($gene[0]) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
+	} elsif ($dbaccn eq "nm") {
+		my $sp =
+		  $gkdb->{dbh}->prepare("select organism from ll_locus a, ll_refseq_nm b where a.ll_id=b.ll_id and b.nm_accn=?");
+		$sp->execute($accn);
+		my $species = $sp->fetchrow_array();
+		if (!$species) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		$ensdb->change_mart_organism($species);
+		my @gene = $ensdb->nm_to_ens($accn);
+		unless ($gene[0]) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
+		unless ($trans[0]) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+	} elsif ($dbaccn eq "swissprot") {
+		my $sp =
+		  $gkdb->{dbh}->prepare("select organism from ll_locus a, gk_ll2sprot b where a.ll_id=b.ll_id and sprot_id=?") || die;
+		$sp->execute($accn) || die;
+		my $species = $sp->fetchrow_array();
+		if (!$species) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		$ensdb->change_mart_organism($species);
+		@gene = $ensdb->swissprot_to_ens($accn);
+		unless ($gene[0]) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+		@trans = $ensdb->ens_transcripts_by_gene($gene[0]);
+		unless ($trans[0]) {
+			print qq{<div class="emp">The $dbaccn ID you provided ($accn) could not be found. 
+			Please check that the provided ID ($accn) is a $dbaccn ID. 
+			You will get the best results if you provide us with an Ensembl Gene ID.</div>};
+			&exitscr();
+		}
+	} elsif ($dbaccn eq "tf_name") {
+		@trans  = ("none");
+		$tfname = qq{\%$accn\%};
+	}
+	my ($tfcount,$seqcounter) = (0,0);
+	my @tfcomplexes;
+	foreach my $trans (@trans) {
+		my $tf;
+		if ($trans eq "none") {
 			$tf = $dbh->create_tf;
-			@complexes = $tf->get_tfcomplex_by_id($PZid);
-		    } else {
-			$tf = $dbhandle->create_tf;
-			@complexes = $tf->get_tfcomplex_by_transcript($trans);
-		    }
-		    foreach my $comp (@complexes) {
-			push @tfcomplexes, $comp;
-		    }
+			@tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
+		} elsif ($trans eq "PAZARid") {
+			my $PZid = $accn;
+			$PZid =~ s/^\D+0*//;
+			$tf = $dbh->create_tf;
+			@tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
+		} else {
+			$tf = $dbh->create_tf;
+			my @tfcomp = $tf->get_tfcomplex_by_transcript($trans);
+			foreach my $comp (@tfcomp) {
+				push @tfcomplexes, $comp;
+			}
 		}
-	    }
+		if ($loggedin eq "true") {
+			foreach my $proj (@projids) {
+				my $restricted = &select($dbh, "SELECT project_name FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
+				my $restr_proj = $restricted->fetchrow_array();
+				if ($restr_proj) {
+					my $dbhandle = pazar->new(
+						-host       => $ENV{PAZAR_host},
+						-user       => $ENV{PAZAR_pubuser},
+						-pass       => $ENV{PAZAR_pubpass},
+						-dbname     => $ENV{PAZAR_name},
+						-pazar_user => $info{user},
+						-pazar_pass => $info{pass},
+						-drv        => $ENV{PAZAR_drv},
+						-project    => $restr_proj
+					);
+					my @complexes;
+					if ($trans eq "none") {
+						$tf = $dbhandle->create_tf;
+						@complexes = $tf->get_tfcomplex_by_name($tfname);
+					} elsif ($trans eq "PAZARid") {
+						my $PZid = $accn;
+						$PZid =~ s/^\D+0*//;
+						$tf = $dbh->create_tf;
+						@complexes = $tf->get_tfcomplex_by_id($PZid);
+					} else {
+						$tf = $dbhandle->create_tf;
+						@complexes = $tf->get_tfcomplex_by_transcript($trans);
+					}
+					foreach my $comp (@complexes) {
+						push @tfcomplexes, $comp;
+					}
+				}
+			}
+		}
 	}
-    }
-
-my @excluded_proj;
-my $excluded='none';
-if ($param{excl_proj}) {
-    foreach my $val ($get->param('excl_proj')) {
-	push @excluded_proj, $val;
-    }
-    $excluded=join('__',@excluded_proj);
-} elsif ($param{excluded}) {
-    $excluded=$param{excluded};
-    @excluded_proj=split(/__/,$excluded);
-}
-
-print<<SUMMARY_HEADER;
-<a name='top'></a>
-<p class="title2">Summary</p>
-<p><b>Projects excluded from the search:</b> $excluded</p>
-<table width='700' class='summarytable'><tr>
-<td class='tftabletitle' width='100'>Species</td>
-<td class='tftabletitle' width='100'>PAZAR TF ID</td>
-<td class='tftabletitle' width='100'>TF Name<br><small>(user defined)</small></td>
-<td class='tftabletitle' width='150'>Transcript Accession</td>
-<td class='tftabletitle' width='150'>Class/Family</td>
-<td class='tftabletitle' width='100'>Project</td></tr>
-SUMMARY_HEADER
-
-my $bg_color = 0;
-my %colors = (0 => "#fffff0",
-	      1 => "#FFB5AF");
-
+	my @excluded_proj;
+	my $excluded = "none";
+	if ($param{excl_proj}) {
+		foreach my $val ($get->param("excl_proj")) {
+			push @excluded_proj, $val;
+		}
+		$excluded = join("__", @excluded_proj);
+	} elsif ($param{excluded}) {
+		$excluded = $param{excluded};
+		@excluded_proj = split(/__/, $excluded);
+	}
+	my $exprint = "";
+	unless ($excluded eq "none") {
+		$exprint = qq{<div class="p10bo"><span class="b">Projects excluded from the search:</span> $excluded</div>};
+	}
+	
+	my %nicename = (
+		"tf_name" => "user-defined TF name",
+		"EnsEMBL_gene" => "Ensembl gene ID",
+		"EnsEMBL_transcript" => "Ensembl transcript ID",
+		"EntrezGene" => "Entrez Gene ID",
+		"nm" => "Refseq ID",
+		"swissprot" => "Swissprot ID",
+		"PAZAR_TF" => "PAZAR TF ID"
+	);
+	print qq{
+		<a name="top"></a>
+		<h2>Matching TFs <span class="txt-grey">($nicename{$dbaccn} "$accn")</span></h2>
+		$exprint};
+	my $bg_color = 0;
+	my %colors   = (
+		0 => "#fffff0",
+		1 => "#FFB5AF"
+	);
+	my $suta;
 	foreach my $complex (@tfcomplexes) {
-
-	    my $tfproj=$dbh->get_project_name('funct_tf',$complex->dbid);
-	    if (grep(/^$tfproj$/,@excluded_proj)) {
-		next;
-	    }
-	    my $tf_name=$complex->name;
-	    my $pazartfid=write_pazarid($complex->dbid,'TF');
-
-	    my @classes = ();
-	    my @families = ();
-	    my @transcript_accessions = ();
-	    my $species;
-	    while (my $subunit=$complex->next_subunit) {
-		my $fam=!$subunit->get_fam?'':'/'.$subunit->get_fam;
-		my $class=!$subunit->get_class?'':$subunit->get_class.$fam;
-		push(@classes,$class);
-		my $tr_accn=$subunit->get_transcript_accession($dbh);
-		push(@transcript_accessions, $tr_accn);
-		unless ($species) {
-		    my @ens_coords = $ensdb->get_ens_chr($tr_accn);
-		    $ens_coords[5]=~s/\[.*\]//g;
-		    $ens_coords[5]=~s/\(.*\)//g;
-		    $ens_coords[5]=~s/\.//g;
-		    $species = $ensdb->current_org();
-		    $species = ucfirst($species);
+		my $tfproj = $dbh->get_project_name("funct_tf", $complex->dbid);
+		if (grep(/^$tfproj$/, @excluded_proj) ) {
+			next;
 		}
-	    }
-	    unless ($species) { $species='-';}
-	    my $traccns=join('<br>',@transcript_accessions);
-	    my $trclasses=join('<br>',@classes);
+		my $pazartfid = write_pazarid($complex->dbid, "TF");
+		my $tf_name = $complex->name;
+		my @families = ();
+		my @classes = ();
+		my @traccs = ();
+		my $species;
+		while (my $subunit = $complex->next_subunit) {
+			my $fam   = !$subunit->get_fam   ? "" : "/" . $subunit->get_fam;
+			my $class = !$subunit->get_class ? "" : $subunit->get_class . $fam;
+			push(@classes, $class);
+			my $tr_accn = $subunit->get_transcript_accession($dbh);
+			push(@traccs, $tr_accn);
+			unless ($species) {
+				my @enco = $ensdb->get_ens_chr($tr_accn);
+				$enco[5] =~ s/\[.*\]//g;
+				$enco[5] =~ s/\(.*\)//g;
+				$enco[5] =~ s/\.//g;
+				$species = $ensdb->current_org();
+				$species = ucfirst($species);
+			}
+		}
+		my $ensspecies = $species;
+		$ensspecies =~ s/ /_/g;
 
-	print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$species</td>";
-	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$pazartfid&nbsp<a href='#$pazartfid'><img src='$pazar_html/images/magni.gif' alt='View Details' align='bottom' width=12></a></td>";
-	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$tf_name</td>";
-	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$traccns</td>";
-	print "<td class='basictd' width='150' bgcolor=\"$colors{$bg_color}\">$trclasses</td>";
-	print "<td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$tfproj</td>";
-	print "</tr>";
-
-	$bg_color =  1 - $bg_color;
+		unless ($species) { $species = "-"; }
+		my $tfclass = join(" ", @classes);
+		if (length($species) > 18) {
+			$species =~ s/\'/\&\#39\;/g;
+			$species = qq{<div onclick="popup(this,'$species','rt');" class="popup">} . substr($species,0,16) . "..." . qq{</div>};
+		}
+		if (length($tf_name) > 12) {
+			$tf_name =~ s/\'/\&\#39\;/g;
+			$tf_name = qq{<div onclick="popup(this,'$tf_name','rt');" class="popup">} . substr($tf_name,0,10) . "..." . qq{</div>};
+		}
+		if (length($tfclass) > 18) {
+			$tfclass =~ s/\'/\&\#39\;/g;
+			$tfclass = qq{<div onclick="popup(this,'$tfclass','rt');" class="popup">} . substr($tfclass,0,16) . "..." . qq{</div>};
+		}
+		if (length($tfproj) > 16) {
+			$tfproj =~ s/\'/\&\#39\;/g;
+			$tfproj = qq{<a href="$pazar_cgi/project.pl?project_name=$tfproj">} . substr($tfproj,0,14) . "..." . qq{</a>};
+		} else {
+			$tfproj = qq{<a href="$pazar_cgi/project.pl?project_name=$tfproj">$tfproj</a>};
+		}
+		my $traccns;
+		foreach my $t (@traccs) {$traccns .= qq{<a target="_blank" href="http://www.ensembl.org/$ensspecies/Gene/Idhistory?db=core;t=$t">$t</a> };}
+		$suta .= qq{
+				<tr style="background-color: $colors{$bg_color};">
+					<td class="btc">$species</td>
+					<td class="btc">$pazartfid&nbsp;<a href="#$pazartfid"><img src="$pazar_html/images/magni.gif" alt="View Details" align="bottom" width="10"></a></td>
+					<td class="btc">$tf_name</td>
+					<td class="btc">$traccns</td>
+					<td class="btc">$tfclass</td>
+					<td class="btc">$tfproj</td>
+				</tr>};
+		$bg_color = 1 - $bg_color;
 	}
-
-print<<HEADER_TABLE;
-</table><br><hr color='black'><p class="title2">Details TF-by-TF</p>
-HEADER_TABLE
-
+	if ($suta) {
+		print qq{
+			<div class="p10bo"><table class="summarytable tblw">
+				<tbody><tr>
+					<td class="tfdst w16p">Species</td>
+					<td class="tfdst w12p">PAZAR TF</td>
+					<td class="tfdst w16p">TF name</td>
+					<td class="tfdst ">Transcript accession</td>
+					<td class="tfdst w20p">Class and family</td>
+					<td class="tfdst w16p">PAZAR project</td>
+				</tr>$suta</tbody></table></div>};
+	}
+	print qq{
+		<h2>Details</h2>
+		<div class="p10 bg-lg small b">
+			Note: genes marked with a red asterisk [ <span class="warning">*</span> ] 
+			are used as markers located in the vicinity of the regulatory region.<br>
+			They have not been shown to be regulated by the associated sequence.
+		</div>
+		};
 	foreach my $complex (@tfcomplexes) {
-	    $bg_color = 0;
-	    my $tfid=$complex->dbid;
-	    my $tfproj=$dbh->get_project_name('funct_tf',$tfid);
-	    if (grep(/^$tfproj$/,@excluded_proj)) {
-		next;
-	    }
-
-	    $tfcount++;
-
-	    my $tf_name=$complex->name;
-	    my $pazartfid=write_pazarid($tfid,'TF');
-# 	    my $tfname_s=$tf_name;
-# 	    $tfname_s=~s/\//-/g;
-# 	    print "<input type='hidden' name='accn' value='$tfname_s'";
-	    my $file="$pazarhtdocspath/tmp/".$pazartfid.".fa";
-	    open (TMP, ">$file");
-
-	    my @classes = ();
-	    my @families = ();
-	    my @transcript_accessions = ();
-	    my $species;
-	    while (my $subunit=$complex->next_subunit) {
-		my $class=!$subunit->get_class?'-':$subunit->get_class;
-		my $fam=!$subunit->get_fam?'-':$subunit->get_fam;
-		push(@classes,$class);
-		push(@families,$fam);
-		my $tr_accn=$subunit->get_transcript_accession($dbh);
-		unless ($species) {
-		    my @ens_coords = $ensdb->get_ens_chr($tr_accn);
-		    $ens_coords[5]=~s/\[.*\]//g;
-		    $ens_coords[5]=~s/\(.*\)//g;
-		    $ens_coords[5]=~s/\.//g;
-		    $species = $ensdb->current_org();
-		    $species = ucfirst($species);
+		$bg_color = 0;
+		my $tfid = $complex->dbid;
+		my $tfproj = $dbh->get_project_name("funct_tf", $tfid);
+		if (grep(/^$tfproj$/, @excluded_proj) ) {
+			next;
 		}
-		my $ensspecies=$species;
-		$ensspecies=~s/ /_/g;
-		my $link_tr_accn="<a href=\"http://www.ensembl.org/$ensspecies/geneview?gene=$tr_accn\" target='enswin' onClick=\"window.open('about:blank','enswin');\">$tr_accn</a>";
-		push(@transcript_accessions, $link_tr_accn);
-	    }
-	    unless ($species) { $species='-';}
-	    my $traccns=join('<br>',@transcript_accessions);
-	    my $trclasses=join('<br>',@classes);
-	    my $trfams=join('<br>',@families);
+		$tfcount++;
+		my $tf_name = $complex->name;
+		my $pazartfid = write_pazarid($tfid, "TF");
+		my $file = "$pazarhtdocspath/tmp/" . $pazartfid . ".fa";
+		open(TMP, ">$file");
+		my @classes               = ();
+		my @families              = ();
+		my @traccs = ();
+		my $species;
+		while (my $subunit = $complex->next_subunit) {
+			my $class = !$subunit->get_class ? "-" : $subunit->get_class;
+			my $fam   = !$subunit->get_fam   ? "-" : $subunit->get_fam;
+			push(@classes,  $class);
+			push(@families, $fam);
+			my $tr_accn = $subunit->get_transcript_accession($dbh);
+			unless ($species) {
+				my @enco = $ensdb->get_ens_chr($tr_accn);
+				$enco[5] =~ s/\[.*\]//g;
+				$enco[5] =~ s/\(.*\)//g;
+				$enco[5] =~ s/\.//g;
+				$species = $ensdb->current_org();
+				$species = ucfirst($species);
+			}
+			my $ensspecies = $species;
+			$ensspecies =~ s/ /_/g;
+			my $link_tr_accn = qq{<a href="http://www.ensembl.org/$ensspecies/Gene/Idhistory?db=core;t=$tr_accn" 
+				target="enswin" onClick="window.open('about:blank','enswin');">$tr_accn</a>};
+			push(@traccs, $link_tr_accn);
+		}
+		unless ($species) { $species = "-"; }
+		my $traccns = join(" ", @traccs);
+		my $tfclass = join(" ", @classes);
+		my $trfamil = join(" ", @families);
+		my $tf_editable = "false";
+		my $tfsth = &select($dbh, "select project_id from funct_tf where funct_tf_id=" . $tfid);
+		my $tfresultshref = $tfsth->fetchrow_hashref;
+		my $tf_projid = $tfresultshref->{"project_id"};
+		my $tf_name_edit = "";
+		if ($loggedin eq "true") {
+			foreach my $proj (@projids) {
+				if ($proj == $tf_projid) {
+					$tf_editable = "true";
+				}
+			}
+			if ($tf_editable eq "true") {
+				$tf_name_edit = qq{
+					<div class="p5to">
+					<span class="txt-ora b">Editing options: </span> 
+					<input type="button" name="tfnameupdatebutton" value="Update TF name" onclick="window.open('$pazar_cgi/updatetfname.pl?mode=form&pid=$tf_projid&tfid=$tfid');"></div>};
+			}
+		}
+		my $dp = qq{
+			<a name="$pazartfid"></a>
+			<h3><div class="float-r"><a href="#top" class="ns">back to top</a></div><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid&excluded=$excluded">$tf_name</a> in the <a href="$pazar_cgi/project.pl?project_name=$tfproj">$tfproj</a> project<div class="clear-l"></div></h3>
+			<div class="p20lo p40bo"><div>
+				<div>Species: <span class="b">$species</span></div>
+				<div>PAZAR TF ID: <span class="b"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid&excluded=$excluded">$pazartfid</a></span></div>
+				<div>Transcript accession: <span class="b">$traccns</span></div>
+				<div>Class and family: <span class="b">$tfclass $trfams</span></div>
+				<div>$tf_name_edit</div>
+				<div id="Hidden$pazartfid\_$tf_projid" class="hide">$tf_name</div>};
+		my $dc;
 
+		if (!$complex->{targets}) {
+			$dc .= qq{<div class="emp">No target could be found for this transcription factor.</div>};
+			next;
+		}
+		my $count = 0;
+		my @rsids;
+		my @coids;
+		my ($bigrow,$smlrow);
+		my $dh;
+		while (my $site = $complex->next_target) {
+			my $type = $site->get_type;
+			if ($type eq "matrix") {
+				next;
+			} elsif ($type eq "reg_seq") {
+				my $rsid = $site->get_dbid;
+				if (grep /^$rsid$/, @rsids) { next; }
+				push @rsids, $rsid;
+				my $id = write_pazarid($rsid, "RS");
+				my $seqname = !$site->get_name ? "" : $site->get_name;
+				my $reg_seq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,
+					$site->get_dbid);
+				my $gid = $reg_seq->PAZAR_gene_ID;
+				my $gidprefix = "GS";
+				my $asterisk  = "";
+				my $genetype  = $reg_seq->gene_type;
+				if ($genetype eq "marker") {
+					$gidprefix = "MK";
+					$asterisk  = qq{<span class="warning">*</span>};
+				}
+				my $pazargeneid = write_pazarid($gid, $gidprefix);
+				my $gene_accession = $reg_seq->gene_accession;
+				my @enco =
+				  $ensdb->get_ens_chr($reg_seq->gene_accession);
+				$enco[5] =~ s/\[.*\]//g;
+				$enco[5] =~ s/\(.*\)//g;
+				$enco[5] =~ s/\.//g;
+				my $species = $ensdb->current_org();
+				$species = ucfirst($species) || "-";
+				$seqcounter++;
+				$count++;
+				
+				my $rs_binomial_species = $reg_seq->binomial_species;
+				my $rs_assembly = $reg_seq->seq_dbassembly;
+				my $rs_chromosome = $reg_seq->chromosome;
+				my $rs_dbname = $reg_seq->seq_dbname;
+				my $rs_start = &pnum($reg_seq->start);
+				my $rs_break = &pnum($reg_seq->end);
+				my $uc_start = $reg_seq->start;
+				my $uc_break = $reg_seq->end;
+				my $rs_strand = $reg_seq->strand;
+				my $rs_site = $site->get_seq;
+				my $rs_gene = $enco[5];
+				my $rs_seq = chopstr($rs_site,20);
+				$rs_strand = "&ndash;" if $rs_strand eq "-";
+				if (length($seqname) > 10) {
+					$seqname =~ s/\'/\&\#39\;/g;
+					$seqname = qq{<div onclick="popup(this,'$seqname','rt');" class="popup">} . substr($seqname,0,8) . "..." . qq{</div>};
+				}
+				if (length($rs_gene) > 16) {
+					$rs_gene =~ s/\'/\&\#39\;/g;
+					$rs_gene = qq{<div onclick="popup(this,'$rs_gene','rt');" class="popup">} . substr($rs_gene,0,14) . "..." . qq{</div>};
+				}
+				my $big_coord = qq{chr$rs_chromosome:$rs_start-$rs_break ($rs_strand)<div class="small">[$rs_dbname $rs_assembly]</div>};
+				my $sml_coord = qq{chr$rs_chromosome:$rs_start-$rs_break ($rs_strand)};
+				my $link_ucsc = qq{href="$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=$rs_chromosome&start=$uc_start&end=$uc_break&species=$rs_binomial_species&excluded=$excluded" target="_blank"};
+				my $link_embl = qq{href="$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=$rs_chromosome&start=$rs_start&end=$rs_break&species=$rs_binomial_species&excluded=$excluded" target="_blank"};
+				my $rs_checkb = qq{<input type="checkbox" name="seq$seqcounter" value="$rs_site">};
+				my $rs_bgco = qq{style="background-color:$colors{$bg_color};"};
+				my $rs_set = substr($rs_site,0,10);
+				my $rs_ses = substr($rs_site,0,10);
+				my $rs_seqlen = length($rs_site);
+				if ($rs_seqlen > 10) {
+					$rs_seqlen = &pnum($rs_seqlen);
+					$rs_set .= "... ($rs_seqlen&nbsp;bp)";
+					$rs_ses .= "...";
+				}
+				my $seq_reg = qq{<div class=""><div onclick="popup(this,'$rs_seq','st');" class="popup">$rs_set</div></div>};
+				my $seq_sml = qq{<div class=""><div onclick="popup(this,'$rs_seq','st');" class="popup">$rs_ses</div></div>};
+				$bigrow .= qq{
+					<tr class="genomic" $rs_bgco>
+						<td class="btc"><div>$rs_checkb</div></td>
+						<td class="btc"><div>Genomic</div></td>
+						<td class="btc"><div><a href="$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded" class="b">$id</a><br>$seqname</div></td>
+						<td class="btc"><div>$asterisk<a href="$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded" class="b">$pazargeneid</a> 
+							<div class="b">$rs_gene</div>$species</div></td>
+						<td class="btc">$seq_reg</td>
+						<td class="btc"><div><div class="b">Coordinates:</div>$big_coord</div></td>
+						<td class="btc"><div class="p5to"><a $link_ucsc ><img src="$pazar_html/images/ucsc_logo.png" alt="Go to UCSC Genome Browser"></a> 
+							<a $link_embl ><img src="$pazar_html/images/ensembl_logo.gif" alt="Go to EnsEMBL Genome Browser"></a></div></td>
+					</tr>};
 
-my $tf_editable = "false";
-#make gene name editable if page viewed by project member
+				$smlrow .= qq{
+					<tr class="genomic" $rs_bgco>
+						<td class="btc"><div>$rs_checkb</div></td>
+						<td class="btc"><div>Genomic</div></td>
+						<td class="btc"><div><a href="$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded" class="b">$id</a></div></td>
+						<td class="btc"><div>$asterisk<a href="$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded" class="b">$pazargeneid</a></div></td>
+						<td class="btc">$seq_sml</td>
+						<td class="btc"><div>$sml_coord</div></td>
+						<td class="btc"><div><a $link_ucsc>UCSC</a> <a $link_embl >Ensembl</a></div></td>
+					</tr>};
+				
+				$dh = 1;
 
-#determine the project that this tf belongs to
+			} elsif ($type eq "construct") {
 
-my $tfsth = &select($dbh,"select project_id from funct_tf where funct_tf_id=".$tfid);
-#$geneName = $geneName . "gene id: ".$pazargeneid;
+				my $coid = $site->get_dbid;
+				if (grep /^$coid$/, @coids) { next; }
+				push @coids, $coid;
+				my $id = write_pazarid($coid,"CO");
+				my $seqname = $site->get_name == 0 ? "" : $site->get_name;
+				my $desc = $site->get_desc || qq{(no description provided)};
+				$seqcounter++;
+				$count++;
+				my $rs_site = $site->get_seq;
+				my $rs_chps = chopstr($rs_site,20);
+				my $rs_shrt = substr($rs_site,0,10);
+				my $rs_shrs = substr($rs_site,0,10);
+				my $rs_leng = length($rs_site);
+				my $rs_bgco = qq{style="background-color:$colors{$bg_color};"};
+				$seqname = substr($seqname,0,8) . "..." if length($seqname) > 10;
+				my $rs_checkb = qq{<input type="checkbox" name="seq$seqcounter" value="$rs_site">};
+				
+				if ($rs_leng > 10) {
+					$rs_leng = &pnum($rs_leng);
+					$rs_shrt .= "... ($rs_leng&nbsp;bp)";
+					$rs_shrs .= "...";
+				}
+				
+				my $seq_reg = qq{<div class=""><div onclick="popup(this,'$rs_chps','st');" class="popup">$rs_shrt</div></div>};
+				my $seq_sml = qq{<div class=""><div onclick="popup(this,'$rs_chps','st');" class="popup">$rs_shrs</div></div>};
 
-my $tfresultshref = $tfsth->fetchrow_hashref;
+				if (length($desc) > 28) {
+					$desc =~ s/\'/\&\#39\;/g;
+					$desc = qq{<div onclick="popup(this,'$desc','rt');" class="popup">} . substr($desc,0,26) . "..." . qq{</div>};
+				}
 
-my $tf_projid = $tfresultshref->{"project_id"};
+				$bigrow .= qq{
+					<tr class="construct" $rs_bgco >
+						<td class="btc"><div>$rs_checkb</div></td>
+						<td class="btc"><div>Artificial</div></td>
+						<td class="btc"><div><div class="b">$id</div>$seqname</div></td>
+						<td class="btc"><div>-</div></td>
+						<td class="btc">$seq_reg</td>
+						<td class="btc"><div><div class="b">Description:</div>$desc</div></td>
+						<td class="btc"><div>&nbsp;</div></td>
+					</tr>};
 
+				$smlrow .= qq{
+					<tr class="construct" $rs_bgco >
+						<td class="btc"><div>$rs_checkb</div></td>
+						<td class="btc"><div>Artificial</div></td>
+						<td class="btc"><div class="b">$id</div></td>
+						<td class="btc"><div>-</div></td>
+						<td class="btc">$seq_sml</td>
+						<td class="btc"><div>$desc</div></td>
+						<td class="btc"><div>&nbsp;</div></td></tr>};
+				
+				$dh = 1;
 
-#print hidden table to store original TF name for passing to ajax javascript function
-print "<div id=\"HiddenSummaryTable$pazartfid\_$tf_projid\" style=\"visibility:hidden\">$tf_name</div>";
-
-
-if ($loggedin eq 'true') {
-
-#determine the project that this tf belongs to
-
-	foreach my $proj (@projids) {
-	#see if $proj is the same as the sequence or if my userid is same as sequence user_id
-	if($proj == $tf_projid)
-	{
-		#gene name is editable
-		$tf_editable = "true";
-	}
-    }
-
-
-if($tf_editable eq "true")
-{
-	$tf_name = "<div id =\"ajaxtfname\">".$tf_name."</div><input type=\"button\" name=\"tfnameupdatebutton\" value=\"Update TF Name\" onClick=\"javascript:window.open('updatetfname.pl?mode=form&pid=$tf_projid&tfid=".$tfid."');\">";
-}
-
-}
-
-
-
-print<<COLNAMES;
-<a href='#top'>Back to top</a><a name='$pazartfid'></a>
-<table id="HeadSummaryTable$pazartfid\_$tf_projid" class="summarytable">
-<tr><td class="tftabletitle"><span class="title4">Species</span></td><td class="basictd">$species</td></tr>
-<tr><td class="tftabletitle"><span class="title4">TF Name</span></td><td class="basictd">$tf_name</td></tr>
-<tr><td class="tftabletitle"><span class="title4">PAZAR TF ID</span></td><td class="basictd"><a href="$pazar_cgi/tf_search.cgi?geneID=$pazartfid&excluded=$excluded">$pazartfid</a></td></tr>
-<tr><td class="tftabletitle"><span class="title4">Transcript Accession</span></td><td class="basictd">$traccns</td></tr>
-<tr><td class="tftabletitle"><span class="title4">Class</span></td><td class="basictd">$trclasses</td></tr>
-<tr><td class="tftabletitle"><span class="title4">Family</span></td><td class="basictd">$trfams</td></tr>
-<tr><td class="tftabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$tfproj">$tfproj</a></td></tr>
-COLNAMES
-
-=pod
-if($tf_editable eq "true")
-{
-    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This TF\" onClick=\"confirm_entry(".$tfid.")\"></td></tr>";
-}
-=cut
-
-print "</table>";
-
-    print "<p><i><span class='warning'>*</span>Genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the associated sequence.</i></p>";
-print "<br>";
-
-########### start of binding sites HTML table
-
-	    if (!$complex->{targets}) {
-		print "<span class='red'>No target could be found for this TF!</span><br><br><br><br>\n";
-		next;
-	    }
-	    my $count = 0;
-	    my @rsids;
-	    my @coids;
-            my $bigrow;
-            my $smlrow;
-	    while (my $site=$complex->next_target) {
-		my $type=$site->get_type;
-		if ($type eq 'matrix') {next;}
-		if ($type eq 'reg_seq') {
-		    my $rsid=$site->get_dbid;
-		    if (grep/^$rsid$/,@rsids) {next;}
-		    push @rsids, $rsid;
-		    my $id=write_pazarid($rsid,'RS');
-		    my $seqname=!$site->get_name?'':$site->get_name;
-		    my $reg_seq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$site->get_dbid);
-		    my $gid=$reg_seq->PAZAR_gene_ID;
-
-			#check whether the gene is a marker or not
-			my $gidprefix = 'GS';
-			my $asterisk = "";
-			my $genetype = $reg_seq->gene_type;
-			if($genetype eq "marker")
-			{
-			        $gidprefix = "MK";
-			        $asterisk = "<span class='warning'>*</span>";
 			}
 
-		    my $pazargeneid = write_pazarid($gid,$gidprefix);
-		    my $gene_accession=$reg_seq->gene_accession;
-		    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
-		    $ens_coords[5]=~s/\[.*\]//g;
-		    $ens_coords[5]=~s/\(.*\)//g;
-		    $ens_coords[5]=~s/\.//g;
-		    my $species = $ensdb->current_org();
-		    $species = ucfirst($species)||'-';
-		    $seqcounter++;
-		    $count++;
-		    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
-		    my $sml_coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")";
-		    my $longer;
-		    if (length($site->get_seq)> 35) {
-			$longer='...';
-		    }
-
-		    $bigrow.= "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Genomic<br>Sequence</div></td>";
-		    $smlrow.= "<tr class=\"genomic\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'>Genomic</div></td>";
-		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a><br>$seqname</div></td>";
-		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><a href=\"$pazar_cgi/seq_search.cgi?regid=$rsid&excluded=$excluded\">".$id."</a></div></td>";
-		    $bigrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$asterisk<a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded\">".$pazargeneid."</a><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</div></td>";
-		    $smlrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>$asterisk<a href=\"$pazar_cgi/gene_search.cgi?geneID=$pazargeneid&excluded=$excluded\">".$pazargeneid."</a></div></td>";
-		    $bigrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
-		    $smlrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div>".substr($site->get_seq,0,35)."$longer</div></td>";
-		    $bigrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>".$coord."</div></td>";
-		    $smlrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>".$sml_coord."</div></td>";
-		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ucsc_logo.png' alt='Go to UCSC Genome Browser'></a><br><br>";
-		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ucsc&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'>UCSC</a> ";
-		    $bigrow.= "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'><img src='$pazar_html/images/ensembl_logo.gif' alt='Go to EnsEMBL Genome Browser'></a>";
-		    $smlrow.= "<a href=\"$pazar_cgi/gff_custom_track.cgi?resource=ensembl&chr=".$reg_seq->chromosome."&start=".$reg_seq->start."&end=".$reg_seq->end."&species=".$reg_seq->binomial_species."&excluded=$excluded\" target='_blank'>EnsEMBL</a>";
-		    $bigrow.= "</div></td>";
-		    $smlrow.= "</div></td>";		}
-
-		if ($type eq 'construct') {
-		    my $coid=$site->get_dbid;
-		    if (grep/^$coid$/,@coids) {next;}
-		    push @coids, $coid;
-		    my $id=write_pazarid($coid,'CO');
-		    my $seqname=$site->get_name==0?'':$site->get_name;
-		    my $desc=$site->get_desc||'-';
-		    $seqcounter++;
-		    $count++;
-		    $bigrow.= "<tr class=\"construct\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial<br>Sequence</div></td>";
-		    $smlrow.= "<tr class=\"construct\"><td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><input type='checkbox' name='seq$seqcounter' value='".$site->get_seq."'><br>Artificial</div></td>";
-		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>".$id."</b><br>$seqname</div></td>";
-		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div><b>".$id."</b></div></td>";
-		    $bigrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
-		    $smlrow.= "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>-</div></td>";
-		    $bigrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".chopstr($site->get_seq,40)."</div></td>";
-		    $smlrow.= "<td width='300' class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div>".substr($site->get_seq,0,35)."$longer</div></td>";
-		    $bigrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Description:</b><br>".$desc."</div></td>";
-		    $smlrow.= "<td width='300' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div>".$desc."</div></td>";
-		    $bigrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
-		    $smlrow.= "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\">&nbsp</td>";
+			my $construct_name = $pazartfid . "_site" . $count;
+			print TMP ">" . $construct_name . "\n";
+			my $construct_seq = $site->get_seq;
+			$construct_seq =~ s/N//ig;
+			print TMP $construct_seq . "\n";
+			$bg_color = 1 - $bg_color;
 		}
-		$bigrow.= "</tr>";
-		$smlrow.= "</tr>";
+		my $showhide_1 = "show";
+		my $showhide_2 = "hide";
+		if ($count > 40) {
+			$showhide_1 = "hide";
+			$showhide_2 = "show";
+		}
+		$dc .= qq{
+			<div class="tr p5bo">
+				<span class="b">View</span> <input type="button" href="#$pazartfid" onClick="toggleRows('list$pazartfid','1','2');" value="more detail"> 
+				<input type="button" href="#$pazartfid" onClick="toggleRows('list$pazartfid','2','2');" value="less detail">
+			</div>
+			<div id="desc$pazartfid\_$tf_projid" name="desc$pazartfid\_$tf_projid" class="seqTableDiv">
+				<div id="1_list$pazartfid" class="$showhide_1">
+					<table id="$pazartfid\_$tf_projid" class="evidencetableborder tblw">
+						<tbody><tr>
+							<td class="tfdst w30">&nbsp;</td>
+							<td class="tfdst w70">Seq type</td>
+							<td class="tfdst w80">Seq ID</td>
+							<td class="tfdst">Target gene</td>
+							<td class="tfdst w110">Sequence</td>
+							<td class="tfdst w210">Sequence info</td>
+							<td class="tfdst w90">Links</td>
+						</tr>
+						$bigrow
+						</tbody>
+					</table>
+				</div>
+				<div id="2_list$pazartfid" class="$showhide_2">
+					<table id="sml$pazartfid\_$tf_projid" class="evidencetableborder tblw">
+						<tbody><tr>
+							<td class="tfdst w30">&nbsp;</td>
+							<td class="tfdst w70">Seq type</td>
+							<td class="tfdst w80">Seq ID</td>
+							<td class="tfdst">Target gene</td>
+							<td class="tfdst w110">Sequence</td>
+							<td class="tfdst w210">Sequence info</td>
+							<td class="tfdst w90">Links</td>
+						</tr>
+						$smlrow
+					</tbody></table>
+				</div>
+			</div>};
 
-		my $construct_name=$pazartfid."_site".$count;
-		print TMP ">".$construct_name."\n";
-		my $construct_seq=$site->get_seq;
-		$construct_seq=~s/N//ig;
-		print TMP $construct_seq."\n";
-                $bg_color = 1 - $bg_color;
-            }
-            
-            my $showhide_1="show";
-            my $showhide_2="hide";
-            if ($count > 40) {
-		$showhide_1="hide";
-		$showhide_2="show";
-	    }
-
-print<<SITE_TABLE;	    
-        <a href="#$pazartfid" onClick="toggleRows('list$pazartfid','1','2')">More sequence details</a><span>&nbsp&nbsp&nbsp</span> 
-	<a href="#$pazartfid" onClick="toggleRows('list$pazartfid','2','2')">Less sequence details</a>
-
-        <div id="desc$pazartfid\_$tf_projid" name="desc$pazartfid\_$tf_projid" class="seqTableDiv">
-
-	<div id="1_list$pazartfid" class="$showhide_1">
-        <table id="SummaryTable$pazartfid\_$tf_projid" class="evidencetableborder"><tr>
-        <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
-        <td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>
-        <td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>
-        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>
-        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>
-        <td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>
-        </tr>
-        $bigrow
-        </table><br>
-        </div>
-
-	<div id="2_list$pazartfid" class="$showhide_2">
-        <table id="smlSummaryTable$pazartfid\_$tf_projid" class="evidencetableborder"><tr>
-        <td width="100" class="tfdetailstabletitle"><span class="title4">Sequence Type</span></td>
-        <td class=\"tfdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallbold\">click an ID to enter Sequence View</span></td>
-        <td width='150' class=\"tfdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallbold\">click an ID to enter Gene View</span></td>
-        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence</span></td>
-        <td width='300' class=\"tfdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>
-        <td width='100' class=\"tfdetailstabletitle\"><span class=\"title4\">Display Genomic Context</span></td>
-        </tr>
-        $smlrow
-        </table></div><br>
-
-        </div>
-
-SITE_TABLE
-
- 
-print<<Select_buttons;
-<input type="button" name="selectall" id="selectall" value="Select all" onclick="selectallseq('SummaryTable$pazartfid\_$tf_projid');">
-<input type="button" name="selecttype1" id="selecttype1" value="Select genomic sequences" onclick="selectbytype('SummaryTable$pazartfid\_$tf_projid','genomic');">
-<input type="button" name="selecttype2" id="selecttype2" value="Select artificial sequences" onclick="selectbytype('SummaryTable$pazartfid\_$tf_projid','construct');">
-<input type="button" name="resetall" id="resetall" value="Reset" onclick="resetallseq('SummaryTable$pazartfid\_$tf_projid');"><br><br>
-Select_buttons
- 
-	    close (TMP);
-
-	    if ($count<2) {
-		print "<div id='memediv".$pazartfid."_".$tf_projid."' name='memediv".$pazartfid."'>Cannot be generated</div><br><br><br><br>\n";
-		next;
-	    } else {
-	    	#Ajax call, no callback func defined for now
-	    	print "<input type='button' name='Generate PFM' value='Generate PFM with selected sequences' onclick=\"ajaxcall('SummaryTable".$pazartfid."_".$tf_projid."','memediv".$pazartfid."_".$tf_projid."')\">&nbsp&nbsp(from $pazartfid only; see bottom of the page to combine sequences from multiple TFs)<br><br>
-	    		<div id='memediv".$pazartfid."_".$tf_projid."' name='memediv".$pazartfid."_".$tf_projid."'>Not generated</div><br><br>";
-=non-ajax
-		my $patterngen =
-		    TFBS::PatternGen::MEME->new(-seq_file=> "$file",
-						-binary => 'meme',
-						-additional_params => '-revcomp -mod oops');
-		my $pfm = $patterngen->pattern(); # $pfm is now a TFBS::Matrix::PFM object
-		if (!$pfm) {
-		    print "<span class='red'>No motif could be found!<br>Try running the motif discovery again with a sub-selection of sequences.</span><br><br><br><br>\n";
-		    next;
+		close(TMP);
+		if ($count < 2) {
+			$dc .= qq{
+				<div id="memediv$pazartfid\_$tf_projid">
+					<div class="emp">A logo for this TF could not be generated because there are less than two sequences present.</div>
+				</div>
+				};
 		} else {
-#print a human readable format of the matrix
-		    my $prettystring = $pfm->prettyprint();
-		    my @matrixlines = split /\n/, $prettystring;
-		    $prettystring = join "<BR>\n", @matrixlines;
-		    $prettystring =~ s/ /\&nbsp\;/g;
-		    print "<table bordercolor='white' bgcolor='white' border=1 cellspacing=0 cellpadding=10><tr><td><span class=\"title4\">Position Frequency Matrix</span></td><td><SPAN class=\"monospace\">$prettystring</SPAN></td></tr>";
-#draw the logo
-		    my $logo = $pazartfid.".png";
-		    my $gd_image = $pfm->draw_logo(-file=>"$pazarhtdocspath/tmp/".$logo, -xsize=>400);
-		    print "<tr><td><span class=\"title4\">Logo</span></td><td><img src=\"$pazar_html/tmp/$logo\">";
-		    print "<p class=\"small\">These PFM and Logo were generated dynamically using the MEME pattern discovery algorithm.</p></td></tr>\n";
-		    print "</table><br><br><br><br>\n";
-########### end of HTML table
+			$dc .= qq{
+				<div class="p10 bg-lg">
+					<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
+					<div class="p5bo">
+						<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid\_$tf_projid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid\_$tf_projid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid\_$tf_projid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid\_$tf_projid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid\_$tf_projid','memediv$pazartfid\_$tf_projid');">
+					</div>
+					<div id="memediv$pazartfid\_$tf_projid">Not generated</div>
+					<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
+				</div>};
 		}
-=cut
-	    }
+		if ($dh == 1) {
+			print $dp . $dc;
+		} else {
+			print $dp . qq{<div class="hide">$dc</div><div class="p10to"><div class="emp">There is no sequence data for this TF in this project.</div></div>};
+		}
+		print qq{</div></div>};
 	}
-    
-
-    if ($tfcount==0) {
-	print "<p><b>Projects excluded from the search:</b> $excluded</p><h3>No annotation could be found for the Transcription Factor $accn!<br>Do not hesitate to create your own project and enter information about this TF or any other TF!</h3>";
-	exit;
-    }
-
-####hidden form inputs
-    print "<hr color='black'><span class=\"title2\">You can recalculate matrix and logo based on all selected sequences on this page (combining multiple TFs)<br>by clicking here&nbsp&nbsp</span>";
-    print "<input type='button' value='Generate PFM' onClick=\"multiTF('allSeqPFM');\"><br>";
-    print "</form>"; ####end of form
-print '<div id="allSeqPFM" name="allSeqPFM"><span class="red">No matrix built yet!</span></div>'; 
+	if ($tfcount == 0) {
+		print qq{
+			<div class="p10bo"><span class="b">Projects excluded from the search:</span> $excluded</div>
+			<div class="emp">No annotation could be found for the transcription factor $accn. 
+			Please do not hesitate to create your own project and enter information about this TF or any other TF.</div>};
+			&exitscr();
+	}
+	print qq{
+		<h2>Custom matrix</h2>
+		<div class="p20lo">
+			<div class="p10 bg-lg">
+				<div class="p10bo">You can recalculate matrix and logo based on select sequences on this page. You can also combine multiple TFs. First, select your sequences using the checkboxes that appear to the left of the sequences. Then, click on the <span class="b">Generate PFM</span> button. <input type="button" value="Generate PFM" onclick="multiTF('allSeqPFM');"></div>
+				<div id="allSeqPFM" name="allSeqPFM"><div class="emp">No matrix built yet.</div></div>
+			</div>
+		</div>};
 }
+print qq{</div>};
 
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => 'tail.tmpl');
-print $template_tail->output;
+sub exitscr {}
 
-#split long lines into several smaller ones by inserting a line break at a specified character interval
-#parameters: string to break up, interval
 sub chopstr {
-
-    my $longstr = $_[0];
-    my $interval = $_[1];
-    my $newstr = "";
-
-    while(length($longstr) > $interval)
-    {
-#put line break at character+1 position
-	$newstr = $newstr.substr($longstr,0,$interval)."<br>";
-	$longstr = substr($longstr,$interval); #return everything starting at interval'th character	
-    }
-    $newstr = $newstr . $longstr;
-
-    return $newstr;
+	my ($longstr,$intervl) = @_;
+	my $newstr = "";
+	while (length($longstr) > $intervl) {
+		$newstr = $newstr . substr($longstr, 0, $intervl) . "<br>";
+		$longstr = substr($longstr, $intervl);
+	}
+	$newstr = $newstr . $longstr;
+	return $newstr;
 }
-
 
 sub select {
-
-    my ($dbh, $sql) = @_;
-    my $sth=$dbh->prepare($sql);
-    $sth->execute or die "$dbh->errstr\n";
-    return $sth;
+	my ($dbh,$sql) = @_;
+	my $sth = $dbh->prepare($sql);
+	$sth->execute or die "$dbh->errstr\n";
+	return $sth;
 }
 
 sub write_pazarid {
-    my $id=shift;
-    my $type=shift;
-    my $id7d = sprintf "%07d",$id;
-    my $pazarid=$type.$id7d;
-    return $pazarid;
+	my ($id,$type) = @_;
+	my $id7d = sprintf "%07d", $id;
+	my $pzid = $type . $id7d;
+	return $pzid;
 }
+
+my $tail = HTML::Template->new(filename => "tail.tmpl");
+print $tail->output;
+
+exit;

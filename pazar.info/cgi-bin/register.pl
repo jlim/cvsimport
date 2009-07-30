@@ -310,5 +310,5 @@ Page_Done
 }
 
 # print out the html tail template
-my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
-print $template_tail->output;
+my $temptail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
+print $temptail->output;

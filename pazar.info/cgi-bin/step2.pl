@@ -1,326 +1,176 @@
 #!/usr/bin/perl
 
 use HTML::Template;
-
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
-# open the html header template
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
-
-# fill in template parameters
-$template->param(TITLE => 'PAZAR XML writing Step 2');
+my $temptail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
+$template->param(TITLE => "Step 2 - Capturing information | PAZAR XML format | PAZAR");
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
 
-# send the obligatory Content-Type and print the template output
+require "$pazarcgipath/getsession.pl";
+if ($loggedin eq "true") {
+	$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> <a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});
+} else {
+	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
+}
+
 print "Content-Type: text/html\n\n", $template->output;
+print qq{
+	<div class="docp">
+		<div class="float-r b txt-grey">PAZAR Documentation</div>
+		<a href="$pazar_cgi/dataformats.pl" class="b">Data formats</a> &raquo; <a href="$pazar_cgi/xml.pl" class="b">PAZAR XML format</a> &raquo; Step-by-step documentation
+		<div class="clear-r"></div>
+	</div>
+	<h1>PAZAR XML format</h1>
+	<h2>Step 2 &mdash; Capturing the regulatory sequence and (or) TF basic information</h2>
+	<div class="">
+		<p>Once the project element has been defined (<a href="$pazar_cgi/step1.pl">see Step 1</a>), you are ready to enter sequence and transcription factor information. These will be entered within the "data" element, which is a child element within the "pazar" element.</p>
+		
+		<h3>2.0. Initialization</h3>
+		<div class="p20lo">
+			<p>The "data" element stores all the annotations separately. They will be linked together later in the "analysis" element (<a href="$pazar_cgi/step3.pl">see Step 3</a>). First the "data" element has to initialized:</p>
+			<div class="p5bo">
+				<div class="p5 bg-lg monospace b">&nbsp;&nbsp;&lt;data&gt;</div>
+			</div>
+			<p>Then, different type of annotations can be inserted:</p>
+			<ul>
+				<li><a href="#Regulatory_Sequence_for_specific_gene">Regulatory sequence for a specific gene</a></li>
+				<li><a href="#Regulatory_Sequence_without_gene_info">Regulatory sequence without any gene information</a></li>
+				<li><a href="#Transcription_Factor">Transcription factor</a></li>
+				<li><a href="#Artificial_sequence">Artificial sequence or a sequence that is not attached to genomic coordinates</a></li>
+			</ul>
+		</div>
+		<h3>
+			<div class="float-r"><a href="#Step2_TOP">Back to top</a></div>
+			<a name="Regulatory_Sequence_for_specific_gene"></a>2.1. Annotating a regulatory sequence for a specific gene
+		</h3>
+		<div class="p20lo">
+			<p>The "reg_seq" is embedded within "tsr" and "gene_source" elements. The "gene_source" element informs about the gene accession number. The "tsr" element describes the transcription start region based on the observation that transcription does not always start at exactly the same nucleotide (however, a unique start site can be described by inserting the same value in fuzzy_start and fuzzy_end).</p>
+			<p>Thus, if a gene has two alternative promoters, each of which can be described with a different "tsr" element within the "gene_source" element, different regulatory sequences can be associated with each "tsr".</p>
 
-print<<page;
-          <span class="title1">PAZAR - XML format</span><br>
-          <span class="title2">Step-by-Step Documentation</span><br><br>
-          <p class="title3"><a name="Step2_TOP"></a>Step2: Capturing the regulatory sequence and/or TF basic information</p>
-      <div style="text-align: justify;">Once the project
-element has been defined (<a href="$pazar_cgi/step1.pl">see Step 1</a>), you are ready to enter sequence
-and transcription factor information. These will be entered within the
-'data' element, which is a child element within the 'pazar' element.
-      <br>
-      <br>
+			<div class="p5bo"><div class="p10 bg-lg monospace b">
+				<div>&lt;gene_source db_accn="<span class="red">ENSG00000133256</span>" description="<span class="red">PDE6B</span>" pazar_id="<span class="red">gs_0001</span>"&gt;</span></div>
+				<div class="p10lo">&lt;db_source db_name="<span class="red">EnsEMBL</span>" assembly="<span class="red">37_35j</span>"/&gt;</div>
+				<div class="p10lo">&lt;tsr fuzzy_end="<span class="red">609373</span>" fuzzy_start="<span class="red">609373</span>" pazar_id="<span class="red">tsr_0001</span>"&gt;</div>
+				<div class="p20lo">&lt;reg_seq&nbsp;pazar_id="<span class="red">rs_0001</span>" quality="<span class="red">tested</span>" sequence="<span class="red">ATTTGTAGGAGTGAGTCAGCTGACCCGC</span>"&gt;</div>
+				<div class="p30lo">&lt;coordinate begin="<span class="red">609283</span>" end="<span class="red">609310</span>" length="<span class="red">28</span>" strand="<span class="red">+</span>"&gt;</div>
+				<div class="p40lo">&lt;location band="<span class="red">p16.3</span>" chr="<span class="red">4</span>" species="<span class="red">Homo sapiens</span>"&gt;</div>
+				<div class="p50lo">&lt;db_source db_name="<span class="red">EnsEMBL</span>" assembly="<span class="red">NCBI 35</span>"/&gt;</div>
+				<div class="p40lo">&lt;/location&gt;</div>
+				<div class="p30lo">&lt;/coordinate&gt;</div>
+				<div class="p20lo">&lt;/reg_seq&gt;</div>
+				<div class="p10lo">&lt;/tsr&gt;</div>
+				<div>&lt;/gene_source&gt;</div>
+			</div></div>
+		<p><span class="b">Note: replace the red values with your own information.</span> The pazar IDs are internal IDs that will not be stored. They can be anything as long as they are unique throughout the file.</p>
+	</div>
+	<h3>
+		<div class="float-r"><a href="$pazar_cgi/step2.pl#Step2_TOP">Back to top</a></div>
+		<a name="Regulatory_Sequence_without_gene_info"></a>2.2. Annotating a regulatory sequence without any gene information
+	</h3>
+	<div class="p20lo">
+		<p>The "reg_seq" element can also be embedded in a "marker" element if the gene regulated by the sequence is not defined yet. The marker can be a gene but then it is just used for location purpose and not to infer any role for the sequence on this gene.</p>
+		<div class="p5bo"><div class="p10 bg-lg monospace b"><span>&nbsp;&nbsp;&nbsp;
+&lt;marker db_accn="<span class="red">ENSG00000133256</span>"
+description="<span class="red">PDE6B</span>"
+pazar_id="<span class="red">ma_0001</span>"&gt;</span><br>
 
-      </div>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;db_source db_name="<span class="red">EnsEMBL</span>" assembly="<span class="red">37_35j</span>"/&gt;</span><br>
 
-      <span style="margin-left: 0.5in; text-decoration: underline;">2.0-
-Initialization<br>
+      <span>&nbsp;</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;reg_seq&nbsp;pazar_id="<span class="red">rs_0001</span>"
+quality="<span class="red">tested</span>"
+sequence="<span class="red">ATTTGTAGGAGTGAGTCAGCTGACCCGC</span>"&gt;</span><br>
 
-      </span>
-      <div style="text-align: justify;">The 'data' element
-stores all the annotations separately. They will be linked together
-later in the 'analysis' element (<a href="$pazar_cgi/step3.pl">see
-Step 3</a>). <br>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;coordinate begin="<span class="red">609283</span>"
+end="<span class="red">609310</span>"
+length="<span class="red">28</span>"
+strand="<span class="red">+</span>"&gt;</span><br>
 
-First the 'data' element has to initialized:<br>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;location band="<span class="red">p16.3</span>"
+chr="<span class="red">4</span>"
+species="<span class="red">Homo sapiens</span>"&gt;</span><br>
 
-      <span style="font-weight: bold;"></span><br>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;db_source db_name="<span class="red">EnsEMBL</span>" assembly="<span class="red">37_35j</span>"/&gt;</span><br>
 
-      <span style="font-weight: bold;"></span></div>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/location&gt;</span><br>
 
-      <span style="font-weight: bold;">&nbsp;&nbsp;&lt;data&gt;</span><br>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/coordinate&gt;</span><br>
 
-      <span style="margin-left: 0.5in;"><br>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/reg_seq&gt;</span><br>
 
-Then, different type of annotations can be inserted:<br>
+      <span></span><span>&nbsp;&nbsp;&nbsp;
+&lt;/marker&gt;</span></div></div>
+		<p><span class="b">Note: replace the red values with your own information.</span> The pazar IDs are internal IDs that will not be stored. They can be anything as long as they are unique throughout the file.</p>
+	</div>
 
-      </span>
-      <ul>
+	<h3>
+		<div class="float-r"><a href="$pazar_cgi/step2.pl#Step2_TOP">Back to top</a></div>
+		<a name="Transcription_Factor"></a>2.3. Annotating a transcription factor
+	</h3>
+		<div class="p20lo">
+			<p>A transcription factor is described in multiple steps. First, at the gene level: the "tf" element is embedded in both "transcript" and "gene_source" elements. Multiple "transcript" elements can be used to describe multiple isoforms of a gene. Then, at the protein level: The "funct_tf" element captures the functional protein information with as many "tf_unit" elements as there are proteins in the complex (1 for monomers, 2 for dimers, <span class="i">etc.</span>) The tf_id calls a pazar_id from a "tf" element.</p>
+			<div class="p5bo"><div class="p10 bg-lg monospace b">
+&nbsp;&nbsp;&nbsp;
+&lt;gene_source db_accn="<span class="red">ENSG00000129535</span>"
+description="<span class="red">NRL</span>"
+pazar_id="<span class="red">gs_0002</span>"&gt;</span><br>
 
-      </ul>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;db_source db_name="<span class="red">EnsEMBL</span>" assembly="<span class="red">37_35j</span>"/&gt;</span><br>
 
-      <ol>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;transcript db_accn="<span class="red">ENST00000250471</span>"
+pazar_id="<span class="red">tr_0002</span>"&gt;</span><br>
 
-        <li><a href="#Regulatory_Sequence_for_specific_gene"><span>Regulatory
-Sequence for a Specific Gene</span></a><span></span></li>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;db_source db_name="<span class="red">EnsEMBL</span>" assembly="<span class="red">37_35j</span>"/&gt;</span><br>
 
-        <li><a href="#Regulatory_Sequence_without_gene_info"><span>Regulatory
-Sequence without any gene information</span></a></li>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;tf class="<span class="red">bZIP</span>"
+family="<span class="red">MAF</span>"
+pazar_id="<span class="red">tf_0001</span>"/&gt;</span><br>
 
-        <li><a href="#Transcription_Factor"><span>Transcription
-Factor</span></a></li>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/transcript&gt;</span><br>
 
-        <li><span><a href="#Artificial_sequence">Artificial
-sequence/Sequence not attached
-to genomic coordinates</a><br>
-
-          </span></li>
-
-      </ol>
-
-      <ul>
-
-      </ul>
-
-      <span style="margin-left: 0.5in; text-decoration: underline;"><br style="text-decoration: underline;">
-
-      </span><span style="margin-left: 0.5in; text-decoration: underline;"><a name="Regulatory_Sequence_for_specific_gene">2.1 -
-Annotating a Regulatory Sequence for a Specific Gene</a></span><small><span style="margin-left: 0.1in;"> <a href="#Step2_TOP">TOP</a></span></small><span style="margin-left: 0.5in;"><br>
-
-      </span>
-      <div style="text-align: justify;"><span>The
-'reg_seq' is embedded within '</span><span>tsr'</span><span>
-and&nbsp;</span><span>'gene_source' elements.</span><span>
-The 'gene_source' element informs about the gene accession number.</span>
-The 'tsr' element describes the transcription start region based on the
-observation that transcription does not always start at exactly the same
-nucleotide (however, a unique start site can be described by inserting
-the same value in fuzzy_start and fuzzy_end).<br>
-Thus, if a gene has 2 alternative promoters, each of which can be
-described with a different 'tsr' element within the 'gene_source'
-element,&nbsp;different regulatory sequences can be associated with
-each 'tsr'.<br>
-      <br>
-      </div>
-
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;gene_source db_accn="<span style="color: rgb(255, 0, 0);">ENSG00000133256</span>"
-description="<span style="color: rgb(255, 0, 0);">PDE6B</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">gs_0001</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;db_source db_name="<span style="color: rgb(255, 0, 0);">EnsEMBL</span>" assembly="<span style="color: rgb(255, 0, 0);">37_35j</span>"/&gt;</span><br style="font-weight: bold;">
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;tsr fuzzy_end="<span style="color: rgb(255, 0, 0);">609373</span>"
-fuzzy_start="<span style="color: rgb(255, 0, 0);">609373</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">tsr_0001</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;"></span><span style="font-weight: bold;"></span><span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;reg_seq&nbsp;pazar_id="<span style="color: rgb(255, 0, 0);">rs_0001</span>"
-quality="<span style="color: rgb(255, 0, 0);">tested</span>"
-sequence="<span style="color: rgb(255, 0, 0);">ATTTGTAGGAGTGAGTCAGCTGACCCGC</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;coordinate begin="<span style="color: rgb(255, 0, 0);">609283</span>"
-end="<span style="color: rgb(255, 0, 0);">609310</span>"
-length="<span style="color: rgb(255, 0, 0);">28</span>"
-strand="<span style="color: rgb(255, 0, 0);">+</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;location band="<span style="color: rgb(255, 0, 0);">p16.3</span>"
-chr="<span style="color: rgb(255, 0, 0);">4</span>"
-species="<span style="color: rgb(255, 0, 0);">Homo sapiens</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;db_source db_name="<span style="color: rgb(255, 0, 0);">EnsEMBL</span>" assembly="<span style="color: rgb(255, 0, 0);">NCBI 35</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/location&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/coordinate&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/reg_seq&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/tsr&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
+      <span>&nbsp;&nbsp;&nbsp;
 &lt;/gene_source&gt;</span><br>
 
-      <br>
+      <span>&nbsp;&nbsp;&nbsp;
+&lt;funct_tf funct_tf_name="<span class="red">NRL</span>"
+pazar_id="<span class="red">fu_0001</span>"&gt;</span><br>
 
-      <small>Replace the red values with your own information.<br>
+      <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;tf_unit pazar_id="<span class="red">tu_0001</span>"
+tf_id="<span class="red">tf_0001</span>"/&gt;</span><br>
 
-The pazar IDs are internal IDs that will not be stored. They can be
-anything as long as they are unique throughout the file.</small><br>
+      <span>&nbsp;&nbsp;&nbsp;
+&lt;/funct_tf&gt;</div></div>
+		<p><span class="b">Note: replace the red values with your own information.</span> The pazar IDs are internal IDs that will not be stored. They can be anything as long as they are unique throughout the file.</p>
+	</div>
 
-      <br>
+	<h3>
+		<div class="float-r"><a href="$pazar_cgi/step2.pl#Step2_TOP">Back to top</a></div>
+		<a name="Artificial_sequence"></a>2.4. Annotating an artificial sequence
+	</h3>
+	<div class="p20lo">
+		<p>The "construct" element can be used to describe any sequence without specific genomic coordinates (<span class="i">e.g.</span> a synthesized oligonucleotide representing a consensus binding site).</p>
+		<div class="p5bo"><div class="p10 bg-lg monospace b">&lt;construct construct_name="<span class="red">FN-13A</span>" description="<span class="red">random oligo</span>" sequence="<span class="red">gggtgagtcagcg</span>" pazar_id="<span class="red">co_0001</span>"/&gt;</span></div></div>
+		<p><span class="b">Note: replace the red values with your own information.</span> The pazar IDs are internal IDs that will not be stored. They can be anything as long as they are unique throughout the file.</p>
+	</div>
+	<div><a href="$pazar_cgi/step1.pl" class="b">&laquo; Go to Step 1</a> &nbsp; <a href="$pazar_cgi/step3.pl" class="b">Go to Step 3 &raquo;</a></div>
+</div>};
 
-      <span style="margin-left: 0.5in; text-decoration: underline;"><a name="Regulatory_Sequence_without_gene_info">2.2 -
-Annotating a Regulatory Sequence without any gene information</a></span><small><span style="margin-left: 0.1in;"> <a href="$pazar_cgi/step2.pl#Step2_TOP">TOP</a></span></small>
-      <div style="text-align: justify;"><span>The
-'reg_seq' element can also be embedded in a 'marker' element if the
-gene regulated by the sequence is not defined yet. The marker can be a
-gene but then it is just used for location purpose and not to infer any
-role for the sequence on this gene.</span><br>
-
-      <span></span></div>
-
-      <span><br>
-
-      </span><span style="text-decoration: underline;"></span><span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;marker db_accn="<span style="color: rgb(255, 0, 0);">ENSG00000133256</span>"
-description="<span style="color: rgb(255, 0, 0);">PDE6B</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">ma_0001</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;db_source db_name="<span style="color: rgb(255, 0, 0);">EnsEMBL</span>" assembly="<span style="color: rgb(255, 0, 0);">37_35j</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;</span><span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;reg_seq&nbsp;pazar_id="<span style="color: rgb(255, 0, 0);">rs_0001</span>"
-quality="<span style="color: rgb(255, 0, 0);">tested</span>"
-sequence="<span style="color: rgb(255, 0, 0);">ATTTGTAGGAGTGAGTCAGCTGACCCGC</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;coordinate begin="<span style="color: rgb(255, 0, 0);">609283</span>"
-end="<span style="color: rgb(255, 0, 0);">609310</span>"
-length="<span style="color: rgb(255, 0, 0);">28</span>"
-strand="<span style="color: rgb(255, 0, 0);">+</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;location band="<span style="color: rgb(255, 0, 0);">p16.3</span>"
-chr="<span style="color: rgb(255, 0, 0);">4</span>"
-species="<span style="color: rgb(255, 0, 0);">Homo sapiens</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;db_source db_name="<span style="color: rgb(255, 0, 0);">EnsEMBL</span>" assembly="<span style="color: rgb(255, 0, 0);">37_35j</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/location&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/coordinate&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/reg_seq&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;"></span><span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;/marker&gt;<br>
-
-      <br>
-
-      </span><small>Replace the red values with your own
-information.<br>
-
-The pazar IDs are internal IDs that will not be stored. They can be
-anything as long as they are unique throughout the file.<br>
-
-      <br>
-
-      </small><span style="margin-left: 0.5in; text-decoration: underline;"><a name="Transcription_Factor">2.3 -
-Annotating a Transcription Factor</a></span><small><span style="margin-left: 0.1in;"> <a href="$pazar_cgi/step2.pl#Step2_TOP">TOP</a></span></small><br>
-
-      <div style="text-align: justify;"><span>A
-transcription factor is described in
-multiple steps.</span><br>
-
-      <span>First, at the gene level: The
-'tf' element is embedded in both 'transcript' and 'gene_source'
-elements. Multiple 'transcript' elements can be used to describe
-multiple isoforms of a gene.</span><br>
-
-      <span>Then, at the protein level: The 'funct_tf' element
-captures the
-functional protein information</span><span> with as many
-'tf_unit' elements as there are proteins in the complex (1
-for monomers, 2 for dimers,...). The tf_id calls a pazar_id from a 'tf'
-element.</span><br>
-
-      <span></span></div>
-
-      <span><br>
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;gene_source db_accn="<span style="color: rgb(255, 0, 0);">ENSG00000129535</span>"
-description="<span style="color: rgb(255, 0, 0);">NRL</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">gs_0002</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;db_source db_name="<span style="color: rgb(255, 0, 0);">EnsEMBL</span>" assembly="<span style="color: rgb(255, 0, 0);">37_35j</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;transcript db_accn="<span style="color: rgb(255, 0, 0);">ENST00000250471</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">tr_0002</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;db_source db_name="<span style="color: rgb(255, 0, 0);">EnsEMBL</span>" assembly="<span style="color: rgb(255, 0, 0);">37_35j</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;tf class="<span style="color: rgb(255, 0, 0);">bZIP</span>"
-family="<span style="color: rgb(255, 0, 0);">MAF</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">tf_0001</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;/transcript&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;/gene_source&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;funct_tf funct_tf_name="<span style="color: rgb(255, 0, 0);">NRL</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">fu_0001</span>"&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&lt;tf_unit pazar_id="<span style="color: rgb(255, 0, 0);">tu_0001</span>"
-tf_id="<span style="color: rgb(255, 0, 0);">tf_0001</span>"/&gt;</span><br style="font-weight: bold;">
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;
-&lt;/funct_tf&gt;<br>
-
-      <br>
-
-      </span></span><small>Replace the red values
-with your own information.<br>
-
-The pazar IDs are internal IDs that will not be stored. They can be
-anything as long as they are unique throughout the file.<br>
-
-      <br>
-
-      </small><small><br>
-
-      </small><span style="margin-left: 0.5in; text-decoration: underline;"><a name="Artificial_sequence">2.4 -
-Annotating an Artificial Sequence</a></span><small><span style="margin-left: 0.1in;"> <a href="$pazar_cgi/step2.pl#Step2_TOP">TOP</a></span></small><br>
-
-      <span></span>
-      <div style="text-align: justify;">The
-'construct' element can be used to describe any sequence without
-specific genomic coordinates (e.g. a synthesized oligonucleotide
-representing a consensus binding site).<br>
-
-      </div>
-
-      <span><br>
-
-&nbsp; &nbsp;<span style="font-weight: bold;">
-&lt;construct construct_name="<span style="color: rgb(255, 0, 0);">FN-13A</span>"
-description="<span style="color: rgb(255, 0, 0);">random
-oligo</span>" sequence="<span style="color: rgb(255, 0, 0);">gggtgagtcagcg</span>"
-pazar_id="<span style="color: rgb(255, 0, 0);">co_0001</span>"/&gt;</span><br>
-
-      <span style="font-weight: bold;">&nbsp;&nbsp;&nbsp;&nbsp;</span>&lt;</span><small>Replace
-the red values
-with your own information.<br>
-
-The pazar IDs are internal IDs that will not be stored. They can be
-anything as long as they are unique throughout the file.</small> <br>
-
-      <br>
-
-      <a style="text-decoration: none;" href="$pazar_cgi/step1.pl"><input value="&lt;- To Step 1" type="button"></a> <a style="text-decoration: none;" href="$pazar_cgi/step3.pl"><input value="To Step 3 -&gt;" type="button"></a><br><br>
-
-page
-
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
-print $template_tail->output;
+print $temptail->output;

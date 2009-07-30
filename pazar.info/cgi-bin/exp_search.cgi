@@ -1,678 +1,485 @@
 #!/usr/bin/perl
-
-#use strict;
-
 use pazar;
 use pazar::gene;
 use pazar::talk;
 use pazar::reg_seq;
-
 use HTML::Template;
-
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-###use CGI::Debug( report => 'everything', on => 'anything' );
-
-#use Data::Dumper;
-
+# use CGI::Debug(report => 'everything', on => 'anything');
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
-
 require "$pazarcgipath/getsession.pl";
-
-# open the html header template
+require "$pazarcgipath/searchbox.pl";
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
-
-# fill in template parameters
-$template->param(TITLE => 'PAZAR Analysis View');
+$template->param(TITLE => "Analysis view | PAZAR");
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
-$template->param(JAVASCRIPT_FUNCTION => qq{
-function setCount(target){
-
-if(target == 0) 
-{
-document.gene_search.action="$pazar_cgi/gene_list.cgi";
-document.gene_search.target="Window1";
-window.open('about:blank','Window1', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=800, width=800');
+$template->param(JAVASCRIPT_FUNCTION => qq{ });
+if ($loggedin eq "true") {$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> <a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});} else {$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});}
+sub pnum {
+	my $num = shift;
+	my @aum = split(//,$num);
+	my $fnu;
+	while (@aum) {
+		my $len = @aum;
+		if ($len > 3) {
+			$fnu = pop(@aum) . $fnu;
+			$fnu = pop(@aum) . $fnu;
+			$fnu = pop(@aum) . $fnu;
+			$fnu = "," . $fnu;
+		} else {
+			while (@aum) {
+				$fnu = pop(@aum) . $fnu;
+			}
+		}
+	}
+	return $fnu;
 }
-if(target == 1) 
-{
-var myTextField = document.getElementById('ID_list');
-
-if(myTextField.value == "PAZAR_seq") {
-document.gene_search.target="_self";
-document.gene_search.action="$pazar_cgi/seq_search.cgi";
-} else {
-document.gene_search.target="_self";
-document.gene_search.action="$pazar_cgi/gene_search.cgi";
-}
-}
-if(target == 2) 
-{
-document.gene_search.action="$pazar_cgi/genebrowse_alpha.pl";
-document.gene_search.target="Window2";
-window.open('about:blank','Window2', 'resizable=1,scrollbars=yes, menubar=no, toolbar=no directories=no, height=600, width=650');
-}
-}
-
-function confirm_entry(aid,projid)
-{
-input_box=confirm("Are you sure you want to delete this analysis?");
-if (input_box==true)
-
-{ 
-// submit analysis id to delete page
-    location.href="deleteanalysis.pl?aid="+aid+"&pid="+projid;
-}
-
-}
-
-});
-
-if($loggedin eq 'true')
-{
-    #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
-}
-else
-{
-    #log in link
-    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
-}
-
-# send the obligatory Content-Type and print the template output
+my $dbh = pazar->new(
+	-host         => $ENV{PAZAR_host},
+	-user         => $ENV{PAZAR_pubuser},
+	-pass         => $ENV{PAZAR_pubpass},
+	-dbname       => $ENV{PAZAR_name},
+	-drv          => $ENV{PAZAR_drv},
+	-globalsearch => "yes"
+);
+my $ensdb = pazar::talk->new(
+	DB   => "ensembl",
+	USER => $ENV{ENS_USER},
+	PASS => $ENV{ENS_PASS},
+	HOST => $ENV{ENS_HOST},
+	DRV  => "mysql"
+);
 print "Content-Type: text/html\n\n", $template->output;
-
-#connect to the database
-my $dbh = pazar->new( 
-		      -host          =>    $ENV{PAZAR_host},
-		      -user          =>    $ENV{PAZAR_pubuser},
-		      -pass          =>    $ENV{PAZAR_pubpass},
-		      -dbname        =>    $ENV{PAZAR_name},
-		      -drv           =>    $ENV{PAZAR_drv},
-                      -globalsearch  =>    'yes');
-
-my $ensdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
-
 my @pubprojects = $dbh->public_projects;
-
-print<<page;
-<h1>PAZAR Analysis View <a href='$pazar_cgi/help_FAQ.pl#2.5%20Analysis%20View' target='helpwin' onClick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a></h1>
-          <table border="0" cellpadding="0" cellspacing="0" width="100%">
-            <tbody><tr>
-              <td colspan="2">
-      <p class="title2">Search by Gene or Sequence</p>
-      </td>
-    </tr>
-<form name="gene_search" method="post" action="" enctype="multipart/form-data" target="">
-    <tr align="left">
-      <td colspan="2">
-<p > Please enter a &nbsp;
-      <select name="ID_list" id="ID_list">
-      <option selected="selected" value="GeneName">User Defined Gene Name</option>
-      <option value="EnsEMBL_gene">EnsEMBL gene ID</option>
-      <option value="EnsEMBL_transcript">EnsEMBL transcript ID</option>
-      <option value="EntrezGene">Entrezgene ID</option>
-      <option value="nm">RefSeq ID</option>
-      <option value="swissprot">Swissprot ID</option>
-      <option value="PAZAR_gene">PAZAR Gene ID</option>
-      <option value="PAZAR_seq">PAZAR Sequence ID</option>
-      </select>
-&nbsp; <input value="" name="geneID" type="text">&nbsp; <input value="Submit" name="submit" type="submit" onClick="setCount(1)">&nbsp; <a href='$pazar_html/ID_help.htm' target='helpwin'onClick="window.open('about:blank','helpwin', 'scrollbars=yes, menubar=no, toolbar=no directories=no, height=650, width=350');"><img src="$pazar_html/images/help.gif" alt='Help' align='bottom' width=12></a><br></p>
-      </td>
-    </tr>
-    <tr align="left">
-      <td colspan="2"><p > Or browse the current list of annotated genes
-&nbsp;
-      <input value="View Gene List" name="submit" type="submit"  onClick="setCount(0)"><br><br></p>
-      </td>
-    </tr>
-    <tr align="left">
-      <td width='400' valign=top><span class='red'>!!!NEW!!!</span> Select projects you want to exclude from your search:<br><small>Make your selection before performing your query and hitting the Submit button above.<br>Hold the 'Ctrl' button ('Command' button on Mac) to select/unselect one or more projects.</small></td>
-      <td valign=top><select name="excl_proj" size="3" multiple="multiple">
-page
-
-my %unsort_proj;
-foreach my $project (@pubprojects) {
-    my $proj = $dbh->get_project_name_by_ID($project);
-    my $proj_lc=lc($proj);
-    $unsort_proj{$proj_lc}=$proj;
-}
-foreach my $projname (sort(keys %unsort_proj)) {
-    print "<option value=\"$unsort_proj{$projname}\"> $unsort_proj{$projname}</option>";
-}
-print "</td></tr></form></tbody></table><hr color='black'>";
-
-
+print $bowz;
 my $bg_color = 0;
-my %colors = (0 => "#fffff0",
-	      1 => "#B7DDA6"
-	      );
-
+my %colors = (
+	0 => "#fffff0",
+	1 => "#B7DDA6");
 my $get = new CGI;
 my %params = %{$get->Vars};
 my $aid = $params{aid};
-
-my $excluded=$params{excluded}||'none';
-
-#check if access is authorized
-my $projstat=&select($dbh, "SELECT b.project_name,b.status FROM analysis a,project b WHERE a.analysis_id=$aid AND a.project_id=b.project_id");
+my $xc = $params{excluded} || "none";
+my $projstat = &select($dbh,qq{
+	SELECT b.project_name,b.status 
+	FROM analysis a,project b 
+	WHERE a.analysis_id="$aid" 
+	AND a.project_id=b.project_id});
 my @res = $projstat->fetchrow_array;
 undef $dbh;
-if($res[1]=~/restricted/i) {
-    $dbh = pazar->new( 
-		       -globalsearch  =>    'no',		      
-		       -host          =>    $ENV{PAZAR_host},
-		       -user          =>    $ENV{PAZAR_pubuser},
-		       -pass          =>    $ENV{PAZAR_pubpass},
-		       -dbname        =>    $ENV{PAZAR_name},
-		       -pazar_user    =>    $info{user},
-		       -pazar_pass    =>    $info{pass},
-		       -drv           =>    $ENV{PAZAR_drv},
-		       -project       =>    $res[0]);
-} elsif ($res[1]=~/published/i || $res[1]=~/open/i ) {
-    $dbh = pazar->new( 
-		       -globalsearch  =>    'no',		      
-		       -host          =>    $ENV{PAZAR_host},
-		       -user          =>    $ENV{PAZAR_pubuser},
-		       -pass          =>    $ENV{PAZAR_pubpass},
-		       -dbname        =>    $ENV{PAZAR_name},
-		       -drv           =>    $ENV{PAZAR_drv},
-		       -project       =>    $res[0]);
+if ($res[1] =~ /restricted/i) {
+	$dbh = pazar->new( 
+		-globalsearch => "no",			  
+		-host         => $ENV{PAZAR_host},
+		-user         => $ENV{PAZAR_pubuser},
+		-pass         => $ENV{PAZAR_pubpass},
+		-dbname       => $ENV{PAZAR_name},
+		-pazar_user   => $info{user},
+		-pazar_pass   => $info{pass},
+		-drv          => $ENV{PAZAR_drv},
+		-project      => $res[0]);
+} elsif (($res[1] =~ /published/i) or ($res[1] =~ /open/i)) {
+	$dbh = pazar->new( 
+		-globalsearch  => "no",			  
+		-host          => $ENV{PAZAR_host},
+		-user          => $ENV{PAZAR_pubuser},
+		-pass          => $ENV{PAZAR_pubpass},
+		-dbname        => $ENV{PAZAR_name},
+		-drv           => $ENV{PAZAR_drv},
+		-project       => $res[0]);
 }   
-
-my @an=$dbh->get_data_by_primary_key('analysis',$aid);
-my $pazaranid=write_pazarid($aid,'AN');
-my @met=$dbh->get_data_by_primary_key('method',$an[3]);
-my @cell=$dbh->get_data_by_primary_key('cell',$an[4]);
 my $cellinfo;
-my @cell_cols=('Cell','Tissue','Status','Description','Species');
-for (my $i=0;$i<5;$i++) {
-    if ($cell[$i] && $cell[$i] ne '' && $cell[$i] ne '0' && $cell[$i] ne 'NA') {
-	if ($cellinfo) {
-	    $cellinfo.='<br>';
+my $anid = &wpid($aid,"AN");
+my @an = $dbh->get_data_by_primary_key("analysis",$aid);
+my @cell = $dbh->get_data_by_primary_key("cell",$an[4]);
+my @met = $dbh->get_data_by_primary_key("method",$an[3]);
+my @ceco = ("Cell","Tissue","Status","Description","Species");
+for (my $i=0; $i<5; $i++) {
+	if (($cell[$i] && $cell[$i] ne "") and ($cell[$i] ne "0") and ($cell[$i] ne "NA")) {
+		if ($ceco[$i] eq "Species") {
+			$cell[$i] = lc($cell[$i]);
+			$cell[$i] = ucfirst($cell[$i]);
+		}
+		if ($ceco[$i] eq "Status") {
+			$cell[$i] = lc($cell[$i]);
+		}
+		my $temp = qq{<div class="">} . $ceco[$i] . ": " . $cell[$i] . qq{</div>};
+		$cellinfo .= $temp;
 	}
-	if ($cell_cols[$i] eq 'Species') {$cell[$i]=lc($cell[$i]);$cell[$i]=ucfirst($cell[$i]);}
-	if ($cell_cols[$i] eq 'Status') {$cell[$i]=lc($cell[$i]);}
-	$cellinfo.=$cell_cols[$i].": ".$cell[$i];
-    }
 }
-unless ($cellinfo) {$cellinfo='-';}
-my @time=$dbh->get_data_by_primary_key('time',$an[5]);
+$cellinfo = "(not provided)" unless ($cellinfo);
 my $timeinfo;
-my @time_cols=('Name','Description','Scale','Range Start','Range End');
-for (my $i=0;$i<5;$i++) {
-    if ($time[$i] && $time[$i] ne '' && $time[$i] ne '0' && $time[$i] ne 'NA') {
-	if ($timeinfo) {
-	    $timeinfo.='<br>';
+my @time = $dbh->get_data_by_primary_key("time",$an[5]);
+my @time_cols = ("Name","Description","Scale","Range Start","Range End");
+for (my $i=0; $i<5; $i++) {
+	if ($time[$i] and ($time[$i] ne "") and ($time[$i] ne "0") and ($time[$i] ne "NA")) {
+		if ($timeinfo) {
+			$timeinfo .= "<br>";
+		}
+		$timeinfo .= $time_cols[$i] . ": " . $time[$i];
 	}
-	$timeinfo.=$time_cols[$i].": ".$time[$i];
-    }
 }
-unless ($timeinfo) {$timeinfo='-';}
-my @ref=$dbh->get_data_by_primary_key('ref',$an[6]);
-
-my $comments = $an[7]||'-';
+my @ref = $dbh->get_data_by_primary_key("ref",$an[6]);
+my $comments = $an[7];
 my $commentseditable = "false";
 my $analysis_projid = "";
-# make comments editable if page is viewed by project member
-if ($loggedin eq 'true') {	
+my $edito;
+if ($loggedin eq "true") {	
 	$analysis_projid = $an[9];
 	foreach my $proj (@projids) {
-	#see if $proj is the same as the analysis project or if my userid is same as analysis user_id
-	if($proj == $analysis_projid)
-	{
-		#comments are editable
-		$commentseditable = "true";
+		if ($proj == $analysis_projid) {
+			$commentseditable = "true";
+		}
 	}
-    }
-
-
-if($commentseditable eq "true")
-{
-	$comments = "<div id =\"ajaxcomment\">".$an[7]."</div><input type=\"button\" name=\"commentupdatebutton\" value=\"Update Comments\" onClick=\"javascript:window.open('updateanalysiscomments.pl?mode=form&pid=$analysis_projid&aid=$aid');\">";
+	if ($commentseditable eq "true") {
+		$edito .= qq{<div class="p5to"><span class="txt-ora b">Editing options:</span> <input type="button" name="commentupdatebutton" value="Update comments" onclick="javascript:window.open('updateanalysiscomments.pl?mode=form&pid=$analysis_projid&aid=$aid');"> <input type="button" value="Delete this analysis" onclick="confirm_entry_exp_search('$aid','$analysis_projid');"></div>};
+	}
 }
-
-}
-
-my @ev=$dbh->get_data_by_primary_key('evidence',$an[1]);
-my $evinfo='Type: '.$ev[0].'<br>Status: '.$ev[1];
-my @user=$dbh->get_data_by_primary_key('users',$an[0]);
+my @ev = $dbh->get_data_by_primary_key("evidence",$an[1]);
+my $evinfo = qq{
+	<div>Evidence type: <span class="b">$ev[0]</span></div>
+	<div>Evidence status: <span class="b">$ev[1]</span></div>};
+my @user = $dbh->get_data_by_primary_key("users",$an[0]);
 my $userinfo;
-unless ($user[0]||$user[1]) {
-    $userinfo=$user[4];
+unless ($user[0] or $user[1]) {
+	$userinfo = $user[4];
 } else {
-    $userinfo=$user[0].' '.$user[1];
+	$userinfo = qq{$user[0] $user[1]};
 }
-
-#print header
-
-print<<HEADER_TABLE;
-<table class="summarytable">
-<tr><td class="analysistabletitle"><span class="title4">Analysis ID</span></td><form name='intdetails' method='post' action="$pazar_cgi/exp_search.cgi" enctype='multipart/form-data'><input type='hidden' name='aid' value="$params{aid}"><input type='hidden' name='excluded' value="$excluded"><td class="basictd"><input type="submit" class="submitLink" value="$pazaranid"></td></form></tr>
-<tr><td class="analysistabletitle"><span class="title4">Analysis Method</span></td><td class="basictd">$met[0]</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Cell Type</span></td><td class="basictd">$cellinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Time</span></td><td class="basictd">$timeinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Reference (PMID)</span></td><td class="basictd"><a href="http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$ref[0]" target='pubwin' onClick="window.open('about:blank','pubwin');">$ref[0]</a></td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Comments</span></td><td class="basictd">$comments</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Evidence</span></td><td class="basictd">$evinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Annotator</span></td><td class="basictd">$userinfo</td></tr>
-<tr><td class="analysistabletitle"><span class="title4">Project</span></td><td class="basictd"><a href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a></td></tr>
-HEADER_TABLE
-
-#show delete button if user is logged in and member of the project ie. same requirements as editing analysis comments
-
-if($commentseditable eq "true")
-{
-    print "<tr><td class=\"basictd\" colspan=2 align=\"left\"><input type=\"button\" value=\"Delete This Analysis\" onClick=\"confirm_entry(".$aid.",".$analysis_projid.")\"></td></tr>";
+my $timeinfodisplay = "";
+my $commentsinfodisplay = "";
+if ($timeinfo) {
+	$timeinfodisplay = qq{<div>Time: <span class="b">$timeinfo</span></div>};
 }
-
-    print "</table>";
-
-    print "<p><i><span class='warning'>*</span>Genes marked with a red asterisk are used as markers located in the vicinity of the regulatory region. They have not been shown to be regulated by the associated sequence.</i></p>";
-print "<br>";
-
-my @analysis=$dbh->get_analysis_structure_by_id($aid);
-my @idlist;
+if ($comments) {
+	$commentsinfodisplay = qq{<div>Comments: <div id="ajaxcomment" class="inline"><span class="b">$comments</span></div></div>};
+}
+print qq{
+	<h2>Analysis <a class="b" href="$pazar_cgi/exp_search.cgi?aid=$params{aid}&amp;excluded=$xc">$anid</a> in the <a class="b" href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a> project <a href="$pazar_cgi/help_FAQ.pl#2.5%20Analysis%20View" target="helpwin" onclick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt="Help" align="bottom" width="10"></a></h2>
+	<div class="p10lo p10bo">
+		<div>Analysis method: <span class="b">$met[0]</span></div>
+		<div><div class="float-l">Cell&nbsp;type:&nbsp;</div><div class="float-l b w600">$cellinfo</div><div class="clear-l"></div></div>
+		$timeinfodisplay
+		<div>Pubmed: <a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]" class="b">$ref[0]</a></div>
+		$commentsinfodisplay
+		$evinfo
+		<div>Annotator: <span class="b">$userinfo</span></div>
+		$edito
+	</div>};
+my @analysis = $dbh->get_analysis_structure_by_id($aid);
 my %results;
+my @idlist;
 my $mode;
 my %sort;
 foreach my $link (@analysis) {
-    my @out_types=$link->get_output_types;
-    $mode=$out_types[0];
-    my ($type,$id,@ins)=$link->next_relationship;
+    my @out_types = $link->get_output_types;
+    $mode = $out_types[0];
+    my ($type,$id,@ins) = $link->next_relationship;
     while ($type) {
-	unless (grep(/^$id$/,@idlist)) {
-	    push @idlist, $id;
-	    my @seq;
-	    my @tf;
-	    my @condid;
-	    foreach my $in (@ins) {
-		my ($intable,$inid,@indata)=$dbh->links_to_data($in,'input');
-		if ($intable eq 'reg_seq'||$intable eq 'construct'||$intable eq 'mutation_set') {
-		    push @seq, [$intable,$inid];
-		    push @{$sort{$intable}}, $id;
-		} elsif ($intable eq 'funct_tf'||$intable eq 'sample') {
-		    push @tf, [$intable,$inid];
-		} elsif ($intable eq 'bio_condition') {
-		    push @condid, $inid;
+		unless (grep(/^$id$/,@idlist)) {
+			push @idlist, $id;
+			my @condid;
+			my @seq;
+			my @tf;
+			foreach my $in (@ins) {
+				my ($intable,$inid,@indata) = $dbh->links_to_data($in,"input");
+				if (($intable eq "reg_seq") or ($intable eq "construct") or ($intable eq "mutation_set")) {
+					push @seq, [$intable,$inid];
+					push @{$sort{$intable}}, $id;
+				} elsif (($intable eq "funct_tf") or ($intable eq "sample")) {
+					push @tf, [$intable,$inid];
+				} elsif ($intable eq "bio_condition") {
+					push @condid, $inid;
+				}
+			}
+			$results{$id}{"condid"} = \@condid;
+			$results{$id}{"seq"} = \@seq;
+			$results{$id}{"tf"} = \@tf;
 		}
-	    }
-	    $results{$id}{'seq'}=\@seq;
-	    $results{$id}{'tf'}=\@tf;
-	    $results{$id}{'condid'}=\@condid;
-	}
-	($type,$id,@ins)=$link->next_relationship;
+		($type,$id,@ins) = $link->next_relationship;
     }
 }
-my @sorted_keys = @{$sort{'reg_seq'}};
-push @sorted_keys, @{$sort{'mutation_set'}};
-push @sorted_keys, @{$sort{'construct'}};
-
-my $count=0;
-if ($mode eq 'expression') {
-    print "<table class=\"evidencedetailstableborder\"><tr>";
-    print "<td width='80' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Type</span></td>";
-    print "<td class=\"analysisdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span><br><span class=\"smallredbold\">click an ID to enter Sequence View</span></td>";
-    print "<td width='150' class=\"analysisdetailstabletitle\"><span class=\"title4\">Gene ID</span><br><span class=\"smallredbold\">click an ID to enter Gene View</span></td>";
-    print "<td width='300' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='250' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
-    print "<td width='100' class=\"analysisdetailstabletitle\"><span class=\"title4\">Expression Level</span></td>";
-    print "<td width='200' class=\"analysisdetailstabletitle\"><span class=\"title4\">Condition(s)</span></td>";
-    print "</tr>";
-
-    foreach my $key (@sorted_keys) {
-	my $seqtable=$results{$key}{'seq'}->[0]->[0];
-	my $seqid=$results{$key}{'seq'}->[0]->[1];
-	$count++;
-#get reg_seq and print out all information
-	if ($seqtable eq 'reg_seq') {
-	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$seqid);
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Genomic Sequence</div></td>";
-
-	    my $regid=$reg_seq->accession_number;
-	    my $pazarregid=write_pazarid($regid,'RS');
-	    my $seqname=$reg_seq->id;
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
-	    my $gid=$reg_seq->PAZAR_gene_ID;
-#check whether the representative gene in reg_seq object is gene or marker
-
-my $gidprefix = 'GS';
-my $asterisk = "";
-if($reg_seq->gene_type eq "marker")
-{
-	$gidprefix = 'MK';
-	$asterisk = "<span class='warning'>*</span>";
+my @sorted_keys = @{$sort{"reg_seq"}};
+push @sorted_keys, @{$sort{"mutation_set"}};
+push @sorted_keys, @{$sort{"construct"}};
+my $count = 0;
+print qq{<div class="p10lo">};
+if ($mode eq "expression") {
+	print qq{
+		<table class="evidencedetailstableborder tblw">
+			<tr>
+				<td class="adtt w100">Seq ID and info</td>
+				<td class="adtt w120">Target gene</td>
+				<td class="adtt w100">Sequence</td>
+				<td class="adtt">Sequence or method info</td>
+				<td class="adtt w200">Expression level and condition(s)</td>
+			</tr>};
+} elsif ($mode eq "interaction") {
+	print qq{
+		<table class="evidencedetailstableborder tblw">
+			<tr>
+				<td class="adtt w100">Seq ID and info</td>
+				<td class="adtt w120">Target gene</td>
+				<td class="adtt w100">Sequence</td>
+				<td class="adtt">Sequence or method info</td>
+				<td class="adtt w200">Interaction level and interactor</td>
+			</tr>};
 }
-
-	    my $pazargeneid = write_pazarid($gid,$gidprefix);
-	    my $gene_accession=$reg_seq->gene_accession;
-	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
-	    $ens_coords[5]=~s/\[.*\]//g;
-	    $ens_coords[5]=~s/\(.*\)//g;
-	    $ens_coords[5]=~s/\.//g;
-	    my $species = $ensdb->current_org();
-	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
-
-	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
-		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
-
-	    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>$coord</div></td>";
-	}
-
-#get mutant and print out all information
-	if ($seqtable eq 'mutation_set') {
-	    my @mut=$dbh->get_data_by_primary_key('mutation_set',$seqid);
-	    my $regid=$mut[0];
-	    my $pazarregid=write_pazarid($regid,'RS');
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Mutant of Sequence<form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"></form></div></td>";
-
-	    my $pazarmutid=write_pazarid($seqid,'MS');
-	    my $seqname=$mut[1];
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>$pazarmutid</b><br>$seqname</div></td>";
-
-	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$regid);
-	    my $gid=$reg_seq->PAZAR_gene_ID;
-
-	my $gidprefix = 'GS';
-	my $asterisk = "";
-	if($reg_seq->gene_type eq "marker")
-	{
-	        $gidprefix = 'MK';
-	        $asterisk = "<span class='warning'>*</span>";
-	}
-
-	    my $pazargeneid = write_pazarid($gid,$gidprefix);
-	    my $gene_accession=$reg_seq->gene_accession;
-	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
-	    $ens_coords[5]=~s/\[.*\]//g;
-	    $ens_coords[5]=~s/\(.*\)//g;
-	    $ens_coords[5]=~s/\.//g;
-	    my $species = $ensdb->current_org();
-	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
-
-	    my $seqstr=chopstr($mut[4],40)||'-';
-	    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
-
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
-	    if ($mut[2]>0) {
-		my @mutmet=$dbh->get_data_by_primary_key('method',$mut[2]);
-		print "<b>Method:</b> $mutmet[0]<br>";
-	    }
-	    if ($mut[3]>0) {
-		my @mutref=$dbh->get_data_by_primary_key('ref',$mut[3]);
-		print "<b>PMID:</b> <a href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$mutref[0]\" target='pubwin' onClick=\"window.open('about:blank','pubwin');\">$mutref[0]</a><br>";
-	    }
-	    if ($mut[5] && $mut[5] ne '0') {
-		print "<b>Comments:</b> $mut[5]<br>";
-	    }
-	    print "</div></td>";
-	}
-
-#get construct and print out all information
-	if ($seqtable eq 'construct') {
-	    my @construct=$dbh->get_data_by_primary_key('construct',$seqid);
-	    my $pazarcoid=write_pazarid($seqid,'CO');
-	    my $seqname=$construct[0];
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Artificial Sequence</div></td>";
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$pazarcoid<br>$seqname</div></td>";
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
-
-	    my $seqstr=chopstr($construct[2],40)||'-';
-		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
-
-	    my $desc=$construct[1]||'-';
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Description:</b><br>$desc</div></td>";
-	}
-
-	my ($outtable,$outid,@outdat)=$dbh->links_to_data($key,'output');
-	print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
-	my @outdata;
-	for (my $i=0;$i<(@outdat-3);$i++) {
-	    if ($outdat[$i] && $outdat[$i] ne '0') {
-		push @outdata,$outdat[$i];
-	    }
-	}
-	print join(" ",@outdata)."</div></td>";
-
-	my @condids=@{$results{$key}{'condid'}};
-	print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
-	my $nocond=0;
-	for (my $i=0;$i<@condids;$i++) {
-	    if ($i>0) {print "<hr>";}
-	    $nocond=1;
-	    my @dat=$dbh->get_data_by_primary_key('bio_condition',$condids[$i]);
-	    my $condinfo;
-	    my @cond_cols=('Type','Molecule','Description','Concentration','Scale');
-	    for (my $j=0;$j<5;$j++) {
-		if (lc($dat[0]) eq 'co-expression' && $j==2) {
-		    next;
+foreach my $key (@sorted_keys) {
+	print qq{<tr style="background-color: $colors{$bg_color};">};
+	my $seqtable = $results{$key}{"seq"}->[0]->[0];
+	my $seqid = $results{$key}{"seq"}->[0]->[1];
+	my $tftable = $results{$key}{"tf"}->[0]->[0];
+	my $tfid = $results{$key}{"tf"}->[0]->[1];
+	$count++;
+	if ($seqtable eq "reg_seq") {
+		my $rsq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$seqid);
+		my $rgid = $rsq->accession_number;
+		my $prs = &wpid($rgid,"RS");
+		my $gid = $rsq->PAZAR_gene_ID;
+		my $sqna = $rsq->id;
+		my $gpf = "GS";
+		my $stk = "";
+		if ($rsq->gene_type eq "marker") {
+			$stk = qq{<span class="warning">*</span>};
+			$gpf = "MK";
 		}
-		if ($dat[$j] && $dat[$j] ne '' && $dat[$j] ne 'NA') {
-		    if ($condinfo) {
-			$condinfo.='<br>';
-		    }
-		    $condinfo.=$cond_cols[$j].": ".$dat[$j];
+		my $pgid = &wpid($gid,$gpf);
+		my $gnac = $rsq->gene_accession;
+		my @ec = $ensdb->get_ens_chr($gnac);
+		$ec[5] =~ s/\[.*\]//g;
+		$ec[5] =~ s/\(.*\)//g;
+		$ec[5] =~ s/\.//g;
+		my $spc = $ensdb->current_org();
+		$spc = ucfirst($spc) || "(none provided)";
+		my $chrst = $rsq->strand; $chrst = "&ndash;" if $chrst eq "-";
+		my $seqstr = $rsq->seq;
+		my $coord = 
+			"chr" . $rsq->chromosome . ":"
+			. &pnum($rsq->start) . "-"
+			. &pnum($rsq->end)
+			. qq{ ($chrst)}
+			. qq{<div class="small">[}
+			. $rsq->seq_dbname . " " . $rsq->seq_dbassembly . qq{]</div>};
+		my $rs_gene = $ec[5];
+		if (length($rs_gene) > 16) {
+			$rs_gene = qq{<div onclick="popup(this,'$rs_gene','rt');" class="popup">} . substr($rs_gene,0,14) . "..." . qq{</div>};
 		}
-	    }
-	    print $condinfo;
-	    if (lc($dat[0]) eq 'co-expression') {
-		my $tf = $dbh->create_tf;
-		my $tfid=$dat[2];
-		my $complex = $tf->get_tfcomplex_by_id($tfid, 'notargets');
-		my $pazartfid=write_pazarid($tfid,'TF');
-		print "<form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form>";
-	    }
+		my $rs_chp = chopstr($seqstr,20);
+		my $rs_set = substr($seqstr,0,10);
+		my $rs_len = length($seqstr);
+		my $rs_sql = &pnum($rs_len);
+		if ($rs_len > 10) {$rs_set .= "...";}
+		my $fi_seq = qq{<div class=""><div onclick="popup(this,'$rs_chp','st');" class="popup">$rs_set<br>($rs_sql&nbsp;bp)</div></div>};
+		print qq{
+			<td class="btc"><div>Genomic</div>
+			<a class="b" href="$pazar_cgi/seq_search.cgi?regid=$rgid&amp;excluded=$xc">$prs</a></td>
+			<td class="btc">
+				<a class="b" href="$pazar_cgi/gene_search.cgi?geneID=$pgid&amp;ID_list=PAZAR_gene&amp;excluded=$xc">$pgid</a>
+				$stk
+				<div class="b">$rs_gene</div>
+				<div>$spc</div>
+			</td>
+			<td class="btc">$fi_seq</td>
+			<td class="btc"><div class="b">Coordinates:</div>$coord</td>};
+	} elsif ($seqtable eq "mutation_set") {
+		my @mut = $dbh->get_data_by_primary_key("mutation_set",$seqid);
+		my $sqna = $mut[1];
+		my $rgid = $mut[0];
+		my $muid = &wpid($seqid,"MS");
+		my $prs = &wpid($rgid,"RS");
+		my $rsq = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$rgid);
+		my $gid = $rsq->PAZAR_gene_ID;
+		my $gpf = "GS";
+		my $stk = "";
+		if ($rsq->gene_type eq "marker") {
+			$stk = qq{<span class="warning">*</span>};
+			$gpf = "MK";
+		}
+		my $pgid = &wpid($gid,$gpf);
+		my $gnac = $rsq->gene_accession;
+		my @ec = $ensdb->get_ens_chr($gnac);
+		my $spc = $ensdb->current_org();
+		$spc = ucfirst($spc) || "(none provided)";
+		$ec[5] =~ s/\[.*\]//g;
+		$ec[5] =~ s/\(.*\)//g;
+		$ec[5] =~ s/\.//g;
+		my $seqstr = $mut[4];
+		my $mutp;
+		if ($mut[2] > 0) {
+			my @mm = $dbh->get_data_by_primary_key("method",$mut[2]);
+			my @mc = split(/::/,$mm[0]);
+			my $mf;
+			foreach my $m (@mc) {
+				if (length($m) > 20) {
+					$m = qq{<div onclick="popup(this,'$m','rt');" class="popup">} . substr($m,0,18) . "..." . qq{</div>};
+				}
+				$mf .= $m;
+			}
+			$mutp .= qq{<div class="b">Method(s):</div>$mf};
+		}
+		if ($mut[3] > 0) {
+			my @mutref = $dbh->get_data_by_primary_key("ref",$mut[3]);
+			$mutp .= qq{<div><span class="b">Pubmed:</span> <a class="b" href="http://www.ncbi.nlm.nih.gov/pubmed/$mutref[0]">$mutref[0]</a></div>};
+		}
+		if ($mut[5] and ($mut[5] ne "0")) {
+			if (length($mut[5]) > 18) {
+				$mut[5] = qq{<div onclick="popup(this,'$mut[5]','rt');" class="popup">} . substr($mut[5],0,16) . "..." . qq{</div>};
+			}
+			$mutp .= qq{<div><span class="b">Comments:</span> $mut[5]</div>};
+		}
+		my $rs_chp = chopstr($seqstr,20);
+		my $rs_set = substr($seqstr,0,10);
+		my $rs_len = length($seqstr);
+		my $rs_sql = &pnum($rs_len);
+		if ($rs_len > 10) {$rs_set .= "...";}
+		my $fi_seq = qq{<div class=""><div onclick="popup(this,'$rs_chp','st');" class="popup">$rs_set<br>($rs_sql&nbsp;bp)</div></div>};
+		my $rs_gene = $ec[5];
+		if (length($rs_gene) > 16) {
+			$rs_gene = qq{<div onclick="popup(this,'$rs_gene','rt');" class="popup">} . substr($rs_gene,0,14) . "..." . qq{</div>};
+		}
+		if (length($sqna) > 12) {
+			$sqna = qq{<div onclick="popup(this,'$sqna','rt');" class="popup">} . substr($sqna,0,10) . "..." . qq{</div>};
+		}
+		print qq{
+			<td class="btc"><div class="b">$muid</div>$sqna<div class="p5to">Mutant of sequence <a class="b" href="$pazar_cgi/seq_search.cgi?regid=$rgid&amp;excluded=$xc">$prs</a></div></td>
+			<td class="btc">
+				<a class="b" href="$pazar_cgi/gene_search.cgi?geneID=$pgid&amp;ID_list=PAZAR_gene&amp;excluded=$xc">$pgid</a>$stk
+				<div class="b">$rs_gene</div>
+				$spc</td>
+			<td class="btc">$fi_seq</td>
+			<td class="btc">$mutp</td>};
+	} elsif ($seqtable eq "construct") {
+		my @construct = $dbh->get_data_by_primary_key("construct",$seqid);
+		my $desc = $construct[1] || "(no description)";
+		my $pazarcoid = &wpid($seqid,"CO");
+		my $seqstr = $construct[2];
+		my $sqna = $construct[0];
+		my $rs_chp = chopstr($seqstr,20);
+		my $rs_set = substr($seqstr,0,10);
+		my $rs_sql = &pnum(length($seqstr));
+		if ($rs_sql > 10) {$rs_set .= "...";}
+		my $fi_seq = qq{<div class=""><div onclick="popup(this,'$rs_chp','st');" class="popup">$rs_set<br>($rs_sql&nbsp;bp)</div></div>};
+		print qq{
+			<td class="btc">Artificial<div class="b">$pazarcoid</div>$sqna</td>
+			<td class="btc">(not applicable)</td>
+			<td class="btc">$fi_seq</td>
+			<td class="btc"><div class="b">Description:</div>$desc</td>};
 	}
-	if ($nocond==0) {
-	    print "None";
+	if ($mode eq "expression") {
+		my ($outtable,$outid,@outdat) = $dbh->links_to_data($key,"output");
+		my @outdata;
+		my $tda;
+		for (my $i=0; $i<(@outdat-3); $i++) {
+			if ($outdat[$i] and ($outdat[$i] ne "0")) {
+				$tda .= $outdat[$i] . " ";
+			}
+		}
+		my @condids = @{$results{$key}{"condid"}};
+		if (length($tda) > 28) {
+			$tda = qq{<div onclick="popup(this,'$tda','rt');" class="popup">} . substr($tda,0,26) . "..." . qq{</div>};
+		}
+		print qq{<td class="btc"><div class="p5bo"><div class="br-b b">$tda</div></div>};
+		my $nocond = 0;
+		for (my $i=0; $i<@condids; $i++) {
+			if ($i>0) {print qq{<div class="p5to p5bo"><div class="br-b"></div></div>};}
+			$nocond = 1;
+			my @dat = $dbh->get_data_by_primary_key("bio_condition",$condids[$i]);
+			my $condinfo;
+			my @cond_cols = ("Type","Molecule","Description","Concentration","Scale");
+			for (my $j=0; $j<5; $j++) {
+				if (lc($dat[0]) eq "co-expression" && $j==2) {
+					next;
+				}
+				if ($dat[$j] and ($dat[$j] ne "") and ($dat[$j] ne "NA")) {
+					$condinfo .= qq{<div><span class="b">} . $cond_cols[$j] . qq{:</span> } . $dat[$j] . qq{</div>};
+				}
+			}
+			print $condinfo;
+			if (lc($dat[0]) eq "co-expression") {
+				my $tfid = $dat[2];
+				my $tf = $dbh->create_tf;
+				my $ptfd = &wpid($tfid,"TF");
+				my $cp = $tf->get_tfcomplex_by_id($tfid,"notargets");
+				my $cn = $cp->name;
+				if (length($cn) > 10) {
+					$cn = qq{<div onclick="popup(this,'$cn','rt');" class="popup">} . substr($cn,0,8) . "..." . qq{</div>};
+				}
+				print qq{<a href="$pazar_cgi/tf_search.cgi?ID_list=PAZAR_TF&amp;geneID=$ptfd&amp;excluded=$xc" class="b">$ptfd</a><div class="b">$cn</div>};
+			}
+		}
+		if ($nocond == 0) {
+			print "(no condition)";
+		}
+		print qq{</td>};
+	} elsif ($mode eq "interaction") {
+		print qq{<td class="btc">};
+		my ($outtable,$outid,@outdat) = $dbh->links_to_data($key,"output");
+		my $tda;
+		for (my $i=0; $i<(@outdat-3); $i++) {
+			if ($outdat[$i] and ($outdat[$i] ne "0")) {
+				$tda .= $outdat[$i] . " ";
+			}
+		}
+		print qq{<div class="p5bo"><div class="br-b b">$tda</div></div>};
+		if ($tftable eq "funct_tf") {
+			my $tf = $dbh->create_tf;
+			my $complex = $tf->get_tfcomplex_by_id($tfid,"notargets");
+			my $ptfd = &wpid($tfid,"TF");
+			my $cn = $complex->name;
+			if (length($cn) > 28) {
+				$cn = qq{<div onclick="popup(this,'$cn','rt');" class="popup">} . substr($cn,0,26) . "..." . qq{</div>};
+			}
+			print qq{<div><a class="b" href="$pazar_cgi/tf_search.cgi?ID_list=PAZAR_TF&amp;geneID=$ptfd&amp;excluded=$xc">$ptfd</a></div><div class="b">$cn</div>};
+		} elsif ($tftable eq "sample") {
+			my @sa = $dbh->get_data_by_primary_key("sample",$tfid);
+			my @sc = $dbh->get_data_by_primary_key("cell",$sa[1]);
+			print qq{$sa[0] $sc[0]};
+		} else {
+			print qq{(unknown)};
+		}
+		print qq{</td>};
 	}
-	print "</div></td>";
-	print "</tr>";
+	print qq{</tr>};
 	$bg_color = 1 - $bg_color;
-    }
-    print "</table>";
-} elsif ($mode eq 'interaction') {
-    print "<table class=\"evidencedetailstableborder\"><tr>";
-    print "<td width='80' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Type</span></td>";
-    print "<td class=\"analysisdetailstabletitle\" width='100'><span class=\"title4\">Sequence ID</span></td>";
-    print "<td width='150' class=\"analysisdetailstabletitle\"><span class=\"title4\">Gene ID</span></td>";
-    print "<td width='300' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence</span></td>";
-    print "<td width='250' class=\"analysisdetailstabletitle\"><span class=\"title4\">Sequence Info</span></td>";
-    print "<td width='100' class=\"analysisdetailstabletitle\"><span class=\"title4\">Interaction Level</span></td>";
-    print "<td width='200' class=\"analysisdetailstabletitle\"><span class=\"title4\">Interacting Factor/Sample</span></td>";
-    print "</tr>";
-
-    foreach my $key (@sorted_keys) {
-	my $seqtable=$results{$key}{'seq'}->[0]->[0];
-	my $seqid=$results{$key}{'seq'}->[0]->[1];
-	my $tftable=$results{$key}{'tf'}->[0]->[0];
-	my $tfid=$results{$key}{'tf'}->[0]->[1];
-	$count++;
-#get reg_seq and print out all information
-	if ($seqtable eq 'reg_seq') {
-	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$seqid);
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Genomic Sequence</div></td>";
-
-	    my $regid=$reg_seq->accession_number;
-	    my $pazarregid=write_pazarid($regid,'RS');
-	    my $seqname=$reg_seq->id;
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"><br>$seqname</form></div></td>";
-	    my $gid=$reg_seq->PAZAR_gene_ID;
-
-        my $gidprefix = 'GS';
-	my $asterisk = "";
-        if($reg_seq->gene_type eq "marker")
-        {
-         $gidprefix = 'MK';
-         $asterisk = "<span class='warning'>*</span>";	 
-        }
-
-	    my $pazargeneid = write_pazarid($gid,$gidprefix);
-	    my $gene_accession=$reg_seq->gene_accession;
-	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
-	    $ens_coords[5]=~s/\[.*\]//g;
-	    $ens_coords[5]=~s/\(.*\)//g;
-	    $ens_coords[5]=~s/\.//g;
-	    my $species = $ensdb->current_org();
-	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
-
-	    my $seqstr=chopstr($reg_seq->seq,40)||'-';
-		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
-
-	    my $coord="chr".$reg_seq->chromosome.":".$reg_seq->start."-".$reg_seq->end." (".$reg_seq->strand.")<br><small>[".$reg_seq->seq_dbname." ".$reg_seq->seq_dbassembly."]</small>";
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Coordinates:</b><br>$coord</div></td>";
-	}
-#get mutant and print out all information
-	if ($seqtable eq 'mutation_set') {
-	    my @mut=$dbh->get_data_by_primary_key('mutation_set',$seqid);
-	    my $regid=$mut[0];
-	    my $pazarregid=write_pazarid($regid,'RS');
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Mutant of Sequence<form name='seqlink$count' method='post' action='$pazar_cgi/seq_search.cgi' enctype='multipart/form-data'><input type='hidden' name='regid' value=\"$regid\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazarregid\"></form></div></td>";
-
-	    my $pazarmutid=write_pazarid($seqid,'MS');
-	    my $seqname=$mut[1];
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>$pazarmutid</b><br>$seqname</div></td>";
-
-	    my $reg_seq=pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$regid);
-	    my $gid=$reg_seq->PAZAR_gene_ID;
-
-        my $gidprefix = 'GS';
-	my $asterisk = "";
-
-           if($reg_seq->gene_type eq "marker")
-	   {
-                $gidprefix = 'MK';
-                $asterisk = "<span class='warning'>*</span>";
-           }
-
-	    my $pazargeneid = write_pazarid($gid,$gidprefix);
-	    my $gene_accession=$reg_seq->gene_accession;
-	    my @ens_coords = $ensdb->get_ens_chr($reg_seq->gene_accession);
-	    $ens_coords[5]=~s/\[.*\]//g;
-	    $ens_coords[5]=~s/\(.*\)//g;
-	    $ens_coords[5]=~s/\.//g;
-	    my $species = $ensdb->current_org();
-	    $species = ucfirst($species)||'-';
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='genelink$count' method='post' action='$pazar_cgi/gene_search.cgi' enctype='multipart/form-data'><input type='hidden' name='geneID' value=\"$pazargeneid\"><input type='hidden' name='ID_list' value='PAZAR_gene'><input type='hidden' name='excluded' value='$excluded'>$asterisk<input type=\"submit\" class=\"submitLink\" value=\"$pazargeneid\"><br>$asterisk<b>$ens_coords[5]</b><br>$asterisk$species</form></div></td>";
-
-	    my $seqstr=chopstr($mut[4],40)||'-';
-	    print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
-
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
-	    if ($mut[2]>0) {
-		my @mutmet=$dbh->get_data_by_primary_key('method',$mut[2]);
-		print "<b>Method:</b> $mutmet[0]<br>";
-	    }
-	    if ($mut[3]>0) {
-		my @mutref=$dbh->get_data_by_primary_key('ref',$mut[3]);
-		print "<b>PMID:</b> <a href=\"http://www.ncbi.nlm.nih.gov/sites/entrez?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=$mutref[0]\" target='pubwin' onClick=\"window.open('about:blank','pubwin');\">$mutref[0]</a><br>";
-	    }
-	    if ($mut[5] && $mut[5] ne '0') {
-		print "<b>Comments:</b> $mut[5]<br>";
-	    }
-	    print "</div></td>";
-	}
-
-#get construct and print out all information
-	if ($seqtable eq 'construct') {
-	    my @construct=$dbh->get_data_by_primary_key('construct',$seqid);
-	    my $pazarcoid=write_pazarid($seqid,'CO');
-	    my $seqname=$construct[0];
-	    print "<td width='80' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>Artificial Sequence</div></td>";
-	    print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>$pazarcoid<br>$seqname</div></td>";
-	    print "<td width='150' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>-</div></td>";
-
-	    my $seqstr=chopstr($construct[2],40)||'-';
-		print "<td height=100 width=300 class=\"basictd\" bgcolor=\"$colors{$bg_color}\"><div style=\"font-family:monospace;height:100; width:300;overflow:auto;\">".$seqstr."</div></td>";
-
-	    my $desc=$construct[1]||'-';
-	    print "<td width='250' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><b>Description:</b><br>$desc</div></td>";
-	}
-
-	my ($outtable,$outid,@outdat)=$dbh->links_to_data($key,'output');
-	print "<td width='100' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>";
-	my @outdata;
-	for (my $i=0;$i<(@outdat-3);$i++) {
-	    if ($outdat[$i] && $outdat[$i] ne '0') {
-		push @outdata,$outdat[$i];
-	    }
-	}
-	print join(" ",@outdata)."</div></td>";
-
-	if ($tftable eq 'funct_tf') {
-	    my $tf = $dbh->create_tf;
-	    my $complex = $tf->get_tfcomplex_by_id($tfid, 'notargets');
-	    my $pazartfid=write_pazarid($tfid,'TF');
-	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'><form name='tflink$pazartfid$count' method='post' action='$pazar_cgi/tf_search.cgi' enctype='multipart/form-data'><input type='hidden' name='ID_list' value='PAZAR_TF'><input type='hidden' name='geneID' value=\"".$pazartfid."\"><input type='hidden' name='excluded' value='$excluded'><input type=\"submit\" class=\"submitLink\" value=\"$pazartfid\"><br><b>".$complex->name."</b><br></form></div></td>";
-	} elsif ($tftable eq 'sample') {
-	    my @sample=$dbh->get_data_by_primary_key('sample',$tfid);
-	    my @samplecell=$dbh->get_data_by_primary_key('cell',$sample[1]);
-	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>".$sample[0]."&nbsp;".$samplecell[0]."</div></td>";
-	} else {
-	    print "<td width='200' class=\"basictdcenter\" bgcolor=\"$colors{$bg_color}\"><div class='overflow'>UNKNOWN</div></td>";
-	}
-	print "</tr>";
-    	$bg_color = 1 - $bg_color;
-    }
-    print "</table>";
 }
-
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
-print $template_tail->output;
-
-#split long lines into several smaller ones by inserting a line break at a specified character interval
-#parameters: string to break up, interval
+print "</table></div>";
+my $temptail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
+print $temptail->output;
 sub chopstr {
-
-    my $longstr = $_[0];
-    my $interval = $_[1];
-    my $newstr = "";
-
-    while(length($longstr) > $interval)
-    {
-#put line break at character+1 position
-	$newstr = $newstr.substr($longstr,0,$interval)."<br>";
-	$longstr = substr($longstr,$interval); #return everything starting at interval'th character	
-    }
-    $newstr = $newstr . $longstr;
-
-    return $newstr;
+	my ($longstr,$intervl) = @_;
+	my $newstr = "";
+	while (length($longstr) > $intervl) {
+		$newstr = $newstr . substr($longstr, 0, $intervl) . "<br>";
+		$longstr = substr($longstr, $intervl);
+	}
+	$newstr = $newstr . $longstr;
+	return $newstr;
 }
-
 sub select {
-
-    my ($dbh, $sql) = @_;
-    my $sth=$dbh->prepare($sql);
-    $sth->execute or die "$dbh->errstr\n";
-    return $sth;
+	my ($dbh,$sql) = @_;
+	my $sth = $dbh->prepare($sql);
+	$sth->execute or die "$dbh->errstr\n";
+	return $sth;
 }
-
+sub wpid {
+	my ($id,$type) = @_;
+	my $id7d = sprintf "%07d", $id;
+	my $pzid = $type . $id7d;
+	return $pzid;
+}
 sub convert_id {
-    my ($auxdb,$genedb,$geneid,$ens)=@_;
-    undef my @id;
-    my $add=$genedb . "_to_llid";
-# print "Working on $geneid in $genedb; $add";
-    @id=$auxdb->$add($geneid);
-    my $ll = $id[0];
-    my @ensembl;
-    if ($ll) { 
-	@ensembl=$ens?$ens:$auxdb->llid_to_ens($ll) ;
-    }
-    return $ensembl[0];
-}
-
-sub write_pazarid {
-    my $id=shift;
-    my $type=shift;
-    my $id7d = sprintf "%07d",$id;
-    my $pazarid=$type.$id7d;
-    return $pazarid;
+	my ($auxdb,$genedb,$geneid,$ens) = @_;
+	undef my @id;
+	my $add = $genedb . "_to_llid";
+	@id = $auxdb->$add($geneid);
+	my $ll = $id[0];
+	my @ensembl;
+	if ($ll) { 
+		@ensembl = $ens?$ens:$auxdb->llid_to_ens($ll) ;
+	}
+	return $ensembl[0];
 }

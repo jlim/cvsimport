@@ -10,51 +10,45 @@ my $pazarcgipath = $ENV{PAZARCGIPATH};
 
 require "$pazarcgipath/getsession.pl";
 
-my $query=new CGI;
-
-# open the html header template
+my $query = new CGI;
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
-
-# fill in template parameters
-$template->param(TITLE => 'PAZAR Login');
+my $temptail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
+$template->param(TITLE => "Sign in | PAZAR");
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
+my $msg;
 
-if($loggedin eq 'true') {
-    #log out link
-    $template->param(LOGOUT => "$info{first} $info{last} logged in. "."<a href=\'$pazar_cgi/logout.pl\'>Log Out</a>");
-    # send the obligatory Content-Type and print the template output
-    print "Content-Type: text/html\n\n", $template->output;
-    #print logout message if user already logged in
-    print "<p class=\"warning\">You are already logged in!</p>";
+if ($loggedin eq "true") {
+	$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> <a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});
+	$msg = qq{
+		<h1>Sign in</h1>
+		<div class="b">You are currently signed in as $info{first} $info{last} (<a href="mailto:$info{user}">$info{user}</a>). <a href="$pazar_cgi/logout.pl" class="b">Click here to sign out</a></div>};
 } else {
-    #log in link
-    $template->param(LOGOUT => "<a href=\'$pazar_cgi/login.pl\'>Log In</a>");
-
-# send the obligatory Content-Type and print the template output
-print "Content-Type: text/html\n\n", $template->output;
-
-
- print<<Page_Done;
-
-	<p class="title1">PAZAR Login</p>
-	<FORM  method="POST" action="$pazar_cgi/dologin.pl">
-	<table>
-	<tr><td >Email</td><td> <input type="text" name="username"></td></tr>      
-	<tr><td >Password</td><td> <input type="password" name="password"></td></tr>
-	<tr><td></td><td><INPUT type="submit" name="login" value="login"></td></tr>
-	</table>
-	</FORM>
-<p>
-<table>
-<tr><td>New User?</td><td><a href="$pazar_cgi/register.pl">Click here to REGISTER</a></td></tr>
-
-<tr><td>Forgotten Password?</td><td><a href="mailto:pazar\@cmmt.ubc.ca">Click here to EMAIL US</a></td></tr>
-</table>
-</p>
-Page_Done
+	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
+	$msg = qq{
+		<h1>Sign in</h1>
+		<div class="p10bo">
+			<form method="POST" action="$pazar_cgi/dologin.pl">
+				<table cellspacing="0" cellpadding="0" border="0">
+					<tbody>
+						<tr>
+							<td class="p10ro p5bo b">Email</td>
+							<td class="p10ro p5bo"><input type="text" name="username"></td>
+						</tr><tr>
+							<td class="p10ro p5bo b">Password</td>
+							<td class="p10ro p5bo"><input type="password" name="password"></td>
+						</tr><tr>
+							<td class="p10ro p5bo">&nbsp;</td>
+							<td class="p10ro p5bo"><input type="submit" name="login" value="Sign in"></td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+		</div>
+		<div class="b">New User? <a href="$pazar_cgi/register.pl" class="b">Click here to register.</a></div>
+		<div class="b">Forgotten password? <a href="mailto:pazar\@cmmt.ubc.ca">Click here to request a new password.</a></div>
+	};
 }
 
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
-print $template_tail->output;
+print "Content-Type: text/html\n\n", $template->output;
+print $msg . $temptail->output;

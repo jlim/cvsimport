@@ -1,45 +1,47 @@
 #!/usr/bin/perl
 
 use HTML::Template;
-
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
-# open the html header template
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
-
-# fill in template parameters
-$template->param(TITLE => 'PAZAR Contact Information');
+my $temptail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
+$template->param(TITLE => "Contact information | PAZAR");
 $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
 
-# send the obligatory Content-Type and print the template output
+require "$pazarcgipath/getsession.pl";
+if ($loggedin eq "true") {
+	$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> <a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});
+} else {
+	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
+}
+
+
 print "Content-Type: text/html\n\n", $template->output;
+print qq{
+	<h1>Contact information</h1>
+	<p>PAZAR is hosted by <a target="_blank" href="http://sourceforge.net/projects/pazar">SourceForge</a>, where everyone can go and browse the <a href="http://pazar.cvs.sourceforge.net/pazar/" target="_blank">CVS repository</a>. Our mailing list, <a href="http://lists.sourceforge.net/lists/listinfo/pazar-news" target="_blank">"News and Views"</a>, is available in which every major development will be posted. Two forums are also available so that everyone can ask for help (at the <a href="https://sourceforge.net/forum/forum.php?forum_id=520428" target="_blank">PAZAR SourceForge help forum</a>) or make any comment or suggestion (at the <a href="https://sourceforge.net/forum/forum.php?forum_id=512784" target="_blank">PAZAR SourceForge open discussion forum</a>). If you want to contact us more directly, please use the e-mail below.</p>
+	<h3>Current project members (alphabetical order)</h3>
+	<ul>
+		<li><span class="b">Jonathan Lim</span>, developer</li>
+		<li><span class="b">Anthony McCallum</span>, developer</li>
+		<li><span class="b">Elodie Portales-Casamar</span>, developer</li>
+		<li><span class="b">Wyeth W. Wasserman</span>, PI</li>
+		<li><span class="b">Dimas Yusuf</span>, developer</li>
+		<li><span class="b">Cindy Zhang</span>, data curator</li>
+		<li>Team e-mail: <img style="border:0; height:10px;" src="$pazar_html/images/email.gif"> <a href="mailto:pazar\@cmmt.ubc.ca">pazar\@cmmt.ubc.ca</a></li>
+	</ul>
+	<h3>Alumni (alphabetical order)</h3>
+	<ul>
+		<li><span class="b">Christopher Dickman</span>, data curator</li>
+		<li><span class="b">Steven Jiang</span>, data curator</li>
+		<li><span class="b">Stefan Kirov</span>, developer</li>
+		<li><span class="b">Stuart Lithwick</span>, data curator</li>
+		<li><span class="b">Jay R. Snoddy</span>, PI</li>
+		<li><span class="b">Magdalena Swanson</span>, data curator</li>
+		<li><span class="b">Amy Ticoll</span>, data curator</li>
+	</ul>};
 
-print<<page;
-          <p class="title1">PAZAR - Contact Information</p>
-<table border="0" cellpadding="0" cellspacing="0" width="550">
-<tbody><tr><td style='text-align: justify;'>PAZAR is hosted by <a target="_blank" href="http://sourceforge.net/projects/pazar">sourceforge.net</a>, where everyone can go and browse the <a href="http://pazar.cvs.sourceforge.net/pazar/" target="_blank">CVS repository</a>.<br>
-A mailing list <a href="http://lists.sourceforge.net/lists/listinfo/pazar-news" target="_blank">'News and Views'</a> is available in which every major development will be posted.<br>
-Two forums are also available so that everyone can ask for help (<a href="https://sourceforge.net/forum/forum.php?forum_id=520428" target="_blank">'Help' forum</a>) or make any comment or suggestion (<a href="https://sourceforge.net/forum/forum.php?forum_id=512784" target="_blank">'Open Discussion' forum</a>).<br>
-If you want to contact us more directly, please use the e-mail below.<br><br><hr>
-</td></tr></tbody></table>
-          <p class="title2">Project Members (alphabetical order):</p>
-          <p >
-          Stefan Kirov, developer<br>
-          Jonathan Lim, developer<br>
-          Stuart Lithwick, data curator<br>
-          Elodie Portales-Casamar, developer<br>
-          Jay R. Snoddy, PI<br>
-          Magdalena Swanson, data curator<br>
-          Amy Ticoll, data curator<br>
-          Wyeth W. Wasserman, PI</p>
-
-          <p class="title2">Team e-mail: &nbsp;&nbsp;<a href="mailto:pazar\@cmmt.ubc.ca"><img style="border: 0px solid ; height: 12px;" src="$pazar_html/images/email.gif"></a></p>
-
-page
-
-# print out the html tail template
-my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");
-print $template_tail->output;
+print $temptail->output;
