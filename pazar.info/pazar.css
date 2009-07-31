@@ -1,3 +1,26 @@
+.blklk {
+	border: 1px solid #eeeeee;
+	background-color: #ffffff;
+	text-decoration: none;
+	margin-bottom: 5px;
+	font-weight: bold;
+	cursor: pointer;
+	color: #888888;
+	display: block;
+	padding: 5px;
+}
+.blklk:hover,
+.blklk-a {
+	border: 1px solid #eeeeee;
+	background-color: #eeeeee;
+	text-decoration: none;
+	margin-bottom: 5px;
+	font-weight: bold;
+	cursor: pointer;
+	color: #000000;
+	display: block;
+	padding: 5px;
+}
 p {
 	padding: 0 0 6px 0;
 	margin: 0 0 0 0;
@@ -444,12 +467,12 @@ a:hover {
 .tftt,
 .tftabletitle {
 	background-color: #e65656;
-	border: 0;
 	vertical-align: top;
 	padding-right: 5px;
 	padding-left: 5px;
 	font-weight: bold;
 	text-align: left;
+	border: 0;
 }
 .tfdst,
 .tfdetailstabletitle {
@@ -638,6 +661,7 @@ img {
 .p40bo {padding-bottom: 40px;}
 .m5ro {margin-right: 5px;}
 .m10ro {margin-right: 10px;}
+.m20bo {margin-bottom: 20px;}
 form {
 	padding: 0;
 	margin: 0;

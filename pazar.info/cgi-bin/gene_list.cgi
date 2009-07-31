@@ -2,10 +2,17 @@
 
 use pazar;
 use pazar::talk;
+use HTML::Template;
 
 use CGI qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
-#use CGI::Debug( report => 'everything', on => 'anything' );
+
+# use CGI::Debug(report => "everything", on => "anything");
+
+my $pazar_cgi = $ENV{PAZAR_CGI};
+my $pazar_html = $ENV{PAZAR_HTML};
+my $pazarcgipath = $ENV{PAZARCGIPATH};
+my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 
 use constant DB_DRV  => $ENV{PAZAR_drv};
 use constant DB_NAME => $ENV{PAZAR_name};
@@ -13,290 +20,129 @@ use constant DB_USER => $ENV{PAZAR_pubuser};
 use constant DB_PASS => $ENV{PAZAR_pubpass};
 use constant DB_HOST => $ENV{PAZAR_host};
 
+my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
+my $temptail = HTML::Template->new(filename => "tail.tmpl");
+$template->param(TITLE => "List of target genes | PAZAR");
+$template->param(JAVASCRIPT_FUNCTION => qq{ });
+$template->param(PAZAR_HTML => $pazar_html);
+$template->param(PAZAR_CGI => $pazar_cgi);
+$template->param(ONLOAD_FUNCTION => "");
+
+my $pazarcgipath = $ENV{PAZARCGIPATH};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazar_cgi = $ENV{PAZAR_CGI};
-my $pazarcgipath = $ENV{PAZARCGIPATH};
 
 require "$pazarcgipath/getsession.pl";
 
 my $get = new CGI;
 my %param = %{$get->Vars};
 
-#initialize the html page
-print $get->header("text/html");
-
-#connect to the database
 my $dbh = pazar->new( 
-		      -host          =>    DB_HOST,
-		      -user          =>    DB_USER,
-		      -pass          =>    DB_PASS,
-		      -dbname        =>    DB_NAME,
-		      -drv           =>    DB_DRV,
-                      -globalsearch  =>    'yes');
+	-host => DB_HOST,
+	-user => DB_USER,
+	-pass => DB_PASS,
+	-dbname => DB_NAME,
+	-drv => DB_DRV,
+	-globalsearch => "yes");
 
-my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+my $talkdb = pazar::talk->new(
+	DB =>"ensembl",
+	USER =>$ENV{ENS_USER},
+	PASS =>$ENV{ENS_PASS},
+	HOST =>$ENV{ENS_HOST},
+	DRV =>"mysql");
 
 my $bg_color = 0;
-my %colors = (0 => "#fffff0",
-	      1 => "#BDE0DC");
+my %colors = (
+	0 => "#fffff0",
+	1 => "#BDE0DC");
 
-my $projects=&select($dbh, "SELECT * FROM project WHERE upper(status)='OPEN' OR upper(status)='PUBLISHED'");
+my $projects = &select($dbh, qq{SELECT * FROM project WHERE upper(status)="OPEN" OR upper(status)="PUBLISHED"});
 our %sqlcache;
 my @desc;
-while (my $project=$projects->fetchrow_hashref) {
-    push @desc, $project;
+while (my $project = $projects->fetchrow_hashref) {
+	push @desc, $project;
 }
-if ($loggedin eq 'true') {
-    foreach my $proj (@projids) {
-	my $restricted=&select($dbh, "SELECT * FROM project WHERE project_id='$proj' and upper(status)='RESTRICTED'");
-	while (my $restr=$restricted->fetchrow_hashref) {
-	    push @desc, $restr;
-	}
-    }
-}
-
-=oLD new=ajax
-my $tsrs=$dbh->prepare("SELECT * FROM tsr WHERE gene_source_id=?")||die DBI::errstr;
-my %gene_project;
-foreach my $project (@desc) {
-     $gh->execute($project->{project_id})||die DBI::errstr;
-	while (my $gene=$gh->fetchrow_hashref) {
-	    my $found=0;
-	    $tsrs->execute($gene->{gene_source_id})||die DBI::errstr;
-		while (my $tsr=$tsrs->fetchrow_hashref && $found==0) {
-			my @coords = $talkdb->get_ens_chr($gene->{db_accn});
-			$coords[5]=~s/\[.*\]//g;
-			$coords[5]=~s/\(.*\)//g;
-			$coords[5]=~s/\.//g;
-			my $species = $talkdb->current_org();
-			$species = ucfirst($species)||'-';
-
-			my $pazargeneid = write_pazarid($gene->{gene_source_id},'GS');
-			my $gene_desc=$gene->{description};
-			if ($gene_desc eq '0'||$gene_desc eq '') {$gene_desc='-';}
-			push (@{$gene_project{$project->{project_name}}}, {
-                            ID => $pazargeneid,
-			    accn => $gene->{db_accn},
-			    desc => $gene_desc,
-			    ens_desc => $coords[5],
-                            species => $species});
-			$found++;
+if ($loggedin eq "true") {
+	foreach my $proj (@projids) {
+		my $restricted = &select($dbh, qq{SELECT * FROM project WHERE project_id="$proj" AND upper(status)="RESTRICTED"});
+		while (my $restr = $restricted->fetchrow_hashref) {
+			push @desc, $restr;
 		}
 	}
 }
-=cut
+
 my %gene_project;
 my %marker_project;
 
-my $mh=$dbh->prepare("SELECT count(distinct db_accn) FROM marker where project_id=?")||die DBI::errstr;  
-
-my $gh=$dbh->prepare("SELECT count(distinct db_accn) FROM gene_source a, tsr b WHERE a.project_id=? and a.gene_source_id=b.gene_source_id")||die DBI::errstr;
+my $mh = $dbh->prepare(qq{SELECT count(distinct db_accn) FROM marker WHERE project_id=?}) || die DBI::errstr;
+my $gh = $dbh->prepare(qq{SELECT count(distinct db_accn) FROM gene_source a, tsr b WHERE a.project_id=? AND a.gene_source_id=b.gene_source_id}) || die DBI::errstr;
 foreach my $project (@desc) {
-     $gh->execute($project->{project_id})||die DBI::errstr;
-	my $cnt=$gh->fetchrow_array;
-
-     $mh->execute($project->{project_id})||die DBI::errstr;
-        my $mcnt=$mh->fetchrow_array;
-
-	 $gene_project{$project->{project_name}}{CNT}=$cnt;
-	 $gene_project{$project->{project_name}}{ID}=$project->{project_id};
-
-         $marker_project{$project->{project_name}}{CNT}=$mcnt;
-         $marker_project{$project->{project_name}}{ID}=$project->{project_id};
-
+	$gh->execute($project->{project_id}) || die DBI::errstr;
+	my $cnt = $gh->fetchrow_array;
+	$mh->execute($project->{project_id}) || die DBI::errstr;
+	my $mcnt = $mh->fetchrow_array;
+	$gene_project{$project->{project_name}}{CNT} = $cnt;
+	$gene_project{$project->{project_name}}{ID} = $project->{project_id};
+	$marker_project{$project->{project_name}}{CNT} = $mcnt;
+	$marker_project{$project->{project_name}}{ID} = $project->{project_id};
 }
-
-
-    print "<head>
-<title>PAZAR - Gene List</title>
-<script src='$pazar_html/js/sortable.js'></script>
-<script type=\"text/javascript\">
-function showHide(inputID) {
-	var theObj = document.getElementById(inputID);
-		theDisp = theObj.style.display == \"none\" ? \"block\" : \"none\";
-		theObj.style.display = theDisp;
-	if (theObj.getAttribute(\"loaded\")=='no') {
-		var prev=theObj.innerHTML;
-		theObj.setAttribute(\"loaded\",\"yes\");
-		if (theObj.getAttribute(\"genes\")<1000) {
-			theObj.innerHTML=prev+'Loading data now...<br>';
-			getgenes(inputID);
-		}
-		else {
-			theObj.innerHTML=prev+'This project contains more than 1000 genes. It can take a while for the genes to display.<br><input type=\"button\" value=\"Display genes anyway\" onclick=\"getgenes(\\''+inputID+'\\');\">';
-		}
-	}
-}
-
-
-function getgenes(divId) {
- var divObj = document.getElementById(divId);
-var http=false;
-if (divObj.getAttribute(\"genes\")>1000) {
-	divObj.innerHTML=\"Loading data now...<br>\";
-}
-if(navigator.appName == \"Microsoft Internet Explorer\") {
-  http = new ActiveXObject(\"Microsoft.XMLHTTP\");
+if ($loggedin eq "true") {
+	$template->param(LOGOUT => qq{<span class="b">You are signed in as $info{first} $info{last}.</span> <a href="$pazar_cgi/logout.pl" class="b">Sign out</a>});
 } else {
-  http = new XMLHttpRequest();
+	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
 }
-var args='project_id='+divObj.getAttribute(\"project_id\");
+print "Content-Type: text/html\n\n", $template->output;
+print qq{
+	<div class="docp">
+		<div class="float-r b txt-grey">PAZAR Database</div>
+		<a href="$pazar_cgi/gene_search.cgi" class="b">&laquo; Return to gene search</a>
+		<div class="clear-r"></div>
+	</div>
+	<h1>List of target genes</h1>};
 
-//check if divId is for marker or gene ie. ends with 'markers' or not and send type param
-if (divId.match(\"markers\"+\"\$\"))
-{
-	args+='&table=marker';
-}
-else
-{
-	args+='&table=gene_source';
-}
-
-
-http.open(\"POST\", \"proj2gene_list.pl\",true);
-//Send the proper header information along with the request
-http.setRequestHeader(\"Content-type\", \"application\/x-www-form-urlencoded\");
-http.setRequestHeader(\"Content-length\", args.length);
-http.setRequestHeader(\"Connection\", \"close\");
-http.onreadystatechange=function() {
-  if(http.readyState == 4) {
-    divObj.innerHTML=http.responseText;
- 	for (j=0;j<divObj.childNodes.length;j++) {
-      		if( divObj.childNodes[j].tagName == 'TABLE' ) {
-       	 		ts_makeSortable(divObj.childNodes[j]);
-      		}
-  	}
-  }
-}
-http.send(args);
-}
-
-</script>
-<STYLE type=\"text/css\">
-.title1 {
-font-weight: bold;
-font-size: 18px;
-}
-.summarytable {
-border: 2px solid black;
-border-collapse: collapse;
-}
-.genedetailstabletitle {
-padding-left: 5px;
-padding-right: 5px;
-text-align: center;
-vertical-align: top;
-background-color: #39aecb;
-border: 1px solid black;
-}
-.basictd {
-padding-left: 5px;
-padding-right: 5px;
-text-align: left;
-vertical-align: top;
-border: 1px solid black;
-}
-.submitLink {
-background-color: transparent;
-text-decoration: underline;
-font-size: 14px;
-border: none;
-cursor: pointer;
-cursor: hand;
-  }
-</style>
-    </head>
-    <body style=\"background-color: rgb(255, 255, 255);\" onblur=\"self.focus();\">
-    <b><span class=\"title1\">Gene List sorted by project name:</span></b><br>
-   You can change the sorting options by clicking on the column headers.<br>
-<table width='750'><ul>";
-
-my @proj_names=sort(keys %gene_project);
+my @proj_names = sort(keys %gene_project);
 foreach my $proj_name (@proj_names) {
-my $div_id=$proj_name;
-$div_id=~s/ /_/g;
-my $style='display:none';
-if ($param{opentable} eq $proj_name) {$style='display:block';}
-
-#generate div ids for markers
-
-my $mdiv_id=$proj_name."markers";
-$mdiv_id=~s/ /_/g;
-my $mstyle='display:none';
-if ($param{opentable} eq $proj_name."markers") {$mstyle='display:block';}
-
-#####################
-
-print " <tr><td width='750'><li><a href=\"#$div_id\" onclick = \"showHide('$div_id');\">$proj_name</a>&nbsp&nbsp<small>($gene_project{$proj_name}{CNT} genes)</small></li></td></tr><tr><td  width='750'>
-<div id=\"$div_id\" style=\"$style\" loaded=\"no\" project_id=\"$gene_project{$proj_name}{ID}\" genes=\"$gene_project{$proj_name}{CNT}\">";
-
-print " <tr><td width='750'><li><a href=\"#$mdiv_id\" onclick = \"showHide('$mdiv_id');\">$proj_name markers</a>&nbsp&nbsp<small>($marker_project{$proj_name}{CNT} genes)</small></li></td></tr><tr><td  width='750'>
-<div id=\"$mdiv_id\" style=\"$mstyle\" loaded=\"no\" project_id=\"$marker_project{$proj_name}{ID}\" genes=\"$marker_project{$proj_name}{CNT}\">";
-
-=oLD new ajax
-<table width='750' class='summarytable'><tr>";
-    print "<td class='genedetailstabletitle' width='100'><form name=\"species_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='species'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Species\"></form></td>";
-    print "<td class='genedetailstabletitle' width='80'><form name=\"ID_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ID'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"PAZAR Gene ID\"></form></td>";
-    print "<td class='genedetailstabletitle' width='80'><form name=\"desc_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"Gene name\"><small>(user defined)</small></form></td>";
-    print "<td class='genedetailstabletitle' width='80'><form name=\"accn_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='accn'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene ID\"></form></td>";
-    print "<td class='genedetailstabletitle' width='120'><form name=\"ens_desc_browse\" method=\"post\" action=\"$pazar_cgi/gene_list.cgi\" enctype=\"multipart/form-data\" target=\"_self\"><input type='hidden' name='BROWSE' value='ens_desc'><input type='hidden' name='opentable' value='$proj_name'><input type=\"submit\" class=\"submitLink\" value=\"EnsEMBL Gene Description\"></form></td>";
-    print "</tr>";
-
-    my @sorted;
-    if ($param{BROWSE} eq 'species') {
-	@sorted=sort {lc($a->{species}) cmp lc($b->{species}) or lc($a->{desc}) cmp lc($b->{desc})} @{$gene_project{$proj_name}};
-    } elsif ($param{BROWSE} eq 'ID') {
-	@sorted=sort {$a->{ID} cmp $b->{ID}} @{$gene_project{$proj_name}};
-    } elsif ($param{BROWSE} eq 'ens_desc') {
-	@sorted=sort {lc($a->{ens_desc}) cmp lc($b->{ens_desc}) or lc($a->{species}) cmp lc($b->{species})} @{$gene_project{$proj_name}};
-    } elsif ($param{BROWSE} eq 'accn') {
-	@sorted=sort {$a->{accn} cmp $b->{accn}} @{$gene_project{$proj_name}};
-    } else {
-	@sorted=sort {lc($a->{desc}) cmp lc($b->{desc}) or lc($a->{species}) cmp lc($b->{species})} @{$gene_project{$proj_name}};
-    }
-
-foreach my $gene_data (@sorted) {
-
-print "<tr><td class='basictd' width='100' bgcolor=\"$colors{$bg_color}\">$gene_data->{species}</td>";
-print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\"><a href=\"#$gene_data->{accn}\" onClick=\"javascript:window.opener.document.gene_search.geneID.value='$gene_data->{accn}';window.opener.document.gene_search.ID_list.options[1].selected=true;window.opener.focus();window.close();\">$gene_data->{ID}</a></td>";
-print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\">$gene_data->{desc}</td>";
-print "<td class='basictd' width='80' bgcolor=\"$colors{$bg_color}\">$gene_data->{accn}</td>";
-print "<td class='basictd' width='120' bgcolor=\"$colors{$bg_color}\">$gene_data->{ens_desc}</td>";
-print "</tr>";
-
-$bg_color =  1 - $bg_color;
+	my $div_id = $proj_name;
+	$div_id =~ s/ /_/g;
+	my $style = "display: none";
+	if ($param{opentable} eq $proj_name) {
+		$style = "display: block";
+	}
+	my $mdiv_id = $proj_name . "markers";
+	$mdiv_id =~ s/ /_/g;
+	my $mstyle = "display: none";
+	if ($param{opentable} eq $proj_name . "markers") {
+		$mstyle = "display: block";
+	}
+	my $nuberg = $gene_project{$proj_name}{CNT};
+	my $geneid = $marker_project{$proj_name}{ID};
+	my $marker = $marker_project{$proj_name}{CNT};
+	print qq{
+		<div class="blklk" onclick="showHideGeneList('$div_id');">$proj_name ($nuberg genes)</div>
+		<div class="p20lo"><div id="$div_id" style="$style" loaded="no" project_id="$geneid" genes="$nuberg"></div></div>
+		<div class="blklk" onclick="showHideGeneList('$mdiv_id');">$proj_name markers ($marker genes)</div>
+		<div class="p20lo"><div id="$mdiv_id" style="$mstyle" loaded="no" project_id="$geneid" genes="$marker"></div></div>};
 }
-print "</table>";
-=cut
-
-print "<br></div></td></tr>";
-}
-print "</ul></table></body></html>";
-
-
-
 
 sub select {
-
-    my ($dbh, $sql,$cache) = @_;
-    my $sth;
-    if ($cache) {
-	    unless ($sqlcache{$sql}) {
-		$sth=$dbh->prepare($sql);
-		$sqlcache{$sql}=$sth;
+	my ($dbh,$sql,$cache) = @_;
+	my $sth;
+	if ($cache) {
+		unless ($sqlcache{$sql}) {
+			$sth = $dbh->prepare($sql);
+			$sqlcache{$sql} = $sth;
 		}
+	} else {
+		$sth = $dbh->prepare($sql);
 	}
-	else {
-		$sth=$dbh->prepare($sql);
-	}
-	    $sth->execute or die "$dbh->errstr\n";
-    return $sth;
+	$sth->execute or die "$dbh->errstr\n";
+	return $sth;
 }
-
 sub write_pazarid {
-    my $id=shift;
-    my $type=shift;
-    my $id7d = sprintf "%07d",$id;
-    my $pazarid=$type.$id7d;
+    my $id = shift;
+    my $type = shift;
+    my $id7d = sprintf "%07d", $id;
+    my $pazarid = $type . $id7d;
     return $pazarid;
 }

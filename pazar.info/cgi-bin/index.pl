@@ -12,6 +12,7 @@ my $pazarcgipath    = $ENV{PAZARCGIPATH};
 my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 our $searchtab = "tfs";
 my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
+my $temptail = HTML::Template->new(filename => "tail.tmpl");
 $template->param(TITLE => "Search for Transcription Factors (TFs) | PAZAR");
 $template->param(PAZAR_HTML          => $pazar_html);
 $template->param(PAZAR_CGI           => $pazar_cgi);
@@ -120,5 +121,4 @@ sub pnum {
 	}
 	return $fnu;
 }
-my $temptail = HTML::Template->new(filename => "tail.tmpl");
 print $temptail->output;

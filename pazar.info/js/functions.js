@@ -1,4 +1,53 @@
 var pazar_cgi = "/cgi-bin";
+function showHideGeneList(inputID) {
+	var theObj = document.getElementById(inputID);
+	theDisp = theObj.style.display == "none" ? "block" : "none";
+	theObj.style.display = theDisp;
+	if (theObj.getAttribute("loaded") == "no") {
+		var prev = theObj.innerHTML;
+		theObj.setAttribute("loaded","yes");
+		if (theObj.getAttribute("genes") < 1000) {
+			theObj.innerHTML = prev + "<div class='p20lo p20bo'><div class='b p5'>Loading data now...</div></div>";
+			getgenes(inputID);
+		} else {
+			theObj.innerHTML = prev + "<div class='p20lo p20bo'><div class='b p5'>This project contains more than 1,000 genes. It can take a while for the genes to display. <input type='button' value='Load genes anyway' onclick=\"getgenes('"+inputID+"');\"></div></div>";
+		}
+	}
+}
+function getgenes(divId) {
+	var divObj = document.getElementById(divId);
+	var http = false;
+	if (divObj.getAttribute("genes") > 1000) {
+		divObj.innerHTML = "<div class='p20lo p20bo'><div class='b p5'>Loading data now...</div></div>";
+	}
+	if (navigator.appName == "Microsoft Internet Explorer") {
+		http = new ActiveXObject("Microsoft.XMLHTTP");
+	} else {
+		http = new XMLHttpRequest();
+	}
+	var args = "project_id=" + divObj.getAttribute("project_id");
+	if (divId.match("markers"+"\$")) {
+		args += "&table=marker";
+	} else {
+		args += "&table=gene_source";
+	}
+	http.open("POST", "proj2gene_list.pl",true);
+	http.setRequestHeader("Content-type", "application\/x-www-form-urlencoded");
+	http.setRequestHeader("Content-length", args.length);
+	http.setRequestHeader("Connection", "close");
+	http.onreadystatechange = function() {
+		if (http.readyState == 4) {
+			divObj.innerHTML=http.responseText;
+			for (j=0; j<divObj.childNodes.length; j++) {
+				if( divObj.childNodes[j].tagName == 'TABLE' ) {
+					ts_makeSortable(divObj.childNodes[j]);
+				}
+			}
+		}
+	}
+	http.send(args);
+}
+
 function correctSubmitHandler(e) {
 	if (e && e.preventDefault)
 		e.preventDefault();

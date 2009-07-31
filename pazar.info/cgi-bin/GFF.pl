@@ -54,24 +54,24 @@ print qq{
 			<h3>Mandatory attributes</h3>
 			<div class="p5to p5bo"><ul>
 				<li>
-					<div class="b p5bo">sequence</div>
+					<p class="b">sequence</p>
 					<ul>
 						<li>example &mdash; <div class="inline p5 bg-lg monospace"> sequence="ATTTGTAGGAGTGAGTCAGCTGACCCGC"; </div></li>
 					</ul>
 				</li>
 				<li>
-					<div class="b p5bo">db_seqinfo</div> 
+					<p class="b">db_seqinfo</p> 
 					<ul>
 						<li>format &mdash; <span class="b">database:assembly</span></li>
 						<li>example &mdash; <div class="inline p5 bg-lg monospace"> db_seqinfo="EnsEMBL:NCBI 35"; </li>
 					</ul>
 				</li>
-				<li><div class="b p5bo">species</div>
+				<li><p class="b">species</p>
 					<ul>
 						<li>example &mdash; <div class="inline p5 bg-lg monospace"> species="Homo sapiens"; </div></li>
 					</ul>
 				</li>
-				<li><div class="b p5bo">db_geneinfo</div>
+				<li><p class="b">db_geneinfo</p>
 					<ul>
 						<li>format &mdash; <span class="b">database:accession:name</span></li>
 						<li>example &mdash; <div class="inline p5 bg-lg monospace"> db_geneinfo="EnsEMBL_gene:ENSG00000133256:PDE6B"; </div></li>
@@ -81,18 +81,93 @@ print qq{
 			</ul></div>
 			
 			<h3>Optional attributes</h3>
-			<p><span class="b">band=</span>""; # eg. "p16.3"<br>
-			<span class="b">db_transcriptinfo=</span>"database:accession:name"; # eg. "EnsEMBL_transcript:ENST00000255622"<br>The database can be either of the following:EnsEMBL Transcript, RefSeq, SwissProt. Last part (isoform name) optional.<br>
-			<span class="b">transcript_start=</span>""; # eg. "609373"<br>
-			<span class="b">analysis_name=</span>""; # eg. "gff_example1"<br><span class='red'>Note:</span> Please ensure that you provide the same analysis name to all records belonging to the same experiment.<br>
-			<span class="b">analysis_comment=</span>""; # eg. "some comment on the experiment"<br><span class='red'>Note:</span> Please ensure that you provide the same analysis comment to all records belonging to the same experiment.<br>
-			<span class="b">db_tfinfo=</span>"database:accession:name"; # eg. "EnsEMBL_transcript:ENST00000250471:NRL"<br>The database can be either of the following:EnsEMBL Transcript, RefSeq, SwissProt.<br><span class='red'>Note:</span> The record is stored as an interaction if db_tfinfo is provided. If you want to record an interaction but the factor is unknown, state db_tfinfo="unknown". If db_tfinfo is not provided, the record will be stored as an expression.<br>
-			<span class="b">method=</span>""; # eg. "SELEX"<br>
-			<span class="b">evidence=</span>""; # should be either "curated" or "prediction"<br>
-			<span class="b">pmid=</span>""; # eg. "15264535"<br>
-			<span class="b">cell_type</span>="cell:species"; # eg. "HepG2:Homo sapiens" Last part (species) optional.<br>
-			<span class="b">expression=</span>"level:scale"; # eg. "56:percent"<br>Use this field if you want to record a specific expression level. If not used, an expression experiment is stored as 'induced'.<br>
-			<span class="b">impaired_mutant=</span>"sequence"; # The format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use 'N' where the original nucleotides were.<br></p>
+			<div class="p5to p5bo"><ul>
+				<li>
+					<p class="b">band</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">band="16.3";</div>
+					</ul>
+				</li>
+				<li>
+					<p class="b">db_transcriptinfo</p>
+					<ul>
+						<li>format &mdash; <span class="b">database:accession:name</span></li>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">db_transcriptinfo="EnsEMBL_transcript:ENST00000255622";</div></li>
+						<li>note &mdash; the database can be either "EnsEMBL_transcript", "RefSeq", or "SwissProt". Last part (isoform name) is optional.</li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">transcript_start</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">transcript_start="609373";</div></li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">analysis_name</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">analysis_name="gff_example1";</div></li>
+						<li>note &mdash; please ensure that you provide the same analysis name to all records belonging to the same experiment.</li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">analysis_comment</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">analysis_comment="some comment on the experiment";</div></li>
+						<li>note &mdash; please ensure that you provide the same analysis comment to all records belonging to the same experiment.</li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">db_tfinfo</p>
+					<ul>
+						<li>format &mdash; <span class="b">database:accession:name</span></li>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">db_tfinfo="EnsEMBL_transcript:ENST00000250471:NRL";</div></li>
+						<li>note &mdash; the database can be either "EnsEMBL_transcript", "RefSeq", or "SwissProt". The record is stored as an interaction if db_tfinfo is provided. If you want to record an interaction but the factor is unknown, state db_tfinfo="unknown". If db_tfinfo is not provided, the record will be stored as an expression.</li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">method</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">method="SELEX";</div></li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">evidence</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">evidence="curated";</div></li>
+						<li>note &mdash; the evidence should be either "curated" or "prediction".</li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">pmid</p>
+					<ul>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">pmid="15264535";</div></li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">cell_type</p>
+					<ul>
+						<li>format &mdash; <span class="b">cell:species</span></li>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">cell_type="HepG2:Homo sapiens";</div></li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">expression</p>
+					<ul>
+						<li>format &mdash; <span class="b">level:scale</span></li>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">expression="56:percent";</div></li>
+						<li>note &mdash; use this field if you want to record a specific expression level. If not used, an expression experiment is stored as "induced".</li>
+					</ul>
+				</li>
+				<li>
+					<p class="b">impaired_mutant</p>
+					<ul>
+						<li>format &mdash; <span class="b">sequence</span></li>
+						<li>example &mdash; <div class="inline p5 bg-lg monospace">impaired_mutant="gactactgatgGtaacNagtcga";</div></li>
+						<li>note &mdash; the format of the sequence should be lowercase where the original sequence remains and uppercase for the mutated nucleotides. If the mutation is a deletion use "N" where the original nucleotides were.</li>
+					</ul>
+				</li>
+			</ul>
+			</div>
 		</div>
 	<h2>Examples</h2>
 		<div class="p20lo">

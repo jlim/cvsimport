@@ -220,7 +220,6 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 		print qq{<div class="emp">$statusmsg</div>} if $statusmsg;
 		print qq{
 			<h1>My projects</h1>
-			<h2>Current projects</h2>
 			<div class="p10lo">};
 			
 		my %fields;
@@ -273,24 +272,21 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 				<div class="show" id="1_pro$proj_id">
 				<h3>
 					<div class="float-r txt-grey"> No. <span class="b">$proj_id</span></div>
-					<a href="$pazar_cgi/project.pl?project_name=$projdetails[1]">$projdetails[1]</a> <input type="button" href="#$pazartfid" onClick="toggleRows('pro$proj_id','2','2');" value="Edit properties">
+					<span class="txt-ora">$projdetails[1]</span> <input type="button" href="#$pazartfid" onClick="toggleRows('pro$proj_id','2','2');" value="Edit properties">
 				</h3>
 				<div class="p10lo">
 					<div class="p5 br-a bg-lg">
-						<span class="b">By</span> $userstring
-					</div><div class="p5 br-a">
-						<span class="b">Project status</span> &mdash; $projdetails[3] &nbsp; &nbsp; 
-						<span class="b">Last edited</span> &mdash; $last_date
-					</div><div class="p5 br-a bg-lg">
-						<span class="b">Description</span> &mdash; $projdetails[4]
-					</div><div class="p5 tr"></div>
+						<div class="p5bo"><span class="b">By</span> $userstring</div>
+						<div class="p5bo"><span class="b">Project status</span> &mdash; $projdetails[3] &nbsp; &nbsp; <span class="b">Last edited</span> &mdash; $last_date</div>
+						<div><span class="b">Description</span> &mdash; $projdetails[4]</div>
+					</div>
 				</div>
 				</div>};
 			print qq{
 				<div class="hide" id="2_pro$proj_id">
 				<h3>
 					<div class="float-r txt-grey"> No. <span class="b">$proj_id</span></div>
-					<a href="$pazar_cgi/project.pl?project_name=$projdetails[1]">$projdetails[1]</a> <input type="button" href="#$pazartfid" onClick="toggleRows('pro$proj_id','1','2');" value="Done">
+					<span class="txt-ora">$projdetails[1]</span> <input type="button" href="#$pazartfid" onClick="toggleRows('pro$proj_id','1','2');" value="Done">
 				</h3>
 				<div class="p10lo">
 					<div class="p5 br-a">

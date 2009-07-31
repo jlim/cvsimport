@@ -9,13 +9,12 @@ my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
 my $dbh = pazar->new(
-	-host         => $ENV{PAZAR_host},
-	-user         => $ENV{PAZAR_pubuser},
-	-pass         => $ENV{PAZAR_pubpass},
-	-dbname       => $ENV{PAZAR_name},
-	-drv          => $ENV{PAZAR_drv},
-	-globalsearch => "yes"
-);
+	-host => $ENV{PAZAR_host},
+	-user => $ENV{PAZAR_pubuser},
+	-pass => $ENV{PAZAR_pubpass},
+	-dbname => $ENV{PAZAR_name},
+	-drv => $ENV{PAZAR_drv},
+	-globalsearch => "yes");
 
 my @pubprojects = $dbh->public_projects;
 
@@ -107,10 +106,10 @@ $bowz .= qq{
 				</form>
 			</div>
 			<div class="show" id="1_aso1">
-				<div class=""><a href="$pazar_cgi/tf_list.cgi" target="_blank">Select a TF from our list of reported TFs</a> &bull; <a href="#" onclick="toggleRows('aso1','2','2');">View advanced search options</a></div>
+				<div class=""><a href="$pazar_cgi/tf_list.cgi">Select a TF from our list of reported TFs</a> &bull; <a href="#" onclick="toggleRows('aso1','2','2');">View advanced search options</a></div>
 			</div>
 			<div class="hide" id="2_aso1">
-				<div class=""><a href="$pazar_cgi/tf_list.cgi" target="_blank">Select a TF from our list of reported TFs</a> &bull; <a href="#" onclick="toggleRows('aso1','1','2');">Hide advanced search options</a></div>
+				<div class=""><a href="$pazar_cgi/tf_list.cgi">Select a TF from our list of reported TFs</a> &bull; <a href="#" onclick="toggleRows('aso1','1','2');">Hide advanced search options</a></div>
 				<div class="p5bo p5to">You may select which projects you would like to <span class="b">exclude</span> from your search:</div>
 				<div class="">
 					$checkl_proj
@@ -148,10 +147,10 @@ $bowz .= qq{<div id="2_bowz" class="$stat{'genes'}">
 					<div class="clear-r"></div>
 				</div>
 				<div class="show" id="1_aso2">
-					<div class=""><a href="$pazar_cgi/gene_list.cgi" target="_blank">Select a gene from our list of annotated genes</a> &bull; <a href="#" onclick="toggleRows('aso2','2','2');">Show advanced search options</a></div>
+					<div class=""><a href="$pazar_cgi/gene_list.cgi">Select a gene from our list of annotated genes</a> &bull; <a href="#" onclick="toggleRows('aso2','2','2');">Show advanced search options</a></div>
 				</div>
 				<div class="hide" id="2_aso2">
-					<div class=""><a href="$pazar_cgi/gene_list.cgi" target="_blank">Select a gene from our list of annotated genes</a> &bull; <a href="#" onclick="toggleRows('aso2','1','2');">Hide advanced search options</a></div>
+					<div class=""><a href="$pazar_cgi/gene_list.cgi">Select a gene from our list of annotated genes</a> &bull; <a href="#" onclick="toggleRows('aso2','1','2');">Hide advanced search options</a></div>
 					<div class="p5bo p5to">You may select which projects you would like to <span class="b">exclude</span> from your search:</div>
 					<div class="small">
 						$checkl_proj

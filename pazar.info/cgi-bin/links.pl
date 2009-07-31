@@ -175,7 +175,7 @@ print qq{
 		</tbody>
 	</table>
 </div>
-<h2><a name="2. Regulatory Datasets"></a>Regulatory Datasets</h2>
+<h2><a name="2. Regulatory Datasets"></a>Regulatory datasets</h2>
 <div class="p20lo">
 <table class="sibo w100p">
 	<tbody>
@@ -216,7 +216,7 @@ print qq{
 			<td class="tl psp">Composite regulatory elements&mdash;structure, function and classification. <a href="http://compel.bionet.nsc.ru/new/compel/compel.html">http://compel.bionet.nsc.ru/new/compel/compel.html</a></td>
 		</tr>
 		<tr class="bg-vlg">
-			<td class="tl psp">DATF</td>
+			<td class="tl psp b">DATF</td>
 			<td class="tl psp">The Database of <span class="i">Arabidopsis thaliana</span> transcription factors (DATF). <a href="http://datf.cbi.pku.edu.cn/">http://datf.cbi.pku.edu.cn/</a></td>
 		</tr>
 		<tr>
