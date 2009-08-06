@@ -362,7 +362,7 @@ if (!defined $reg_seq) {
 	
 		my @ref = $dbh->get_data_by_primary_key("ref",$an[6]);
 		print qq{
-			<td class="btc"><a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]">$ref[0]</a></td>
+			<td class="btc"><a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]" target="_blank">$ref[0]</a></td>
 			<td class="btc small">};
 		my @mutants = $dbh->get_mutants_by_analysis_id($inter->{aid});
 		my $mutnb = 0;
@@ -529,7 +529,7 @@ if (!defined $reg_seq) {
 				<td class="btc small">$cellinfo</td>
 				<td class="btc small">$condinfo</td>
 				<td class="btc small">$blag</td>
-				<td class="btc"><a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]">$ref[0]</a></td>
+				<td class="btc"><a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]" target="_blank">$ref[0]</a></td>
 				<td class="btc small">$mutmut</td>
 			</tr>};
 		$count++;

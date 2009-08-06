@@ -163,7 +163,7 @@ print qq{
 		<div>Analysis method: <span class="b">$met[0]</span></div>
 		<div><div class="float-l">Cell&nbsp;type:&nbsp;</div><div class="float-l b w600">$cellinfo</div><div class="clear-l"></div></div>
 		$timeinfodisplay
-		<div>Pubmed: <a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]" class="b">$ref[0]</a></div>
+		<div>Pubmed: <a href="http://www.ncbi.nlm.nih.gov/pubmed/$ref[0]" class="b" target="_blank">$ref[0]</a></div>
 		$commentsinfodisplay
 		$evinfo
 		<div>Annotator: <span class="b">$userinfo</span></div>
@@ -323,7 +323,7 @@ foreach my $key (@sorted_keys) {
 		}
 		if ($mut[3] > 0) {
 			my @mutref = $dbh->get_data_by_primary_key("ref",$mut[3]);
-			$mutp .= qq{<div><span class="b">Pubmed:</span> <a class="b" href="http://www.ncbi.nlm.nih.gov/pubmed/$mutref[0]">$mutref[0]</a></div>};
+			$mutp .= qq{<div><span class="b">Pubmed:</span> <a class="b" href="http://www.ncbi.nlm.nih.gov/pubmed/$mutref[0]" target="_blank">$mutref[0]</a></div>};
 		}
 		if ($mut[5] and ($mut[5] ne "0")) {
 			if (length($mut[5]) > 18) {
