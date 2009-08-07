@@ -41,16 +41,34 @@ my $dbh = pazar->new(
     -drv          => $ENV{PAZAR_drv},
     -globalsearch => "yes"
 );
-my @pubprojects = $dbh->public_projects;
 my %unsort_proj;
 my $checkl_proj;
-foreach my $project (@pubprojects) {
-	my $proj_rw = $dbh->get_project_name_by_ID($project);
-	my $proj_lc = lc($proj_rw);
+my $checkl_proj_public;
+my $projects = &select($dbh,qq{SELECT * FROM project WHERE status="open" OR status="published"});
+my @desc;
+while (my $project = $projects->fetchrow_hashref) {
+ 	my $proj_rw = $project->{project_name};
+ 	my $proj_lc = lc($proj_rw);
 	$unsort_proj{$proj_lc} = $proj_rw;
+}
+if ($loggedin eq "true") {
+	foreach my $proj (@projids) {
+		my $restricted = &select($dbh,qq{SELECT * FROM project WHERE project_id="$proj" and upper(status)="RESTRICTED"});
+		while (my $restr = $restricted->fetchrow_hashref) {
+		 	my $proj_rw = $restr->{project_name};
+ 			my $proj_lc = lc($proj_rw);
+ 			$proj_lc = qq{RESTRICTED_} . $proj_lc;
+			$unsort_proj{$proj_lc} = $proj_rw;
+		}
+	}
 }
 foreach my $projname (sort(keys %unsort_proj)) {
 	my $pn = $unsort_proj{$projname};
+	my $public = 0;
+	if ($projname =~ /^RESTRICTED_/) {
+		$projname =~ s/^RESTRICTED_//g;
+		$public = 1;
+	}
 	my $pd = &select($dbh,qq{SELECT status, description, project_id FROM project WHERE project_name="$projname"});
 	my ($sta,$des,$pid) = $pd->fetchrow_array;
 	my $tnb = &select($dbh,qq{SELECT count(funct_tf_id) FROM funct_tf WHERE project_id="$pid"});
@@ -72,26 +90,49 @@ foreach my $projname (sort(keys %unsort_proj)) {
 	}
 	$totmrk = &pnum($totmrk);
 	$tfnb = &pnum($tfnb);
-	$checkl_proj .= qq{
-		<div class="p5bo p10lo">
-			<div class="pde">
-				<div class="pp-pro">$matrixnb</div>
-				<div class="pp-gns">$totmrk</div>
-				<div class="pp-tfs">$tfnb</div>
-				<div class="float-l p10ro"><a class="b" href="$pazar_cgi/project.pl?project_name=$pn">$pn</a></div>
-				$des
-			</div>
-			<div class="clear-l"></div>
-		</div>};
+	if ($public == 1) {
+		$checkl_proj_public .= qq{
+			<div class="p5bo p10lo">
+				<div class="pde">
+					<div class="pp-pro">$matrixnb</div>
+					<div class="pp-gns">$totmrk</div>
+					<div class="pp-tfs">$tfnb</div>
+					<div class="float-l p10ro"><a class="b" href="$pazar_cgi/project.pl?project_name=$pn">$pn</a></div>
+					$des
+				</div>
+				<div class="clear-l"></div>
+			</div>};
+	} else {
+		$checkl_proj .= qq{
+			<div class="p5bo p10lo">
+				<div class="pde">
+					<div class="pp-pro">$matrixnb</div>
+					<div class="pp-gns">$totmrk</div>
+					<div class="pp-tfs">$tfnb</div>
+					<div class="float-l p10ro"><a class="b" href="$pazar_cgi/project.pl?project_name=$pn">$pn</a></div>
+					$des
+				</div>
+				<div class="clear-l"></div>
+			</div>};
+	}
 }
-print qq{
-	$bowz
-	$intro
+print $bowz;
+if ($checkl_proj_public) {
+	print qq{
 	<h2>
 		<div class="pp-pro">Profiles</div>
 		<div class="pp-gns">Genes</div>
 		<div class="pp-tfs">TFs</div>
-		Projects
+		My restricted projects
+	</h2>
+	$checkl_proj_public};
+}
+print qq{
+	<h2>
+		<div class="pp-pro">Profiles</div>
+		<div class="pp-gns">Genes</div>
+		<div class="pp-tfs">TFs</div>
+		Open projects
 	</h2>
 	$checkl_proj
 	<div class="p20to p10lo small b txt-grey">&bull; Transcription factor binding profiles can be generated dynamically in this project.</div>};

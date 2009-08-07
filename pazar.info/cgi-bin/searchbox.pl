@@ -8,6 +8,7 @@ my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazar_html = $ENV{PAZAR_HTML};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
+require "$pazarcgipath/getsession.pl";
 my $dbh = pazar->new(
 	-host => $ENV{PAZAR_host},
 	-user => $ENV{PAZAR_pubuser},
@@ -152,7 +153,7 @@ $bowz .= qq{<div id="2_bowz" class="$stat{'genes'}">
 				<div class="hide" id="2_aso2">
 					<div class=""><a href="$pazar_cgi/gene_list.cgi">Select a gene from our list of annotated genes</a> &bull; <a href="#" onclick="toggleRows('aso2','1','2');">Hide advanced search options</a></div>
 					<div class="p5bo p5to">You may select which projects you would like to <span class="b">exclude</span> from your search:</div>
-					<div class="small">
+					<div>
 						$checkl_proj
 						<div class="clear-l"></div>
 					</div>

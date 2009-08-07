@@ -271,8 +271,11 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 			print qq{
 				<div class="show" id="1_pro$proj_id">
 				<h3>
-					<div class="float-r txt-grey"> No. <span class="b">$proj_id</span></div>
-					<span class="txt-ora">$projdetails[1]</span> <input type="button" href="#$pazartfid" onClick="toggleRows('pro$proj_id','2','2');" value="Edit properties">
+					<div class="float-r">
+						<input type="button" onclick="toggleRows('pro$proj_id','2','2');" value="edit properties"> 
+						<input type="button" onclick="document.location.href='$pazar_cgi/project.pl?project_name=$projdetails[1]';" value="view data">
+					</div>
+					<span class="txt-ora">$projdetails[1]</span>
 				</h3>
 				<div class="p10lo">
 					<div class="p5 br-a bg-lg">
@@ -285,8 +288,11 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 			print qq{
 				<div class="hide" id="2_pro$proj_id">
 				<h3>
-					<div class="float-r txt-grey"> No. <span class="b">$proj_id</span></div>
-					<span class="txt-ora">$projdetails[1]</span> <input type="button" href="#$pazartfid" onClick="toggleRows('pro$proj_id','1','2');" value="Done">
+					<div class="float-r">
+						<input type="button" onclick="toggleRows('pro$proj_id','1','2');" value="close edit panel"> 
+						<input type="button" onclick="document.location.href='$pazar_cgi/project.pl?project_name=$projdetails[1]';" value="view data">
+					</div>
+					<span class="txt-ora">$projdetails[1]</span>
 				</h3>
 				<div class="p10lo">
 					<div class="p5 br-a">
@@ -310,7 +316,7 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 							<input type="hidden" name="mode" value="adduser">
 							username <input type="text" name="usertoadd" size="25"> &nbsp; 
 							project password <input type="password" name="projpass" size="25"> 
-							<input type="button" onClick="doUserAdd($proj_id);" value="Add user">
+							<input type="button" onclick="doUserAdd($proj_id);" value="Add user">
 						</form>
 					</div><div class="p5 bg-dy">
 						<form method="post" action="$pazar_cgi/editprojects.pl">
@@ -341,7 +347,7 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 						<div class="p5to tr">
 							Project password 
 							<input type="password" name="projpass" size="25"> 
-							<input type="button" onClick="doUpdateDesc($proj_id);" value="Update description"></form>
+							<input type="button" onclick="doUpdateDesc($proj_id);" value="Update description"></form>
 						</div>
 					</div><div class="p5 bg-dy">
 						<form name="deleteform$proj_id" id="deleteform$proj_id" method="POST" action="$pazar_cgi/editprojects.pl">
@@ -352,7 +358,7 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 							<span class="txt-red b">Delete this project</span> &mdash; 
 							enter project password
 							<input type="password" name="projpass" size="25">
-							<input type="button" onClick="doDelete($proj_id);" value="Delete">
+							<input type="button" onclick="doDelete($proj_id);" value="Delete">
 						</form>
 					</div><div class="p5 tr"></div>
 				</div>
@@ -394,7 +400,7 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 						<td class="tl p5"><input type="password" name="projpasscheck" maxlength="20" class="w300"></td>
 					</tr>
 				</tbody></table>
-				<div class="p5to"><input type="button" onClick="verifyProjectCreate();" value="Create new project"></div>
+				<div class="p5to"><input type="button" onclick="verifyProjectCreate();" value="Create new project"></div>
 			</form>
 			</div>};
 	} else {
