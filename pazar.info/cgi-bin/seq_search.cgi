@@ -228,6 +228,11 @@ if (!defined $reg_seq) {
 		$gn_marker_warning = qq{<div class="p5to"><div class="emp">This gene is used as a marker located in the vicinity of the regulatory region. It is not necessarily regulated by the described sequence.</div></div>};
 	}
 	
+	my $rs_sta_nocomma = $rs_sta;
+	my $rs_end_nocomma = $rs_end;
+	$rs_sta_nocomma =~ s/,//g;
+	$rs_end_nocomma =~ s/,//g;
+	
 	print qq{<h2>Sequence <a class="b" href="$pazar_cgi/seq_search.cgi?regid=$regid&amp;excluded=$xc">$id</a> in the <a class="b" href="$pazar_cgi/project.pl?project_name=$res[0]">$res[0]</a> project <a href="$pazar_cgi/help_FAQ.pl#2.4%20Sequence%20View" target="helpwin" onclick="window.open('about:blank','helpwin');"><img src="$pazar_html/images/help.gif" alt="Help" align="bottom" width="10"></a></h2>
 	
 	<div class="w50p float-l">
@@ -260,7 +265,7 @@ if (!defined $reg_seq) {
 			<div class="bg-lg p10">
 				<div class="float-l p5to p5ro b">
 					<form name="display" method="POST" action="$pazar_cgi/gff_custom_track.cgi" enctype="multipart/form-data" target="_blank">View in&nbsp;
-					<input type="hidden" name="excluded" value="$xc"><input type="hidden" name="chr" value="$rs_chr"><input type="hidden" name="start" value="$rs_sta"><input type="hidden" name="end" value="$rs_end"><input type="hidden" name="species" value="$rs_bsp"><input type="hidden" name="resource" value="ucsc"><a href="#" onclick="javascript:document.display.resource.value='ucsc'; document.display.submit();"><img align="absmiddle" src="$pazar_html/images/ucsc_logo.png" alt="Go to UCSC Genome Browser"></a><!--<input type="submit" name="ucsc" value="ucsc" onClick="javascript:document.display.resource.value='ucsc';">--> <a href="#" onClick="javascript:document.display.resource.value='ensembl'; document.display.submit();"><img align="absmiddle" src="$pazar_html/images/ensembl_logo.gif" alt="Go to EnsEMBL Genome Browser"></a><!--<input type="submit" name="ensembl" value="ensembl" onClick="javascript:document.display.resource.value='ensembl';">-->
+					<input type="hidden" name="excluded" value="$xc"><input type="hidden" name="chr" value="$rs_chr"><input type="hidden" name="start" value="$rs_sta_nocomma"><input type="hidden" name="end" value="$rs_end_nocomma"><input type="hidden" name="species" value="$rs_bsp"><input type="hidden" name="resource" value="ucsc"><a href="#" onclick="javascript:document.display.resource.value='ucsc'; document.display.submit();"><img align="absmiddle" src="$pazar_html/images/ucsc_logo.png" alt="Go to UCSC Genome Browser"></a><!--<input type="submit" name="ucsc" value="ucsc" onClick="javascript:document.display.resource.value='ucsc';">--> <a href="#" onClick="javascript:document.display.resource.value='ensembl'; document.display.submit();"><img align="absmiddle" src="$pazar_html/images/ensembl_logo.gif" alt="Go to EnsEMBL Genome Browser"></a><!--<input type="submit" name="ensembl" value="ensembl" onClick="javascript:document.display.resource.value='ensembl';">-->
 					</form>
 				</div>
 				<div class="float-l w210 p5lo br-l"><img src="http://burgundy.cmmt.ubc.ca/ORCAtk/images/ORCA.png" height="30" align="left" class="m5ro"><a href="http://burgundy.cmmt.ubc.ca/cgi-bin/ORCAtk/orca?rm=select_seq1_coords&amp;species=$otktsf&amp;chr=$otkrsc&amp;start=$otksta&amp;end=$otkend">Scan for transcription factor binding sites with ORCAtk</a></div>

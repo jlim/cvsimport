@@ -17,6 +17,7 @@ my $pazarhtdocspath = $ENV{PAZARHTDOCSPATH};
 my $get = new CGI;
 my %param = %{ $get->Vars };
 our $searchtab = $param{"searchtab"} || "tfs";
+my $MEssages;
 
 require "$pazarcgipath/getsession.pl";
 require "$pazarcgipath/searchbox.pl";
@@ -220,7 +221,9 @@ if ($accn) {
 			$tf = $dbh->create_tf;
 			my @tfcomp = $tf->get_tfcomplex_by_transcript($trans);
 			foreach my $comp (@tfcomp) {
-				push @tfcomplexes, $comp;
+				if ($comp) {
+					push @tfcomplexes, $comp;
+				}
 			}
 		}
 		if ($loggedin eq "true") {
@@ -245,14 +248,16 @@ if ($accn) {
 					} elsif ($trans eq "PAZARid") {
 						my $PZid = $accn;
 						$PZid =~ s/^\D+0*//;
-						$tf = $dbh->create_tf;
+						$tf = $dbhandle->create_tf;
 						@complexes = $tf->get_tfcomplex_by_id($PZid);
 					} else {
 						$tf = $dbhandle->create_tf;
 						@complexes = $tf->get_tfcomplex_by_transcript($trans);
 					}
 					foreach my $comp (@complexes) {
-						push @tfcomplexes, $comp;
+						if ($comp) {
+							push @tfcomplexes, $comp;
+						}
 					}
 				}
 			}

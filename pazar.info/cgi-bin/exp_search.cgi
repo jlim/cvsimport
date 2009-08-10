@@ -275,8 +275,10 @@ foreach my $key (@sorted_keys) {
 		if ($rs_len > 10) {$rs_set .= "...";}
 		my $fi_seq = qq{<div class=""><div onclick="popup(this,'$rs_chp','st');" class="popup">$rs_set<br>($rs_sql&nbsp;bp)</div></div>};
 		print qq{
-			<td class="btc"><div>Genomic</div>
-			<a class="b" href="$pazar_cgi/seq_search.cgi?regid=$rgid&amp;excluded=$xc">$prs</a></td>
+			<td class="btc">
+				<a class="b" href="$pazar_cgi/seq_search.cgi?regid=$rgid&amp;excluded=$xc">$prs</a>
+				<div>Genomic</div>
+			</td>
 			<td class="btc">
 				<a class="b" href="$pazar_cgi/gene_search.cgi?geneID=$pgid&amp;ID_list=PAZAR_gene&amp;excluded=$xc">$pgid</a>
 				$stk

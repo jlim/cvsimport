@@ -1009,10 +1009,11 @@ sub print_tf_attr {
 					<td class="btc"><div><input type="checkbox" name="seq$seqcounter" value="$rs_rawseq"></div></td>
 					<td class="btc">Genomic</td>
 					<td class="btc">
-						<a class="b" href="$pazar_cgi/seq_search.cgi?regid=$rsid">$id</a> $seqname
+						<a class="b" href="$pazar_cgi/seq_search.cgi?regid=$rsid">$id</a>
+						<div>$seqname</div>
 					</td>
 					<td class="btc">
-						<a href="$pazar_cgi/gene_search.cgi?geneID=$gene_accession">$pazargeneid</a>$asterisk
+						<a class="b" href="$pazar_cgi/gene_search.cgi?geneID=$pazargeneid">$pazargeneid</a>$asterisk
 						<div>$rs_gene</div>
 						<div>$species</div>
 					</td>
