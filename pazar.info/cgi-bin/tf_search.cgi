@@ -84,21 +84,6 @@ my $gkdb = pazar::talk->new(
 print "Content-Type: text/html\n\n", $template->output;
 my @pubprojects = $dbh->public_projects;
 
-my %unsort_proj;
-my $checkl_proj;
-foreach my $project (@pubprojects) {
-	my $proj    = $dbh->get_project_name_by_ID($project);
-	my $proj_lc = lc($proj);
-	$unsort_proj{$proj_lc} = $proj;
-}
-foreach my $projname (sort(keys %unsort_proj) ) {
-	my $pn = $unsort_proj{$projname};
-	if (length($pn) > 14) {
-		$pn = substr($pn, 0, 14) . "...";
-	}
-	$checkl_proj .= qq{<div class="float-l w20p ov-hide sml"><input type="checkbox" name="excl_proj" value="$pn"> $pn</div>};
-}
-
 print $bowz;
 
 my $accn  = $param{geneID};

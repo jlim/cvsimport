@@ -77,23 +77,6 @@ my $gkdb = pazar::talk->new(
 );
 my @pubprojects = $dbh->public_projects;
 
-my %unsort_proj;
-my $checkl_proj;
-
-foreach my $project (@pubprojects) {
-	my $proj_na = $dbh->get_project_name_by_ID($project);
-	my $proj_lc = lc($proj_na);
-	$unsort_proj{$proj_lc} = $proj_na;
-}
-
-foreach my $projname (sort(keys %unsort_proj)) {
-	my $pn = $unsort_proj{$projname};
-	if (length($pn) > 14) {
-		$pn = substr($pn, 0, 14) . qq{...};
-	}
-	$checkl_proj .= qq{<div class="float-l w20p ov-hide sml"><input type="checkbox" name="excl_proj" value="$pn"> $pn</div>};
-}
-
 print $bowz;
 
 my $bg_color = 0;

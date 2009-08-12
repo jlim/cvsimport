@@ -30,10 +30,11 @@ foreach my $project (@pubprojects) {
 
 foreach my $projname (sort(keys %unsort_proj)) {
 	my $pn = $unsort_proj{$projname};
+	my $pn_short = $pn;
 	if (length($pn) > 14) {
-		$pn = substr($pn, 0, 14) . qq{...};
+		$pn_short = substr($pn, 0, 14) . qq{...};
 	}
-	$checkl_proj .= qq{<div class="float-l w20p ov-hide sml"><input type="checkbox" name="excl_proj" value="$pn"> $pn</div>};
+	$checkl_proj .= qq{<div class="float-l w20p ov-hide sml"><input type="checkbox" name="excl_proj" value="$pn"> $pn_short</div>};
 }
 
 my $shoe = 1;

@@ -91,8 +91,12 @@ else
 #continue with the rest of the file********************************************
 
     my @excluded_proj;
-    if ($params{excluded}) {
-	@excluded_proj=split(/__/,$params{excluded});
+	if ($param{excl_proj}) {
+		foreach my $val ($get->param("excl_proj")) {
+			push @excluded_proj, $val;
+		}
+	} elsif ($params{excluded}) {
+		@excluded_proj=split(/__/,$params{excluded});
     }
 
     my @projects;
@@ -199,9 +203,8 @@ else
 	my $ensemblorg = lc($params{species});
 	$ensemblorg=ucfirst($ensemblorg);
 	$ensemblorg=~s/ /_/;
-	my $ensembl_pos = $chr.":".($start-$flanking_bp)."-".($end+$flanking_bp);
-	
-	print "<script>document.location.href='http://$ensembl_url/$ensemblorg/Location/View?r=$ensembl_pos;contigviewbottom=url:$pazar_html/mapping/$filename'</script>";
+
+	print "<script>document.location.href='http://$ensembl_url/$ensemblorg/contigview?data_URL=$pazar_html/mapping/$filename'</script>";
     }
     
 } # else continue with the rest of the file
