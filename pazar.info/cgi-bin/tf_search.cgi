@@ -93,13 +93,7 @@ my $tfname;
 my @trans;
 if ($accn) {
 	if ($dbaccn eq "PAZAR_TF") {
-		unless ($accn =~ /TF\d{7}/i) {
-			print qq{<div class="emp">The PAZAR TF ID you provided ($accn) could not be found. 
-			Please check that the provided ID ($accn) is a PAZAR TF ID.</div>};
-			&exitscr();
-		} else {
-			@trans = ("PAZARid");
-		}
+		@trans = ("PAZARid");
 	}
 	if ($dbaccn eq "EnsEMBL_gene") {
 		@trans = $ensdb->ens_transcripts_by_gene($accn);
@@ -198,10 +192,18 @@ if ($accn) {
 			$tf = $dbh->create_tf;
 			@tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
 		} elsif ($trans eq "PAZARid") {
-			my $PZid = $accn;
-			$PZid =~ s/^\D+0*//;
-			$tf = $dbh->create_tf;
-			@tfcomplexes = $tf->get_tfcomplex_by_id($PZid);
+			my @ids;
+			if ($accn=~m/,/) {
+				@ids = split(/,/,$accn);
+			} else {
+				@ids = ($accn);
+			}
+			foreach my $PZid (@ids) {
+				$PZid =~ s/^\D+0*//;
+				$tf = $dbh->create_tf;
+				my @tfcomp = $tf->get_tfcomplex_by_id($PZid);
+				push @tfcomplexes, $tfcomp[0];
+			}
 		} else {
 			$tf = $dbh->create_tf;
 			my @tfcomp = $tf->get_tfcomplex_by_transcript($trans);
