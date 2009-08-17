@@ -174,7 +174,7 @@ if ($param{submit} =~ /gene/i) {
 		}
 	}
 	if (!$reg_seqs[0]) {
-		my @rsid = pazar::reg_seq::get_all_regseq_ids($dbh);
+		my @rsid = $dbh->get_all_regseq_ids();
 		foreach my $id (@rsid) {
 			my @seqs = pazar::reg_seq::get_reg_seq_by_regseq_id($dbh,$id);
 			foreach my $regseq (@seqs) {
@@ -1062,10 +1062,7 @@ sub print_tf_attr {
 					<tr class="construct" style="background-color: $colors{$bg_color};">
 						<td class="btc"><div><input type="checkbox" name="seq$seqcounter" value="$rs_rawseq"></div></td>
 						<td class="btc">Artificial</td>
-						<td class="btc">
-							<div class="b">$id</div> 
-							$seqname
-						</td>
+						<td class="btc"><div><div><a href="$pazar_cgi/seq_search.cgi?regid=$id" class="b">$id</a></div>$seqname</div></td>
 						<td class="btc">-</td>
 						<td class="btc">$seqstr</td>
 						<td class="btc">

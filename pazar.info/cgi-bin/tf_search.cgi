@@ -576,7 +576,7 @@ if ($accn) {
 					<tr class="construct" $rs_bgco >
 						<td class="btc"><div>$rs_checkb</div></td>
 						<td class="btc"><div>Artificial</div></td>
-						<td class="btc"><div><div class="b">$id</div>$seqname</div></td>
+						<td class="btc"><div><div><a href="$pazar_cgi/seq_search.cgi?regid=$id&excluded=$excluded" class="b">$id</a></div>$seqname</div></td>
 						<td class="btc"><div>-</div></td>
 						<td class="btc">$seq_reg</td>
 						<td class="btc"><div><div class="b">Description:</div>$desc</div></td>
@@ -587,7 +587,7 @@ if ($accn) {
 					<tr class="construct" $rs_bgco >
 						<td class="btc"><div>$rs_checkb</div></td>
 						<td class="btc"><div>Artificial</div></td>
-						<td class="btc"><div class="b">$id</div></td>
+						<td class="btc"><div><a href="$pazar_cgi/seq_search.cgi?regid=$id&excluded=$excluded" class="b">$id</a></div></td>
 						<td class="btc"><div>-</div></td>
 						<td class="btc">$seq_sml</td>
 						<td class="btc"><div>$desc</div></td>

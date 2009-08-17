@@ -33,6 +33,7 @@ if ($loggedin eq "true") {
 	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
 }
 print "Content-Type: text/html\n\n", $template->output;
+print $bowz;
 my $dbh = pazar->new(
     -host         => $ENV{PAZAR_host},
     -user         => $ENV{PAZAR_pubuser},
@@ -75,6 +76,11 @@ foreach my $projname (sort(keys %unsort_proj)) {
 	my $tfnb = $tnb->fetchrow_array || "0";
 	my $mnb = &select($dbh,qq{SELECT count(distinct db_accn) FROM marker WHERE project_id="$pid"});
 	my $markernb = $mnb->fetchrow_array || "0";
+	my $rnb = &select($dbh,qq{SELECT count(reg_seq_id) FROM reg_seq WHERE project_id="$pid"});
+	my $regseqnb = $rnb->fetchrow_array || "0";
+	my $cnb = &select($dbh,qq{SELECT count(construct_id) FROM construct WHERE project_id="$pid"});
+	my $constrnb = $cnb->fetchrow_array || "0";
+	my $totalseq = $regseqnb + $constrnb;
 	my $gnb = &select($dbh,qq{SELECT count(distinct db_accn) FROM gene_source a, tsr b 
 		WHERE a.project_id="$pid" and a.gene_source_id=b.gene_source_id});
 	my $genenb = $gnb->fetchrow_array || "0";
@@ -88,6 +94,7 @@ foreach my $projname (sort(keys %unsort_proj)) {
 	} else {
 		$matrixnb = "&bull;";
 	}
+	$totalseq = &pnum($totalseq);
 	$totmrk = &pnum($totmrk);
 	$tfnb = &pnum($tfnb);
 	if ($public == 1) {
@@ -95,6 +102,7 @@ foreach my $projname (sort(keys %unsort_proj)) {
 			<div class="p5bo p10lo">
 				<div class="pde">
 					<div class="pp-pro">$matrixnb</div>
+					<div class="pp-seq">$totalseq</div>
 					<div class="pp-gns">$totmrk</div>
 					<div class="pp-tfs">$tfnb</div>
 					<div class="float-l p10ro"><a class="b" href="$pazar_cgi/project.pl?project_name=$pn">$pn</a></div>
@@ -107,6 +115,7 @@ foreach my $projname (sort(keys %unsort_proj)) {
 			<div class="p5bo p10lo">
 				<div class="pde">
 					<div class="pp-pro">$matrixnb</div>
+					<div class="pp-seq">$totalseq</div>
 					<div class="pp-gns">$totmrk</div>
 					<div class="pp-tfs">$tfnb</div>
 					<div class="float-l p10ro"><a class="b" href="$pazar_cgi/project.pl?project_name=$pn">$pn</a></div>
@@ -116,11 +125,11 @@ foreach my $projname (sort(keys %unsort_proj)) {
 			</div>};
 	}
 }
-print $bowz;
 if ($checkl_proj_public) {
 	print qq{
 	<h2>
 		<div class="pp-pro">Profiles</div>
+		<div class="pp-seq">Seqs</div>
 		<div class="pp-gns">Genes</div>
 		<div class="pp-tfs">TFs</div>
 		My restricted projects
@@ -128,15 +137,16 @@ if ($checkl_proj_public) {
 	$checkl_proj_public};
 }
 print qq{
+	$intro
 	<h2>
 		<div class="pp-pro">Profiles</div>
+		<div class="pp-seq">Seqs</div>
 		<div class="pp-gns">Genes</div>
 		<div class="pp-tfs">TFs</div>
-		Open projects
+		Public projects
 	</h2>
 	$checkl_proj
 	<div class="p20to p10lo small b txt-grey">&bull; Transcription factor binding profiles can be generated dynamically in this project.</div>};
-
 sub select {
 	my ($dbh, $sql) = @_;
 	my $sth = $dbh->prepare($sql);

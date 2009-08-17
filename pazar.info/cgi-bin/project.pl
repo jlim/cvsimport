@@ -112,8 +112,8 @@ print qq{
 		<h3>Statistics</h3>
 		<div class="p10bo">
 			Regulated genes (or markers): <span class="b">$totmrk</span><br>
-			Regulatory sequence (genomic): <span class="b">$regseqnb</span><br>
-			Regulatory sequence (artificial): <span class="b">$constrnb</span><br>
+			Regulatory sequences (genomic): <span class="b">$regseqnb</span><br>
+			Regulatory sequences (artificial): <span class="b">$constrnb</span><br>
 			Transcription factors: <span class="b">$tfnb</span><br>
 			Transcription factor profiles: <span class="b">$matrixnb</span><br>
 			Annotated publications: <span class="b">$refsnb</span><br>
