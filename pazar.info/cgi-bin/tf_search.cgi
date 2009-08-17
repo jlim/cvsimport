@@ -446,6 +446,7 @@ if ($accn) {
 		my @coids;
 		my ($bigrow,$smlrow);
 		my $dh;
+		my $fasta;
 		while (my $site = $complex->next_target) {
 			my $type = $site->get_type;
 			if ($type eq "matrix") {
@@ -490,6 +491,7 @@ if ($accn) {
 				my $rs_site = $site->get_seq;
 				my $rs_gene = $enco[5];
 				my $rs_seq = chopstr($rs_site,20);
+				$fasta.=">$id\n$rs_site\n";
 				$rs_strand = "&ndash;" if $rs_strand eq "-";
 				if (length($seqname) > 10) {
 					$seqname =~ s/\'/\&\#39\;/g;
@@ -559,6 +561,7 @@ if ($accn) {
 				my $rs_bgco = qq{style="background-color:$colors{$bg_color};"};
 				$seqname = substr($seqname,0,8) . "..." if length($seqname) > 10;
 				my $rs_checkb = qq{<input type="checkbox" name="seq$seqcounter" value="$rs_site">};
+				$fasta.=">$id\n$rs_site\n";
 				
 				if ($rs_leng > 10) {
 					$rs_leng = &pnum($rs_leng);
@@ -659,6 +662,7 @@ if ($accn) {
 		} else {
 			$dc .= qq{
 				<div class="p10 bg-lg">
+					<div class="b p5bo"><form name="fasta$pazartfid\_$tf_projid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
 					<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
 					<div class="p5bo">
 						<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid\_$tf_projid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid\_$tf_projid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid\_$tf_projid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid\_$tf_projid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid\_$tf_projid','memediv$pazartfid\_$tf_projid');">
