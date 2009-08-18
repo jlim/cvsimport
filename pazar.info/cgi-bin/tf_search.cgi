@@ -653,12 +653,18 @@ if ($accn) {
 			</div>};
 
 		close(TMP);
-		if ($count < 2) {
+		if ($count == 200) {
 			$dc .= qq{
-				<div id="memediv$pazartfid\_$tf_projid">
-					<div class="emp">A logo for this TF could not be generated because there are less than two sequences present.</div>
-				</div>
-				};
+				<div class="emp">Too many sequences are linked to this TF. Only the first 200 are reported.</div>
+				<div class="p10 bg-lg">
+					<div class="b p5bo"><form name="fasta$pazartfid\_$tf_projid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
+					<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
+					<div class="p5bo">
+						<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid\_$tf_projid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid\_$tf_projid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid\_$tf_projid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid\_$tf_projid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid\_$tf_projid','memediv$pazartfid\_$tf_projid');">
+					</div>
+					<div id="memediv$pazartfid\_$tf_projid">Not generated</div>
+					<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
+				</div>};
 		} else {
 			$dc .= qq{
 				<div class="p10 bg-lg">

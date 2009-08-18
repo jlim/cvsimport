@@ -1081,17 +1081,32 @@ sub print_tf_attr {
 			$bg_color = 1 - $bg_color;
 		}
 		close (TMP);
-		print qq{
-			</tbody></table></div>
-			<div class="p10 bg-lg">
-				<div class="b p5bo"><form name="fasta$pazartfid\_$tf_projid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
-				<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
-				<div class="p5bo">
-					<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid','memediv$pazartfid');">
-				</div>
-				<div id="memediv$pazartfid">Not generated</div>
-				<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
-			</div>};
+		if ($count == 200) {
+			print qq{
+				</tbody></table></div>
+				<div class="emp">Too many sequences are linked to this TF. Only the first 200 are reported.</div>
+				<div class="p10 bg-lg">
+					<div class="b p5bo"><form name="fasta$pazartfid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
+					<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
+					<div class="p5bo">
+						<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid','memediv$pazartfid');">
+					</div>
+					<div id="memediv$pazartfid">Not generated</div>
+					<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
+				</div>};
+		} else {
+			print qq{
+				</tbody></table></div>
+				<div class="p10 bg-lg">
+					<div class="b p5bo"><form name="fasta$pazartfid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
+					<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
+					<div class="p5bo">
+						<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid','memediv$pazartfid');">
+					</div>
+					<div id="memediv$pazartfid">Not generated</div>
+					<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
+				</div>};
+		}
 	}
 	print qq{</div>};
 	return $seqcounter;
