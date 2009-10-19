@@ -202,7 +202,9 @@ if ($accn) {
 				$PZid =~ s/^\D+0*//;
 				$tf = $dbh->create_tf;
 				my @tfcomp = $tf->get_tfcomplex_by_id($PZid);
-				push @tfcomplexes, $tfcomp[0];
+				if ($tfcomp[0]) {
+					push @tfcomplexes, $tfcomp[0];
+				}
 			}
 		} else {
 			$tf = $dbh->create_tf;
@@ -233,18 +235,26 @@ if ($accn) {
 						$tf = $dbhandle->create_tf;
 						@complexes = $tf->get_tfcomplex_by_name($tfname);
 					} elsif ($trans eq "PAZARid") {
-						my $PZid = $accn;
-						$PZid =~ s/^\D+0*//;
-						$tf = $dbhandle->create_tf;
-						@complexes = $tf->get_tfcomplex_by_id($PZid);
+						my @ids;
+						if ($accn=~m/,/) {
+							@ids = split(/,/,$accn);
+						} else {
+							@ids = ($accn);
+						}
+						foreach my $PZid (@ids) {
+							$PZid =~ s/^\D+0*//;
+							$tf = $dbhandle->create_tf;
+							my @tfcomp = $tf->get_tfcomplex_by_id($PZid);
+							if ($tfcomp[0]) {
+								push @complexes, $tfcomp[0];
+							}
+						}
 					} else {
 						$tf = $dbhandle->create_tf;
 						@complexes = $tf->get_tfcomplex_by_transcript($trans);
 					}
 					foreach my $comp (@complexes) {
-						if ($comp) {
-							push @tfcomplexes, $comp;
-						}
+						push @tfcomplexes, $comp;
 					}
 				}
 			}

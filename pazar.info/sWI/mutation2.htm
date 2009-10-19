@@ -10,7 +10,7 @@ resetMenu = function() {
       ddm[n].selectedIndex=0;
    }
 }
-function setCount(target){
+function setCount_mutant(target){
 if(target == 0) 
 {
 document.MUT.action="serverpath/check_mutant.cgi";
@@ -42,7 +42,7 @@ Enter the coordinates of the region(s) deleted from the original sequence:<br>
 Enter the coordinate(s) of the mutated nucleotide(s), relative to the original sequence, followed by the mutant nucleotide:<br>
 <input name="pointmutation" id="pointmutation" type="text">(use nucleotide numbering scheme displayed above:&nbsp;&nbsp;e.g. 54A;55T;58G)</p>
 <p><b>Comments (if any) </b><textarea name="mutcomment" cols="100" rows="2" id="mutcomment"></textarea></p>
-<p><b>Check the resulting Mutant Sequence     </b><input name="check" type="submit" id="check" value="Check" onClick="setCount(0)">
+<p><b>Check the resulting Mutant Sequence     </b><input name="check" type="submit" id="check" value="Check" onClick="setCount_mutant(0)">
 </p>
 <hr><h3>Method used to make the mutation</h3>
 <p>Method Name 
@@ -59,7 +59,8 @@ Enter the coordinate(s) of the mutated nucleotide(s), relative to the original s
 <table width="200">
     <tr> 
       <td><label> 
-        <input name="muteffecttype" type="radio" value="mutqual" onClick="MUT.muteffect0.disabled=true;MUT.muteffectscale.disabled=true;MUT.mutqual.disabled=false;MUT.mutqual.focus();">
+        <input name="muteffecttype" type="radio" value="mutqual" onClick="MUT.muteffect0.disabled=true;MUT.muteffectscale.disabled=true;MUT.mutqual.disabled=false;
+MUT.mutqual.focus();">
         qualitative</label></td>
     </tr>
     <tr> 
@@ -92,7 +93,7 @@ Enter the coordinate(s) of the mutated nucleotide(s), relative to the original s
 <p><b>Comments on the expression level (if any) </b><textarea name="muteffectcomment" cols="100" rows="2" id="muteffectcomment"></textarea></p>
 <hr>
     <input name="modeDone" type="hidden" value="Done">
-    <input name="submit" type="submit" id="submit" value="Submit Data" onClick="setCount(1)">
+    <input name="submit" type="submit" id="submit" value="Submit Data" onClick="setCount_mutant(1)">
     <input name="cancel" id="cancel" value="Cancel" type="reset">
   </p><br>
   </form>

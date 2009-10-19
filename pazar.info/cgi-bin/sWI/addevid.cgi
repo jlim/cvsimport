@@ -121,7 +121,7 @@ my $pazaraid=write_pazarid($aid,'AN');
 my $JSCRIPT=<<END;
 // Add a javascript
 var MyChildWin=null;
-function setCount(target){
+function setCount_addCond(target){
     if (!MyChildWin || MyChildWin.closed ) {
 	if(target == 0) {
 	    document.mut.action="$cgiroot/addmutation.cgi";
@@ -165,7 +165,7 @@ if ($type eq 'reg_seq') {
     print $query->hidden(-name=>'effect',-value=>'expression');
     print $query->submit(-name=>'submit',
 			 -value=>'Add Mutation Information',
-                         -onClick=>'return setCount(0);');
+                         -onClick=>'return setCount_addCond(0);');
     print $query->end_form;
     print $query->br;
 }
@@ -183,7 +183,7 @@ print $query->hidden(-name=>'sequence',-value=>$params{'sequence'});
 print $query->hidden(-name=>'modeCond',-value=>'cond');
 print $query->submit(-name=>'submit',
 		     -value=>'Add Perturbation',
-                     -onClick=>'return setCount(1);');
+                     -onClick=>'return setCount_addCond(1);');
 print $query->br;
 print $query->br;
 

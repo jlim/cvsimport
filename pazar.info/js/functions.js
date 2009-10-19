@@ -108,7 +108,7 @@ function MM_findObj(n, d) { //v4.01
 function MM_validateForm() { //v4.0
   var i,p,q,nm,test,num,min,max,errors='',args=MM_validateForm.arguments;
   for (i=0; i<(args.length-2); i+=3) { test=args[i+2]; val=MM_findObj(args[i]);
-    if (val) { nm=val.name; if ((val=val.value)!="") {
+    if (val && val.disabled==false) { nm=val.name; if ((val=val.value)!="") {
       if (test.indexOf('isEmail')!=-1) { p=val.indexOf('@');
         if (p<1 || p==(val.length-1)) errors+='- '+nm+' must contain an e-mail address.\n';
       } else if (test!='R') { num = parseFloat(val);
@@ -226,6 +226,20 @@ function showHide(inputID) {
 	theObj = document.getElementById(inputID)
 	theDisp = theObj.style.display == 'none' ? 'block' : 'none'
 	theObj.style.display = theDisp
+}
+function sHc(iD) {
+	var obj = document.getElementById(iD);
+	if (obj.className == "hide") {
+		obj.className = "show";
+	} else {
+		obj.className = "hide";
+	}
+}
+function so(iD) {
+	document.getElementById(iD).className = "show";
+}
+function ho(iD) {
+	document.getElementById(iD).className = "hide";
 }
 function myXMLHttpRequest() {
 	var xmlhttplocal;

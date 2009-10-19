@@ -19,46 +19,42 @@ $template->param(PAZAR_HTML => $pazar_html);
 $template->param(PAZAR_CGI => $pazar_cgi);
 $template->param(ONLOAD_FUNCTION => "resetMenu();");
 $template->param(JAVASCRIPT_FUNCTION => q{
-function PopUp(PopUpUrl){
-var ScreenWidth=window.screen.width;
-var ScreenHeight=window.screen.height;
-var movefromedge=0;
-placementx=(ScreenWidth/2)-((580)/500);
-placementy=(ScreenHeight/2)-((380+10)/6);
-WinPop=window.open(PopUpUrl,"","width=580,height=380,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1,left="+placementx+",top="+placementy+",screenX="+placementx+",screenY="+placementy+",");
-}}.qq{
-var ChildWin=null;
-function setCount(target){
-	if (document.MM_returnValue) {
-	if (!ChildWin || ChildWin.closed ) {
-if(target == 0) 
-{
-document.CRE.action="$pazar_cgi/sWI/TFcomplex.cgi";
-document.CRE.target="ChildWin";
-ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
-}
-if(target == 1) 
-{
-document.CRE.action="$pazar_cgi/sWI/psite_get_cre.cgi";
-document.CRE.target="ChildWin";
-ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
-}
-if(target == 2) 
-{
-document.CRE.action="$pazar_cgi/sWI/accept_cre.cgi";
-document.CRE.target="_self";
-}
-if(target == 3) 
-{
-document.CRE.action="$pazar_cgi/sWI/geneselect.cgi";
-document.CRE.target="_self";
-}
-} else{
-	alert('A child window is open. Please finish your annotation before entering a new Experiment!');
-ChildWin.focus();
-	return correctSubmitHandler();
+	function PopUp(PopUpUrl){
+		var ScreenWidth=window.screen.width;
+		var ScreenHeight=window.screen.height;
+		var movefromedge=0;
+		placementx=(ScreenWidth/2)-((580)/500);
+		placementy=(ScreenHeight/2)-((380+10)/6);
+		WinPop=window.open(PopUpUrl,"","width=580,height=380,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1,left="+placementx+",top="+placementy+",screenX="+placementx+",screenY="+placementy+",");
+	}}.qq{
+	var ChildWin=null;
+	function setCount_submit(target){
+		if (document.MM_returnValue) {
+		if (!ChildWin || ChildWin.closed ) {
+			if(target == 0) {
+				document.CRE.action="$pazar_cgi/sWI/TFcomplex.cgi";
+				document.CRE.target="ChildWin";
+				ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+			}
+			if(target == 1) {
+				document.CRE.action="$pazar_cgi/sWI/psite_get_cre.cgi";
+				document.CRE.target="ChildWin";
+				ChildWin=window.open('about:blank','ChildWin','height=800, width=800,toolbar=1,location=1,directories=1,status=1,scrollbars=1,menubar=1,resizable=1');
+			}
+			if(target == 2) {
+				document.CRE.action="$pazar_cgi/sWI/accept_cre.cgi";
+				document.CRE.target="_self";
+			}
+			if(target == 3) {
+				document.CRE.action="$pazar_cgi/sWI/geneselect.cgi";
+				document.CRE.target="_self";
+			}
+		} else{
+			alert('A child window is open. Please finish your annotation before entering a new Experiment!');
+			ChildWin.focus();
+			return correctSubmitHandler();
+		}
 	}
-}
 }});
 
 
@@ -205,21 +201,21 @@ if ($params{mode} eq 'addevid') {
   <hr style="width: 100%; height: 2px;">
   <h3>Transcription factor/complex binding to this CRE (if known)</h3>
   <p>
-	<input value="Add TF Interaction Evidence" name="TFcomplexadd" type="submit" onClick="MM_validateForm();return setCount(0);return document.MM_returnValue;">
+	<input value="Add TF Interaction Evidence" name="TFcomplexadd" type="submit" onClick="MM_validateForm();return setCount_submit(0);return document.MM_returnValue;">
   </p>
   <hr style="width: 100%; height: 2px;">
   <h3>Interaction Evidence with an unknown factor (e.g. nuclear extract)</h3>
   <p>
-	<input value="Add Interaction Evidence" name="Interactadd" type="submit" onClick="MM_validateForm();return setCount(0);return document.MM_returnValue;">
+	<input value="Add Interaction Evidence" name="Interactadd" type="submit" onClick="MM_validateForm();return setCount_submit(0);return document.MM_returnValue;">
   </p>
   <hr style="width: 100%; height: 2px;">
   <h3>Other Experimental Evidence for a Role of this CRE in Regulating Gene Expression</h3>
   <p>
-	<input value="Add Experimental Evidence" name="Evidadd" type="submit" onClick="MM_validateForm();return setCount(1);return document.MM_returnValue;">
+	<input value="Add Experimental Evidence" name="Evidadd" type="submit" onClick="MM_validateForm();return setCount_submit(1);return document.MM_returnValue;">
   </p>
   <hr>
   <p> 
-	<input name="done" id="done" value="Done" type="submit" onClick="MM_validateForm();return setCount(3);return document.MM_returnValue;">
+	<input name="done" id="done" value="Done" type="submit" onClick="MM_validateForm();return setCount_submit(3);return document.MM_returnValue;">
   </p><br>  </form>
 
 ALTERNATE

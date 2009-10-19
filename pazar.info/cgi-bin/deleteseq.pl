@@ -31,16 +31,6 @@ my $get = new CGI;
 my %params = %{$get->Vars};
 
 
-#connect to the database
-my $pazar = pazar->new(
-                      -host          =>    $ENV{PAZAR_host},
-                      -user          =>    $ENV{PAZAR_pubuser},
-                      -pass          =>    $ENV{PAZAR_pubpass},
-                      -dbname        =>    $ENV{PAZAR_name},
-                      -drv           =>    $ENV{PAZAR_drv},
-                      -globalsearch  =>    'yes');
-
-
 #check if logged in
 
 if($loggedin eq "true") {
@@ -72,6 +62,22 @@ if($loggedin eq "true") {
     }
     #make sure user is a member of the project
     if($seqeditable eq "true") {
+    
+   		#connect to the database
+   		my $restricted = $dbh->prepare("SELECT project_name FROM project WHERE project_id='$projectid'");
+		$restricted->execute;
+		my $restr_proj = $restricted->fetchrow_array();
+		my $pazar = pazar->new(
+						-host       => $ENV{PAZAR_host},
+						-user       => $ENV{PAZAR_pubuser},
+						-pass       => $ENV{PAZAR_pubpass},
+						-dbname     => $ENV{PAZAR_name},
+						-pazar_user => $info{user},
+						-pazar_pass => $info{pass},
+						-drv        => $ENV{PAZAR_drv},
+						-project    => $restr_proj
+					);
+
 		if ($sequenceid =~ /^CO/) {
 			$sequenceid =~ s/\D//g;
 			$sequenceid =~ s/^0+//;

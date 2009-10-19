@@ -9,6 +9,25 @@ use pazar::talk;
 
 #use CGI::HTMLError trace => 1;
 
+######
+=debug
+use Log::Log4perl qw(:easy);
+Log::Log4perl->easy_init($ERROR);
+my $logger = get_logger();
+
+$logger->level($INFO);
+
+    my $appender = Log::Log4perl::Appender->new(
+        "Log::Dispatch::File",
+        filename => "/usr/local/apache/pazar.info/tmp/addcre.log",
+        mode     => "append",
+    );
+
+    $logger->add_appender($appender);
+$logger->info("warning message");
+=cut
+########
+
 my $pazar_cgi = $ENV{PAZAR_CGI};
 my $pazarcgipath = $ENV{PAZARCGIPATH};
 
@@ -127,7 +146,7 @@ $pazar->reset_outputs;
 my $JSCRIPT=<<END;
 // Add a javascript
 var MyChildWin=null;
-function setCount(target){
+function setCount_addCond(target){
     if (!MyChildWin || MyChildWin.closed ) {
 	if(target == 0) {
 	    document.mut.action="$cgiroot/addmutation.cgi";
@@ -175,7 +194,7 @@ if ($type eq 'reg_seq') {
     print $query->hidden(-name=>'effect',-value=>'interaction');
     print $query->submit(-name=>'submit',
 			 -value=>'Add Mutation Information',
-                         -onClick=>'return setCount(0);');
+                         -onClick=>'return setCount_addCond(0);');
     print $query->br;
     print $query->br;
 } elsif ($type eq 'construct') {

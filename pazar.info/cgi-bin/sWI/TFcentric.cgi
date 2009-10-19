@@ -82,7 +82,7 @@ function MM_validateForm() { //v4.0
   document.MM_returnValue = (errors == '');
 }}.qq{
 
-function setCount(target){
+function setCount_TFsubmit(target){
 if(target == 0) 
 {
 document.SEQ.action="$pazar_cgi/sWI/TFcentric_CRE.cgi";
@@ -322,11 +322,11 @@ sub next_page {
     print 'Just click the appropriate button again once you have completed a submission<br><br>';
     print $query->submit(-name=>'submit',
 			 -value=>'Add CRE to which the TF/TF complex binds',
-                         -onClick=>"setCount(0)");
+                         -onClick=>"setCount_TFsubmit(0)");
     print $query->h4(' or ');
     print $query->submit(-name=>'submit',
 			 -value=>'Add SELEX or similar artificial entry',
-                         -onClick=>"setCount(0)");
+                         -onClick=>"setCount_TFsubmit(0)");
     print $query->endform;
 # print out the html tail template
     my $template_tail = HTML::Template->new(filename => "$pazarcgipath/tail.tmpl");

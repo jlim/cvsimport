@@ -8,39 +8,64 @@ Element</h2>
     Artificial Sequence</p>
 <hr>
   <h3>CRE genome location data</h3>
+
   <h4>Enter here unique genome identification parameters in chromosome coordinates.</h4>
+
   <p>The chromosome coordinates should be correct for the current Ensembl release and the respective genome build.<br>
 The best way to set those is through the 'Get chromosome coordinates' button.</p>
+
   <p>sequence
+
     <textarea name="sequence" id="sequence" cols="120" rows="2"></textarea></p>
     <p>sequence name (optional)
+
     <input name="seqname" type="text" id="seqname" maxlength=20>
     quality 
+
     <select name="quality" id="quality">
+
       <option selected="selected" value="NA">NA</option>
       <option value="PREDICTED">PREDICTED</option>
       <option value="TESTED">TESTED</option>
       <option value="CONSERVED">CONSERVED</option>
     </select>
   </p>
+
   <p> start 
+
     <input name="start" type="text" id="start" maxlength=10>
+
     end 
+
     <input name="end" type="text" id="end" maxlength=10>
+
   </p>
+
   <p>chromosome 
+
     <input type="text" name="chromosome" id="chromosome" maxlength=5>
+
     strand (+ or -)
+
     <input name="str" type="text" id="str">
+
     <input name="build" type="hidden" id="build" maxlength=45>
  </p>
+
   <p>organism 
+
     <input name="organism" type="text" id="organism" maxlength=45>
+
    </p>
+
   <p> Gene ID 
+
     <input id="gid" name="gid" maxlength="25" type="text">
+
     Gene DB 
+
     <select name="genedb" id="genedb">
+
       <option selected="selected" value="EnsEMBL_gene">EnsEMBL
 gene ID</option>
       <option value="EnsEMBL_transcript"> EnsEMBL
@@ -50,59 +75,84 @@ ID</option>
       <option value="nm"> RefSeq ID</option>
       <option value="swissprot"> Swissprot ID</option>
     </select>
+
   </p>
+
   <p>Gene Description (optional) 
+
     <input name="giddesc" type="text" id="giddesc" maxlength=255>
+
   </p>
+
   <p>Representative Transcript (optional) 
+
     <input name="tid" type="text" id="tid">
+
     Transcript DB 
+
     <select name="transdb">
+
       <option value="EnsEMBL_transcript" selected> EnsEMBL
 transcript
 ID</option>
       <option value="refseq"> RefSeq ID</option>
       <option value="swissprot"> Swissprot ID</option>
     </select>
+
   </p>
+
   <p>Transcription Start Region Start (optional) 
+
     <input name="fstart" type="text" id="fstart" maxlength=10>
+
     Transcription Start Region End (optional) 
+
     <input name="fend" type="text" id="fend" maxlength=10>
+
   </p>
+
   <p>
+
     <input name="chrcoord" type="button" id="chrcoord" value="Get Chromosome Coordinates" tooltiptext="Press to get the coordinates from the current Ensembl release" onMouseOver="return escape('test')" onclick="PopUp('htpath/chrcoordinates.htmgenepath')" >
   </p>
   <hr>
   <h3>Artificial Sequence data</h3>
   <p>sequence 
+
     <textarea name="csequence" id="csequence" cols="120" rows="2" disabled="true"></textarea></p>
+
     <p>construct name 
+
     <input name="constructname" type="text" id="constructname" maxlength=45 disabled="true">
+
   </p>
+
   <p>comment 
+
     <textarea name="artificialcomment" cols="120" rows="2" id="artificialcomment" disabled="true"></textarea>
+
   </p>
+
 
 
   <hr style="width: 100%; height: 2px;">
   <h2>Transcription factor/complex binding to this CRE (if known)</h2>
   <p>
-    <input value="Add TF Interaction Evidence" name="TFcomplexadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount(0);return document.MM_returnValue;">
+    <input value="Add TF Interaction Evidence" name="TFcomplexadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount_submit(0);return document.MM_returnValue;">
   </p>
   <hr style="width: 100%; height: 2px;">
   <h2>Interaction Evidence with an unknown factor (e.g. nuclear extract)</h2>
   <p>
-    <input value="Add Interaction Evidence" name="Interactadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount(0);return document.MM_returnValue;">
+    <input value="Add Interaction Evidence" name="Interactadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount_submit(0);return document.MM_returnValue;">
   </p>
   <hr style="width: 100%; height: 2px;">
   <h2>Other Experimental Evidence for a Role of this CRE in Regulating Gene Expression</h2>
   <p>
-    <input value="Add Experimental Evidence" name="Evidadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount(1);return document.MM_returnValue;">
+    <input value="Add Experimental Evidence" name="Evidadd" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount_submit(1);return document.MM_returnValue;">
   </p>
   <hr>
   <p> 
-    <input name="done" id="done" value="Done" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount(2);return document.MM_returnValue;">
+    <input name="done" id="done" value="Done" type="submit" onClick="MM_validateForm('start','','RisNum','end','','RisNum','chromosome','','R','organism','','R','gid','','R','constructname','','R','csequence','','R');return setCount_submit(2);return document.MM_returnValue;">
     <input name="cancel" id="cancel" value="Clear" type="reset"><br>
   </p><br>
   </form>

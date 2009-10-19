@@ -456,7 +456,7 @@ sub next_page {
 my $JSCRIPT=<<END;
 // Add a javascript
 var MyChildWin=null;
-function setCount(target){
+function setCount_addCond(target){
     if (!MyChildWin || MyChildWin.closed ) {
 	if(target == 0) {
 	    document.mut.action="$cgiroot/addmutation.cgi";
@@ -504,7 +504,7 @@ print $query->start_html(-title=>"Annotating experiment $pazaraid",
 	print $query->hidden(-name=>'effect',-value=>'interaction');
 	print $query->submit(-name=>'submit',
 			     -value=>'Add Mutation Information',
-                             -onClick=>'return setCount(0);');
+                             -onClick=>'return setCount_addCond(0);');
 	print $query->br;
 	print $query->br;
     } else {

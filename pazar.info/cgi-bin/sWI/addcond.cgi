@@ -29,7 +29,7 @@ my $pazaraid=write_pazarid($params{aid},'AN');
 my $JSCRIPT=<<END;
 // Add a javascript
 var MyChildWin2=null;
-function setCount(target){
+function setCount_addCond(target){
     if (!MyChildWin2 || MyChildWin2.closed ) {
 	if(target == 0) {
 	    document.mut.action="$cgiroot/addmutation.cgi";
@@ -183,8 +183,8 @@ if  ($params{condENV}>0) {
     for (my $i=0;$i<$params{condENV};$i++) {
 	print<<ENVCOND;
    <h4>Environmental Perturbation</h4>
-  <p>Chemical compound <input name="env_comp$i" maxlength="45" type="text"><br>
-Description <textarea name="env_desc$i" cols="100" rows="2" id="env_desc$i"></textarea><br>
+  <p>Chemical compound <input name="env_comp$i" maxlength="45"
+ type="text"><br>
 Concentration/Quantity <input name="env_conc$i" type="text" maxlength="20"><br>
  Scale<input name="env_scale$i" type="text" maxlength="20"></p>
   <hr color="black" style="width: 100%; height: 2px;">
@@ -256,8 +256,7 @@ eval {
 		my $conc=$params{"env_conc$i"}||'na';
 		my $molecule=$params{"env_comp$i"}||'na';
 		my $scale=$params{"env_scale$i"}||'na';
-		my $env_desc=$params{"env_desc$i"}||'na';
-		my $condid=$pazar->table_insert('bio_condition','environmental',$molecule,$env_desc,$conc,$scale);
+		my $condid=$pazar->table_insert('bio_condition','environmental',$molecule,'na',$conc,$scale);
 		$pazar->add_input('bio_condition',$condid);
 		push @conds,$condid;
 	    }
@@ -353,7 +352,7 @@ if ($params{reg_type} eq 'reg_seq') {
     print $query->hidden(-name=>'effect',-value=>'expression');
     print $query->submit(-name=>'submit',
 			 -value=>'Add Mutation Information',
-                         -onClick=>'return setCount(0);');
+                         -onClick=>'return setCount_addCond(0);');
     print $query->br;
     print $query->br;
 } else {
