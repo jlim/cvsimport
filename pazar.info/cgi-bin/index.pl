@@ -22,7 +22,7 @@ my $intro = qq{
 	<div class="p20to p5bo">
 		<span class="welcometext">Welcome to PAZAR!</span>
 	</div>
-	<div class="welcomeintro"><span class="b">PAZAR is your one stop shopping experience for transcription factors and regulatory sequence annotations.</span> It is a software framework for the construction and maintenance of regulatory sequence data annotations; a framework which allows multiple boutique databases to function independently within a larger system (or information mall). Our goal is to be the public repository for regulatory data. <a target="publication" href="$pazar_cgi/overview.pl#publications">View our publications &raquo;</a></div>};
+	<div class="welcomeintro"><span class="b">PAZAR is your one stop shopping experience for transcription factors and regulatory sequence annotations.</span> It is a software framework for the construction and maintenance of regulatory sequence data annotations; a framework which allows multiple boutique databases to function independently within a larger system (or information mall). Our goal is to be the public repository for regulatory data. <a target="publication" href="$pazar_cgi/overview.pl#publications">View our publications &raquo;</a><br><a target="webinar" href="http://cmmt.na3.acrobat.com/p24235926">View our first information webinar held on Nov 24th 2009</a></div>};
 
 
 require "$pazarcgipath/searchbox.pl";
