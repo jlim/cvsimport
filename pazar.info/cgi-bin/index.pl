@@ -33,7 +33,8 @@ if ($loggedin eq "true") {
 	$template->param(LOGOUT => qq{<a href="$pazar_cgi/login.pl"><span class="b">Sign in</span></a>});
 }
 print "Content-Type: text/html\n\n", $template->output;
-print $bowz;
+print "$bowz.$intro";
+
 my $dbh = pazar->new(
     -host         => $ENV{PAZAR_host},
     -user         => $ENV{PAZAR_pubuser},
@@ -137,7 +138,6 @@ if ($checkl_proj_public) {
 	$checkl_proj_public};
 }
 print qq{
-	$intro
 	<h2>
 		<div class="pp-pro">Profiles</div>
 		<div class="pp-seq">Seqs</div>
