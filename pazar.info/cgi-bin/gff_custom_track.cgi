@@ -142,8 +142,10 @@ else
     $chr=~s/\s//g;
     my $start = $params{start};
     $start=~s/\s//g;
+    $start=~s/,//g;
     my $end = $params{end};
     $end=~s/\s//g;
+    $end=~s/,//g;
 
 #print "resource: ".$resource;
 
