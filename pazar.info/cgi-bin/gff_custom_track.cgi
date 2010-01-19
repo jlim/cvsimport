@@ -203,8 +203,9 @@ else
 	my $ensemblorg = lc($params{species});
 	$ensemblorg=ucfirst($ensemblorg);
 	$ensemblorg=~s/ /_/;
-
-	print "<script>document.location.href='http://$ensembl_url/$ensemblorg/contigview?data_URL=$pazar_html/mapping/$filename'</script>";
+    my $ensembl_pos = $chr.":".($start-$flanking_bp)."-".($end+$flanking_bp);
+    
+	print "<script>document.location.href='http://$ensembl_url/$ensemblorg/Location/View?r=$ensembl_pos;contigviewbottom=url:$pazar_html/mapping/$filename'</script>";
     }
     
 } # else continue with the rest of the file
