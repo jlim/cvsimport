@@ -5,6 +5,7 @@ use Crypt::Imail;
 use CGI::Session;
 use CGI qw( :all);
 use HTML::Template;
+use Mail::Mailer;
 
 # use CGI::Debug(report => "everything", on => "anything");
 
@@ -62,6 +63,7 @@ if ($params{mode} eq "add") {
 			$dbh->do(qq{INSERT INTO user_project (user_project_id, user_id, project_id) VALUES ("", "$params{uid}", LAST_INSERT_ID())});
 			push(@projids,$rs[0]);
 			$session->param("projects", \@projids);
+			sendprojectcreationemail('pazar@cmmt.ubc.ca','jlim@cmmt.ubc.ca',$pname,$pdesc,$params{projstatus});
 		} else {
 			$statusmsg = "Paswords do not match. Please re-enter them.";
 		}
@@ -410,3 +412,27 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 	}
 }
 print $temptail->output;
+
+
+sub sendprojectcreationemail
+{
+
+    my $from_address = shift;
+    my $to_address = shift;
+    my $project_name = shift;
+    my $project_description = shift;
+    my $project_status = shift;
+    my $subject = "PAZAR project ".$project_name." created";
+    my $body = "A new project called $project_name has been created in PAZAR with the following status: $project_status\n\nProject description: $project_description";
+
+    my $mailer = Mail::Mailer->new("sendmail");
+    $mailer->open({From => $from_address,
+                   To => $to_address,
+                   Subject => $subject})
+    or die "Can't open: $!\n";
+
+    print $mailer $body;
+    $mailer->close;
+
+}
+
