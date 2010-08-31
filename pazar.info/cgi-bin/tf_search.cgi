@@ -26,7 +26,8 @@ my $template = HTML::Template->new(filename => "$pazarcgipath/header.tmpl");
 $template->param(TITLE => "Search for transcription factors (TFs) | PAZAR");
 $template->param(PAZAR_HTML          => $pazar_html);
 $template->param(PAZAR_CGI           => $pazar_cgi);
-$template->param(ONLOAD_FUNCTION     => "init();");
+#disable onload function to disable automatic meme display generation
+#$template->param(ONLOAD_FUNCTION     => "init();");
 $template->param(JAVASCRIPT_FUNCTION => qq{ });
 
 if ($loggedin eq "true") {
@@ -85,6 +86,7 @@ print "Content-Type: text/html\n\n", $template->output;
 my @pubprojects = $dbh->public_projects;
 
 print $bowz;
+my $numresults = $param{results};
 
 my $accn  = $param{geneID};
 $accn =~ s/[\s]//g;
@@ -190,7 +192,7 @@ if ($accn) {
 		my $tf;
 		if ($trans eq "none") {
 			$tf = $dbh->create_tf;
-			@tfcomplexes = $tf->get_tfcomplex_by_name($tfname);
+			@tfcomplexes = $tf->get_tfcomplex_by_name($tfname,undef,$numresults);
 		} elsif ($trans eq "PAZARid") {
 			my @ids;
 			if ($accn=~m/,/) {
@@ -201,14 +203,14 @@ if ($accn) {
 			foreach my $PZid (@ids) {
 				$PZid =~ s/^\D+0*//;
 				$tf = $dbh->create_tf;
-				my @tfcomp = $tf->get_tfcomplex_by_id($PZid);
+				my @tfcomp = $tf->get_tfcomplex_by_id($PZid,undef,$numresults);
 				if ($tfcomp[0]) {
 					push @tfcomplexes, $tfcomp[0];
 				}
 			}
 		} else {
 			$tf = $dbh->create_tf;
-			my @tfcomp = $tf->get_tfcomplex_by_transcript($trans);
+			my @tfcomp = $tf->get_tfcomplex_by_transcript($trans,undef,$numresults);
 			foreach my $comp (@tfcomp) {
 				if ($comp) {
 					push @tfcomplexes, $comp;
@@ -233,7 +235,7 @@ if ($accn) {
 					my @complexes;
 					if ($trans eq "none") {
 						$tf = $dbhandle->create_tf;
-						@complexes = $tf->get_tfcomplex_by_name($tfname);
+						@complexes = $tf->get_tfcomplex_by_name($tfname,undef,$numresults);
 					} elsif ($trans eq "PAZARid") {
 						my @ids;
 						if ($accn=~m/,/) {
@@ -244,14 +246,14 @@ if ($accn) {
 						foreach my $PZid (@ids) {
 							$PZid =~ s/^\D+0*//;
 							$tf = $dbhandle->create_tf;
-							my @tfcomp = $tf->get_tfcomplex_by_id($PZid);
+							my @tfcomp = $tf->get_tfcomplex_by_id($PZid,undef,$numresults);
 							if ($tfcomp[0]) {
 								push @complexes, $tfcomp[0];
 							}
 						}
 					} else {
 						$tf = $dbhandle->create_tf;
-						@complexes = $tf->get_tfcomplex_by_transcript($trans);
+						@complexes = $tf->get_tfcomplex_by_transcript($trans,undef,$numresults);
 					}
 					foreach my $comp (@complexes) {
 						push @tfcomplexes, $comp;
@@ -457,6 +459,7 @@ if ($accn) {
 		my ($bigrow,$smlrow);
 		my $dh;
 		my $fasta;
+#by default, complex has 200 targets unless numresults parameter specified with  a numeric value or 'all'
 		while (my $site = $complex->next_target) {
 			my $type = $site->get_type;
 			if ($type eq "matrix") {
@@ -610,7 +613,7 @@ if ($accn) {
 				
 				$dh = 1;
 
-			}
+			    }
 
 			my $construct_name = $pazartfid . "_site" . $count;
 			print TMP ">" . $construct_name . "\n";
@@ -618,7 +621,7 @@ if ($accn) {
 			$construct_seq =~ s/N//ig;
 			print TMP $construct_seq . "\n";
 			$bg_color = 1 - $bg_color;
-		}
+		    } #while complex->next_target
 		my $showhide_1 = "show";
 		my $showhide_2 = "hide";
 		if ($count > 40) {
@@ -663,19 +666,75 @@ if ($accn) {
 			</div>};
 
 		close(TMP);
-		if ($count == 200) {
+# By default, 200 targets are returned if numresults argument is not given to the page. numresults is passed to all get_tfcomplex_by... methods. It can be used to set desired number of results, or 'all'.
+
+
+# use the result param, or use limit of 200 (hardcoded into tf.pm methods) if no results param. If limit=='all', then we are already showing all and don't need the button
+my $resultlimit = $numresults;
+if (!defined $numresults)
+{
+	$resultlimit = 200;
+}
+		if ($count == $resultlimit) {
 			$dc .= qq{
-				<div class="emp">Too many sequences are linked to this TF. Only the first 200 are reported.</div>
-				<div class="p10 bg-lg">
-					<div class="b p5bo"><form name="fasta$pazartfid\_$tf_projid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
+				<div class="emp">Too many sequences are linked to this TF. Only the first $count are reported.</div>
+				<div class="p10 bg-lg">};
+				}
+			$dc .= qq{
+					<div class="b p5bo"><form name="fasta$pazartfid\_$tf_projid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download above sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>};
+
+#if number of results < limit, or all specified -> do nothing if number of results = specified limit, there are probably more - display show all button
+if ($count == $resultlimit)
+{
+ $dc .= qq{<div class="b p5bo"><form name="showallseqs\_$tf_projid" method="POST" action="$pazar_cgi/tf_search.cgi"><input type="submit" value="Show all sequences"> (could take a long time if there are many sequences)<input type="hidden" name="ID_list" value="PAZAR_TF"><input type="hidden" name="excluded" value="none"><input type="hidden" name="results" value="all"><input type="hidden" name="geneID" value="$pazartfid"></form></div>};
+
+$dc .= qq{<div class="b p5bo"><form name="downloadallseqs\_$tf_projid" method="POST" action="$pazar_cgi/fasta_all.pl"><input type="submit" value="Download complete sequence set"><input type="hidden" name="ID_list" value="PAZAR_TF"><input type="hidden" name="excluded" value="none"><input type="hidden" name="results" value="all"><input type="hidden" name="geneID" value="$pazartfid"></form></div>}
+}
+
+#function init () {
+#        var divs = document.getElementsByTagName("div");
+#        for (i = 0; i < divs.length; i++) {
+#                if (divs[i].className == "seqTableDiv") {
+#                        baseName = divs[i].id;
+#                        baseName = baseName.replace(/^desc/,"");
+#                        try {
+#                                ajaxcall(baseName,"memediv"+baseName, 1);
+#                        }
+#                        catch (err) {
+#                                alert(err);
+#                        }
+#                }
+#        }
+#}
+
+#upper limit (number of regseqs) for generating a meme profile
+my $memelimit = 40;
+
+			$dc .= qq{
 					<div class="b p5bo">Generate a custom PFM and logo with selected sequences from $tf_name ($pazartfid)</div>
 					<div class="p5bo">
 						<span class="b">Select</span> <input type="button" name="selectall" id="selectall" value="all" onclick="selectallseq('$pazartfid\_$tf_projid');"> <input type="button" name="selecttype1" id="selecttype1" value="genomic sequences" onclick="selectbytype('$pazartfid\_$tf_projid','genomic');"> <input type="button" name="selecttype2" id="selecttype2" value="artificial sequences" onclick="selectbytype('$pazartfid\_$tf_projid','construct');"> <input type="button" name="resetall" id="resetall" value="reset" onclick="resetallseq('$pazartfid\_$tf_projid');"> <span class="b">then click</span> <input type="button" name="Regenerate PFM" value="Generate PFM" onclick="ajaxcall('$pazartfid\_$tf_projid','memediv$pazartfid\_$tf_projid');">
 					</div>
-					<div id="memediv$pazartfid\_$tf_projid">Not generated</div>
+					<div id="memediv$pazartfid\_$tf_projid">Too many sequences: Profiles are automatically generated for $memelimit or fewer sequenecs only.</div>
 					<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
 				</div>};
-		} else {
+
+#generate meme profile automatically and display if number of regseqs <= limit
+if($count <= $memelimit)
+{
+
+	$dc .= qq{
+	<script language='javascript'>
+	ajaxcall("$pazartfid\_$tf_projid","memediv$pazartfid\_$tf_projid",1);
+	</script>
+	};
+
+}
+
+=unneeded
+		 else {
+#either all sequences (less than or greater than 200) or results limited to a number other than 200
+#display the button to show all if 
 			$dc .= qq{
 				<div class="p10 bg-lg">
 					<div class="b p5bo"><form name="fasta$pazartfid\_$tf_projid" method="POST" action="$pazar_cgi/fasta_call.pl"><input type="submit" value="Download all sequences"><input type="hidden" name="fasta" value="$fasta"><input type="hidden" name="TFID" value="$pazartfid"></form></div>
@@ -687,6 +746,7 @@ if ($accn) {
 					<div class="p5to small b">Note: to generate a profile with sequences from multiple projects, use the &quot;Custom matrix&quot; tool at the bottom of the page.</div>
 				</div>};
 		}
+=cut
 		if ($dh == 1) {
 			print $dp . $dc;
 		} else {
