@@ -223,6 +223,7 @@ foreach my $regid (@regids) {
 		my $seqname_editable = "false";
 		my $seq_projid = "";
 		my $edito;
+		my $maxcoord_display = "";
 		if ($loggedin eq "true") {
 			my $regseqsth = &select($dbh,qq{SELECT project_id FROM reg_seq WHERE reg_seq_id="$regid"});
 			my $regseqresultshref = $regseqsth->fetchrow_hashref;
@@ -232,6 +233,16 @@ foreach my $regid (@regids) {
 					$seqname_editable = "true";
 				}
 			}
+			#check whether chip-seq peak data exists for this regseq, and display if so
+			my $rs = &select($dbh, "select * from peak where reg_seq_id='$regid'");
+                                if ($rs)
+                                {
+                                        #retrieve peak table record and create peak tag
+                                        my $rsh = $rs->fetchrow_hashref;
+                                        $maxcoord_display = "<div>Peak Max Coordinate: <span class=\"b\">".$rsh->{max_coord}."</span></div>";
+                                }
+
+			#check whether current user has premission to edit / delete this sequence, and display edit/delete buttons accordingly
 			if ($seqname_editable eq "true") {
 				$edito = qq{<div class="p5to"><span class="txt-ora b">Editing options:</span> <input type="button" name="seqnameupdatebutton" value="Update sequence name" onclick="javascript:window.open('updatesequencename.pl?mode=form&pid=$seq_projid&sid=$regid');"> <input type="button" value="Delete this sequence" onclick="confirm_entry_seq_search('$regid','$seq_projid');"></div>};
 			}
@@ -303,6 +314,7 @@ foreach my $regid (@regids) {
 					<h3>Sequence details</h3>
 					<div>Sequence name: <div id="ajaxseqname" class="inline"><span class="b">$seqname</span></div></div>
 					<div>Coordinates: <span class="b">$coord</span></div>
+					$maxcoord_display
 					<div>Ensembl transcript ID: <span class="b">$transcript</span></div>
 					<div>TSS: <span class="b">$tss</span></div>
 					<div>Quality: <span class="b">$quality</span></div>
@@ -401,7 +413,7 @@ foreach my $regid (@regids) {
 				print qq{<td class="btc small">};
 				my @data;
 				for (my $i=0; $i<(@dat-3); $i++) {
-					if ($dat[$i] and ($dat[$i] ne "0")) {
+					if ($dat[$i] and ($dat[$i] ne "0") and ($dat[$i] ne "NA")) {
 						push (@data,$dat[$i]);
 					}
 				}
