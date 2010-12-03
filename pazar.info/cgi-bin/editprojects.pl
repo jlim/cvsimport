@@ -369,8 +369,13 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 		if ($proc == 0) {
 			print qq{<div class="emp">You are not enrolled in any projects at this time. Why not create a new one?</div>};
 		}
-		print qq{
-			</div>
+		print qq{</div>};
+                if ($proc != 0)
+                {
+                        print qq{<h2>Forgotten Project Passwords?</h2><br>Click this button to have your project administrative passwords sent to you by email. <form method=\"post\" action=\"emailprojectpasswords.pl\"><input type=\"submit\" value=\"Request Passwords\"></form>};
+                }
+
+		print qq{			
 			<h2>Create a new project</h2>
 			<div class="p20lo">
 			<form name="createprojectform" method="post" action="$pazar_cgi/editprojects.pl">
