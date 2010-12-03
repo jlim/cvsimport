@@ -46,7 +46,7 @@ if ($loggedin eq "true") {
 			</form>
 		</div>
 		<div class="b">New User? <a href="$pazar_cgi/register.pl" class="b">Click here to register.</a></div>
-		<div class="b">Forgotten password? <a href="mailto:pazar\@cmmt.ubc.ca">Click here to request a new password.</a></div>
+		<div class="b">Forgotten password? <a href="recoveruserpass.pl">Click here to request password.</a></div>
 	};
 }
 
