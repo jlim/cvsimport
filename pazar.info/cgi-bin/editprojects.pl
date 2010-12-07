@@ -372,7 +372,7 @@ if ($params{mode} eq "login" || $loggedin eq "true" || $params{mode} eq "") {
 		print qq{</div>};
                 if ($proc != 0)
                 {
-                        print qq{<h2>Forgotten Project Passwords?</h2><br>Click this button to have your project administrative passwords sent to you by email. <form method=\"post\" action=\"emailprojectpasswords.pl\"><input type=\"submit\" value=\"Request Passwords\"></form>};
+                        print qq{<h2>Forgotten Project Passwords?</h2><br>Click this button to have your project administrative passwords sent to you by email.<br>* Note that you will only receive passwords for projects that you created <form method=\"post\" action=\"emailprojectpasswords.pl\"><input type=\"submit\" value=\"Request Passwords\"></form>};
                 }
 
 		print qq{			
