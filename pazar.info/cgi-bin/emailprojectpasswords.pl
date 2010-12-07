@@ -74,7 +74,7 @@ my $dbh = DBI->connect($DBURL,$DBUSER,$DBPASS);
 #get project passwords
 
 my $username = $info{"user"};
-
+my $uid = $info{"userid"};
 
 my $msgtext = "";
     foreach my $proj (@projids)
@@ -82,13 +82,27 @@ my $msgtext = "";
 	#use $proj to retrieve encrypted pass from db
 	my $name = "defaultuser";
 
-	my $sth = $dbh->prepare(qq{SELECT password,project_name from project where project_id=?});
-	$sth->execute($proj);
-	my ($encrypted_pass,$pname) = $sth->fetchrow_array;
+	my $projectcreator = 0; #whether current user owns the project. default is no
 
-
-	my $password = $im->decrypt($name,$encrypted_pass);
-	$msgtext .= "$pname : $password\n";
+	#do the rest only if current user created the project (user_project_id is the lowest)
+	my $upsth=$dbh->prepare("select * from user_project where project_id=? order by user_project_id");
+	#the first userid should equal $uid
+	$upsth->execute($proj);
+	if (my $href = $upsth->fetchrow_hashref)
+	{
+		if($href->{user_id}==$uid)
+		{
+			$projectcreator = 1;
+		}
+	}
+	if ($projectcreator==1)
+	{
+		my $sth = $dbh->prepare(qq{SELECT password,project_name from project where project_id=?});
+		$sth->execute($proj);
+		my ($encrypted_pass,$pname) = $sth->fetchrow_array;
+		my $password = $im->decrypt($name,$encrypted_pass);
+		$msgtext .= "$pname : $password\n";
+	}
     }
 
 #send the email
