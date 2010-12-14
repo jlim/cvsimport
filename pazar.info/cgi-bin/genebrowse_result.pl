@@ -50,7 +50,7 @@ my %colors = (0 => "#fffff0",
 my $pazardbh = DBI->connect($PAZARDBURL,$PAZARDBUSER,$PAZARDBPASS)
     or die "Can't connect to pazar database";
 
-my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},PORT => $ENV{ENS_PORT},ENSEMBL_DATABASES_HOST => $ENV{ENSEMBL_DATABASES_HOST},ENSEMBL_DATABASES_USER => $ENV{ENSEMBL_DATABASES_USER},ENSEMBL_DATABASES_PASS => $ENV{ENSEMBL_DATABASES_PASS},DRV=>'mysql');
 
 #use open and published projects for searching
 my %gene_project;

@@ -83,6 +83,10 @@ our $ensdb = pazar::talk->new(
 	USER => $ENV{ENS_USER},
 	PASS => $ENV{ENS_PASS},
 	HOST => $ENV{ENS_HOST},
+        PORT => $ENV{ENS_PORT},
+        ENSEMBL_DATABASES_HOST => $ENV{ENSEMBL_DATABASES_HOST},
+        ENSEMBL_DATABASES_USER => $ENV{ENSEMBL_DATABASES_USER},
+        ENSEMBL_DATABASES_PASS => $ENV{ENSEMBL_DATABASES_PASS},
 	DRV => "mysql");
 
 my $projid = $dbh->get_projectid();
