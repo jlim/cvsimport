@@ -74,7 +74,7 @@ unless ($pid) {
     exit;
 }
 
-my $talkdb = pazar::talk->new(DB=>'ensembl',USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
+my $talkdb = pazar::talk->new(DB=>'ensembl',PORT => $ENV{ENS_PORT},ENSEMBL_DATABASES_HOST => $ENV{ENSEMBL_DATABASES_HOST},ENSEMBL_DATABASES_USER => $ENV{ENSEMBL_DATABASES_USER},ENSEMBL_DATABASES_PASS => $ENV{ENSEMBL_DATABASES_PASS},USER=>$ENV{ENS_USER},PASS=>$ENV{ENS_PASS},HOST=>$ENV{ENS_HOST},DRV=>'mysql');
 
 print "<h1>Cis-Regulatory Sequence Submission</h1><hr>\n";
 print "<form name=\"NewGene\" method=\"post\" action=\"$pazar_cgi/sWI/psite_get.cgi\" enctype=\"multipart/form-data\" target=\"_self\">\n";
