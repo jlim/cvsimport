@@ -91,7 +91,7 @@ if ($searchtab eq "tfs") {
 
 $bowz = qq{
 	<div class="p5to p10lo cc_smltxt">
-		<img class="float-l" src="/images/search.png"/>
+		<img class="float-l" src="$pazar_html/images/search.png"/>
 		<div class="p10to"><a href="$pazar_cgi/mallmap.pl" class="b">View interactive mall map</a></div>
 		<div>(requires Adobe Flash player)</div>
 		<div class="clear-l"></div>
